@@ -1,5 +1,22 @@
-﻿#include <stdlib.h>
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
+#include <stdlib.h>
+
+// Add by K.Magara
+// とりあえずコンパイルを通すために GUI/Qt/StdAfxQt.cpp から移植
+GUI_Interface GuiIF;		// クラスGUI_Interfaceのインスタンスをグローバルで宣言
+
+// コマンドプロンプトにメッセージを出力
+int GUI_Interface::SetMessage(const char *mes)
+{
+    fprintf(stderr,"%s\n",mes);
+    return 0;
+}
+// 新たに登録したBODYの名前をウィンドウリストに表示する
+void GUI_Interface::AddBodyNameToWin(const char *name)
+{
+    // void
+}
+// --
 
 
 // Operator: +

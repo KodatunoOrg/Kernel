@@ -1,8 +1,27 @@
 ﻿#ifndef _STD_AFX_H_
 #define _STD_AFX_H_
 
-#include "Kutil.h"
+//#include "Kutil.h"
 //#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <iostream>
+#include <ctype.h>
+
+#include <GL/glu.h>
+
+// Add by K.Magara
+// とりあえずコンパイルを通すために GUI/Qt/StdAfxQt.h から移植
+class GUI_Interface
+{
+public:
+    int SetMessage(const char *);			// コンソールにメッセージを出力
+    void AddBodyNameToWin(const char *);	// 新たに登録したBODYの名前をウィンドウリストに表示する
+};
+extern GUI_Interface GuiIF;		// クラスGUI_Interfaceのインスタンスをグローバルで宣言
+
 
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
