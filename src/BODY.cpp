@@ -1,6 +1,6 @@
 ﻿#include "BODY.h"
 
-extern GUI_Interface_BASE GuiIF;
+extern GUI_Interface_BASE GuiIFB;
 
 // Function: BODY
 // BODYクラスのコンストラクタ．各種初期化
@@ -75,7 +75,7 @@ void BODY::NewBodyElem()
 
 
 EXIT:	// メモリー確保に失敗した場合は、これまで確保した分を解放して終了
-	GuiIF.SetMessage("KOD_ERROR: malloc BODY");
+	GuiIFB.SetMessage("KOD_ERROR: malloc BODY");
 	while(flag){
 		if(flag == _CURVE_ON_PARAMETRIC_SURFACE+1 && TypeNum[_TRIMMED_SURFACE]){
 			free(ConpS);
@@ -337,7 +337,7 @@ void BODY::ExpandBody(Coord r)
 void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 {
 	Mom = BodyList->add(this);				// 読み込んだIGESデータをBODYListに登録する
-	GuiIF.AddBodyNameToWin(BodyName);		// BodyリストウィンドウにBODY名を登録
+	GuiIFB.AddBodyNameToWin(BodyName);		// BodyリストウィンドウにBODY名を登録
 	strcpy(Name,BodyName);					// ファイル名をbody名として登録
 }
 
@@ -355,7 +355,7 @@ void BODY::RegistNurbsCtoBody(BODYList *BodyList,NURBSC Nurb,const char BodyName
 	TypeNum[_NURBSC] = 1;											// NURBS曲面の数1にする
 	ChangeStatColor(this->NurbsC[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	BodyList->add(this);											// リストに新しいBODYを登録
-	GuiIF.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
+	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	strcpy(Name,BodyName);											// 新しいBODY名を登録
 }
 
@@ -376,7 +376,7 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,NURBSC Nurb[],const char BodyN
 		ChangeStatColor(this->NurbsC[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	}
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
-	GuiIF.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
+	GuiIFB.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
 	strcpy(Name,BodyName);											// 新しいBODY名を登録
 }
 
@@ -395,7 +395,7 @@ void BODY::RegistNurbsStoBody(BODYList *BodyList,NURBSS Nurb,const char BodyName
 	TypeNum[_NURBSS] = 1;											// NURBS曲面の数1にする
 	ChangeStatColor(this->NurbsS[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
-	GuiIF.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
+	GuiIFB.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
 	strcpy(Name,BodyName);											// 新しいBODY名を登録
 }
 
@@ -417,7 +417,7 @@ void BODY::RegistNurbsStoBodyN(BODYList *BodyList,NURBSS Nurb[],const char BodyN
 		ChangeStatColor(this->NurbsS[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	}
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
-	GuiIF.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
+	GuiIFB.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
 	strcpy(Name,BodyName);											// 新しいBODY名を登録
 }
 
@@ -742,7 +742,7 @@ int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -793,7 +793,7 @@ int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)
 		flag = CirAToNurbsC_seg4(NurbsCount ,CirCount ,vec, radius);			//　4セグメント
 	}
 	else{
-		GuiIF.SetMessage("Center angle of a circle or circular arc is not calculated normally");
+		GuiIFB.SetMessage("Center angle of a circle or circular arc is not calculated normally");
 		return KOD_ERR;
 	}
 
@@ -876,7 +876,7 @@ int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angl
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -972,7 +972,7 @@ int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angl
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -1078,7 +1078,7 @@ int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angl
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -1179,7 +1179,7 @@ int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radi
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;

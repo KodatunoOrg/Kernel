@@ -4,7 +4,7 @@
 
 #include "STL_Parser.h"
 
-extern GUI_Interface_BASE GuiIF;
+extern GUI_Interface_BASE GuiIFB;
 
 // Function: STL_Parser_Main
 // STLパーサメイン
@@ -42,11 +42,11 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 	// STLファイルオープン
 	if((fp = fopen(STL_fname,"r")) == NULL){
 		sprintf(mes,"KOD_ERROR: Cannot open %s",STL_fname);
-        GuiIF.SetMessage(mes);
+        GuiIFB.SetMessage(mes);
 		return(KOD_ERR);
 	}
 	sprintf(mes,"Open %s",STL_fname);
-    GuiIF.SetMessage(mes);
+    GuiIFB.SetMessage(mes);
 
 	// まずファセットの総数を数える
 	while(fgets(buf,sizeof(buf),fp) != NULL){
@@ -55,7 +55,7 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 			facet_num++;								// ファセット数をインクリメント
 	}
 	sprintf(mes,"Total facet number is %d.",facet_num);
-    GuiIF.SetMessage(mes);
+    GuiIFB.SetMessage(mes);
 
 	fseek(fp,0L,SEEK_SET);		// ファイル先頭に戻る
 

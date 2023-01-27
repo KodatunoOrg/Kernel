@@ -4,7 +4,7 @@
 
 #include "IGES_Parser.h"
 
-extern GUI_Interface_BASE GuiIF;
+extern GUI_Interface_BASE GuiIFB;
 
 // Function: IGES_Parser_Main
 // IGESパーサーのメイン
@@ -28,11 +28,11 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 	// IGESファイルオープン
 	if((fp = fopen(IGES_fname,"r")) == NULL){
 		sprintf(mes,"KOD_ERROR: Cannot open %s",IGES_fname);
-		GuiIF.SetMessage(mes);
+		GuiIFB.SetMessage(mes);
 		return(KOD_ERR);
 	}
 	sprintf(mes,"Open %s",IGES_fname);
-	GuiIF.SetMessage(mes);
+	GuiIFB.SetMessage(mes);
 
 	// 各セクションの行数をあらかじめ取得
 	GetSectionLine(fp,line);
@@ -41,7 +41,7 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 	line[SECTION_DIRECTORY] /= 2;		// ディレクトリ部は、2行で1つのシーケンスを構成するので2で割ったものをディレクトリ部のライン数とする
 	dpara = (DirectoryParam *)malloc(sizeof(DirectoryParam)*line[SECTION_DIRECTORY]);
 	if(dpara == NULL){
-		GuiIF.SetMessage("KOD_ERROR: fail to allocate DirectoryParam");
+		GuiIFB.SetMessage("KOD_ERROR: fail to allocate DirectoryParam");
 		return(KOD_ERR);
 	}
 
@@ -635,7 +635,7 @@ int IGES_PARSER::GetParameterSection(FILE *fp,DirectoryParam *dpara,BODY body,in
 		else{
 		//	char mes[256];
 			//sprintf(mes,"Entity Type #%d:Unsupported",dpara[i].entity_type);
-		//	GuiIF.SetMessage(mes);
+		//	GuiIFB.SetMessage(mes);
 			continue;
 		}
 	}
@@ -698,7 +698,7 @@ int IGES_PARSER::GetCirAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 // KOD_TRUE
 int IGES_PARSER::GetConAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 {
-	GuiIF.SetMessage("Type104:Unmounted");
+	GuiIFB.SetMessage("Type104:Unmounted");
 	return KOD_TRUE;
 }
 
@@ -792,7 +792,7 @@ int IGES_PARSER::GetNurbsCPara(char str[],int pD,DirectoryParam *dpara,BODY body
 
 	// メモリー確保
 	if(NFunc.New_NurbsC(&body.NurbsC[TypeCount[_NURBSC]],body.NurbsC[TypeCount[_NURBSC]].K,body.NurbsC[TypeCount[_NURBSC]].N) == KOD_ERR){
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 
@@ -854,7 +854,7 @@ int IGES_PARSER::GetNurbsSPara(char str[],int pD,DirectoryParam *dpara,BODY body
 
 	// メモリー確保
 	if(NFunc.New_NurbsS(&body.NurbsS[TypeCount[_NURBSS]],body.NurbsS[TypeCount[_NURBSS]].K,body.NurbsS[TypeCount[_NURBSS]].N) == KOD_ERR){
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 	
@@ -913,7 +913,7 @@ int IGES_PARSER::GetCompCPara(char str[],int pD,DirectoryParam *dpara,int dline,
 
 	// 複合曲線のメモリーを確保
 	if(NFunc.New_CompC(&body.CompC[TypeCount[_COMPOSITE_CURVE]],body.CompC[TypeCount[_COMPOSITE_CURVE]].N) == KOD_ERR){
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 
@@ -997,7 +997,7 @@ int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 
 	// 単純閉曲線N2の数だけメモリー確保
 	if((NFunc.New_TrmS(&body.TrmS[TypeCount[_TRIMMED_SURFACE]],body.TrmS[TypeCount[_TRIMMED_SURFACE]].n2)) == KOD_ERR){
-		GuiIF.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 
@@ -1038,12 +1038,12 @@ int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int TypeNum[
 		strcpy(str,"");				// str初期化
 
 		if(fgets(buf,COLUMN_MAX_,fp) == NULL){		// i番目のエンティティの1行目を読み込み
-			GuiIF.SetMessage("DIRECTORY SECTION KOD_ERROR: fail to read this file");
+			GuiIFB.SetMessage("DIRECTORY SECTION KOD_ERROR: fail to read this file");
 			exit(KOD_ERR);
 		}
 		strncat(str,buf,COLUMN_MAX);
 		if(fgets(buf,COLUMN_MAX_,fp) == NULL){		// i番目のエンティティの2行目を読み込み
-			GuiIF.SetMessage("DIRECTORY SECTION KOD_ERROR: fail to read this file");
+			GuiIFB.SetMessage("DIRECTORY SECTION KOD_ERROR: fail to read this file");
 			exit(KOD_ERR);
 		}
 		strncat(str,buf,COLUMN_MAX);				// 読み込んだ2行はstrに全て格納される
@@ -1146,14 +1146,14 @@ int IGES_PARSER::GetGlobalSection(FILE *fp,GlobalParam *gpara,int gline)
 	// グローバル部のライン数*COL_CHAR分メモリー確保
 	str = (char *)malloc(sizeof(char) * gline*COL_CHAR);
 	if(str == NULL){
-		GuiIF.SetMessage("GLOBAL SECTION KOD_ERROR: faile to allocate memory");
+		GuiIFB.SetMessage("GLOBAL SECTION KOD_ERROR: faile to allocate memory");
 		exit(KOD_ERR);
 	}
 
 	strcpy(str,"");			// str初期化
 	for(i=0;i<gline;i++){
 		if(fgets(buf,COLUMN_MAX_,fp) == NULL){
-			GuiIF.SetMessage("GLOBAL SECTION KOD_ERROR: faile to read this file");
+			GuiIFB.SetMessage("GLOBAL SECTION KOD_ERROR: faile to read this file");
 			exit(KOD_ERR);
 		}
 		strncat(str,buf,COL_CHAR-1);	// strにセクション判別文字までの文字列をつけたしていく
@@ -1163,13 +1163,13 @@ int IGES_PARSER::GetGlobalSection(FILE *fp,GlobalParam *gpara,int gline)
 	//sscanf(str,"%dH%c",&para_length,&para_delim);		// パラメータデリミタを取得
 	//fprintf(stderr,"%d,%c\n",para_length,para_delim);
 	//if(para_delim != ','){
-	//	GuiIF.SetMessage("GLOBAL SECTION KOD_ERROR: The parameter delimiter is not governed by and construed for JAMA-IS");
+	//	GuiIFB.SetMessage("GLOBAL SECTION KOD_ERROR: The parameter delimiter is not governed by and construed for JAMA-IS");
 	//	exit(KOD_ERR);
 	//}
 	//else{
 	//	sscanf(str,"%dH[^,],[^,],%dH%c",&para_length,&para_length,&record_delim);		// レコードデリミタを取得
 	//	if(record_delim != ';'){
-	//		GuiIF.SetMessage("GLOBAL SECTION KOD_ERROR: The record delimiter is not governed by and construed for JAMA-IS");
+	//		GuiIFB.SetMessage("GLOBAL SECTION KOD_ERROR: The record delimiter is not governed by and construed for JAMA-IS");
 	//		exit(KOD_ERR);
 	//	}
 	//}
@@ -1191,7 +1191,7 @@ int IGES_PARSER::GetGlobalSection(FILE *fp,GlobalParam *gpara,int gline)
 
 	for(i=3;i<GLOBALPARAMNUM;i++){		// 2つのデリミタを抜かした残りのパラメータを逐次読み込む
 		if((p = strchr(p_,',')) == NULL){
-			GuiIF.SetMessage("GLOBAL SECTION KOD_ERROR: Low parameter count of global section");
+			GuiIFB.SetMessage("GLOBAL SECTION KOD_ERROR: Low parameter count of global section");
 			exit(KOD_ERR);
 		}
 		strncpy(str,p_,p-p_);
@@ -1234,7 +1234,7 @@ int IGES_PARSER::GetStartSection(FILE *fp,int sline)
 
 	for(i=0;i<sline;i++){
 		if(fgets(buf,COLUMN_MAX_,fp) == NULL){
-			GuiIF.SetMessage("START SECTION KOD_ERROR:fail to read this file");
+			GuiIFB.SetMessage("START SECTION KOD_ERROR:fail to read this file");
 			exit(KOD_ERR);
 		}
 
@@ -1279,7 +1279,7 @@ void IGES_PARSER::GetSectionLine(FILE *fp,int line[])
 			line[SECTION_TERMINATE]++;
 		}
 		else{							// どのセクションにも属さない文字を検出
-			GuiIF.SetMessage("KOD_ERROR: IGES FORMAT");
+			GuiIFB.SetMessage("KOD_ERROR: IGES FORMAT");
 			exit(KOD_ERR);
 		}
 	}
@@ -1300,7 +1300,7 @@ int IGES_PARSER::CatchStringI(char **p)
 	int a;
 
 	if((*p = strchr(*p,',')) == NULL){
-		GuiIF.SetMessage("KOD_ERROR:No governed by and construed for JAMA-IS");
+		GuiIFB.SetMessage("KOD_ERROR:No governed by and construed for JAMA-IS");
 		exit(KOD_ERR);
 	}
 
@@ -1323,7 +1323,7 @@ double IGES_PARSER::CatchStringD(char **p)
 	double a;
 
 	if((*p = strchr(*p,',')) == NULL){
-		GuiIF.SetMessage("KOD_ERROR:No governed by and construed for JAMA-IS");
+		GuiIFB.SetMessage("KOD_ERROR:No governed by and construed for JAMA-IS");
 		exit(KOD_ERR);
 	}
 
@@ -1427,7 +1427,7 @@ int IGES_PARSER::SearchMaxCoord(BODY *body,int TypeNum[])
 	
 	// メモリ確保
 	if((CoordBuf = (double*)malloc(sizeof(double)*bufnum)) == NULL){
-		GuiIF.SetMessage("SEARCH MAXCOORD KOD_ERROR:fail to allocate memory");
+		GuiIFB.SetMessage("SEARCH MAXCOORD KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 
