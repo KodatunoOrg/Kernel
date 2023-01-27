@@ -24,18 +24,18 @@ SOURCES += \
     src/VRML_Parser.cpp
 
 HEADERS += \
-    src/BODY.h \
-    src/DXF_Parser.h \
-    src/Describe_BODY.h \
-    src/IGES_Parser.h \
-    src/KodListFunc.h \
-    src/MESH.h \
-    src/NURBS_Func.h \
-    src/Quaternion.h \
-    src/SFQuant.h \
-    src/STL_Parser.h \
-    src/StdAfx.h \
-    src/VRML_Parser.h
+    include/BODY.h \
+    include/DXF_Parser.h \
+    include/Describe_BODY.h \
+    include/IGES_Parser.h \
+    include/KodListFunc.h \
+    include/MESH.h \
+    include/NURBS_Func.h \
+    include/Quaternion.h \
+    include/SFQuant.h \
+    include/STL_Parser.h \
+    include/StdAfx.h \
+    include/VRML_Parser.h
 
 # Default rules for deployment.
 unix {
