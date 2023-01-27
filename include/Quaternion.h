@@ -1,7 +1,7 @@
 ﻿#ifndef _QUATERNION_H_
 #define _QUATERNION_H_
 
-#include "StdAfx.h"
+#include "KodatunoKernel.h"
 
 // Constants: General Defines
 // TMATELEMNUM - 回転行列配列の要素数(16)

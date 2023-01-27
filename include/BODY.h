@@ -3,7 +3,7 @@
 #ifndef _BODY_H_
 #define _BODY_H_
 
-#include "StdAfx.h"
+#include "KodatunoKernel.h"
 #include "KodListFunc.h"
 #include "MESH.h"
 

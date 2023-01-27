@@ -6,7 +6,7 @@
 #ifndef _HALF_EDGE_H_
 #define _HALF_EDGE_H_
 
-#include "StdAfx.h"
+#include "KodatunoKernel.h"
 #include "KodListFunc.h"
 
 // Constants: General Defines

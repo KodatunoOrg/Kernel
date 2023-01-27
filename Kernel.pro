@@ -22,8 +22,8 @@ SOURCES += \
     src/Quaternion.cpp \
     src/SFQuant.cpp \
     src/STL_Parser.cpp \
-    src/StdAfx.cpp \
-    src/VRML_Parser.cpp
+    src/VRML_Parser.cpp \
+    src/KodatunoKernel.cpp
 
 HEADERS += \
     include/BODY.h \
@@ -36,8 +36,8 @@ HEADERS += \
     include/Quaternion.h \
     include/SFQuant.h \
     include/STL_Parser.h \
-    include/StdAfx.h \
-    include/VRML_Parser.h
+    include/VRML_Parser.h \
+    include/KodatunoKernel.h
 
 # Default rules for deployment.
 unix {
