@@ -4,6 +4,8 @@
 
 #include "IGES_Parser.h"
 
+extern GUI_Interface_BASE GuiIF;
+
 // Function: IGES_Parser_Main
 // IGESパーサーのメイン
 //

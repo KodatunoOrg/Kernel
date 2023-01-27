@@ -4,6 +4,8 @@
 
 #include "DXF_Parser.h"
 
+extern GUI_Interface_BASE GuiIF;
+
 // Function: DXF_PARSER
 // コンストラクタ
 DXF_PARSER::DXF_PARSER()

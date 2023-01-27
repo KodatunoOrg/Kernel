@@ -14,13 +14,15 @@
 
 // Add by K.Magara
 // とりあえずコンパイルを通すために GUI/Qt/StdAfxQt.h から移植
-class GUI_Interface
+// ここでは仮想関数とし，派生クラス側で実態を定義するように変更
+class GUI_Interface_BASE
 {
 public:
-    int SetMessage(const char *);			// コンソールにメッセージを出力
-    void AddBodyNameToWin(const char *);	// 新たに登録したBODYの名前をウィンドウリストに表示する
+    virtual int SetMessage(const char *);
+    virtual void AddBodyNameToWin(const char *);
 };
-extern GUI_Interface GuiIF;		// クラスGUI_Interfaceのインスタンスをグローバルで宣言
+// ここで宣言してしまうとライブラリ側のGuiIFと使用アプリ側のGuiIFが混同してしまう
+//extern GUI_Interface GuiIF;		// クラスGUI_Interfaceのインスタンスをグローバルで宣言
 
 
 // Constants: General Defines

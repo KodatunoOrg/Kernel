@@ -5,6 +5,8 @@
 
 #include "VRML_Parser.h"
 
+extern GUI_Interface_BASE GuiIF;
+
 // Function: Vrml_Parser_Main
 // VRMLパーサメイン
 //

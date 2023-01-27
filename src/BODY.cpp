@@ -1,5 +1,6 @@
 ﻿#include "BODY.h"
 
+extern GUI_Interface_BASE GuiIF;
 
 // Function: BODY
 // BODYクラスのコンストラクタ．各種初期化

@@ -1,5 +1,7 @@
 ﻿#include "NURBS_Func.h"
 
+extern GUI_Interface_BASE GuiIF;
+
 // Function: New_NurbsC
 // Nurbs曲線のメモリー確保
 //

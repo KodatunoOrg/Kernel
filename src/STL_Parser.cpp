@@ -4,6 +4,8 @@
 
 #include "STL_Parser.h"
 
+extern GUI_Interface_BASE GuiIF;
+
 // Function: STL_Parser_Main
 // STLパーサメイン
 //
