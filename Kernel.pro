@@ -1,3 +1,7 @@
+# Preferences -> ビルドと実行 -> Default Build Properties -> Default build directory を
+# ./build
+# に変えておく
+
 CONFIG -= qt
 
 TEMPLATE = lib
