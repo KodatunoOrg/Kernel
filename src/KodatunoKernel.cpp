@@ -1,10 +1,6 @@
 ﻿#include "KodatunoKernel.h"
 #include <stdlib.h>
-
-// Add by K.Magara
-// とりあえずコンパイルを通すために GUI/Qt/StdAfxQt.cpp から移植
-// アプリ側とバッティングするようなので独立させる -> 対応保留
-GUI_Interface_BASE GuiIFB;		// クラスGUI_Interfaceのインスタンスをグローバルで宣言
+#include <stdexcept>	// throw
 
 int GUI_Interface_BASE::SetMessage(const char *mes)
 {
@@ -824,8 +820,9 @@ Vector NewVector(int len)
 {
 	Vector a;
 	if((a = (double *)malloc(len*sizeof(double))) == NULL){
-        GuiIFB.SetMessage("fail to allocate memoly");
-		return NULL;
+//		GuiIFB.SetMessage("fail to allocate memoly");
+//		return NULL;
+		throw std::bad_alloc();
 	}
 
 	return a;
@@ -895,8 +892,9 @@ Coord *NewCoord1(int len)
 	Coord *a;
 
 	if((a = (Coord *)malloc(len*sizeof(Coord))) == NULL){
-        GuiIFB.SetMessage("fail to allocate memoly");
-		return NULL;
+//		GuiIFB.SetMessage("fail to allocate memoly");
+//		return NULL;
+		throw std::bad_alloc();
 	}
 
 	return a;
@@ -916,15 +914,17 @@ Coord **NewCoord2(int row,int col)
 	Coord **a;
 
 	if((a = (Coord **)malloc((row)*sizeof(Coord *))) == NULL){
-        GuiIFB.SetMessage("fail to allocate memoly");
-		return NULL;
+//		GuiIFB.SetMessage("fail to allocate memoly");
+//		return NULL;
+		throw std::bad_alloc();
 	}
 	for(i=0;i<row;i++){
 		if((a[i] = (Coord *)malloc(col*sizeof(Coord))) == NULL){
-            GuiIFB.SetMessage("fail to allocate memoly");
+//			GuiIFB.SetMessage("fail to allocate memoly");
 			while(--i>=0) free(a[i]);
 			free(a);
-			return NULL;
+//			return NULL;
+			throw std::bad_alloc();
 		}
 	}
 
@@ -945,23 +945,26 @@ Coord ***NewCoord3(int x,int y,int z)
 	Coord ***a;
 
 	if((a = (Coord ***)malloc(x*sizeof(Coord **))) == NULL){
-        GuiIFB.SetMessage("fail to allocate memoly x");
+//		GuiIFB.SetMessage("fail to allocate memoly x");
 		return NULL;
+		throw std::bad_alloc();
 	}
 	for(i=0;i<x;i++){
 		if((a[i] = (Coord **)malloc(y*sizeof(Coord *))) == NULL){
-            GuiIFB.SetMessage("fail to allocate memoly y");
+//			GuiIFB.SetMessage("fail to allocate memoly y");
 			while(--i>=0) free(a[i]);
 			free(a);
-			return NULL;
+//			return NULL;
+			throw std::bad_alloc();
 		}
 		for(j=0;j<y;j++){
 			if((a[i][j] = (Coord *)malloc(z*sizeof(Coord))) == NULL){
-				GuiIFB.SetMessage("fail to allocate memoly z");
+//				GuiIFB.SetMessage("fail to allocate memoly z");
 				while(--j>=0) free(a[i][j]);
 				while(--i>=0) free(a[i]);
 				free(a);
-				return NULL;
+//				return NULL;
+				throw std::bad_alloc();
 			}
 		}
 	}
@@ -1205,8 +1208,8 @@ Coord CalcInterDivPt(Coord p,Coord q,double t)
 Coord CalcOrthoProjection(Coord p,Coord n,Coord q)
 {
 	if(fabs(1-CalcEuclid(n)) > APPROX_ZERO){
-        GuiIFB.SetMessage("ERROR:Norm vector is not unit vector.");
-        GuiIFB.SetMessage("Norm vetor is resized to unit vector.");
+//		GuiIFB.SetMessage("ERROR:Norm vector is not unit vector.");
+//		GuiIFB.SetMessage("Norm vetor is resized to unit vector.");
 		NormalizeVec(n);
 	}
 	double inn = CalcInnerProduct(SubCoord(q,p),n);
@@ -1864,8 +1867,8 @@ int CheckRange(double low,double up,double val,int flag)
 {
 	if(flag < 0 || flag > 5){
 		char mes[256];
-		sprintf(mes,"CheckRange ERROR:wrong specified value. 0 or 1");
-        GuiIFB.SetMessage(mes);
+//		sprintf(mes,"CheckRange ERROR:wrong specified value. 0 or 1");
+//		GuiIFB.SetMessage(mes);
 		return KOD_ERR;
 	}
 	else if(flag == 0){
@@ -2417,8 +2420,9 @@ double Gauss(int n,Matrix a,Vector b,Vector x)
 
 	ip = (int *)malloc(sizeof(int)*n);
 	if(ip == NULL){
-        GuiIFB.SetMessage("fail to allocate");
-		return KOD_ERR;
+//		GuiIFB.SetMessage("fail to allocate");
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 
 	det = LU(n,a,ip);					// LU分解
@@ -2446,8 +2450,9 @@ double Gauss(int n,Matrix a,Coord *b,Coord *x)
 
 	ip = (int *)malloc(sizeof(int)*n);
 	if(ip == NULL){
-        GuiIFB.SetMessage("fail to allocate");
-		return KOD_ERR;
+//		GuiIFB.SetMessage("fail to allocate");
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 
 	det = LU(n,a,ip);					// LU分解
@@ -2535,8 +2540,9 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 
 	ip = (int *)malloc(sizeof(int)*n);
 	if (ip==NULL){
-        GuiIFB.SetMessage("fail to allocate");
-		return KOD_ERR;
+//		GuiIFB.SetMessage("fail to allocate");
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 
 	det = LU(n,a,ip);		// LU分解
@@ -2758,7 +2764,7 @@ void SetColorStat(DispStat *ds,float r, float g, float b, float a)
 int CatCoord(Coord a[],Coord b[],int alim,int anum,int bnum)
 {
 	if(alim < anum+bnum){
-		GuiIFB.SetMessage("stack over flow");
+//		GuiIFB.SetMessage("stack over flow");
 		return KOD_ERR;
 	}
 

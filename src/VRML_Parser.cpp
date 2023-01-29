@@ -5,8 +5,6 @@
 
 #include "VRML_Parser.h"
 
-extern GUI_Interface_BASE GuiIFB;
-
 // Function: Vrml_Parser_Main
 // VRMLパーサメイン
 //
@@ -26,16 +24,16 @@ int VRML_PARSER::Vrml_Parser_Main(BODY *body, const char *fname)
 
 	// VRMLファイルオープン
 	if((fp = fopen(fname,"r")) == NULL){
-		sprintf(mes,"KOD_ERROR: Cannot open %s",fname);
-        GuiIFB.SetMessage(mes);
+//		sprintf(mes,"KOD_ERROR: Cannot open %s",fname);
+//		GuiIFB.SetMessage(mes);
 		return(KOD_ERR);
 	}
 
 	// ヘッダ読み込み
 	fgets(buf,sizeof(buf),fp);
 	if(strcmp(buf,"#VRML V1.0 ascii\n")){
-		sprintf(mes,"KOD_ERROR: Kodatuno supports only #VRML V1.0 ascii.     Please check VRML file version.");
-        GuiIFB.SetMessage(mes);
+//		sprintf(mes,"KOD_ERROR: Kodatuno supports only #VRML V1.0 ascii.     Please check VRML file version.");
+//		GuiIFB.SetMessage(mes);
 		fclose(fp);
 		return(KOD_ERR);
 	}

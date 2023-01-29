@@ -4,8 +4,6 @@
 
 #include "DXF_Parser.h"
 
-extern GUI_Interface_BASE GuiIFB;
-
 // Function: DXF_PARSER
 // コンストラクタ
 DXF_PARSER::DXF_PARSER()
@@ -34,12 +32,12 @@ int DXF_PARSER::DXF_Parser_Main(BODY *body,const char *DXF_fname)
 
 	// DXFファイルオープン
 	if((fp = fopen(DXF_fname,"r")) == NULL){
-		sprintf(mes,"KOD_ERROR: Cannot open %s",DXF_fname);
-		GuiIFB.SetMessage(mes);
+//		sprintf(mes,"KOD_ERROR: Cannot open %s",DXF_fname);
+//		GuiIFB.SetMessage(mes);
 		return(KOD_ERR);
 	}
-	sprintf(mes,"Open %s",DXF_fname);
-	GuiIFB.SetMessage(mes);
+//	sprintf(mes,"Open %s",DXF_fname);
+//	GuiIFB.SetMessage(mes);
 
 	// ファイル読み込み
 	while(fgets(Buf,sizeof(Buf),fp) != NULL){

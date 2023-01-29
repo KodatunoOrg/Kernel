@@ -1,6 +1,5 @@
 ﻿#include "NURBS_Func.h"
-
-extern GUI_Interface_BASE GuiIFB;
+#include <stdexcept>	// throw
 
 // Function: New_NurbsC
 // Nurbs曲線のメモリー確保
@@ -14,16 +13,20 @@ extern GUI_Interface_BASE GuiIFB;
 // 成功：KOD_TRUE, 失敗：KOD_ERR
 int NURBS_Func::New_NurbsC(NURBSC *nurb,int K, int N)
 {
-	if((nurb->T = (double *)malloc(sizeof(double)*N)) == NULL)
-		return KOD_ERR;
+	if((nurb->T = (double *)malloc(sizeof(double)*N)) == NULL) {
+//		return KOD_ERR;
+		throw std::bad_alloc();
+	}
 	if((nurb->W = (double *)malloc(sizeof(double)*K)) == NULL){
 		free(nurb->T);
-		return KOD_ERR;
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 	if((nurb->cp = (Coord *)malloc(sizeof(Coord)*K)) == NULL){
 		free(nurb->T);
 		free(nurb->W);
-		return KOD_ERR;
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 
 	return KOD_TRUE;
@@ -94,7 +97,8 @@ EXIT:
 		free(nurb->S);
 	}
 
-	return KOD_ERR;
+//	return KOD_ERR;
+	throw std::bad_alloc();
 }
 
 // Function: Free_NurbsS_1DArray
@@ -135,7 +139,8 @@ void NURBS_Func::Free_NurbsS(NURBSS *a)
 int NURBS_Func::New_TrmS(TRMS *trms,int num)
 {
 	if((trms->pTI = (CONPS **)malloc(sizeof(CONPS *)*num)) == NULL){
-		return KOD_ERR;
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 
 	return KOD_TRUE;
@@ -175,12 +180,14 @@ void NURBS_Func::Free_TrmS(TRMS *a)
 int NURBS_Func::New_CompC(COMPC *compc,int num)
 {
 	if((compc->DEType = (int *)malloc(sizeof(int)*num)) == NULL){
-		return KOD_ERR;
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 	
 	if((compc->pDE = (COMPELEM **)malloc(sizeof(COMPELEM *)*num)) == NULL){
 		free(compc->DEType);
-		return KOD_ERR;
+//		return KOD_ERR;
+		throw std::bad_alloc();
 	}
 
 	compc->N = num;
@@ -339,7 +346,7 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,double *S,do
 	Nurbs->Dstat.Color[3] = 0.5;
 
 	if(New_NurbsS(Nurbs,Nurbs->K,Nurbs->N) == KOD_ERR){
-        GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 
@@ -392,7 +399,7 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,NURBSS nurb)
 
 	// メモリー確保
 	if(hbody.New_NurbsS(Nurbs,Nurbs->K,Nurbs->N) == KOD_ERR){
-        GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 
@@ -433,11 +440,11 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC NurbsC,Coord Axis,double deg)
         Coord **Cp;	// コントロールポイント
         double rad = DegToRad(deg);
         if((W = NewMatrix(3,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             return KOD_ERR;
         }
         if((Cp = NewCoord2(3,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             FreeMatrix(W,3);
             return KOD_ERR;
         }
@@ -469,11 +476,11 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC NurbsC,Coord Axis,double deg)
         Coord **Cp;	// コントロールポイント
         double rad = DegToRad(deg);
         if((W = NewMatrix(5,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             return KOD_ERR;
         }
         if((Cp = NewCoord2(5,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             FreeMatrix(W,5);
             return KOD_ERR;
         }
@@ -505,11 +512,11 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC NurbsC,Coord Axis,double deg)
         Coord **Cp;	// コントロールポイント
         double rad = DegToRad(deg);
         if((W = NewMatrix(7,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             return KOD_ERR;
         }
         if((Cp = NewCoord2(7,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             FreeMatrix(W,7);
             return KOD_ERR;
         }
@@ -540,11 +547,11 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC NurbsC,Coord Axis,double deg)
         double **W;			// ウエイト
         Coord  **Cp;		// コントロールポイント
         if((W = NewMatrix(9,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             return KOD_ERR;
         }
         if((Cp = NewCoord2(9,NurbsC.K)) == NULL){
-            GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//			GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
             FreeMatrix(W,9);
             return KOD_ERR;
         }
@@ -592,11 +599,11 @@ int NURBS_Func::GenSweepNurbsS(NURBSS *NurbsS,NURBSC NurbsC,Coord Axis,double Le
 	double **W;			// ウエイト
 	Coord  **Cp;		// コントロールポイント
 	if((W = NewMatrix(NurbsC.K,2)) == NULL){
-        GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
 	if((Cp = NewCoord2(NurbsC.K,2)) == NULL){
-        GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
 		FreeMatrix(W,2);
 		return KOD_ERR;
 	}
@@ -1767,7 +1774,7 @@ int NURBS_Func::CalcIntersecPtsPlaneV3(NURBSS *nurb,Coord pt,Coord nvec,int v_di
 			}
 			allansnum += hitnum;				// 条件適合解の数だけ総解数をカウントアップ
 			if(allansnum >= ans_size){
-                GuiIFB.SetMessage("NURBS KOD_ERR:Intersection points exceeded the allocated array length");
+//				GuiIFB.SetMessage("NURBS KOD_ERR:Intersection points exceeded the allocated array length");
 				allansnum = KOD_ERR;
 				goto EXIT;
 			}
@@ -1852,7 +1859,7 @@ int NURBS_Func::CalcIntersecPtsPlaneU3(NURBSS *nurb,Coord pt,Coord nvec,int u_di
 			}
 			allansnum += hitnum;				// 条件適合解の数だけ総解数をカウントアップ
 			if(allansnum >= ans_size){
-                GuiIFB.SetMessage("NURBS KOD_ERR:Intersection points exceeded the allocated array length");
+//				GuiIFB.SetMessage("NURBS KOD_ERR:Intersection points exceeded the allocated array length");
 				allansnum = KOD_ERR;
 				goto EXIT;
 			}
@@ -2147,7 +2154,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 	}
 	init_pt_num = CheckTheSamePoints(init_pt,init_pt_num);		// 同一点は除去する
 	if(!init_pt_num){		// 見つからない場合は、交差していないとみなす
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Init intersection point is noexistence");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Init intersection point is noexistence");
 		return KOD_FALSE;					
 	}
 	else if(init_pt_num == KOD_ERR) return KOD_ERR;			// init_pt_numがinit_ptの配列長を超えた
@@ -2197,7 +2204,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 				else search_flag = SearchIntersectPt_OS(nurb,pt,nvec,ds,&u,&v,INVERSE);
 				if(search_flag == KOD_ERR){					// 特異点検出により処理を継続できない場合
 					//fprintf(stderr,"b,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
-					GuiIFB.SetMessage("NURBS_FUNC CAUTION: Singler point was ditected.");
+//					GuiIFB.SetMessage("NURBS_FUNC CAUTION: Singler point was ditected.");
 					break;
 				}
 				//fprintf(stderr,"f,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
@@ -2265,8 +2272,8 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 
 			// 交点の数が指定サイズを超えた場合はそこまでで強制リターン
 			if(anscount >= ans_size){
-                GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
-                GuiIFB.SetMessage("There is a possibility that you set large ds.");
+//				GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
+//				GuiIFB.SetMessage("There is a possibility that you set large ds.");
                 anscount = RemoveTheSamePoints(nurb,ans,anscount);
 				return anscount;
 			}
@@ -2424,7 +2431,7 @@ int NURBS_Func::SearchIntersectPt_BS(NURBSS *S,Coord pt,Coord nvec,double H,doub
 {
 	// 引数指定ミス
 	if(direction != FORWARD && direction != INVERSE){
-		GuiIFB.SetMessage("NURBS ERROR: selected wrong direction");
+//		GuiIFB.SetMessage("NURBS ERROR: selected wrong direction");
 		return KOD_ERR;
 	}
 
@@ -2853,7 +2860,7 @@ int NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Di
 			ans[anscount] = SetCoord(u,v,t);
 			anscount++;
 			if(anscount == ans_size){
-                GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
+//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
 				return KOD_ERR;
 			}
 		}
@@ -2972,7 +2979,7 @@ int NURBS_Func::CalcIntersecPtsNurbsSSearch(NURBSS *nurbR,NURBSS *nurbS,int div,
 			
 			// 交点の個数がリミットを越えたら
 			if(ans_count >= ans_size-1){
-                GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
+//				GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
 				return ans_count;
 			}
 
@@ -3147,7 +3154,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 
 	// メモリ確保
 	if((J = NewMatrix(3,3)) == NULL){
-        GuiIFB.SetMessage("NURBS ERROR: fail to malloc\n");
+//		GuiIFB.SetMessage("NURBS ERROR: fail to malloc\n");
 		return KOD_ERR;
 	}
 
@@ -3173,7 +3180,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 	double phi1 = sqrt(E1*f1*f1 - 2*F1*f1*g1 + G1*g1*g1);
 	double phi2 = sqrt(E2*f2*f2 - 2*F2*f2*g2 + G2*g2*g2);
 	if(!phi1 && !phi2){			// 特異点
-        GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
 		FreeMatrix(J,3);
 		return KOD_ERR;				
 	}
@@ -3469,7 +3476,7 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 			ans[anscount].y = u;
 			anscount++;
 			if(anscount == ans_size){	// 解の個数がans_sizeを超えたら、ERRをリターン
-                GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
+//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
 				return KOD_ERR;
 			}
 		}
@@ -3595,7 +3602,7 @@ int NURBS_Func::CalcIntersecCurve(NURBSC *nurb,Coord pt,Coord nvec,int Divnum,do
 	int anscount = 0;			// 交点の数をカウント
 
 	if(!LoD){
-		GuiIFB.SetMessage("NURBS_Func ERROR: LoD is changed 0 to 1");
+//		GuiIFB.SetMessage("NURBS_Func ERROR: LoD is changed 0 to 1");
 		LoD = 1;
 	}
 
@@ -3622,7 +3629,7 @@ int NURBS_Func::CalcIntersecCurve(NURBSC *nurb,Coord pt,Coord nvec,int Divnum,do
 		}// end of wihle
 		if(flag == true){
 			if(anscount == ans_size){	// 解の個数がans_sizeを超えたら、ERRをリターン
-				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
+//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
 				return KOD_ERR;
 			}
 			ans[anscount] = t;		// 解として登録
@@ -3686,7 +3693,7 @@ int NURBS_Func::CalcIntersecIsparaCurveU(NURBSS *nurb,double V,Coord pt,Coord nv
 		if(flag == true){
 			anscount = CheckTheSamePoints(ans,anscount);		// 同一点は除去する
 			if(anscount == ans_size){	// 解の個数がans_sizeを超えたら、ERRをリターン
-				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
+//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
 				return KOD_ERR;
 			}
 			ans[anscount] = u;		// 解として登録
@@ -3751,7 +3758,7 @@ int NURBS_Func::CalcIntersecIsparaCurveV(NURBSS *nurb,double U,Coord pt,Coord nv
 		if(flag == true){
 			anscount = CheckTheSamePoints(ans,anscount);		// 同一点は除去する
 			if(anscount == ans_size){	// 解の個数がans_sizeを超えたら、ERRをリターン
-				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
+//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
 				return KOD_ERR;
 			}
 			ans[anscount] = v;		// 解として登録
@@ -3789,7 +3796,7 @@ int NURBS_Func::CalcIntersecCurve3(NURBSC *nurb,Coord pt,Coord nvec,double *ans,
 	int k=0;
 
 	if((coef = NewMatrix(nurb->M,nurb->M)) == NULL){
-        GuiIFB.SetMessage("NURBS KOD_ERROR: CalcIntersecPlane3()");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR: CalcIntersecPlane3()");
 		return KOD_ERR;
 	}
 
@@ -3805,9 +3812,9 @@ int NURBS_Func::CalcIntersecCurve3(NURBSC *nurb,Coord pt,Coord nvec,double *ans,
 			GetBSplCoef1(nurb->M,nurb->K,i,nurb->T,coef);	// 各コントロールポイントにおける1次Bスプライン基底関数の係数を求める
 		}
 		else{
-			char mes[256];
-			sprintf(mes,"NURBS KOD_ERROR:Ther order of equation is unsupported. (order = %d)",nurb->M-1);
-            GuiIFB.SetMessage(mes);
+//			char mes[256];
+//			sprintf(mes,"NURBS KOD_ERROR:Ther order of equation is unsupported. (order = %d)",nurb->M-1);
+//			GuiIFB.SetMessage(mes);
 			goto EXIT;
 		}
 		GetNurbsCCoef(nurb,coef,i,P,Q);						// NURBS曲線の係数(P,Q)を求める
@@ -3817,7 +3824,7 @@ int NURBS_Func::CalcIntersecCurve3(NURBSC *nurb,Coord pt,Coord nvec,double *ans,
 		for(int j=0;j<ansnum;j++){
 			if(t[j] >= nurb->T[i+nurb->M-1] && t[j] <= nurb->T[i+nurb->M]){	// ノットベクトルの値と適合するもののみ解として抽出
 				if(k == ans_size){
-                    GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
+//					GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
 					goto EXIT;
 				}
 				ans[k] = t[j];		// 解を取得
@@ -4212,7 +4219,7 @@ void NURBS_Func::ChRatioNurbsC(NURBSC *nurbs,Coord ratio)
 int NURBS_Func::SetCPNurbsS(NURBSS *nurbs,NURBSS Nurbs)
 {
 	if(nurbs->K[0] != Nurbs.K[0] || nurbs->K[1] != Nurbs.K[1]){
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Control point count is different");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Control point count is different");
 		return KOD_ERR;
 	}
 
@@ -4242,7 +4249,7 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,Coord *P,int PNum,int M)
 	int retflag = KOD_TRUE;
 
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 	if(PNum == 2 || PNum == 3)	M = PNum;	// 与えられた点が2個か3個の場合は、階数を強制的に2か3にする
@@ -4277,7 +4284,7 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,Coord *P,int PNum,int M)
 	// Bスプライン基底関数行列の逆行列を求める
 	double det = Gauss(K,B,P,Q);
 	if(det == 0){
-        GuiIFB.SetMessage("NURBS ERROR:Determinant is 0");
+//		GuiIFB.SetMessage("NURBS ERROR:Determinant is 0");
 		retflag = KOD_ERR;
 		goto EXIT;
 	}
@@ -4320,11 +4327,11 @@ EXIT:
 int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 {
 	if(DiffCoord(P_[0],P_[PNum-1]) == KOD_FALSE){
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Given points P0 and Pn are not unmuched");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Given points P0 and Pn are not unmuched");
 		return KOD_FALSE;
 	}
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 	if(PNum == 2 || PNum == 3)	M = PNum;	// 与えられた点が2個か3個の場合は、階数を強制的に2か3にする
@@ -4420,7 +4427,7 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs,Coord *P,int PNum,int M)
 {
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 
@@ -4470,7 +4477,7 @@ int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs,Coord *P,int PNum,int M)
 int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,Coord *P,int PNum,int M)
 {
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 
@@ -4507,7 +4514,7 @@ int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,Coord *P,int PNum,int M)
 int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,Coord *P,int PNum)
 {
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
-        GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 
@@ -4559,7 +4566,7 @@ int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,Coord *P,int PNum)
 int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,int Mu,int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
-        GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
@@ -4668,7 +4675,7 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,Coord **P,int PNum_u,int PN
 int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,int Mu,int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
-        GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
@@ -4756,7 +4763,7 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,Coord **P,int PNum_u,int PN
 int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,int Mu,int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
-        GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
+//		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
 		return KOD_ERR;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
@@ -5196,15 +5203,15 @@ int NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb,Coord r,Coord p,int Divnum
 			}// end of while
 
 			// LOOPCOUNTMAX回ループしても収束していなかったら警告
-			if(loopcount == LOOPCOUNTMAX)
-                GuiIFB.SetMessage("NURBS_Func ERROR: fail to converge");
-
+//			if(loopcount == LOOPCOUNTMAX) {
+//				GuiIFB.SetMessage("NURBS_Func ERROR: fail to converge");
+//			}
 			// 収束していたら解として登録
 			if(flag == KOD_TRUE){
 				ans[anscount] = SetCoord(u,v,t);
 				anscount++;
 				if(anscount > anssize){
-                    GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
+//					GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
 					return KOD_ERR;
 				}
 			}
@@ -5540,7 +5547,7 @@ int NURBS_Func::DetermPtOnTRMSurf_sub(CONPS *Conps,double u,double v)
 {
 	// 面上線が複合曲線になっていること
 	if(Conps->BType != COMPOSITE_CURVE){
-        GuiIFB.SetMessage("NURBS_Func ERROR:TRIM未実装!");
+//		GuiIFB.SetMessage("NURBS_Func ERROR:TRIM未実装!");
 		return KOD_ERR;
 	}
 
@@ -5555,9 +5562,9 @@ int NURBS_Func::DetermPtOnTRMSurf_sub(CONPS *Conps,double u,double v)
 
 	// トリム境界線を点群Pで近似
 	if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
-			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
-			FreeCoord1(P);
-			return KOD_ERR;
+//		GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
+		FreeCoord1(P);
+		return KOD_ERR;
 	}
 	
 	int trm_flag = KOD_FALSE;							// トリミング領域内外判定用フラグ
@@ -5596,9 +5603,9 @@ int NURBS_Func::GetPtsOnOuterTRMSurf(TRMS *Trm,Coord *Pt,int N)
 
 	// トリム境界線を点群Pで近似
 	if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
-			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
-			FreeCoord1(P);
-			return KOD_ERR;
+//		GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
+		FreeCoord1(P);
+		return KOD_ERR;
 	}
 
 	Coord *ans = NewCoord1(N);		// 残す点の格納先
@@ -5657,7 +5664,7 @@ int NURBS_Func::GetPtsOnInnerTRMSurf(TRMS *Trm,Coord *Pt,int N)
 
 		// トリム境界線を点群Pで近似
 		if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
-			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
+//			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
 			FreeCoord1(P);
 			return KOD_ERR;
 		}
@@ -5738,7 +5745,7 @@ int NURBS_Func::ApproxTrimBorder(COMPC *CompC,Coord *P)
 		}
 		// それ以外
 		else{
-			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
+//			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
 			return KOD_ERR;
 		}
 	}
@@ -5780,13 +5787,13 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,int D,Coord *Pts)
 int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,double D,Coord *Pts)
 {
 	if(D == 0){
-		GuiIFB.SetMessage("NURBS_Func ERROR: Set Correct Interval Value");
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Set Correct Interval Value");
 		return KOD_ERR;
 	}
 
 	double L = CalcNurbsCLength(Nurb);		// NURBS曲線の線分長を得る
 	if(D > L){
-		GuiIFB.SetMessage("NURBS_Func ERROR: Arc Length > Whole Lenth of the Curve");
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Arc Length > Whole Lenth of the Curve");
 	}
 	//fprintf(stderr,"L = %lf\n",L);		// debug
 	//fprintf(stderr,"D = %lf\n",D);		// debug
@@ -5824,7 +5831,7 @@ double NURBS_Func::CalcParamLengthOnNurbsC(NURBSC *C,double L,double Init_t)
 		dt = (L - CalcNurbsCLength(C,0,t))/CalcEuclid(CalcDiffNurbsC(C,t))/2;		// ニュートン法による収束計算
 		t += dt;
 		if(count > LOOPCOUNTMAX || t > C->V[1]){
-			GuiIFB.SetMessage("NURBS_Func ERROR: Cannot find a anser");
+//			GuiIFB.SetMessage("NURBS_Func ERROR: Cannot find a anser");
 			break;
 		}
 		//fprintf(stderr,"%d:  t = %lf,    dt = %lf\n",k,t,dt);	// debug
@@ -5942,7 +5949,7 @@ int NURBS_Func::CalcExtremumNurbsC(NURBSC *C,Coord nf,double *pt,int ptnum)
 			pt[anscount] = t;	// 解として登録
 			anscount++;
 			if(anscount == ptnum){
-                GuiIFB.SetMessage("NURBS_ERROR:range over");
+//				GuiIFB.SetMessage("NURBS_ERROR:range over");
 				return KOD_ERR;
 			}
 		}
@@ -6088,7 +6095,7 @@ int NURBS_Func::SearchExtremum_BS(NURBSS *S,Coord nf,double u0,double v0,double 
 {
 	// 引数指定ミス
 	if(direction != FORWARD && direction != INVERSE){
-        GuiIFB.SetMessage("NURBS ERROR: selected wrong direction");
+//		GuiIFB.SetMessage("NURBS ERROR: selected wrong direction");
 		return KOD_ERR;
 	}
 
@@ -6180,7 +6187,7 @@ int NURBS_Func::GetSECParam1(NURBSS *S,double u,double v,Coord nf,int param,int 
 	if(param == PARAM_U){
 		double f__ = E*fvv*fvv - 2*F*fuv*fvv + G*fuv*fuv;
 		if(f__==0.0){
-            GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detecting singular point.");
+//			GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detecting singular point.");
 			return KOD_FALSE;				
 		}
 		double f_ = 1/sqrt(f__);
@@ -6189,7 +6196,7 @@ int NURBS_Func::GetSECParam1(NURBSS *S,double u,double v,Coord nf,int param,int 
 	else if(param == PARAM_V){
 		double f__ = E*fuv*fuv - 2*F*fuv*fuu + G*fuu*fuu; 
 		if(f__==0.0){
-            GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detecting singular point.");
+//			GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detecting singular point.");
 			return KOD_FALSE;				
 		}
 		double f_ = 1/sqrt(f__);
@@ -7025,7 +7032,7 @@ int NURBS_Func::DivNurbsCParam(NURBSC *C0, NURBSC *C1, NURBSC *C2, double t)
 {
 	// tパラメータが適正範囲か
 	if(t <= C0->T[0] || t >= C0->T[C0->N-1]){
-		GuiIFB.SetMessage("NURBS_Func ERROR: Wrong Curve Parameter is set.");
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Wrong Curve Parameter is set.");
 		return KOD_ERR;
 	}
 
@@ -7140,13 +7147,13 @@ int NURBS_Func::ConnectNurbsC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
 		ReverseNurbsC(C2);				// C2の向きを反転する
 	}
 	else{
-		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't share the same coordinate value.");
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't share the same coordinate value.");
 		return KOD_ERR;
 	}
 
 	// 2曲線の階数が等しいこと
 	if(C1->M != C2->M){
-		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't have the same rank.");
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't have the same rank.");
 		return KOD_ERR;
 	}
 

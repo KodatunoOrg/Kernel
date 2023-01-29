@@ -1,4 +1,5 @@
 ﻿#include "BODY.h"
+#include <stdexcept>	// throw
 
 extern GUI_Interface_BASE GuiIFB;
 
@@ -75,7 +76,7 @@ void BODY::NewBodyElem()
 
 
 EXIT:	// メモリー確保に失敗した場合は、これまで確保した分を解放して終了
-	GuiIFB.SetMessage("KOD_ERROR: malloc BODY");
+//	GuiIFB.SetMessage("KOD_ERROR: malloc BODY");
 	while(flag){
 		if(flag == _CURVE_ON_PARAMETRIC_SURFACE+1 && TypeNum[_TRIMMED_SURFACE]){
 			free(ConpS);
@@ -103,7 +104,8 @@ EXIT:	// メモリー確保に失敗した場合は、これまで確保した�
 		}
 		flag--;
 	}
-	exit(KOD_ERR);
+//	exit(KOD_ERR);
+	throw std::bad_alloc();
 }
 
 
@@ -742,7 +744,7 @@ int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -754,7 +756,8 @@ EXIT:
 	if(KOD_ERRflag == 1){
 		free(NurbsC[NurbsCount].T);
 	}
-	return KOD_ERR;
+//	return KOD_ERR;
+	throw std::bad_alloc();
 }
 
 // Function: GetNurbsCFromCirA
@@ -793,7 +796,7 @@ int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)
 		flag = CirAToNurbsC_seg4(NurbsCount ,CirCount ,vec, radius);			//　4セグメント
 	}
 	else{
-		GuiIFB.SetMessage("Center angle of a circle or circular arc is not calculated normally");
+//		GuiIFB.SetMessage("Center angle of a circle or circular arc is not calculated normally");
 		return KOD_ERR;
 	}
 
@@ -876,7 +879,7 @@ int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angl
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -888,7 +891,8 @@ EXIT:
 	if(KOD_ERRflag == 1){
 		free(NurbsC[NurbsCount].T);
 	}
-	return KOD_ERR;
+//	return KOD_ERR;
+	throw std::bad_alloc();
 }
 
 // private
@@ -972,7 +976,7 @@ int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angl
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -984,7 +988,8 @@ EXIT:
 	if(KOD_ERRflag == 1){
 		free(NurbsC[NurbsCount].T);
 	}
-	return KOD_ERR;
+//	return KOD_ERR;
+	throw std::bad_alloc();
 }
 
 // private
@@ -1078,7 +1083,7 @@ int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angl
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -1090,7 +1095,8 @@ EXIT:
 	if(KOD_ERRflag == 1){
 		free(NurbsC[NurbsCount].T);
 	}
-	return KOD_ERR;
+//	return KOD_ERR;
+	throw std::bad_alloc();
 }
 
 // private
@@ -1179,7 +1185,7 @@ int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radi
 
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
 EXIT:
-		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
+//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
 		free(NurbsC[NurbsCount].cp);
 		KOD_ERRflag--;
@@ -1191,7 +1197,8 @@ EXIT:
 	if(KOD_ERRflag == 1){
 		free(NurbsC[NurbsCount].T);
 	}
-	return KOD_ERR;
+//	return KOD_ERR;
+	throw std::bad_alloc();
 }
 
 // Function: GetOuterEdgeNum
