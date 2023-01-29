@@ -3,10 +3,6 @@
 #ifndef _BODY_H_
 #define _BODY_H_
 
-#include "KodatunoKernel.h"
-#include "KodListFunc.h"
-#include "MESH.h"
-
 // Constants: General Defines
 // ALL_ENTITY_TYPE_NUM -	全エンティティタイプの数(21)
 // CTLPNUMMAX -				NURBSで用いられるコントロールポイントの数の上限(1024)
@@ -425,9 +421,6 @@ typedef struct{
 	int CCount;		// 何番目にピックされた曲線かを表す
 	int SCount;		// 何番目にピックされた曲面かを表す
 }OBJECT;
-
-
-#include "NURBS_Func.h"
 
 // Class: BODY
 // 全てのエンティティを統括するBODYクラス

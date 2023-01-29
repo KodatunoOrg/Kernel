@@ -1,4 +1,4 @@
-﻿#include "Quaternion.h"
+﻿#include "KodatunoKernel.h".h"
 
 // Function: QInit
 // クォータニオンを引数で指定した数値で初期化

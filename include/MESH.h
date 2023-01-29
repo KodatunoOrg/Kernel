@@ -6,9 +6,6 @@
 #ifndef _HALF_EDGE_H_
 #define _HALF_EDGE_H_
 
-#include "KodatunoKernel.h"
-#include "KodListFunc.h"
-
 // Constants: General Defines
 // MAXVERTNUMINFACE -	1つのメッシュが持つ頂点数の上限(四角形まで)(4)
 // TRIMESHVERTNUM -		三角メッシュの頂点数(3)

@@ -1,8 +1,6 @@
 ﻿#ifndef _STL_PARSER_MAIN_H_
 #define _STL_PARSER_MAIN_H_
 
-#include "BODY.h"
-
 // Constants: General Defines
 // BUFSIZEMAX_STL -		文字列一時格納用バッファのサイズ(256)
 // LABELSIZEMAX_STL -	ラベル文字列一時格納用バッファのサイズ(10)

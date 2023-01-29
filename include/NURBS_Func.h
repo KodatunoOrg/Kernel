@@ -1,10 +1,6 @@
 ﻿#ifndef _NURBS_FUNC_H_
 #define _NURBS_FUNC_H_
 
-#include "BODY.h"
-#include "Quaternion.h"
-#include "SFQuant.h"
-
 // Constants: General Defines
 // PTNUMMAX -			NURBSの点列の最大数(10000)
 // RANKMAX -			NURBSの階数の最大値(9)

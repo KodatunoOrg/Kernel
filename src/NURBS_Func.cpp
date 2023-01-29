@@ -1,5 +1,5 @@
-﻿#include "NURBS_Func.h"
-#include <stdexcept>	// throw
+﻿#include <stdexcept>	// throw
+#include "KodatunoKernel.h"
 
 // Function: New_NurbsC
 // Nurbs曲線のメモリー確保

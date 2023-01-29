@@ -1,6 +1,5 @@
-﻿#include "KodatunoKernel.h"
-#include <stdlib.h>
-#include <stdexcept>	// throw
+﻿#include <stdexcept>	// throw
+#include "KodatunoKernel.h"
 
 // Operator: +
 // Coord同士の足し算(AddCoord())

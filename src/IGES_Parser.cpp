@@ -2,8 +2,8 @@
 * IGESファイルを読み込む *
 **************************/
 
-#include "IGES_Parser.h"
 #include <stdexcept>	// throw
+#include "KodatunoKernel.h"
 
 // Function: IGES_Parser_Main
 // IGESパーサーのメイン

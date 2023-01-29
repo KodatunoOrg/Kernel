@@ -1,8 +1,6 @@
 ﻿#ifndef _DXF_PARSER_MAIN_H_
 #define _DXF_PARSER_MAIN_H_
 
-#include "BODY.h"
-
 // Constants: General Defines
 // SECTION_NAME -		セクション名を表すシンボル(2)
 // HEADER_SECTIO -		ヘッダセクションのシンボル(1)

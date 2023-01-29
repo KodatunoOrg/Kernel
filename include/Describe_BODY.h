@@ -3,9 +3,6 @@
 #ifndef _DESCRIBE_BODY_H_
 #define _DESCRIBE_BODY_H_
 
-#include "BODY.h"
-#include "NURBS_Func.h"
-
 // Constants: General Defines
 // COMMAND_DRAW_BOD					BODY描画用ディスプレイリストの登録番号(1)
 // COMMAND_DRAW_USER				Userメイン関数によってコールされたOpenGL描画関数用ディスプレイリストの登録番号(2)

@@ -1,8 +1,6 @@
 ﻿#ifndef _KOD_LIST_FUNC_H_
 #define _KOD_LIST_FUNC_H_
 
-#include "KodatunoKernel.h"
-
 // Constants: General Defines
 // Non
 

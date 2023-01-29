@@ -1,5 +1,4 @@
-﻿#include "NURBS_Func.h"
-#include "SFQuant.h"
+﻿#include "KodatunoKernel.h"
 
 // Function: SFQuant
 // コンストラクタ(初期化)

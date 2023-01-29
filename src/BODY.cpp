@@ -1,5 +1,5 @@
-﻿#include "BODY.h"
-#include <stdexcept>	// throw
+﻿#include <stdexcept>	// throw
+#include "KodatunoKernel.h"
 
 // Function: BODY
 // BODYクラスのコンストラクタ．各種初期化

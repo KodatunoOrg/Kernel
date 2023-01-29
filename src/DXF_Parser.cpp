@@ -2,7 +2,7 @@
 * DXFファイルを読み込む  *
 **************************/
 
-#include "DXF_Parser.h"
+#include "KodatunoKernel.h"
 
 // Function: DXF_PARSER
 // コンストラクタ

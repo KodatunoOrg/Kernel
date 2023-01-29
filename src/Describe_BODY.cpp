@@ -2,7 +2,7 @@
 * BODY描画コア *
 ****************/
 
-#include "Describe_BODY.h"
+#include "KodatunoKernel.h"
 
 GLUnurbsObj *Describe_BODY::NurbsSurf;		// NURBS曲面用オブジェクト
 GLUnurbsObj *Describe_BODY::NurbsCurve;		// NURBS曲線用オブジェクト

@@ -2,8 +2,7 @@
 * STLファイルを読み込む  *
 **************************/
 
-#include "STL_Parser.h"
-
+#include "KodatunoKernel.h"
 
 // Function: STL_Parser_Main
 // STLパーサメイン

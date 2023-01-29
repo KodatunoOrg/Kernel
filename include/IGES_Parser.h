@@ -3,8 +3,6 @@
 #ifndef _IGES_PARSER_MAIN_H_
 #define _IGES_PARSER_MAIN_H_
 
-#include "BODY.h"
-
 // Constants: General Defines
 //#define SECTION_NUM -				セクションの数(S,G,D,P,T)(5)
 //#define COLUMN_MAX_ -				1行のカラム数('\n'と'\0'を含む)(82)

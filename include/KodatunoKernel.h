@@ -1,14 +1,9 @@
 ﻿#ifndef _STD_AFX_H_
 #define _STD_AFX_H_
 
-//#include "Kutil.h"
-//#include <omp.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <iostream>
-#include <ctype.h>
 
 #include <GL/glu.h>
 
@@ -687,5 +682,17 @@ void CoordToArray(Coord,double []);
 // Function: CoordToArray2D
 // Coordをdouble配列に代入
 void CoordToArray2D(Coord,double []);	
+
+#include "KodListFunc.h"
+#include "Quaternion.h"
+#include "MESH.h"
+#include "BODY.h"
+#include "Describe_BODY.h"
+#include "SFQuant.h"
+#include "NURBS_Func.h"
+#include "DXF_Parser.h"
+#include "IGES_Parser.h"
+#include "STL_Parser.h"
+#include "VRML_Parser.h"
 
 #endif

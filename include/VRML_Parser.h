@@ -3,8 +3,6 @@
 #ifndef _VRML_PARSER_MAIN_H_
 #define _VRML_PARSER_MAIN_H_
 
-#include "BODY.h"
-
 // Constants: General Defines
 // BUFSIZEMAX -		文字列一時格納用バッファのサイズ(256)
 // ALLTAGNUM -		VRMLタグの総数(37)

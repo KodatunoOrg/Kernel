@@ -1,8 +1,6 @@
 ﻿#ifndef _SFQUANT_H_
 #define _SFQUANT_H_
 
-#include "BODY.h"
-
 // Constants: General Defines
 // Non
 

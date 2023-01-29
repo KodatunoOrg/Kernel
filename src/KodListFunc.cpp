@@ -1,4 +1,4 @@
-﻿#include "KodListFunc.h"
+﻿#include "KodatunoKernel.h"
 
 // Function: KODlistData
 // コンストラクタ(初期化)

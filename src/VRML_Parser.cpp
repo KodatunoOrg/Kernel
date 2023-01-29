@@ -3,7 +3,7 @@
 * 2012/4 K.Takasugi                                      *
 **********************************************************/
 
-#include "VRML_Parser.h"
+#include "KodatunoKernel.h"
 
 // Function: Vrml_Parser_Main
 // VRMLパーサメイン
