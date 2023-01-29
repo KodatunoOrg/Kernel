@@ -12,19 +12,6 @@
 
 #include <GL/glu.h>
 
-// Add by K.Magara
-// とりあえずコンパイルを通すために GUI/Qt/StdAfxQt.h から移植
-// ここでは仮想関数とし，派生クラス側で実態を定義するように変更
-class GUI_Interface_BASE
-{
-public:
-    virtual int SetMessage(const char *);
-    virtual void AddBodyNameToWin(const char *);
-};
-// ここで宣言してしまうとライブラリ側のGuiIFと使用アプリ側のGuiIFが混同してしまう
-//extern GUI_Interface GuiIF;		// クラスGUI_Interfaceのインスタンスをグローバルで宣言
-
-
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
 // KOD_FALSE -					偽のシンボル(0)

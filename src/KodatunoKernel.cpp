@@ -2,17 +2,6 @@
 #include <stdlib.h>
 #include <stdexcept>	// throw
 
-int GUI_Interface_BASE::SetMessage(const char *mes)
-{
-	fprintf(stderr,"%s\n",mes);
-    return 0;
-}
-void GUI_Interface_BASE::AddBodyNameToWin(const char *)
-{
-}
-// --
-
-
 // Operator: +
 // Coord同士の足し算(AddCoord())
 Coord Coord::operator +(Coord a)
