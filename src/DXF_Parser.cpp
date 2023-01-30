@@ -26,7 +26,7 @@ int DXF_PARSER::DXF_Parser_Main(BODY *body,const char *DXF_fname)
 {
 	FILE *fp;
 	NURBS_Func nfunc;
-	char mes[BUFSIZEMAX_DXF];		// 出力用メッセージ格納バッファ
+//	char mes[BUFSIZEMAX_DXF];		// 出力用メッセージ格納バッファ
 	int line = 1;				// 現在の行番号
 	int section = 0;			// セクション番号
 

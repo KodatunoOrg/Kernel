@@ -807,12 +807,7 @@ int ZoroCoord2D(Coord a)
 Vector NewVector(int len)
 {
 	Vector a;
-	if((a = (double *)malloc(len*sizeof(double))) == NULL){
-//		GuiIFB.SetMessage("fail to allocate memoly");
-//		return NULL;
-		throw std::bad_alloc();
-	}
-
+	a = new double[len];
 	return a;
 }
 
@@ -829,16 +824,8 @@ Matrix NewMatrix(int row,int col)
 	int i;
 	Matrix a;
 
-	if((a = (double **)malloc(row*sizeof(double *))) == NULL){
-		return NULL;
-	}
-	for(i=0;i<row;i++){
-		if((a[i] = (double *)malloc(col*sizeof(double))) == NULL){
-			while(--i>=0) free(a[i]);
-			free(a);
-			return NULL;
-		}
-	}
+	a = new double*[row];
+	for(i=0;i<row;i++) a[i] = new double[col];
 
 	return a;
 }
@@ -850,7 +837,7 @@ Matrix NewMatrix(int row,int col)
 // a - メモリー解放するdouble型1次元配列へのポインタ
 void FreeVector(Vector a)
 {
-	free(a);
+	delete[] a;
 }
 
 // Function: FreeMatrix
@@ -861,10 +848,8 @@ void FreeVector(Vector a)
 // col - aの行要素数
 void FreeMatrix(Matrix a,int col)
 {
-	for(int i=0;i<col;i++)
-		free(a[i]);
-
-	free(a);
+	for(int i=0;i<col;i++) delete[] a[i];
+	delete[] a;
 }
 
 // Function: NewCoord1
@@ -879,12 +864,7 @@ Coord *NewCoord1(int len)
 {
 	Coord *a;
 
-	if((a = (Coord *)malloc(len*sizeof(Coord))) == NULL){
-//		GuiIFB.SetMessage("fail to allocate memoly");
-//		return NULL;
-		throw std::bad_alloc();
-	}
-
+	a = new Coord[len];
 	return a;
 }
 
@@ -901,20 +881,8 @@ Coord **NewCoord2(int row,int col)
 	int i;
 	Coord **a;
 
-	if((a = (Coord **)malloc((row)*sizeof(Coord *))) == NULL){
-//		GuiIFB.SetMessage("fail to allocate memoly");
-//		return NULL;
-		throw std::bad_alloc();
-	}
-	for(i=0;i<row;i++){
-		if((a[i] = (Coord *)malloc(col*sizeof(Coord))) == NULL){
-//			GuiIFB.SetMessage("fail to allocate memoly");
-			while(--i>=0) free(a[i]);
-			free(a);
-//			return NULL;
-			throw std::bad_alloc();
-		}
-	}
+	a = new Coord *[row];
+	for(i=0;i<row;i++) a[i] = new Coord[col];
 
 	return a;
 }
@@ -932,28 +900,11 @@ Coord ***NewCoord3(int x,int y,int z)
 	int i,j;
 	Coord ***a;
 
-	if((a = (Coord ***)malloc(x*sizeof(Coord **))) == NULL){
-//		GuiIFB.SetMessage("fail to allocate memoly x");
-		return NULL;
-		throw std::bad_alloc();
-	}
+	a = new Coord **[x];
 	for(i=0;i<x;i++){
-		if((a[i] = (Coord **)malloc(y*sizeof(Coord *))) == NULL){
-//			GuiIFB.SetMessage("fail to allocate memoly y");
-			while(--i>=0) free(a[i]);
-			free(a);
-//			return NULL;
-			throw std::bad_alloc();
-		}
+		a[i] = new Coord *[y];
 		for(j=0;j<y;j++){
-			if((a[i][j] = (Coord *)malloc(z*sizeof(Coord))) == NULL){
-//				GuiIFB.SetMessage("fail to allocate memoly z");
-				while(--j>=0) free(a[i][j]);
-				while(--i>=0) free(a[i]);
-				free(a);
-//				return NULL;
-				throw std::bad_alloc();
-			}
+			a[i][j] = new Coord[z];
 		}
 	}
 
@@ -967,7 +918,7 @@ Coord ***NewCoord3(int x,int y,int z)
 // *a - 解放する1次元Coord型配列へのポインタ
 void FreeCoord1(Coord *a)
 {
-	free(a);
+	delete[] a;
 }
 
 // Function: FreeCoord2
@@ -982,9 +933,9 @@ void FreeCoord2(Coord **a,int col)
 
 	b=a;
 	for(int i=0;i<col;i++){
-		free(b[i]);
+		delete[] b[i];
 	}
-	free(a);
+	delete[] a;
 }
 
 // Function: FreeCoord3
@@ -999,11 +950,11 @@ void FreeCoord3(Coord ***a,int x,int y)
 
 	for(i=0;i<x;i++){
 		for(j=0;j<y;j++){
-			free(a[i][j]);
+			delete[] a[i][j];
 		}
-		free(a[i]);
+		delete[] a[i];
 	}
-	free(a);
+	delete[] a;
 }
 
 // Function: NormalizeVec
@@ -1854,7 +1805,7 @@ int CheckZero(double val,int flag)
 int CheckRange(double low,double up,double val,int flag)
 {
 	if(flag < 0 || flag > 5){
-		char mes[256];
+//		char mes[256];
 //		sprintf(mes,"CheckRange ERROR:wrong specified value. 0 or 1");
 //		GuiIFB.SetMessage(mes);
 		return KOD_ERR;
@@ -2406,18 +2357,13 @@ double Gauss(int n,Matrix a,Vector b,Vector x)
 	long double det;	// 行列式
 	int *ip;			// 行交換の情報
 
-	ip = (int *)malloc(sizeof(int)*n);
-	if(ip == NULL){
-//		GuiIFB.SetMessage("fail to allocate");
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
+	ip = new int[n];
 
 	det = LU(n,a,ip);					// LU分解
 	if(det == 0) return KOD_FALSE;		// 行列式が0
 	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
 
-	free(ip);                   
+	delete[] ip;
 
 	return det;					// 戻り値は行列式
 }
@@ -2436,18 +2382,13 @@ double Gauss(int n,Matrix a,Coord *b,Coord *x)
 	long double det;	// 行列式
 	int *ip;			// 行交換の情報
 
-	ip = (int *)malloc(sizeof(int)*n);
-	if(ip == NULL){
-//		GuiIFB.SetMessage("fail to allocate");
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
+	ip = new int[n];
 
 	det = LU(n,a,ip);					// LU分解
 	if(det == 0) return KOD_FALSE;		// 行列式が0
 	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
 
-	free(ip);                   
+	delete[] ip;                   
 
 	return det;					// 戻り値は行列式
 }
@@ -2526,12 +2467,7 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 	long double t, det;
 	int *ip;		// 行交換の情報
 
-	ip = (int *)malloc(sizeof(int)*n);
-	if (ip==NULL){
-//		GuiIFB.SetMessage("fail to allocate");
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
+	ip = new int[n];
 
 	det = LU(n,a,ip);		// LU分解
 	if(det != 0){
@@ -2553,7 +2489,7 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 		}
 	}
 
-	free(ip);
+	delete[] ip;
 
 	return det;
 }
@@ -2808,7 +2744,7 @@ int CheckTheSamePoints(double *P,int N)
 {
 	if(!N) return 0;
 
-	bool *flag = (bool *)malloc(sizeof(bool)*N);
+	bool *flag = new bool[N];
 
 	for(int i=0;i<N;i++)
 		flag[i] = false;
@@ -2829,7 +2765,8 @@ int CheckTheSamePoints(double *P,int N)
 			k++;
 		}
 	}
-	free(flag);
+
+	delete[] flag;
 
 	return k;
 }

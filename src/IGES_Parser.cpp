@@ -19,7 +19,7 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 	FILE *fp;
 	GlobalParam gpara;				// グローバル部のパラメータを格納
 	DirectoryParam *dpara;			// ディレクトリ部のパラメータを格納
-	char mes[256];					// メッセージダンプ用string
+//	char mes[256];					// メッセージダンプ用string
 	int  line[SECTION_NUM];			// 各セクション毎のライン数を格納
 	int  flag = 0;
 	int  i;
@@ -36,14 +36,10 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 	// 各セクションの行数をあらかじめ取得
 	GetSectionLine(fp,line);
 
+try {
 	// DirectoryParamのメモリー確保
 	line[SECTION_DIRECTORY] /= 2;		// ディレクトリ部は、2行で1つのシーケンスを構成するので2で割ったものをディレクトリ部のライン数とする
-	dpara = (DirectoryParam *)malloc(sizeof(DirectoryParam)*line[SECTION_DIRECTORY]);
-	if(dpara == NULL){
-//		GuiIFB.SetMessage("KOD_ERROR: fail to allocate DirectoryParam");
-//		return(KOD_ERR);
-		throw std::bad_alloc();
-	}
+	dpara = new DirectoryParam[line[SECTION_DIRECTORY]];
 
 	// IGESファイル読み込み(各セクション毎に処理)
 	for(i=0;i<SECTION_NUM;i++){
@@ -75,8 +71,11 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 
 	fclose(fp);
 
-	free(dpara);
-
+	delete[] dpara;
+}
+catch (std::bad_alloc&) {
+	return KOD_ERR;
+}
 	return flag;
 }
 
@@ -1145,13 +1144,9 @@ int IGES_PARSER::GetGlobalSection(FILE *fp,GlobalParam *gpara,int gline)
 	char *p,*p_;
 	int  i;
 
+try {
 	// グローバル部のライン数*COL_CHAR分メモリー確保
-	str = (char *)malloc(sizeof(char) * gline*COL_CHAR);
-	if(str == NULL){
-//		GuiIFB.SetMessage("GLOBAL SECTION KOD_ERROR: faile to allocate memory");
-//		exit(KOD_ERR);
-		throw std::bad_alloc();
-	}
+	str = new char[gline*COL_CHAR];
 
 	strcpy(str,"");			// str初期化
 	for(i=0;i<gline;i++){
@@ -1219,8 +1214,11 @@ int IGES_PARSER::GetGlobalSection(FILE *fp,GlobalParam *gpara,int gline)
 		p_ = p;
 	}
 
-	free(str);		// メモリー開放
-
+	delete[] str;		// メモリー開放
+}
+catch(std::bad_alloc&) {
+	return KOD_ERR;
+}
 	return KOD_TRUE;
 }
 
@@ -1435,9 +1433,9 @@ int IGES_PARSER::SearchMaxCoord(BODY *body,int TypeNum[])
 	}
 	
 	// メモリ確保
-	if((CoordBuf = (double*)malloc(sizeof(double)*bufnum)) == NULL){
-//		GuiIFB.SetMessage("SEARCH MAXCOORD KOD_ERROR:fail to allocate memory");
-//		return KOD_ERR;
+try {	
+	CoordBuf = new double[bufnum];
+	if ( !CoordBuf ) {
 		throw std::bad_alloc();
 	}
 
@@ -1455,8 +1453,11 @@ int IGES_PARSER::SearchMaxCoord(BODY *body,int TypeNum[])
 	body->MaxCoord = CoordBuf[0];				// 最も大きい座標値を得る
 
 	// メモリ解放
-	free(CoordBuf);
-	
+	delete[] CoordBuf;
+}
+catch(std::bad_alloc&)	{
+	return KOD_ERR;
+}
 	return KOD_TRUE;
 }
 

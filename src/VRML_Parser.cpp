@@ -17,7 +17,7 @@
 int VRML_PARSER::Vrml_Parser_Main(BODY *body, const char *fname)
 {
 	FILE *fp;
-	char mes[BUFSIZEMAX];		// 出力用メッセージ格納バッファ
+//	char mes[BUFSIZEMAX];		// 出力用メッセージ格納バッファ
 	char buf[BUFSIZEMAX];		// 文字列一時格納用バッファ
 	int tag;					// タグ判別用
 	int flag;

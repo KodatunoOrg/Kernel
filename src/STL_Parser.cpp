@@ -19,7 +19,7 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 	NURBS_Func nfunc;
 	char buf[BUFSIZEMAX_STL];		// 文字列一時格納用バッファ
 	char label[LABELSIZEMAX_STL];	// ラベル文字列一時格納用バッファ
-	char mes[BUFSIZEMAX_STL];		// 出力用メッセージ格納バッファ
+//	char mes[BUFSIZEMAX_STL];		// 出力用メッセージ格納バッファ
 	int facet_num=0;			// ファセットの総数
 	double maxval = -1.0E+6;	// 座標値の最大値を格納
 
@@ -57,7 +57,7 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 
 	fseek(fp,0L,SEEK_SET);		// ファイル先頭に戻る
 
-	body->NurbsS = (NURBSS *)malloc(sizeof(NURBSS) * facet_num);	// ファセット数分NURBS曲面をメモリー確保
+	body->NurbsS = new NURBSS[facet_num];	// ファセット数分NURBS曲面をメモリー確保
 	body->TypeNum[_NURBSS] = facet_num;
 
 	// 座標値読み込み

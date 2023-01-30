@@ -1,5 +1,4 @@
-﻿#include <stdexcept>	// throw
-#include "KodatunoKernel.h"
+﻿#include "KodatunoKernel.h"
 
 // Function: BODY
 // BODYクラスのコンストラクタ．各種初期化
@@ -21,89 +20,90 @@ void BODY::NewBodyElem()
 {
 	int flag=0;
 
+try {
 	// エンティティを新たに追加する場合は以下に新たなmallocを記述してください。
 	// エンティティタイプの番号が若い順に記述
 	if(TypeNum[_CIRCLE_ARC]){
-		if(NewCirA(TypeNum[_CIRCLE_ARC]) == NULL)  goto EXIT;
+		NewCirA(TypeNum[_CIRCLE_ARC]);
 		flag = _CIRCLE_ARC+1;
 	}
 
 	if(TypeNum[_COMPOSITE_CURVE]){
-		if(NewCompC(TypeNum[_COMPOSITE_CURVE]) == NULL)  goto EXIT;
+		NewCompC(TypeNum[_COMPOSITE_CURVE]);
 		flag = _COMPOSITE_CURVE+1;
 	}
 
 	if(TypeNum[_CONIC_ARC]){
-		if(NewConA(TypeNum[_CONIC_ARC]) == NULL)  goto EXIT;
+		NewConA(TypeNum[_CONIC_ARC]);
 		flag = _CONIC_ARC+1;
 	}
 
 	if(TypeNum[_LINE]){
-		if(NewLine(TypeNum[_LINE]) == NULL)  goto EXIT;
+		NewLine(TypeNum[_LINE]);
 		flag = _LINE+1;
 	}
 
 	if(TypeNum[_TRANSFORMATION_MATRIX]){
-		if(NewTMat(TypeNum[_TRANSFORMATION_MATRIX]) == NULL)  goto EXIT;
+		NewTMat(TypeNum[_TRANSFORMATION_MATRIX]);
 		flag = _TRANSFORMATION_MATRIX+1;
 	}
 
 	if(TypeNum[_NURBSC]){
-		if(NewNurbsC(TypeNum[_NURBSC]) == NULL)  goto EXIT;
+		NewNurbsC(TypeNum[_NURBSC]);
 		flag = _NURBSC+1;
 	}
 
 	if(TypeNum[_NURBSS]){
-		if(NewNurbsS(TypeNum[_NURBSS]) == NULL)  goto EXIT;
+		NewNurbsS(TypeNum[_NURBSS]);
 		flag = _NURBSS+1;
 	}
 
 	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
-		if(NewConpS(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]) == NULL)  goto EXIT;
+		NewConpS(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]);
 		flag = _CURVE_ON_PARAMETRIC_SURFACE+1;
 	}
 
 	if(TypeNum[_TRIMMED_SURFACE]){
-		if(NewTrmS(TypeNum[_TRIMMED_SURFACE]) == NULL)  goto EXIT;
+		NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 		flag = _TRIMMED_SURFACE+1;
 	}
 
 	Mesh = NULL;		// メッシュはNULLに設定しておく
-
-	return;		// メモリーを正常に確保
-
-
-EXIT:	// メモリー確保に失敗した場合は、これまで確保した分を解放して終了
+}
+catch (std::bad_alloc& e) {	// e.what();
+	// メモリー確保に失敗した場合は、これまで確保した分を解放して終了
 //	GuiIFB.SetMessage("KOD_ERROR: malloc BODY");
 	while(flag){
 		if(flag == _CURVE_ON_PARAMETRIC_SURFACE+1 && TypeNum[_TRIMMED_SURFACE]){
-			free(ConpS);
+			delete[] ConpS;
 		}
 		else if(flag == _NURBSS+1 && TypeNum[_NURBSS]){
-			free(NurbsS);
+			delete[] NurbsS;
 		}
 		else if(flag == _NURBSC+1 && TypeNum[_NURBSC]){
-			free(NurbsC);
+			delete[] NurbsC;
 		}
 		else if(flag == _TRANSFORMATION_MATRIX+1 && TypeNum[_TRANSFORMATION_MATRIX]){
-			free(TMat);
+			delete[] TMat;
 		}
 		else if(flag == _LINE+1 && TypeNum[_LINE]){
-			free(Line);
+			delete[] Line;
 		}
 		else if(flag == _CONIC_ARC+1 && TypeNum[_CONIC_ARC]){
-			free(ConA);
+			delete[] ConA;
 		}
 		else if(flag == _COMPOSITE_CURVE+1 && TypeNum[_COMPOSITE_CURVE]){
-			free(CompC);
+			delete[] CompC;
 		}
 		else if(flag == _CIRCLE_ARC+1 && TypeNum[_CIRCLE_ARC]){
-			free(CirA);
+			delete[] CirA;
 		}
 		flag--;
 	}
-//	exit(KOD_ERR);
-	throw std::bad_alloc();
+	exit(KOD_ERR);
+}
+
+	return;		// メモリーを正常に確保
 }
 
 
@@ -116,34 +116,34 @@ void BODY::DelBodyElem()
 	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
 	if(TypeNum[_TRIMMED_SURFACE]){
 		NFunc.Free_TrmS_1DArray(TrmS,TypeNum[_TRIMMED_SURFACE]);
-		free(TrmS);
+		delete[] TrmS;
 	}
 	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
-		free(ConpS);
+		delete[] ConpS;
 	}
 	if(TypeNum[_NURBSS]){
 		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum[_NURBSS]);
-		free(NurbsS);
+		delete[] NurbsS;
 	}
 	if(TypeNum[_NURBSC]){
 		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum[_NURBSC]);
-		free(NurbsC);
+		delete[] NurbsC;
 	}
 	if(TypeNum[_TRANSFORMATION_MATRIX]){
-		free(TMat);
+		delete[] TMat;
 	}
 	if(TypeNum[_LINE]){
-		free(Line);
+		delete[] Line;
 	}
 	if(TypeNum[_CONIC_ARC]){
-		free(ConA);
+		delete[] ConA;
 	}
 	if(TypeNum[_COMPOSITE_CURVE]){
 		NFunc.Free_CompC_1DArray(CompC,TypeNum[_COMPOSITE_CURVE]);
-		free(CompC);
+		delete[] CompC;
 	}
 	if(TypeNum[_CIRCLE_ARC]){
-		free(CirA);
+		delete[] CirA;
 	}
 	if(Mesh != NULL){
 		Mesh->clear();
@@ -163,34 +163,34 @@ void BODY::DelBodyElem(int TypeNum_[])
 	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
 	if(TypeNum_[_TRIMMED_SURFACE]){
 		NFunc.Free_TrmS_1DArray(TrmS,TypeNum_[_TRIMMED_SURFACE]);
-		free(TrmS);
+		delete[] TrmS;
 	}
 	if(TypeNum_[_CURVE_ON_PARAMETRIC_SURFACE]){
-		free(ConpS);
+		delete[] ConpS;
 	}
 	if(TypeNum_[_NURBSS]){
 		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum_[_NURBSS]);
-		free(NurbsS);
+		delete[] NurbsS;
 	}
 	if(TypeNum_[_NURBSC]){
 		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum_[_NURBSC]);
-		free(NurbsC);
+		delete[] NurbsC;
 	}
 	if(TypeNum_[_TRANSFORMATION_MATRIX]){
-		free(TMat);
+		delete[] TMat;
 	}
 	if(TypeNum_[_LINE]){
-		free(Line);
+		delete[] Line;
 	}
 	if(TypeNum_[_CONIC_ARC]){
-		free(ConA);
+		delete[] ConA;
 	}
 	if(TypeNum_[_COMPOSITE_CURVE]){
 		NFunc.Free_CompC_1DArray(CompC,TypeNum_[_COMPOSITE_CURVE]);
-		free(CompC);
+		delete[] CompC;
 	}
 	if(TypeNum_[_CIRCLE_ARC]){
-		free(CirA);
+		delete[] CirA;
 	}
 	if(Mesh != NULL){
 		Mesh->clear();
@@ -225,8 +225,8 @@ void BODY::CopyBody(BODY *body)
         int curve_num=0;
 
         nurbsS = &this->NurbsS[n];
-        conps_o = (CONPS *)malloc(sizeof(CONPS));		// 外側トリムを構成する面上線のメモリー確保
-        compc_o = (COMPC *)malloc(sizeof(COMPC));		// 外側トリムを構成する複合曲線のメモリー確保
+        conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
+        compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
         NFunc.GenNurbsS(nurbsS,*body->TrmS[n].pts);		// 新たなNURBS曲面を1つ得る
         this->TrmS[n].pts = nurbsS;						// NURBS曲面をトリム面に関連付ける
@@ -234,8 +234,8 @@ void BODY::CopyBody(BODY *body)
 
         NFunc.New_TrmS(&this->TrmS[n],body->TrmS[n].n2);				// トリム面のメモリー確保
 
-        conps_i = (CONPS *)malloc(sizeof(CONPS)*body->TrmS[n].n2);		// 内側を構成する面上線のメモリー確保
-        compc_i = (COMPC *)malloc(sizeof(COMPC)*body->TrmS[n].n2);		// 内側を構成する複合曲線のメモリー確保
+        conps_i = new CONPS[body->TrmS[n].n2];		// 内側を構成する面上線のメモリー確保
+        compc_i = new COMPC[body->TrmS[n].n2];		// 内側を構成する複合曲線のメモリー確保
 
         // NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
         // 外周トリム
@@ -350,7 +350,7 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 //  BodyName[] - 登録するBODY名
 void BODY::RegistNurbsCtoBody(BODYList *BodyList,NURBSC Nurb,const char BodyName[])
 {
-	NurbsC = (NURBSC *)malloc(sizeof(NURBSC));
+	NurbsC = new NURBSC;
 	NurbsC[0] = Nurb;												// NURBS曲面の実体を代入
 	TypeNum[_NURBSC] = 1;											// NURBS曲面の数1にする
 	ChangeStatColor(this->NurbsC[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
@@ -369,7 +369,7 @@ void BODY::RegistNurbsCtoBody(BODYList *BodyList,NURBSC Nurb,const char BodyName
 //	N - 登録するNURBS曲線の数
 void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,NURBSC Nurb[],const char BodyName[],int N)
 {
-	NurbsC = (NURBSC *)malloc(sizeof(NURBSC)*N);
+	NurbsC = new NURBSC[N];
 	for(int i=0;i<N;i++){
 		NurbsC[i] = Nurb[i];										// NURBS曲面の実体を代入
 		TypeNum[_NURBSC] = N;										// NURBS曲面の数1にする
@@ -389,7 +389,7 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,NURBSC Nurb[],const char BodyN
 //  BodyName[] - 登録するBODY名
 void BODY::RegistNurbsStoBody(BODYList *BodyList,NURBSS Nurb,const char BodyName[])
 {
-	NurbsS = (NURBSS *)malloc(sizeof(NURBSS));
+	NurbsS = new NURBSS;
 	NurbsS[0] = Nurb;												// NURBS曲面の実体を代入
 	NurbsS[0].TrmdSurfFlag = KOD_FALSE;								// トリムのない単純なNURBS曲面であることを明示
 	TypeNum[_NURBSS] = 1;											// NURBS曲面の数1にする
@@ -409,7 +409,7 @@ void BODY::RegistNurbsStoBody(BODYList *BodyList,NURBSS Nurb,const char BodyName
 //	N - 登録するNURBS曲面の数
 void BODY::RegistNurbsStoBodyN(BODYList *BodyList,NURBSS Nurb[],const char BodyName[],int N)
 {
-	NurbsS = (NURBSS *)malloc(sizeof(NURBSS)*N);
+	NurbsS = new NURBSS[N];
 	for(int i=0;i<N;i++){
 		NurbsS[i] = Nurb[i];										// NURBS曲面の実体を代入
 		NurbsS[i].TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
@@ -464,8 +464,7 @@ void BODY::InitSurfaceColor(float *col)
 // N - メモリー確保するCIRAの数
 CIRA *BODY::NewCirA(int N)
 {
-	if((CirA = (CIRA *)malloc(sizeof(CIRA)*N/*TypeNum[_CIRCLE_ARC]*/)) == NULL)
-		return NULL;
+	CirA = new CIRA[N];
 
 	for(int i=0;i<N;i++){
 		CirA[i].zt = 0;
@@ -489,8 +488,7 @@ CIRA *BODY::NewCirA(int N)
 // N - メモリー確保するCOMPCの数
 COMPC *BODY::NewCompC(int N)
 {
-	if((CompC = (COMPC *)malloc(sizeof(COMPC)*N/*TypeNum[_COMPOSITE_CURVE]*/)) == NULL)
-		return NULL;
+	CompC = new COMPC[N];
 
 	for(int i=0;i<N;i++){
 		CompC[i].DegeFlag = 0;
@@ -511,8 +509,7 @@ COMPC *BODY::NewCompC(int N)
 // N - メモリー確保するCONAの数
 CONA *BODY::NewConA(int N)
 {
-	if((ConA = (CONA *)malloc(sizeof(CONA)*N/*TypeNum[_CONIC_ARC]*/)) == NULL)
-		return NULL;
+	ConA = new CONA[N];
 
 	for(int i=0;i<N;i++){
 		ConA[i].cp[0] = ConA[i].cp[1] = SetCoord(0,0,0);
@@ -533,8 +530,7 @@ CONA *BODY::NewConA(int N)
 // N - メモリー確保するLINE_の数
 LINE_ *BODY::NewLine(int N)
 {
-	if((Line = (LINE_ *)malloc(sizeof(LINE_)*N/*TypeNum[_LINE]*/)) == NULL)
-		return NULL;
+	Line = new LINE_[N];
 
 	for(int i=0;i<N;i++){
 		Line[i].cp[0] = Line[i].cp[1] = SetCoord(0,0,0);
@@ -554,8 +550,7 @@ LINE_ *BODY::NewLine(int N)
 // N - メモリー確保するTMATの数
 TMAT *BODY::NewTMat(int N)
 {
-	if((TMat = (TMAT *)malloc(sizeof(TMAT)*N/*TypeNum[_TRANSFORMATION_MATRIX]*/)) == NULL)
-		return NULL;
+	TMat = new TMAT[N];
 
 	for(int i=0;i<N;i++){
 		for(int j=0;j<3;j++)
@@ -575,8 +570,7 @@ TMAT *BODY::NewTMat(int N)
 // N - メモリー確保するNURBSCの数
 NURBSC *BODY::NewNurbsC(int N)
 {
-	if((NurbsC = (NURBSC *)malloc(sizeof(NURBSC)*N/*TypeNum[_NURBSC]*/)) == NULL)
-		return NULL;
+	NurbsC = new NURBSC[N];
 
 	for(int i=0;i<N;i++){
 		NurbsC[i].cp = NULL;
@@ -606,8 +600,7 @@ NURBSC *BODY::NewNurbsC(int N)
 // N - メモリー確保するNURBSSの数
 NURBSS *BODY::NewNurbsS(int N)
 {
-	if((NurbsS = (NURBSS *)malloc(sizeof(NURBSS)*N/*TypeNum[_NURBSS]*/)) == NULL)
-		return NULL;
+	NurbsS = new NURBSS[N];
 
 	for(int i=0;i<N;i++){
 		NurbsS[i].cp = NULL;
@@ -636,8 +629,7 @@ NURBSS *BODY::NewNurbsS(int N)
 // N - メモリー確保するCONPSの数
 CONPS *BODY::NewConpS(int N)
 {
-	if((ConpS = (CONPS *)malloc(sizeof(CONPS)*N/*TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]*/)) == NULL)
-		return NULL;
+	ConpS = new CONPS[N];
 
 	for(int i=0;i<N;i++){
 		ConpS[i].BType = 0;
@@ -651,6 +643,7 @@ CONPS *BODY::NewConpS(int N)
 		ConpS[i].SType = 0;
 	}
 	TypeNum[_CURVE_ON_PARAMETRIC_SURFACE] = N;
+
 	return ConpS;
 }
 
@@ -661,8 +654,7 @@ CONPS *BODY::NewConpS(int N)
 // N - メモリー確保するTRMSの数
 TRMS *BODY::NewTrmS(int N)
 {
-	if((TrmS = (TRMS *)malloc(sizeof(TRMS)*N/*TypeNum[_TRIMMED_SURFACE]*/)) == NULL)
-		return NULL;
+	TrmS = new TRMS[N];
 
 	for(int i=0;i<N;i++){
 		TrmS[i].n1 = 0;
@@ -698,19 +690,14 @@ int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
 
+try {
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	if((NurbsC[NurbsCount].T = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].N)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
 	KOD_ERRflag++;	// 2
-	if((NurbsC[NurbsCount].W = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
 	KOD_ERRflag++;	// 3
-	if((NurbsC[NurbsCount].cp = (Coord *)malloc(sizeof(Coord)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
 
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -737,25 +724,25 @@ int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)
 	NurbsC[NurbsCount].pOriginEnt = &Line[LineCount];			// 元は線分要素であったことを記憶
 	for(int i=0;i<4;i++)
 		NurbsC[NurbsCount].Dstat.Color[i] = Line[LineCount].Dstat.Color[i];
-
-	return KOD_TRUE;
-
+}
+catch(std::bad_alloc&) {
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-EXIT:
 //	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
-		free(NurbsC[NurbsCount].cp);
+		delete[] NurbsC[NurbsCount].cp;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 2){
-		free(NurbsC[NurbsCount].W);
+		delete[] NurbsC[NurbsCount].W;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 1){
-		free(NurbsC[NurbsCount].T);
+		delete[] NurbsC[NurbsCount].T;
 	}
-//	return KOD_ERR;
-	throw std::bad_alloc();
+	return KOD_ERR;
+}
+
+	return KOD_TRUE;
 }
 
 // Function: GetNurbsCFromCirA
@@ -823,20 +810,15 @@ int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angl
 	NurbsC[NurbsCount].prop[1] = 0;
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
-	
+
+try {	
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	if((NurbsC[NurbsCount].T = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].N)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
 	KOD_ERRflag++;	// 2
-	if((NurbsC[NurbsCount].W = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
 	KOD_ERRflag++;	// 3
-	if((NurbsC[NurbsCount].cp = (Coord *)malloc(sizeof(Coord)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -872,25 +854,25 @@ int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angl
 		
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-		  
-	return KOD_TRUE;
-
+}
+catch (std::bad_alloc&) {
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-EXIT:
 //	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
-		free(NurbsC[NurbsCount].cp);
+		delete[] NurbsC[NurbsCount].cp;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 2){
-		free(NurbsC[NurbsCount].W);
+		delete[] NurbsC[NurbsCount].W;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 1){
-		free(NurbsC[NurbsCount].T);
+		delete[] NurbsC[NurbsCount].T;
 	}
-//	return KOD_ERR;
-	throw std::bad_alloc();
+	return KOD_ERR;
+}		  
+
+	return KOD_TRUE;
 }
 
 // private
@@ -911,20 +893,15 @@ int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angl
 	NurbsC[NurbsCount].prop[1] = 0;
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
-	
+
+try {	
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	if((NurbsC[NurbsCount].T = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].N)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
 	KOD_ERRflag++;	// 2
-	if((NurbsC[NurbsCount].W = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
 	KOD_ERRflag++;	// 3
-	if((NurbsC[NurbsCount].cp = (Coord *)malloc(sizeof(Coord)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -969,25 +946,25 @@ int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angl
 	
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-		  
-	return KOD_TRUE;
-
+}
+catch (std::bad_alloc&) {
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-EXIT:
 //	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
-		free(NurbsC[NurbsCount].cp);
+		delete[] NurbsC[NurbsCount].cp;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 2){
-		free(NurbsC[NurbsCount].W);
+		delete[] NurbsC[NurbsCount].W;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 1){
-		free(NurbsC[NurbsCount].T);
+		delete[] NurbsC[NurbsCount].T;
 	}
-//	return KOD_ERR;
-	throw std::bad_alloc();
+	return KOD_ERR;
+}
+
+	return KOD_TRUE;
 }
 
 // private
@@ -1009,20 +986,15 @@ int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angl
 	NurbsC[NurbsCount].prop[1] = 0;
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
-	
+
+try {
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	if((NurbsC[NurbsCount].T = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].N)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
 	KOD_ERRflag++;	// 2
-	if((NurbsC[NurbsCount].W = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
 	KOD_ERRflag++;	// 3
-	if((NurbsC[NurbsCount].cp = (Coord *)malloc(sizeof(Coord)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -1076,25 +1048,25 @@ int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angl
 		
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-		  
-	return KOD_TRUE;
-
+}
+catch (std::bad_alloc&) {
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-EXIT:
 //	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
-		free(NurbsC[NurbsCount].cp);
+		delete[] NurbsC[NurbsCount].cp;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 2){
-		free(NurbsC[NurbsCount].W);
+		delete[] NurbsC[NurbsCount].W;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 1){
-		free(NurbsC[NurbsCount].T);
+		delete[] NurbsC[NurbsCount].T;
 	}
-//	return KOD_ERR;
-	throw std::bad_alloc();
+	return KOD_ERR;
+}
+
+	return KOD_TRUE;
 }
 
 // private
@@ -1113,20 +1085,15 @@ int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radi
 	NurbsC[NurbsCount].prop[1] = 0;
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
-	
+
+try {
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	if((NurbsC[NurbsCount].T = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].N)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
 	KOD_ERRflag++;	// 2
-	if((NurbsC[NurbsCount].W = (double *)malloc(sizeof(double)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
 	KOD_ERRflag++;	// 3
-	if((NurbsC[NurbsCount].cp = (Coord *)malloc(sizeof(Coord)*NurbsC[NurbsCount].K)) == NULL){
-		goto EXIT;
-	}
+	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -1178,25 +1145,24 @@ int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radi
 		
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-	
-	return KOD_TRUE;
-
+}
+catch (std::bad_alloc&)	{
 	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-EXIT:
 //	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
 	if(KOD_ERRflag == 3){
-		free(NurbsC[NurbsCount].cp);
+		delete[] NurbsC[NurbsCount].cp;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 2){
-		free(NurbsC[NurbsCount].W);
+		delete[] NurbsC[NurbsCount].W;
 		KOD_ERRflag--;
 	}
 	if(KOD_ERRflag == 1){
-		free(NurbsC[NurbsCount].T);
+		delete[] NurbsC[NurbsCount].T;
 	}
-//	return KOD_ERR;
-	throw std::bad_alloc();
+	return KOD_ERR;
+}
+	return KOD_TRUE;
 }
 
 // Function: GetOuterEdgeNum

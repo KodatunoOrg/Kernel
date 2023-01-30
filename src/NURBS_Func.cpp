@@ -13,22 +13,15 @@
 // 成功：KOD_TRUE, 失敗：KOD_ERR
 int NURBS_Func::New_NurbsC(NURBSC *nurb,int K, int N)
 {
-	if((nurb->T = (double *)malloc(sizeof(double)*N)) == NULL) {
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
-	if((nurb->W = (double *)malloc(sizeof(double)*K)) == NULL){
-		free(nurb->T);
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
-	if((nurb->cp = (Coord *)malloc(sizeof(Coord)*K)) == NULL){
-		free(nurb->T);
-		free(nurb->W);
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
-
+try {	
+	nurb->T = new double[N];
+	nurb->W = new double[K];
+	nurb->cp = new Coord[K];
+}
+catch (std::bad_alloc&) {
+	Free_NurbsC(nurb);
+	return KOD_ERR;
+}
 	return KOD_TRUE;
 }
 
@@ -51,9 +44,22 @@ void NURBS_Func::Free_NurbsC_1DArray(NURBSC *a,int num)
 // *a - メモリーを解放するNurbs曲線へのポインタ
 void NURBS_Func::Free_NurbsC(NURBSC *a)
 {
-	free(a->T);
-	free(a->W);
-	free(a->cp);
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// コンストラクタが定義されていないのでNULL前提は使えない
+	// 		-> コンストラクタ定義
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if ( a->T ) {
+		delete[] a->T;
+		a->T = NULL;
+	}
+	if ( a->W ) {
+		delete[] a->W;
+		a->W = NULL;
+	}
+	if ( a->cp ) {
+		delete[] a->cp;
+		a->cp = NULL;
+	}
 }
 
 // Function: New_NurbsS
@@ -68,37 +74,17 @@ void NURBS_Func::Free_NurbsC(NURBSC *a)
 // 成功：KOD_TRUE, 失敗：KOD_ERR
 int NURBS_Func::New_NurbsS(NURBSS *nurb,int K[2],int N[2])
 {
-	int KOD_ERRflag = 0;
-
-	if((nurb->S = (double *)malloc(sizeof(double)*N[0])) == NULL)
-		goto EXIT;
-	KOD_ERRflag++;	// 1
-	if((nurb->T = (double *)malloc(sizeof(double)*N[1])) == NULL)
-		goto EXIT;
-	KOD_ERRflag++;	// 2
-	if((nurb->W = NewMatrix(K[0],K[1])) == NULL)
-		goto EXIT;
-	KOD_ERRflag++; // 3
-	if((nurb->cp = NewCoord2(K[0],K[1])) == NULL)
-		goto EXIT;
-
+try {
+	nurb->S = new double[N[0]];
+	nurb->T = new double[N[1]];
+	nurb->W = NewMatrix(K[0],K[1]);
+	nurb->cp = NewCoord2(K[0],K[1]);
+}
+catch (std::bad_alloc&) {
+	Free_NurbsS(nurb);
+	return KOD_ERR;
+}
 	return KOD_TRUE;
-
-EXIT:
-	if(KOD_ERRflag == 3){
-		FreeMatrix(nurb->W,nurb->K[0]);
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		free(nurb->T);
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		free(nurb->S);
-	}
-
-//	return KOD_ERR;
-	throw std::bad_alloc();
 }
 
 // Function: Free_NurbsS_1DArray
@@ -121,8 +107,14 @@ void NURBS_Func::Free_NurbsS_1DArray(NURBSS *a,int num)
 // *a - メモリーを解放するNurbs曲面へのポインタ
 void NURBS_Func::Free_NurbsS(NURBSS *a)
 {
-	free(a->S);
-	free(a->T);
+	if ( a->S ) {
+		delete[] a->S;
+		a->S = NULL;
+	}
+	if ( a->T ) {
+		delete[] a->T;
+		a->T = NULL;
+	}
 	FreeMatrix(a->W,a->K[0]);
 	FreeCoord2(a->cp,a->K[0]);
 }
@@ -138,10 +130,7 @@ void NURBS_Func::Free_NurbsS(NURBSS *a)
 // 成功：KOD_TRUE, 失敗：KOD_ERR
 int NURBS_Func::New_TrmS(TRMS *trms,int num)
 {
-	if((trms->pTI = (CONPS **)malloc(sizeof(CONPS *)*num)) == NULL){
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
+	trms->pTI = new CONPS*[num];
 
 	return KOD_TRUE;
 }
@@ -165,7 +154,7 @@ void NURBS_Func::Free_TrmS_1DArray(TRMS *a,int num)
 // *a - メモリーを解放するトリム面へのポインタ
 void NURBS_Func::Free_TrmS(TRMS *a)
 {
-	free(a->pTI);
+	delete[] a->pTI;
 }
 
 // Function: New_CompC
@@ -179,19 +168,14 @@ void NURBS_Func::Free_TrmS(TRMS *a)
 // 成功：KOD_TRUE, 失敗：KOD_ERR
 int NURBS_Func::New_CompC(COMPC *compc,int num)
 {
-	if((compc->DEType = (int *)malloc(sizeof(int)*num)) == NULL){
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
-	
-	if((compc->pDE = (COMPELEM **)malloc(sizeof(COMPELEM *)*num)) == NULL){
-		free(compc->DEType);
-//		return KOD_ERR;
-		throw std::bad_alloc();
-	}
-
+try {	
+	compc->DEType = new int[num];
+	compc->pDE = new COMPELEM*[num];		// !!!COMPELEMの定義変更予定!!!
+}
+catch (std::bad_alloc&) {
+		return KOD_ERR;
+}
 	compc->N = num;
-
 	return KOD_TRUE;
 }
 
@@ -214,8 +198,8 @@ void NURBS_Func::Free_CompC_1DArray(COMPC *a,int num)
 // *a - メモリーを解放する複合曲線へのポインタ
 void NURBS_Func::Free_CompC(COMPC *a)
 {
-	free(a->DEType);
-	free(a->pDE);
+	delete[] a->DEType;
+	delete[] a->pDE;
 }
 
 // Function: GenNurbsC
@@ -244,9 +228,9 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,double T[],double W[],
 	Nurbs->N = N;
 	Nurbs->V[0] = V[0];
 	Nurbs->V[1] = V[1];
-	Nurbs->T = (double *)malloc(sizeof(double)*Nurbs->N);
-	Nurbs->W = (double *)malloc(sizeof(double)*Nurbs->K);
-	Nurbs->cp = (Coord *)malloc(sizeof(Coord)*Nurbs->K);
+	Nurbs->T = new double[Nurbs->N];
+	Nurbs->W = new double[Nurbs->K];
+	Nurbs->cp = new Coord[Nurbs->K];
 	Nurbs->EntUseFlag = euflag;
     Nurbs->BlankStat = DISPLAY;     // デフォルトで描画要素に設定
 	
@@ -285,9 +269,9 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC nurb)
 	Nurbs->V[0] = nurb.V[0];
 	Nurbs->V[1] = nurb.V[1];
 	
-	Nurbs->T = (double *)malloc(sizeof(double)*Nurbs->N);
-	Nurbs->W = (double *)malloc(sizeof(double)*Nurbs->K);
-	Nurbs->cp = (Coord *)malloc(sizeof(Coord)*Nurbs->K);
+	Nurbs->T = new double[Nurbs->N];
+	Nurbs->W = new double[Nurbs->K];
+	Nurbs->cp = new Coord[Nurbs->K];
 	for(i=0;i<nurb.N;i++){
 		Nurbs->T[i] = nurb.T[i];
 	}
@@ -349,11 +333,6 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,double *S,do
 //		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
 		return KOD_ERR;
 	}
-
-	//Nurbs->S = (double *)malloc(sizeof(double)*Nurbs->N[0]);
-	//Nurbs->T = (double *)malloc(sizeof(double)*Nurbs->N[1]);
-	//Nurbs->W = NewMatrix(Nurbs->K[0],Nurbs->K[1]);
-	//Nurbs->cp = NewCoord2(Nurbs->K[0],Nurbs->K[1]);
 
 	for(int i=0;i<Nurbs->N[0];i++)
 		Nurbs->S[i] = S[i];
@@ -732,9 +711,9 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	COMPC *compc_o,*compc_i;
 	int curve_num=0;
 
-	nurbsS = (NURBSS *)malloc(sizeof(NURBSS));		// NURBS曲面のメモリー確保
-	conps_o = (CONPS *)malloc(sizeof(CONPS));		// 外側トリムを構成する面上線のメモリー確保
-	compc_o = (COMPC *)malloc(sizeof(COMPC));		// 外側トリムを構成する複合曲線のメモリー確保
+	nurbsS = new NURBSS;		// NURBS曲面のメモリー確保
+	conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
+	compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
 	// トリム面を構成するNURBS曲線の総数をカウント
 	for(int i=0;i<tnurb.n2;i++){
@@ -744,15 +723,15 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	}
 	curve_num += tnurb.pTO->pB->CompC.N;
 
-	nurbsC = (NURBSC *)malloc(sizeof(NURBSC)*curve_num);	// トリム面を構成するNURBS曲線の数だけNURBS曲線のメモリーを確保
+	nurbsC = new NURBSC[curve_num];	// トリム面を構成するNURBS曲線の数だけNURBS曲線のメモリーを確保
 
 	GenNurbsS(nurbsS,*tnurb.pts);							// 新たなNURBS曲面を1つ得る
 	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
 
 	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
 
-	conps_i = (CONPS *)malloc(sizeof(CONPS)*tnurb.n2);		// 内側を構成する面上線のメモリー確保
-	compc_i = (COMPC *)malloc(sizeof(COMPC)*tnurb.n2);		// 内側を構成する複合曲線のメモリー確保
+	conps_i = new CONPS[tnurb.n2];		// 内側を構成する面上線のメモリー確保
+	compc_i = new COMPC[tnurb.n2];		// 内側を構成する複合曲線のメモリー確保
 
 	// NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
 	// 外周トリム
@@ -1728,9 +1707,9 @@ int NURBS_Func::CalcIntersecPtsPlaneV3(NURBSS *nurb,Coord pt,Coord nvec,int v_di
 	int ansnum;
 	int allansnum=0;
 
-	N = (double *)malloc(sizeof(double)*nurb->K[1]);
-	A = (double *)malloc(sizeof(double)*nurb->K[0]);
-	B = (Coord *)malloc(sizeof(Coord)*nurb->K[0]);
+	N = new double[nurb->K[1]];
+	A = new double[nurb->K[0]];
+	B = new Coord[nurb->K[0]];
 	coef = NewMatrix(nurb->M[0],nurb->M[0]);
 
 	// vパラメータを区間内で分割し、各vパラメータ上のNURBS曲線C(u)と平面(pt,nvec)との交点を求める
@@ -1817,9 +1796,9 @@ int NURBS_Func::CalcIntersecPtsPlaneU3(NURBSS *nurb,Coord pt,Coord nvec,int u_di
 	int ansnum;
 	int allansnum=0;
 
-	N = (double *)malloc(sizeof(double)*nurb->K[0]);
-	A = (double *)malloc(sizeof(double)*nurb->K[1]);
-	B = (Coord *)malloc(sizeof(Coord)*nurb->K[1]);
+	N = new double[nurb->K[0]];
+	A = new double[nurb->K[1]];
+	B = new Coord[nurb->K[1]];
 	coef = NewMatrix(nurb->M[1],nurb->M[1]);
 
 	// uパラメータを区間内で分割し、各uパラメータ上のNURBS曲線C(v)と平面(pt,nvec)との交点を求める
@@ -5556,9 +5535,7 @@ int NURBS_Func::DetermPtOnTRMSurf_sub(CONPS *Conps,double u,double v)
 	int ptnum;							// トリム境界線を点群近似したときの点数
 
 	// メモリ確保
-	if((P = (Coord *)malloc(sizeof(Coord)*(CompC->N*TRM_BORDERDIVNUM))) == NULL){
-		return KOD_ERR;
-	}
+	P = new Coord[CompC->N*TRM_BORDERDIVNUM];
 
 	// トリム境界線を点群Pで近似
 	if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
@@ -5597,9 +5574,7 @@ int NURBS_Func::GetPtsOnOuterTRMSurf(TRMS *Trm,Coord *Pt,int N)
 	int ptnum;								// トリム境界線を点群近似したときの点数
 
 	// メモリ確保
-	if((P = (Coord *)malloc(sizeof(Coord)*(CompC->N*TRM_BORDERDIVNUM))) == NULL){
-		return KOD_ERR;
-	}
+	P = new Coord[CompC->N*TRM_BORDERDIVNUM];
 
 	// トリム境界線を点群Pで近似
 	if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
@@ -5658,9 +5633,7 @@ int NURBS_Func::GetPtsOnInnerTRMSurf(TRMS *Trm,Coord *Pt,int N)
 		CompC = (COMPC *)Trm->pTI[k]->pB;	
 
 		// メモリ確保
-		if((P = (Coord *)malloc(sizeof(Coord)*(CompC->N*TRM_BORDERDIVNUM))) == NULL){
-			return KOD_ERR;
-		}
+		P = new Coord[CompC->N*TRM_BORDERDIVNUM];
 
 		// トリム境界線を点群Pで近似
 		if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
