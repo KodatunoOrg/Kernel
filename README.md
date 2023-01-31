@@ -25,3 +25,11 @@ Kodatuno は，金沢大学マンマシン研究室で開発されているオ�
 
 * includeフォルダの設定と，上記のライブラリをリンクするようにすれば使えるようになります．
 詳しくは <https://github.com/KodatunoOrg/KOD_TEST> を参照ください．
+
+## カーネルの動作確認について（Kernel開発者のみ）
+テスト用アプリのプロジェクトを同時に読み込んで依存関係を設定しておくと，
+カーネルの変更を検知してアプリが再ビルドされます．
+
+<img src="./KernelTest01.png" width="30%">
+
+<img src="./KernelTest02.png" width="30%">
