@@ -44,10 +44,6 @@ void NURBS_Func::Free_NurbsC_1DArray(NURBSC *a,int num)
 // *a - メモリーを解放するNurbs曲線へのポインタ
 void NURBS_Func::Free_NurbsC(NURBSC *a)
 {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// コンストラクタが定義されていないのでNULL前提は使えない
-	// 		-> コンストラクタ定義
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if ( a->T ) {
 		delete[] a->T;
 		a->T = NULL;
@@ -170,7 +166,7 @@ int NURBS_Func::New_CompC(COMPC *compc,int num)
 {
 try {	
 	compc->DEType = new int[num];
-	compc->pDE = new COMPELEM*[num];		// !!!COMPELEMの定義変更予定!!!
+	compc->pDE = new COMPELEM[num];
 }
 catch (std::bad_alloc&) {
 		return KOD_ERR;
@@ -259,29 +255,29 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,double T[],double W[],
 // 
 // return:
 // KOD_TRUE
-int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC nurb)
+int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC* nurb)	// Update by K.Magara
 {
 	int i;
 
-	Nurbs->K = nurb.K;
-	Nurbs->M = nurb.M;
-	Nurbs->N = nurb.N;
-	Nurbs->V[0] = nurb.V[0];
-	Nurbs->V[1] = nurb.V[1];
+	Nurbs->K = nurb->K;
+	Nurbs->M = nurb->M;
+	Nurbs->N = nurb->N;
+	Nurbs->V[0] = nurb->V[0];
+	Nurbs->V[1] = nurb->V[1];
 	
 	Nurbs->T = new double[Nurbs->N];
 	Nurbs->W = new double[Nurbs->K];
 	Nurbs->cp = new Coord[Nurbs->K];
-	for(i=0;i<nurb.N;i++){
-		Nurbs->T[i] = nurb.T[i];
+	for(i=0;i<nurb->N;i++){
+		Nurbs->T[i] = nurb->T[i];
 	}
-	for(i=0;i<nurb.K;i++){
-		Nurbs->W[i] = nurb.W[i];
-		Nurbs->cp[i] = SetCoord(nurb.cp[i]);
+	for(i=0;i<nurb->K;i++){
+		Nurbs->W[i] = nurb->W[i];
+		Nurbs->cp[i] = SetCoord(nurb->cp[i]);
 	}
 
-    Nurbs->BlankStat = nurb.BlankStat;
-    Nurbs->EntUseFlag = nurb.EntUseFlag;
+    Nurbs->BlankStat = nurb->BlankStat;
+    Nurbs->EntUseFlag = nurb->EntUseFlag;
 
 	return KOD_TRUE;
 }
@@ -717,11 +713,11 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 
 	// トリム面を構成するNURBS曲線の総数をカウント
 	for(int i=0;i<tnurb.n2;i++){
-		for(int j=0;j<tnurb.pTI[i]->pB->CompC.N;j++){
+		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
 			curve_num++;
 		}
 	}
-	curve_num += tnurb.pTO->pB->CompC.N;
+	curve_num += tnurb.pTO->pB.CompC->N;
 
 	nurbsC = new NURBSC[curve_num];	// トリム面を構成するNURBS曲線の数だけNURBS曲線のメモリーを確保
 
@@ -736,32 +732,32 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	// NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
 	// 外周トリム
 	TNurbs->pTO = conps_o;
-	New_CompC(compc_o,tnurb.pTO->pB->CompC.N);
-	for(int i=0;i<tnurb.pTO->pB->CompC.N;i++){
-		GenNurbsC(&nurbsC[i],tnurb.pTO->pB->CompC.pDE[i]->NurbsC);
-		compc_o->pDE[i] = (COMPELEM *)(&nurbsC[i]);
-		compc_o->DEType[i] = tnurb.pTO->pB->CompC.DEType[i];
+	New_CompC(compc_o,tnurb.pTO->pB.CompC->N);
+	for(int i=0;i<tnurb.pTO->pB.CompC->N;i++){
+		GenNurbsC(&nurbsC[i],tnurb.pTO->pB.CompC->pDE[i].NurbsC);
+		compc_o->pDE[i].NurbsC = &nurbsC[i];
+		compc_o->DEType[i] = tnurb.pTO->pB.CompC->DEType[i];
 	}
-	TNurbs->pTO->pB = (CURVE *)compc_o;
+	TNurbs->pTO->pB.substitution = compc_o;
 	TNurbs->pTO->BType = tnurb.pTO->BType;
-	TNurbs->pTO->pB->CompC.DegeFlag = tnurb.pTO->pB->CompC.DegeFlag;
-	TNurbs->pTO->pB->CompC.DegeNurbs = tnurb.pTO->pB->CompC.DegeNurbs;
+	TNurbs->pTO->pB.CompC->DegeFlag = tnurb.pTO->pB.CompC->DegeFlag;
+	TNurbs->pTO->pB.CompC->DegeNurbs = tnurb.pTO->pB.CompC->DegeNurbs;
 
 	// 内周トリム
 	curve_num = 0;
 	for(int i=0;i<tnurb.n2;i++){
 		TNurbs->pTI[i] = &(conps_i[i]);
-		New_CompC(&compc_i[i],tnurb.pTI[i]->pB->CompC.N);
-		for(int j=0;j<tnurb.pTI[i]->pB->CompC.N;j++){
-			GenNurbsC(&nurbsC[tnurb.pTO->pB->CompC.N+curve_num],tnurb.pTI[i]->pB->CompC.pDE[j]->NurbsC);
-			compc_i[i].pDE[j] = (COMPELEM *)(&nurbsC[tnurb.pTO->pB->CompC.N+curve_num]);
-			compc_i[i].DEType[j] = tnurb.pTI[i]->pB->CompC.DEType[j];
+		New_CompC(&compc_i[i],tnurb.pTI[i]->pB.CompC->N);
+		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
+			GenNurbsC(&nurbsC[tnurb.pTO->pB.CompC->N+curve_num],tnurb.pTI[i]->pB.CompC->pDE[j].NurbsC);
+			compc_i[i].pDE[j].NurbsC = &nurbsC[tnurb.pTO->pB.CompC->N+curve_num];
+			compc_i[i].DEType[j] = tnurb.pTI[i]->pB.CompC->DEType[j];
 			curve_num++;
 		}
-		TNurbs->pTI[i]->pB = (CURVE *)(&(compc_i[i]));
+		TNurbs->pTI[i]->pB.CompC = &(compc_i[i]);
 		TNurbs->pTI[i]->BType = tnurb.pTI[i]->BType;
-		TNurbs->pTI[i]->pB->CompC.DegeFlag = tnurb.pTI[i]->pB->CompC.DegeFlag;
-		TNurbs->pTI[i]->pB->CompC.DegeNurbs = tnurb.pTI[i]->pB->CompC.DegeNurbs;
+		TNurbs->pTI[i]->pB.CompC->DegeFlag = tnurb.pTI[i]->pB.CompC->DegeFlag;
+		TNurbs->pTI[i]->pB.CompC->DegeNurbs = tnurb.pTI[i]->pB.CompC->DegeNurbs;
 	}
 
 	TNurbs->n1 = tnurb.n1;
@@ -785,26 +781,26 @@ int NURBS_Func::DelTrimdNurbsS(TRIMD_NURBSS *TNurbs)
 
 	// トリム面を構成する全てのNURBS曲線の本数を調べる
 	for(int i=0;i<TNurbs->n2;i++){
-		for(int j=0;j<TNurbs->pTI[i]->pB->CompC.N;j++){
+		for(int j=0;j<TNurbs->pTI[i]->pB.CompC->N;j++){
 			curve_num++;
 		}
 	}
-	curve_num += TNurbs->pTO->pB->CompC.N;
+	curve_num += TNurbs->pTO->pB.CompC->N;
 
-	hbody.Free_NurbsC_1DArray((NURBSC *)TNurbs->pTO->pB->CompC.pDE[0],curve_num);		// トリム面を構成する全てのNURBS曲線パラメータのメモリー解放
+	hbody.Free_NurbsC_1DArray(TNurbs->pTO->pB.CompC->pDE[0].NurbsC,curve_num);		// トリム面を構成する全てのNURBS曲線パラメータのメモリー解放
 
 	hbody.Free_NurbsS(TNurbs->pts);						// トリム面を構成するNURBS曲面パラメータのメモリー解放
 	free(TNurbs->pts);								// トリム面を構成するNURBS曲面のメモリー解放
 
-	hbody.Free_NurbsC(&TNurbs->pTO->pB->CompC.DegeNurbs);	// トリム面外周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
-	hbody.Free_CompC((COMPC *)TNurbs->pTO->pB);			// トリム面外周を構成する複合曲線を構成するNURBS曲線のメモリー解放
-	free(TNurbs->pTO->pB);							// トリム面外周を構成する複合曲線のメモリー解放
+	hbody.Free_NurbsC(&TNurbs->pTO->pB.CompC->DegeNurbs);	// トリム面外周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
+	hbody.Free_CompC(TNurbs->pTO->pB.CompC);			// トリム面外周を構成する複合曲線を構成するNURBS曲線のメモリー解放
+	free(TNurbs->pTO->pB.CompC);							// トリム面外周を構成する複合曲線のメモリー解放
 	free(TNurbs->pTO);								// トリム面外周を構成する面上線のメモリー解放
 
 	for(int i=0;i<TNurbs->n2;i++){
-		hbody.Free_NurbsC(&TNurbs->pTI[i]->pB->CompC.DegeNurbs);	// トリム面内周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
-		hbody.Free_CompC((COMPC *)TNurbs->pTI[i]->pB);	// トリム面内周を構成する複合曲線を構成するNURBS曲線のメモリー解放
-		free(TNurbs->pTI[i]->pB);					// トリム面内周を構成する複合曲線のメモリー解放
+		hbody.Free_NurbsC(&TNurbs->pTI[i]->pB.CompC->DegeNurbs);	// トリム面内周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
+		hbody.Free_CompC(TNurbs->pTI[i]->pB.CompC);	// トリム面内周を構成する複合曲線を構成するNURBS曲線のメモリー解放
+		free(TNurbs->pTI[i]->pB.CompC);					// トリム面内周を構成する複合曲線のメモリー解放
 	}
 	hbody.Free_TrmS(TNurbs);								// トリム面パラメータのメモリー解放
 
@@ -2184,7 +2180,8 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 				if(search_flag == KOD_ERR){					// 特異点検出により処理を継続できない場合
 					//fprintf(stderr,"b,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 //					GuiIFB.SetMessage("NURBS_FUNC CAUTION: Singler point was ditected.");
-					break;
+//					break;
+					return KOD_FALSE;	// 変な情報を返すよりもゼロ扱いで by K.Magara
 				}
 				//fprintf(stderr,"f,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 			}
@@ -5530,7 +5527,7 @@ int NURBS_Func::DetermPtOnTRMSurf_sub(CONPS *Conps,double u,double v)
 		return KOD_ERR;
 	}
 
-	COMPC *CompC=(COMPC *)Conps->pB;	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
+	COMPC *CompC= Conps->pB.CompC;	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
 	Coord *P;							// トリム境界線上に生成した点(多角形近似用の点)を格納
 	int ptnum;							// トリム境界線を点群近似したときの点数
 
@@ -5569,7 +5566,7 @@ int NURBS_Func::GetPtsOnOuterTRMSurf(TRMS *Trm,Coord *Pt,int N)
 	if(!Trm->n1)
 		return KOD_FALSE;
 
-	COMPC *CompC = (COMPC *)Trm->pTO->pB;	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
+	COMPC *CompC = Trm->pTO->pB.CompC;	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
 	Coord *P;								// トリム境界線上に生成した点(多角形近似用の点)を格納
 	int ptnum;								// トリム境界線を点群近似したときの点数
 
@@ -5630,7 +5627,7 @@ int NURBS_Func::GetPtsOnInnerTRMSurf(TRMS *Trm,Coord *Pt,int N)
 	// 内周トリムの数だけループ
 	for(int k=0;k<Trm->n2;k++){
 
-		CompC = (COMPC *)Trm->pTI[k]->pB;	
+		CompC = Trm->pTI[k]->pB.CompC;	
 
 		// メモリ確保
 		P = new Coord[CompC->N*TRM_BORDERDIVNUM];
@@ -5707,7 +5704,7 @@ int NURBS_Func::ApproxTrimBorder(COMPC *CompC,Coord *P)
 	for(int i=0;i<CompC->N;i++){
 		// トリム境界線がNURBS曲線で構成されている
 		if(CompC->DEType[i] == NURBS_CURVE){
-			NurbsC = (NURBSC *)CompC->pDE[i];	// 注目中のNurbs曲線のポインタを取得
+			NurbsC = CompC->pDE[i].NurbsC;	// 注目中のNurbs曲線のポインタを取得
 			if(NurbsC->K == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
 			else divnum = TRM_BORDERDIVNUM;
 			for(int j=0;j<divnum-1;j++){

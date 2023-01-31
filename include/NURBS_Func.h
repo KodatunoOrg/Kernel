@@ -66,7 +66,7 @@ public:
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-	int GenNurbsC(NURBSC *,NURBSC);								
+	int GenNurbsC(NURBSC *,NURBSC *);	// Update by K.Magara								
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する

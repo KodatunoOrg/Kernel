@@ -214,7 +214,7 @@ void BODY::CopyBody(BODY *body)
     this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
     for(int n=0;n<TypeNum[_NURBSC];n++)
-        NFunc.GenNurbsC(&this->NurbsC[n],body->NurbsC[n]);
+        NFunc.GenNurbsC(&this->NurbsC[n],&body->NurbsC[n]);
 
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 
@@ -240,32 +240,32 @@ void BODY::CopyBody(BODY *body)
         // NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
         // 外周トリム
         this->TrmS[n].pTO = conps_o;
-        NFunc.New_CompC(compc_o,body->TrmS[n].pTO->pB->CompC.N);
-        for(int i=0;i<body->TrmS[n].pTO->pB->CompC.N;i++){
-            nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],&body->TrmS[n].pTO->pB->CompC.pDE[i]->NurbsC);
-            compc_o->pDE[i] = (COMPELEM *)nurbsC;
-            compc_o->DEType[i] = body->TrmS[n].pTO->pB->CompC.DEType[i];
+        NFunc.New_CompC(compc_o,body->TrmS[n].pTO->pB.CompC->N);
+        for(int i=0;i<body->TrmS[n].pTO->pB.CompC->N;i++){
+            nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
+            compc_o->pDE[i].NurbsC = nurbsC;
+            compc_o->DEType[i] = body->TrmS[n].pTO->pB.CompC->DEType[i];
         }
-        this->TrmS[n].pTO->pB = (CURVE *)compc_o;
+        this->TrmS[n].pTO->pB.substitution = compc_o;
         this->TrmS[n].pTO->BType = body->TrmS[n].pTO->BType;
-        this->TrmS[n].pTO->pB->CompC.DegeFlag = body->TrmS[n].pTO->pB->CompC.DegeFlag;
-        this->TrmS[n].pTO->pB->CompC.DegeNurbs = body->TrmS[n].pTO->pB->CompC.DegeNurbs;
+        this->TrmS[n].pTO->pB.CompC->DegeFlag = body->TrmS[n].pTO->pB.CompC->DegeFlag;
+        this->TrmS[n].pTO->pB.CompC->DegeNurbs = body->TrmS[n].pTO->pB.CompC->DegeNurbs;
 
         // 内周トリム
         curve_num = 0;
         for(int i=0;i<body->TrmS[n].n2;i++){
             this->TrmS[n].pTI[i] = &(conps_i[i]);
-            NFunc.New_CompC(&compc_i[i],body->TrmS[n].pTI[i]->pB->CompC.N);
-            for(int j=0;j<body->TrmS[n].pTI[i]->pB->CompC.N;j++){
-                nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],&body->TrmS[n].pTI[i]->pB->CompC.pDE[j]->NurbsC);
-                compc_i[i].pDE[j] = (COMPELEM *)nurbsC;
-                compc_i[i].DEType[j] = body->TrmS[n].pTI[i]->pB->CompC.DEType[j];
+            NFunc.New_CompC(&compc_i[i],body->TrmS[n].pTI[i]->pB.CompC->N);
+            for(int j=0;j<body->TrmS[n].pTI[i]->pB.CompC->N;j++){
+                nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
+                compc_i[i].pDE[j].NurbsC = nurbsC;
+                compc_i[i].DEType[j] = body->TrmS[n].pTI[i]->pB.CompC->DEType[j];
                 curve_num++;
             }
-            this->TrmS[n].pTI[i]->pB = (CURVE *)(&(compc_i[i]));
+            this->TrmS[n].pTI[i]->pB.substitution = &(compc_i[i]);
             this->TrmS[n].pTI[i]->BType = body->TrmS[n].pTI[i]->BType;
-            this->TrmS[n].pTI[i]->pB->CompC.DegeFlag = body->TrmS[n].pTI[i]->pB->CompC.DegeFlag;
-            this->TrmS[n].pTI[i]->pB->CompC.DegeNurbs = body->TrmS[n].pTI[i]->pB->CompC.DegeNurbs;
+            this->TrmS[n].pTI[i]->pB.CompC->DegeFlag = body->TrmS[n].pTI[i]->pB.CompC->DegeFlag;
+            this->TrmS[n].pTI[i]->pB.CompC->DegeNurbs = body->TrmS[n].pTI[i]->pB.CompC->DegeNurbs;
         }
 
         this->TrmS[n].n1 = body->TrmS[n].n1;
@@ -635,8 +635,8 @@ CONPS *BODY::NewConpS(int N)
 		ConpS[i].BType = 0;
 		ConpS[i].crtn = 0;
 		ConpS[i].CType = 0;
-		ConpS[i].pB = NULL;
-		ConpS[i].pC = NULL;
+		ConpS[i].pB.substitution = NULL;
+		ConpS[i].pC.substitution = NULL;
 		ConpS[i].pD = 0;
 		ConpS[i].pref = 0;
 		ConpS[i].pS = NULL;
@@ -1172,7 +1172,7 @@ catch (std::bad_alloc&)	{
 // トリム面を構成する外側エッジの数
 int TRMS::GetOuterEdgeNum()
 {
-    COMPC *CompC = (COMPC *)pTO->pB;
+    COMPC *CompC = pTO->pB.CompC;
     return CompC->N;
 }
 
@@ -1196,7 +1196,7 @@ int TRMS::GetInnerTrmNum()
 // トリム面を構成する内側エッジの数
 int TRMS::GetInnerEdgeNum(int N)
 {
-    COMPC *CompC = (COMPC *)pTI[N]->pB;
+    COMPC *CompC = pTI[N]->pB.CompC;
     return CompC->N;
 }
 
@@ -1207,7 +1207,7 @@ int TRMS::GetInnerEdgeNum(int N)
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
 COMPC *TRMS::GetOuterCompC()
 {
-    return (COMPC *)pTO->pB;
+    return pTO->pB.CompC;
 }
 
 // Function: GetInnerCompC
@@ -1220,7 +1220,7 @@ COMPC *TRMS::GetOuterCompC()
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
 COMPC *TRMS::GetInnerCompC(int N)
 {
-    return (COMPC *)pTI[N]->pB;
+    return pTI[N]->pB.CompC;
 }
 
 // Funciton: GetNurbsS

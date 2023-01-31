@@ -197,7 +197,7 @@ typedef struct{
 
 // Structure: NURBSC
 // 有理Bスプライン(NURBS)曲線を表わす構造体
-//
+//			コンストラクタとデストラクタの追加 by K.Magara
 // Variables:
 // int K -			コントロールポイントの数
 // int M -			階数(=次数+1)
@@ -218,7 +218,7 @@ typedef struct{
 // int OriginEnt -	元のエンティティタイプ
 // void *pOriginEnt - 元のエンティティへのポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
-typedef struct{
+struct NURBSC{
     int K;
     int M;
     int N;
@@ -234,7 +234,17 @@ typedef struct{
     int OriginEnt;
     void *pOriginEnt;
     DispStat Dstat;
-}NURBSC;
+
+	NURBSC() {
+		T = W = NULL;
+		cp = NULL;
+	}
+	~NURBSC() {
+		if ( T )	delete[]	T;
+		if ( W )	delete[]	W;
+		if ( cp )	delete[]	cp;
+	}
+};
 
 // Structure: NURBSS
 // 有理Bスプライン(NURBS)曲面を表わす構造体
@@ -276,17 +286,18 @@ typedef struct{
 
 // Structure: COMPELEM
 // 複合曲線を構成できる曲線群を共用体で宣言
-//
+//		実体ではなくポインタ変数の共用体に変更 by K.Magara
 // Variables:
 // CONA ConA -		円錐曲線
 // LINE_ Line -		直線
 // NURBSC NurbsC -	NURBS曲線
-typedef union{
-	CIRA CirA;
-	CONA ConA;
-	LINE_ Line;
-	NURBSC NurbsC;
-}COMPELEM;
+union COMPELEM{
+	void*	substitution;	// ここに代入
+	CIRA*	CirA;
+	CONA*	ConA;
+	LINE_*	Line;
+	NURBSC*	NurbsC;
+};
 
 // Structure: COMPC
 // 複合曲線
@@ -301,7 +312,7 @@ typedef union{
 typedef struct{
 	int N;
 	int *DEType;
-	COMPELEM **pDE;
+	COMPELEM*	pDE;	// COMPELEM定義変更に伴う修正 by K.Magara
 	int DegeFlag;
 	NURBSC DegeNurbs;
 	int pD;
@@ -309,18 +320,19 @@ typedef struct{
 
 // Structure: CURVE
 // 面上線を構成できる曲線群を共用体で宣言
-//
+//		実体ではなくポインタ変数の共用体に変更 by K.Magara
 // Variables:
 // CIRA  CirA -		円・円弧
 // COMPC CompC -	複合曲線
 // CONA  ConA -		円錐曲線
 // NURBSC NurbsC -	NURBS曲線
-typedef union{
-	CIRA  CirA;
-	COMPC CompC;
-	CONA  ConA;
-	NURBSC NurbsC;
-}CURVE;
+union CURVE{
+	void*	substitution;	// ここに代入
+	CIRA*	CirA;
+	COMPC*	CompC;
+	CONA*	ConA;
+	NURBSC*	NurbsC;
+};
 
 // Structure: CONPS
 // 面上線
@@ -341,8 +353,8 @@ typedef struct{
 	int BType;
 	int CType;
 	NURBSS *pS;
-	CURVE *pB;
-	CURVE *pC;
+	CURVE	pB;			// CURVE定義変更に伴う修正 by K.Magara
+	CURVE	pC;
 	int pref;
 	int pD;
 }CONPS;

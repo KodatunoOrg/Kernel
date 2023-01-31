@@ -208,7 +208,7 @@ void Describe_BODY::DrawCompositeCurve(COMPC *CompC)
 
 	for(i=0;i<CompC->N;i++){
 		if(CompC->DEType[i] == NURBS_CURVE){
-			DrawNurbsCurve_Param((NURBSC *)CompC->pDE[i]);	// NURBS曲線
+			DrawNurbsCurve_Param(CompC->pDE[i].NurbsC);	// NURBS曲線
 		}
 		//else if(CompC->DEType[i] == CIRCLE_ARC){
 		//	glDraw_CircleArc_Param((CIRA *)CompC->pDE[i]);		// 円・円弧
@@ -234,7 +234,7 @@ void Describe_BODY::DrawCurveOnParamSurfe(CONPS *ConpS)
 {
 	// 2Dパラメトリック曲線
 	if(ConpS->BType == COMPOSITE_CURVE){
-		DrawCompositeCurve((COMPC *)ConpS->pB);	// 複合曲線
+		DrawCompositeCurve(ConpS->pB.CompC);	// 複合曲線
 	}
 //	else if(ConpS->BType == NURBS_SURFACE){
 //		glDraw_NurbsCurve(ConpS->pB);		// NURBS曲線
