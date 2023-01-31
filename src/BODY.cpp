@@ -348,7 +348,7 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 //	*BodyList - 登録先リスト
 //	Nurb - 登録するNURBS曲線の実体
 //  BodyName[] - 登録するBODY名
-void BODY::RegistNurbsCtoBody(BODYList *BodyList,NURBSC Nurb,const char BodyName[])
+void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char BodyName[])
 {
 	NurbsC = new NURBSC;
 	NurbsC[0] = Nurb;												// NURBS曲面の実体を代入
@@ -367,7 +367,7 @@ void BODY::RegistNurbsCtoBody(BODYList *BodyList,NURBSC Nurb,const char BodyName
 //	Nurb[] - 登録するNURBS曲線の実体
 //  BodyName[] - 登録するBODY名
 //	N - 登録するNURBS曲線の数
-void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,NURBSC Nurb[],const char BodyName[],int N)
+void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const NURBSC* Nurb,const char BodyName[],int N)
 {
 	NurbsC = new NURBSC[N];
 	for(int i=0;i<N;i++){
@@ -387,7 +387,7 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,NURBSC Nurb[],const char BodyN
 //	*BodyList - 登録先リスト
 //	Nurb - 登録するNURBS曲面の実体
 //  BodyName[] - 登録するBODY名
-void BODY::RegistNurbsStoBody(BODYList *BodyList,NURBSS Nurb,const char BodyName[])
+void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char BodyName[])
 {
 	NurbsS = new NURBSS;
 	NurbsS[0] = Nurb;												// NURBS曲面の実体を代入
@@ -407,7 +407,7 @@ void BODY::RegistNurbsStoBody(BODYList *BodyList,NURBSS Nurb,const char BodyName
 //	Nurb[] - 登録するNURBS曲面の実体
 //  BodyName[] - 登録するBODY名
 //	N - 登録するNURBS曲面の数
-void BODY::RegistNurbsStoBodyN(BODYList *BodyList,NURBSS Nurb[],const char BodyName[],int N)
+void BODY::RegistNurbsStoBodyN(BODYList *BodyList,const NURBSS* Nurb,const char BodyName[],int N)
 {
 	NurbsS = new NURBSS[N];
 	for(int i=0;i<N;i++){

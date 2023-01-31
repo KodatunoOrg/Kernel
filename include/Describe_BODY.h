@@ -26,63 +26,63 @@ public:
 
 	// Function: DrawBody
 	// BODYを描画
-	static void DrawBody(BODY *);					
+	static void DrawBody(const BODY *);					
 
 	// Function: DrawCompositeCurve
 	// 複合曲線を描画
-	static void DrawCompositeCurve(COMPC *);		
+	static void DrawCompositeCurve(const COMPC *);		
 
 	// Function: DrawLine
 	// 直線を描画
-	static void DrawLine(LINE_);					
+	static void DrawLine(const LINE_*);					
 
 	// Function: DrawCircleArc
 	// 円・円弧を描画
-	static void DrawCircleArc(CIRA);				
+	static void DrawCircleArc(const CIRA*);				
 
 	// Function: DrawNurbsCurve
 	// NURBS曲線を描画
-	static void DrawNurbsCurve(NURBSC);				
+	static void DrawNurbsCurve(const NURBSC*);				
 
 	// Function: DrawTrimdNurbsSurfe
 	// NURBS曲面の描画(トリムあり)
-	static void DrawTrimdNurbsSurfe(NURBSS *);		
+	static void DrawTrimdNurbsSurfe(const NURBSS*);		
 
 	// Function: DrawNurbsSurfe
 	// NURBS曲面の描画(トリムなし)
-	static void DrawNurbsSurfe(NURBSS);				
+	static void DrawNurbsSurfe(const NURBSS*);				
 
 	// Function: DrawCurveOnParamSurfe
 	// 面上線を描画
-	static void DrawCurveOnParamSurfe(CONPS *);		
+	static void DrawCurveOnParamSurfe(const CONPS *);		
 
 	// Function: DrawTrimdSurf
 	// トリム面を描画
-	static void DrawTrimdSurf(TRMS);				
+	static void DrawTrimdSurf(const TRMS*);				
 
 	// Function: DrawNurbsCurve_Param
 	// 2DパラメトリックNURBS曲線要素の描画
-	static void DrawNurbsCurve_Param(NURBSC *);		
+	static void DrawNurbsCurve_Param(const NURBSC *);		
 
 	// Function: Draw_Lines
 	// BODYに含まれる線分を全て描画
-	static void Draw_Lines(BODY *Body);				
+	static void Draw_Lines(const BODY *Body);				
 
 	// Function: Draw_CircleArcs
 	// BODYに含まれる円，円弧を全て描画
-	static void Draw_CircleArcs(BODY *Body);		
+	static void Draw_CircleArcs(const BODY *Body);		
 
 	// Function: Draw_NurbsCurves
 	// BODYに含まれるNURBS曲線を全て描画
-	static void Draw_NurbsCurves(BODY *Body);		
+	static void Draw_NurbsCurves(const BODY *Body);		
 
 	// Function: Draw_NurbsSurfaces
 	// BODYに含まれるNURBS曲面を全て描画
-	static void Draw_NurbsSurfaces(BODY *Body);		
+	static void Draw_NurbsSurfaces(const BODY *Body);		
 
 	// Function: Draw_TrimSurfes
 	// BODYに含まれるトリム面を全て描画
-	static void Draw_TrimSurfes(BODY *Body);		
+	static void Draw_TrimSurfes(const BODY *Body);		
 
 	// Function: 
 	// NURBS描画時の描画ステータスを設定

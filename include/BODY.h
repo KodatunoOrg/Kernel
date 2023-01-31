@@ -517,19 +517,19 @@ public:
 
 	// Function: RegistNurbsCtoBody
 	// 1つのNURBS曲線を新たなBODYとして登録する
-	void RegistNurbsCtoBody(BODYList *,NURBSC,const char []);	
+	void RegistNurbsCtoBody(BODYList *,const NURBSC&,const char []);	
 
 	// Function: RegistNurbsCtoBodyN
 	// N個のNURBS曲線を新たなBODYとして登録する
-	void RegistNurbsCtoBodyN(BODYList *,NURBSC [],const char [],int);	
+	void RegistNurbsCtoBodyN(BODYList *,const NURBSC*,const char [],int);	
 
 	// Function: RegistNurbsStoBody
 	// 1つのNURBS曲面を新たなBODYとして登録する
-	void RegistNurbsStoBody(BODYList *,NURBSS,const char []);	
+	void RegistNurbsStoBody(BODYList *,const NURBSS&,const char []);	
 
 	// Function: RegistNurbsStoBodyN
 	// N個のNURBS曲面を新たなBODYとして登録する
-	void RegistNurbsStoBodyN(BODYList *,NURBSS [],const char [],int);	
+	void RegistNurbsStoBodyN(BODYList *,const NURBSS*,const char [],int);	
 
 	// Function: ChangeStatColor
 	// エンティティのステータスで定義されている色を変更
