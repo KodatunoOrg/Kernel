@@ -8,7 +8,9 @@ Kodatuno は，金沢大学マンマシン研究室で開発されているオ�
 本家 Kodatuno から Kernel に相当する Src/GE を抜き出し，Qt のスタティックライブラリとして構築しなおしたものです．
 各々の環境では，ここで生成される .lib または .a をリンクして Kodatuno の機能が使えるようになる予定です．
 
-ファイル構成を含めてまだまだ試行中です．
+ファイル構成を含めてまだまだ試行中です．  
+Visual Studio 用の環境は，先行して本家のリポジトリ <https://github.com/KodatunoOrg/Kodatuno> の VisualStudioブランチにありますが，
+将来的にはこのリポジトリに取り込む予定です．
 
 ## ライブラリのビルド方法
 
@@ -17,7 +19,7 @@ Kodatuno は，金沢大学マンマシン研究室で開発されているオ�
 
 * Qtのデフォルトビルドディレクトリを以下のように変えておくことをオススメしています．
 
-<img src="./QtSetup.png" width="30%">
+<img src="./QtSetup.png" width="40%">
 
 * QtからKernel.proのプロジェクトファイルを開きビルドすると，build配下にlibKernel.aが作られます．
 
@@ -30,6 +32,6 @@ Kodatuno は，金沢大学マンマシン研究室で開発されているオ�
 テスト用アプリのプロジェクトを同時に読み込んで依存関係を設定しておくと，
 カーネルの変更を検知してアプリが再ビルドされます．
 
-<img src="./KernelTest01.png" width="30%">
+<img src="./KernelTest01.png" width="40%">
 
-<img src="./KernelTest02.png" width="30%">
+<img src="./KernelTest02.png" width="40%">
