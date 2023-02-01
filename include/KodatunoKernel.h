@@ -72,14 +72,24 @@ typedef double *Vector;
 class Coord
 {
 public:
+	// コンストラクタ
+	Coord();
+	Coord(const Coord&);
 
 	// Variables: x,y,z,dmy
 	// 三次元座標値(x, y, z)及び，汎用としてdmyを用意
 	double x,y,z,dmy;
 
+	// Operator: =
+	// 代入演算子のオーバーロード
+	Coord& operator  =(const Coord&);
+
 	// Operator: +
 	// Coord同士の足し算(AddCoord())
-	Coord operator +(Coord);
+	void	AddCoord(double, double, double=0.0, double=0.0);		// 兼2D ver.
+	Coord& operator +=(const Coord&);
+	Coord& operator + (const Coord&) const;
+	Coord& operator +=(double);
 
 	// Oeprator: -
 	// Coord同士の引き算(SubCoord())
@@ -149,18 +159,6 @@ void InitCoord(Coord *,int);
 // Function: InitCoord
 // 座標値の初期化(オーバーロード)
 Coord InitCoord();
-
-// Function: AddCoord
-// 座標値の足し算
-Coord AddCoord(Coord,Coord);					
-
-// Function: AddCoord
-// 座標値の足し算(オーバーロード)
-Coord AddCoord(Coord,double);					
-
-// Function: AddCoord
-//  座標値の足し算(オーバーロード)
-Coord AddCoord(Coord,double,double,double);		
 
 // Function: DivCoord
 // 座標値の割り算
@@ -300,18 +298,6 @@ Coord CalcNormVecFrom3Pts(Coord,Coord,Coord);
 
 
 // Group: Functions(2次元ベクトル幾何演算)
-
-// Function: AddCoord2D
-// 座標値の足し算 (2D Ver.)
-Coord AddCoord2D(Coord,Coord);
-
-// Function: AddCoord2D
-// 座標値の足し算(オーバーロード) (2D Ver.)
-Coord AddCoord2D(Coord,double);					
-
-// Function: AddCoord2D
-// 座標値の足し算(オーバーロード) (2D Ver.)
-Coord AddCoord2D(Coord,double,double);			
 
 // Function: DivCoord2D
 // 座標値の割り算 (2D Ver.)

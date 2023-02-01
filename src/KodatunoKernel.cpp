@@ -1,11 +1,50 @@
 ﻿#include <stdexcept>	// throw
 #include "KodatunoKernel.h"
 
+// コンストラクタ
+Coord::Coord()
+{
+	x = y = z = dmy = 0;
+}
+Coord::Coord(const Coord& a)
+{
+	operator=(a);
+}
+
+// Operator: =
+// 代入演算子のオーバーロード
+Coord& Coord::operator =(const Coord& a)
+{
+	x = a.x;
+	y = a.y;
+	z = a.z;
+	dmy = a.dmy;
+	return *this;
+}
+
 // Operator: +
 // Coord同士の足し算(AddCoord())
-Coord Coord::operator +(Coord a)
+void Coord::AddCoord(double xx, double yy, double zz, double dmy)
 {
-	return(AddCoord(*this,a));
+	x += xx;
+	y += yy;
+	z += zz;
+	dmy += dmy;
+}
+Coord& Coord::operator +=(const Coord& a)
+{
+	AddCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator + (const Coord& a) const
+{
+	Coord	c(*this);
+	return c+=a;
+}
+Coord& Coord::operator +=(double n)
+{
+	AddCoord(n, n, n);
+	return *this;
 }
 
 // Operator: -
@@ -96,120 +135,6 @@ Coord InitCoord()
 	InitCoord(&a);
 
 	return a;
-}
-
-// Function: AddCoord
-// 座標値同士の足し算
-//
-// Parameter: 
-// a, b - 加算する2つの座標値
-//
-// Return:
-// 演算結果(a.x+b.x, a.y+b.y, a.z+b.z)
-Coord AddCoord(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x + b.x;
-	ans.y = a.y + b.y;
-	ans.z = a.z + b.z;
-
-	return ans;
-}
-// Function: AddCoord
-// 座標値同士の足し算(オーバーロード)
-//
-// Parameter: 
-// a - 加算される座標値
-// b - 加算するdouble値(a.x, a.y, a.zそれぞれにbが加算される)
-//
-// Return:
-// 演算結果(a.x+b, a.y+b, a.z+b)
-Coord AddCoord(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x + b;
-	ans.y = a.y + b;
-	ans.z = a.z + b;
-
-	return ans;
-}
-
-// Function: AddCoord
-// 座標値同士の足し算(オーバーロード)
-//
-// Parameter: 
-// a - 加算される座標値
-// x,y,z - 加算するdouble値(a.x, a.y, a.zそれぞれにx,y,zが加算される)
-//
-// Return:
-// 演算結果(a.x+x, a.y+y, a.z+z)
-Coord AddCoord(Coord a,double x,double y,double z)
-{
-	Coord ans;
-
-	ans.x = a.x + x;
-	ans.y = a.y + y;
-	ans.z = a.z + z;
-
-	return ans;
-}
-
-// Function: AddCoord2D
-// 座標値同士の足し算 (2D Ver.)
-//
-// Parameter: 
-// a, b - 加算する2つの座標値
-//
-// Return:
-// 演算結果(a.x+b.x, a.y+b.y)
-Coord AddCoord2D(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x + b.x;
-	ans.y = a.y + b.y;
-
-	return ans;
-}
-
-// Function: AddCoord2D
-// 座標値同士の足し算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 加算される座標値
-// b - 加算するdouble値(a.x, a.yそれぞれにbが加算される)
-//
-// Return:
-// 演算結果(a.x+b, a.y+b)
-Coord AddCoord2D(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x + b;
-	ans.y = a.y + b;
-
-	return ans;
-}
-
-// Function: AddCoord
-// 座標値同士の足し算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 加算される座標値
-// x,y,z - 加算するdouble値(a.x, a.yそれぞれにx,yが加算される)
-//
-// Return:
-// 演算結果(a.x+x, a.y+y)
-Coord AddCoord2D(Coord a,double x,double y)
-{
-	Coord ans;
-
-	ans.x = a.x + x;
-	ans.y = a.y + y;
-
-	return ans;
 }
 
 // Function: DivCoord
