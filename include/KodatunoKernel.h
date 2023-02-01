@@ -85,27 +85,32 @@ public:
 	Coord& operator  =(const Coord&);
 
 	// Operator: +
-	// Coord同士の足し算(AddCoord())
+	// Coordの足し算(AddCoord())
 	void	AddCoord(double, double, double=0.0, double=0.0);		// 兼2D ver.
 	Coord& operator +=(const Coord&);
 	Coord& operator + (const Coord&) const;
 	Coord& operator +=(double);
 
 	// Oeprator: -
-	// Coord同士の引き算(SubCoord())
-	Coord operator -(Coord);	
+	// Coordの引き算(SubCoord())
+	void	SubCoord(double, double, double=0.0, double=0.0);
+	Coord& operator -=(const Coord&);
+	Coord& operator - (const Coord&) const;
+	Coord& operator -=(double);
 
 	// Oeprator: *
-	// Coord同士の掛け算(MulCoord())
-	Coord operator *(Coord);
-
-	// Oeprator: *
-	// Coordとdoubleとの掛け算（オーバーロード）
-	Coord operator *(double);
+	// Coordの掛け算(MulCoord())
+	void	MulCoord(double, double, double=1.0, double=1.0);
+	Coord& operator *=(const Coord&);
+	Coord& operator * (const Coord&) const;
+	Coord& operator *=(double);
 
 	// Operator: /
-	// Coord同士の割り算(DivCoord())
-	Coord operator /(Coord);
+	// Coordの割り算(DivCoord())
+	void	DivCoord(double, double, double=1.0, double=1.0);
+	Coord& operator /=(const Coord&);
+	Coord& operator / (const Coord&) const;
+	Coord& operator /=(double);
 
 	// Operator: /
 	// Coordとdoubleとの割り算（オーバーロード）
@@ -159,42 +164,6 @@ void InitCoord(Coord *,int);
 // Function: InitCoord
 // 座標値の初期化(オーバーロード)
 Coord InitCoord();
-
-// Function: DivCoord
-// 座標値の割り算
-Coord DivCoord(Coord,Coord);					
-
-// Function: DivCoord
-// 座標値の割り算(オーバーロード)
-Coord DivCoord(Coord,double);					
-
-// Function: DivCoord
-// 座標値の割り算(オーバーロード)
-Coord DivCoord(Coord,double,double,double);		
-
-// Function: MulCoord
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意)
-Coord MulCoord(Coord,Coord);					
-
-// Function: MulCoord
-// 座標値の掛け算(オーバーロード)
-Coord MulCoord(Coord,double);					
-
-// Function: MulCoord
-// 座標値の掛け算(オーバーロード)
-Coord MulCoord(Coord,double,double,double);		
-
-// Function: SubCoord
-// 座標値の引き算
-Coord SubCoord(Coord,Coord);					
-
-// Function: SubCoord
-// 座標値の引き算(オーバーロード)
-Coord SubCoord(Coord,double);					
-
-// Function: SubCoord
-// 座標値の引き算(オーバーロード)
-Coord SubCoord(Coord,double,double,double);
 
 // Function: SetCoord
 // 座標値を代入
@@ -298,42 +267,6 @@ Coord CalcNormVecFrom3Pts(Coord,Coord,Coord);
 
 
 // Group: Functions(2次元ベクトル幾何演算)
-
-// Function: DivCoord2D
-// 座標値の割り算 (2D Ver.)
-Coord DivCoord2D(Coord,Coord);					
-
-// Function: DivCoord2D
-// 座標値の割り算(オーバーロード) (2D Ver.)
-Coord DivCoord2D(Coord,double);					
-
-// Function: DivCoord2D
-// 座標値の割り算(オーバーロード) (2D Ver.)
-Coord DivCoord2D(Coord,double,double);			
-
-// Function: MulCoord2D
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意) (2D Ver.)
-Coord MulCoord2D(Coord,Coord);					
-
-// Function: MulCoord2D
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意)(オーバーロード) (2D Ver.)
-Coord MulCoord2D(Coord,double);					
-
-// Function: MulCoord2D
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意)(オーバーロード) (2D Ver.)
-Coord MulCoord2D(Coord,double,double);			
-
-// Function: SubCoord2D
-// 座標値の引き算 (2D Ver.)
-Coord SubCoord2D(Coord,Coord);					
-
-// Function: SubCoord2D
-// 座標値の引き算(オーバーロード) (2D Ver.)
-Coord SubCoord2D(Coord,double);					
-
-// Function: SubCoord2D
-// 座標値の引き算(オーバーロード) (2D Ver.)
-Coord SubCoord2D(Coord,double,double);			
 
 // Function: SetCoord2D
 // 座標値を代入 (2D Ver.)

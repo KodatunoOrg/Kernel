@@ -49,37 +49,82 @@ Coord& Coord::operator +=(double n)
 
 // Operator: -
 // Coord同士の引き算(SubCoord())
-Coord Coord::operator -(Coord a)
+void Coord::SubCoord(double xx, double yy, double zz, double dmy)
 {
-	return(SubCoord(*this,a));
+	x -= xx;
+	y -= yy;
+	z -= zz;
+	dmy -= dmy;
+}
+Coord& Coord::operator -=(const Coord& a)
+{
+	SubCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator - (const Coord& a) const
+{
+	Coord	c(*this);
+	return c-=a;
+}
+Coord& Coord::operator -=(double n)
+{
+	SubCoord(n, n, n);
+	return *this;
 }
 
 // Oeprator: *
 // Coord同士の掛け算(MulCoord())
-Coord Coord::operator *(Coord a)
+void Coord::MulCoord(double xx, double yy, double zz=1.0, double dmy=1.0)
 {
-	return(MulCoord(*this,a));
+	x *= xx;
+	y *= yy;
+	z *= zz;
+	dmy *= dmy;
 }
-
-// Oeprator: *
-// Coordとdoubleとの掛け算（オーバーロード）
-Coord Coord::operator *(double a)
+Coord& Coord::operator *=(const Coord& a)
 {
-	return(MulCoord(*this,a));
+	MulCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator * (const Coord& a) const
+{
+	Coord	c(*this);
+	return c*=a;
+}
+Coord& Coord::operator *=(double n)
+{
+	MulCoord(n, n, n);
+	return *this;
 }
 
 // Operator: /
 // Coord同士の割り算(DivCoord())
-Coord Coord::operator /(Coord a)
+void Coord::DivCoord(double xx, double yy, double zz, double dmy)
 {
-	return(DivCoord(*this,a));
+	if ( xx==0 || yy==0 || zz==0 || dmy==0) {
+		SetCoord(0, 0, 0);
+	}
+	else {
+		x /= xx;
+		y /= yy;
+		z /= zz;
+		dmy /= dmy;
+	}
 }
-
-// Operator: /
-// Coordとdoubleとの割り算（オーバーロード）
-Coord Coord::operator /(double a)
+Coord& Coord::operator /=(const Coord& a)
 {
-	return(DivCoord(*this,a));
+	DivCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator / (const Coord& a) const
+{
+	Coord	c(*this);
+	return c/=a;
+}
+Coord& Coord::operator /=(double n)
+{
+	DivCoord(n, n, n);
+	return *this;
 }
 
 // Operator: &
@@ -135,367 +180,6 @@ Coord InitCoord()
 	InitCoord(&a);
 
 	return a;
-}
-
-// Function: DivCoord
-// 座標値同士の割り算
-//
-// Parameter: 
-// a,b - 除算する2つの座標値
-//
-// Return:
-// 演算結果(a.x/b.x, a.y/b.y, a.z/b.z)
-Coord DivCoord(Coord a,Coord b)
-{
-	if(b.x == 0.0 || b.y == 0.0 || b.z == 0.0)
-		return SetCoord(0.0,0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b.x;
-	ans.y = a.y / b.y;
-	ans.z = a.z / b.z;
-
-	return ans;
-}
-
-// Function: DivCoord
-// 座標値同士の割り算(オーバーロード)
-//
-// Parameter: 
-// a - 除算される座標値
-// b - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/b, a.y/b, a.z/b)
-Coord DivCoord(Coord a,double b)
-{
-	if(b == 0.0)	return SetCoord(0.0,0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b;
-	ans.y = a.y / b;
-	ans.z = a.z / b;
-
-	return ans;
-}
-
-// Function: DivCoord
-// 座標値同士の割り算(オーバーロード)
-//
-// Parameter: 
-// a - 除算される座標値
-// b - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/x, a.y/y, a.z/z)
-Coord DivCoord(Coord a,double x,double y,double z)
-{
-	if(x == 0.0 || y == 0.0 || z == 0.0)
-		return SetCoord(0.0,0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x/x;
-	ans.y = a.y/y;
-	ans.z = a.z/z;
-
-	return ans;
-}
-
-// Function: DivCoord2D
-// 座標値同士の割り算 (2D Ver.)
-//
-// Parameter: 
-// a,b - 除算する2つの座標値
-//
-// Return:
-// 演算結果(a.x/b.x, a.y/b.y)
-Coord DivCoord2D(Coord a,Coord b)
-{
-	if(b.x == 0.0 || b.y == 0.0)
-		return SetCoord2D(0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b.x;
-	ans.y = a.y / b.y;
-
-	return ans;
-}
-
-// Function: DivCoord2D
-// 座標値同士の割り算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 除算される座標値
-// b - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/b, a.y/b)
-Coord DivCoord2D(Coord a,double b)
-{
-	if(b == 0.0)	return SetCoord2D(0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b;
-	ans.y = a.y / b;
-
-	return ans;
-}
-
-// Function: DivCoord2D
-// 座標値同士の割り算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 除算される座標値
-// x,y - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/x, a.y/y)
-Coord DivCoord2D(Coord a,double x,double y)
-{
-	if(x == 0.0 || y == 0.0)
-		return SetCoord2D(0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x/x;
-	ans.y = a.y/y;
-
-	return ans;
-}
-
-// Function: SubCoord
-// 座標値同士の引き算
-//
-// Parameter: 
-// a,b - 引き算する2つの座標値
-//
-// Return:
-// 演算結果(a.x-b.x, a.y-b.y, a.z-b.z)
-Coord SubCoord(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x - b.x;
-	ans.y = a.y - b.y;
-	ans.z = a.z - b.z;
-
-	return ans;
-}
-
-// Function: SubCoord
-// 座標値同士の引き算(オーバーロード)
-//
-// Parameter: 
-// a - 引き算される座標値
-// b - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-b, a.y-b, a.z-b)
-Coord SubCoord(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x - b;
-	ans.y = a.y - b;
-	ans.z = a.z - b;
-
-	return ans;
-}
-
-// Function: SubCoord
-// 座標値同士の引き算(オーバーロード)
-//
-// Parameter: 
-// a - 引き算される座標値
-// x,x,z - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-x, a.y-y, a.z-z)
-Coord SubCoord(Coord a,double x,double y,double z)
-{
-	Coord ans;
-
-	ans.x = a.x - x;
-	ans.y = a.y - y;
-	ans.z = a.z - z;
-
-	return ans;
-}
-
-// Function: SubCoord2D
-// 座標値同士の引き算 (2D Ver.)
-//
-// Parameter: 
-// a,b - 引き算する2つの座標値
-//
-// Return:
-// 演算結果(a.x-b.x, a.y-b.y)
-Coord SubCoord2D(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x - b.x;
-	ans.y = a.y - b.y;
-
-	return ans;
-}
-
-// Function: SubCoord2D
-// 座標値同士の引き算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 引き算される座標値
-// b - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-b, a.y-b)
-Coord SubCoord2D(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x - b;
-	ans.y = a.y - b;
-
-	return ans;
-}
-
-// Function: SubCoord2D
-// 座標値同士の引き算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 引き算される座標値
-// x,y - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-x, a.y-y)
-Coord SubCoord2D(Coord a,double x,double y)
-{
-	Coord ans;
-
-	ans.x = a.x - x;
-	ans.y = a.y - y;
-
-	return ans;
-}
-
-// Function: MulCoord
-// 座標値同士の掛け算
-//
-// Parameter: 
-// a,b - 掛け算する2つの座標値
-//
-// Return:
-// 演算結果(a.x*b.x, a.y*b.y, a.z*b.z)
-Coord MulCoord(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x * b.x;
-	ans.y = a.y * b.y;
-	ans.z = a.z * b.z;
-
-	return ans;
-}
-
-// Function: MulCoord
-// 座標値同士の掛け算(オーバーロード)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// b - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*b, a.y*b, a.z*b)
-Coord MulCoord(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x * b;
-	ans.y = a.y * b;
-	ans.z = a.z * b;
-
-	return ans;
-}
-
-// Function: MulCoord
-// 座標値同士の掛け算(オーバーロード)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// x,y,z - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*x, a.y*y, a.z*z)
-Coord MulCoord(Coord a,double x,double y,double z)
-{
-	Coord ans;
-
-	ans.x = a.x * x;
-	ans.y = a.y * y;
-	ans.z = a.z * z;
-
-	return ans;
-}
-
-// Function: MulCoord2D
-// 座標値同士の掛け算 (2D Ver.)
-//
-// Parameter: 
-// a,b - 掛け算する2つの座標値
-//
-// Return:
-// 演算結果(a.x*b.x, a.y*b.y)
-Coord MulCoord2D(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x * b.x;
-	ans.y = a.y * b.y;
-
-	return ans;
-}
-
-// Function: MulCoord2D
-// 座標値同士の掛け算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// b - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*b, a.y*b)
-Coord MulCoord2D(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x * b;
-	ans.y = a.y * b;
-
-	return ans;
-}
-
-// Function: MulCoord2D
-// 座標値同士の掛け算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// x,y - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*x, a.y*y)
-Coord MulCoord2D(Coord a,double x,double y)
-{
-	Coord ans;
-
-	ans.x = a.x * x;
-	ans.y = a.y * y;
-
-	return ans;
 }
 
 // Function: DiffCoord
