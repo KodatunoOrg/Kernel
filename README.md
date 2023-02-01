@@ -12,6 +12,10 @@ Kodatuno は，金沢大学マンマシン研究室で開発されているオ�
 Visual Studio 用の環境は，先行して本家のリポジトリ <https://github.com/KodatunoOrg/Kodatuno> の VisualStudioブランチにありますが，
 将来的にはこのリポジトリに取り込む予定です．
 
+## 現在の改訂ポリシー
+[doc/report.pdf](doc/report.pdf) をベースに改訂を進めています．
+間違い等あればご指摘ください．
+
 ## ライブラリのビルド方法
 
 * Qtのセットアップは [本家インストールしてみた](http://www-mm.hm.t.kanazawa-u.ac.jp/research/kodatuno/inst/) から
@@ -19,7 +23,7 @@ Visual Studio 用の環境は，先行して本家のリポジトリ <https://gi
 
 * Qtのデフォルトビルドディレクトリを以下のように変えておくことをオススメしています．
 
-<img src="./QtSetup.png" width="40%">
+![](doc/img/QtSetup.png)
 
 * QtからKernel.proのプロジェクトファイルを開きビルドすると，build配下にlibKernel.aが作られます．
 
@@ -32,6 +36,6 @@ Visual Studio 用の環境は，先行して本家のリポジトリ <https://gi
 テスト用アプリのプロジェクトを同時に読み込んで依存関係を設定しておくと，
 カーネルの変更を検知してアプリが再ビルドされます．
 
-<img src="./KernelTest01.png" width="40%">
+![](doc/img/KernelTest01.png)
 
-<img src="./KernelTest02.png" width="40%">
+![](doc/img/KernelTest02.png)
