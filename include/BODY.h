@@ -3,6 +3,8 @@
 #ifndef _BODY_H_
 #define _BODY_H_
 
+#include <string>		// std::string
+
 // Constants: General Defines
 // ALL_ENTITY_TYPE_NUM -	全エンティティタイプの数(21)
 // CTLPNUMMAX -				NURBSで用いられるコントロールポイントの数の上限(1024)
@@ -13,7 +15,6 @@
 // PARAMETRICELEM -			IGESディレクトリ部"Entity Use Flag"より、2Dパラメトリック要素を示す(5)
 // NORM_KNOT_VAL -			ノットベクトルを正規化するときの範囲の最大値(1)
 // MIN_KNOT_RANG -			隣り合うノットベクトルの差がこの値以上であること(0.0002)
-#define ALL_ENTITY_TYPE_NUM	21
 #define CTLPNUMMAX  1024
 #define KNOTNUMMAX  1024
 #define DISPLAY     0
@@ -94,7 +95,7 @@ typedef KODlistData OBJECTList;
 // _VIEW -							19:投象面
 // _MESH -							20:メッシュ
 enum EntityType{
-    _CIRCLE_ARC,
+    _CIRCLE_ARC = 0,
     _COMPOSITE_CURVE,
     _CONIC_ARC,
     _COPIOUS_DATA,
@@ -114,7 +115,8 @@ enum EntityType{
     _PROPERTY,
     _SINGULAR_SUBFIGURE_INSTANCE,
     _VIEW,
-    _MESH
+    _MESH,
+		ALL_ENTITY_TYPE_NUM		// 21
 };
 
 /*
@@ -136,17 +138,29 @@ enum EntityType{
 // int		EntUseFlag -	ディレクトリ部 Entity Use Flag の値(0:幾何要素 5:2Dパラメトリック要素)
 // int		pD -			ディレクトリ部への逆ポインタ
 // DispStat	Dstat -			 表示属性（色r,g,b）
-typedef struct{
-    double zt;
-    Coord  cp[3];
-    double R;
-    double t[2];
-    Coord  U,V;
+struct CIRA
+{
+	double zt;		
+	Coord  cp[3];	
+	double R;
+	double t[2];
+	Coord  U,V;
     int BlankStat;
-    int EntUseFlag;
-    int pD;
-    DispStat Dstat;
-}CIRA;
+	int EntUseFlag;
+	int pD;
+	DispStat Dstat;
+
+	CIRA() {
+		zt = 0;
+		cp[0] = cp[1] = cp[2] = SetCoord(0,0,0);
+		R = 0;
+		t[0] = t[1] = 0;
+		U = V = SetCoord(0,0,0);
+		BlankStat = 0;
+		EntUseFlag = 0;
+		pD = 0;
+	}
+};
 
 // Structure: CONA
 // 円錐曲線を表わす構造体
@@ -157,13 +171,21 @@ typedef struct{
 // Coord  cp[2] -	始点、終点
 // int pD -			ディレクトリ部への逆ポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
-typedef struct{
-    double prop[6];
-    double zt;
-    Coord  cp[2];
-    int pD;
-    DispStat Dstat;
-}CONA;
+struct CONA
+{
+	double prop[6];
+	double zt;
+	Coord  cp[2];
+	int pD;
+	DispStat Dstat;
+
+	CONA() {
+		InitVector(prop,6);
+		zt = 0;
+		cp[0] = cp[1] = SetCoord(0,0,0);
+		pD = 0;
+	}
+};
 
 // Structure: LINE_
 // 線分を表わす構造体
@@ -174,13 +196,21 @@ typedef struct{
 // int EntUseFlag - ディレクトリ部 Entity Use Flag の値(0:幾何要素 5:2Dパラメトリック要素)
 // int pD -			ディレクトリ部への逆ポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
-typedef struct{
-    Coord cp[2];
+struct LINE_
+{
+	Coord cp[2];
     int BlankStat;
-    int EntUseFlag;
-    int pD;
-    DispStat Dstat;
-}LINE_;
+	int EntUseFlag;
+	int pD;
+	DispStat Dstat;
+
+	LINE_() {
+		cp[0] = cp[1] = SetCoord(0,0,0);
+		BlankStat = 0;
+		EntUseFlag = 0;
+		pD = 0;
+	}
+};
 
 // Structure: TMAT
 // 変換マトリックスを表わす構造体
@@ -189,11 +219,19 @@ typedef struct{
 // double R[3][3] - 回転行列
 // double T[3] -	並進ベクトル
 // int pD -			ディレクトリ部への逆ポインタ
-typedef struct{
-    double R[3][3];	// 回転行列
-    double T[3];	// 並進ベクトル
-    int pD;			// ディレクトリ部への逆ポインタ
-}TMAT;
+struct TMAT
+{
+	double R[3][3];
+	double T[3];
+	int pD;
+
+	TMAT() {
+		for(int j=0;j<3;j++)
+			InitVector(R[j],3);
+		InitVector(T,3);
+		pD = 0;
+	}
+};
 
 // Structure: NURBSC
 // 有理Bスプライン(NURBS)曲線を表わす構造体
@@ -236,8 +274,20 @@ struct NURBSC{
     DispStat Dstat;
 
 	NURBSC() {
-		T = W = NULL;
+		K = 0;
+		M = 0;
+		N = 0;
+		prop[0] = prop[1] = prop[2] = prop[3] = 0;
+		T = NULL;
+		W = NULL;
 		cp = NULL;
+		V[0] = V[1] = 0;
+		norm = SetCoord(0,0,0);
+		BlankStat = 0;
+		EntUseFlag = 0;
+		pD = 0;
+		OriginEnt = 0;
+		pOriginEnt = NULL;
 	}
 	~NURBSC() {
 		if ( T )	delete[]	T;
@@ -268,7 +318,7 @@ struct NURBSC{
 // int pD -			ディレクトリ部への逆ポインタ
 // int TrmdSurfFlag - このNURBS曲面がトリム面として呼ばれているのか、独立して存在するのかを示すフラグ(トリム面:KOD_TRUE  独立面:KOD_FALSE)
 // DispStat Dstat - 表示属性（色r,g,b,）
-typedef struct{
+struct NURBSS{
 	int K[2];
 	int M[2];
 	int N[2];
@@ -282,7 +332,28 @@ typedef struct{
 	int pD;
 	int TrmdSurfFlag;
 	DispStat Dstat;
-}NURBSS;
+
+	NURBSS() {
+		K[0] = K[1] = 0;
+		M[0] = M[1] = 0;
+		N[0] = N[0] = 0;
+		prop[0] = prop[1] = prop[2] = prop[3] = prop[4] = 0;
+		S = NULL;
+		T = NULL;
+		W = NULL;
+		cp = NULL;
+		U[0] = U[1] = 0;
+		V[0] = V[1] = 0;
+		pD = 0;
+		TrmdSurfFlag = 0;
+	}
+	~NURBSS() {
+		if ( S )	delete[]	S;
+		if ( T )	delete[]	T;
+		if ( W )	delete[]	W;
+		if ( cp )	delete[]	cp;
+	}
+};
 
 // Structure: COMPELEM
 // 複合曲線を構成できる曲線群を共用体で宣言
@@ -309,14 +380,26 @@ union COMPELEM{
 // int DegeFlag -		複合曲線が縮退した2Dパラメトリック曲線を表すフラグ
 // NURBSC DegeNurbs -	複合曲線が縮退した2Dパラメトリック曲線だった場合に縮退を解消するためのNURBS曲線
 // int pD -				ディレクトリ部への逆ポインタ
-typedef struct{
+struct COMPC{
 	int N;
 	int *DEType;
 	COMPELEM*	pDE;	// COMPELEM定義変更に伴う修正 by K.Magara
 	int DegeFlag;
 	NURBSC DegeNurbs;
 	int pD;
-}COMPC;
+
+	COMPC() {
+		N = 0;
+		DEType = NULL;
+		pDE = NULL;
+		DegeFlag = 0;
+		pD = 0;
+	}
+	~COMPC() {
+		if ( DEType )	delete[]	DEType;
+		if ( pDE )		delete[]	pDE;
+	}
+};
 
 // Structure: CURVE
 // 面上線を構成できる曲線群を共用体で宣言
@@ -347,22 +430,48 @@ union CURVE{
 // CURVE *pC -	Curve C構造体へのポインタ
 // int pref -	送り側システムで採られていた表現を示すフラグ
 // int pD -		ディレクトリ部への逆ポインタ
-typedef struct{
+struct CONPS
+{
 	int crtn;
 	int SType;
 	int BType;
 	int CType;
 	NURBSS *pS;
-	CURVE	pB;			// CURVE定義変更に伴う修正 by K.Magara
-	CURVE	pC;
+	CURVE pB;			// CURVE定義変更に伴う修正 by K.Magara
+	CURVE pC;
 	int pref;
 	int pD;
-}CONPS;
+
+	CONPS() {
+		crtn = 0;
+		SType = 0;
+		BType = 0;
+		CType = 0;
+		pS = NULL;
+		pB.substitution = NULL;
+		pC.substitution = NULL;
+		pref = 0;
+		pD = 0;
+	}
+};
 
 // Class TRMS
 // トリム面定義クラス
-class TRMS{
-public:
+struct TRMS{
+	TRMS() {
+		pts = NULL;
+		n1 = 0;
+		n2 = 0;
+		pTO = NULL;
+		pTI = NULL;
+		pD = 0;
+	}
+	~TRMS() {
+		if ( pts )		delete[]	pts;
+		if ( pTO )		delete[]	pTO;
+		if ( pTI )		delete[]	pTI;
+	}
+
     // Function: GetOuterEdgeNum
     // トリム面を構成する外側エッジの数を取得する
     int GetOuterEdgeNum();
@@ -387,7 +496,6 @@ public:
     // トリム面を構成するNURBS曲面へのポインタを得る
     NURBSS *GetNurbsS();
 
-public:
     // Variable: *pts
     // トリムされるSurface EntityのDE部へのポインタ
     NURBSS *pts;
@@ -622,9 +730,9 @@ public:
 	// 立体の寸法の最大値(この値で初期表示倍率を決定)
 	double MaxCoord;		
 
-	// Variable: Name[FNAMEMAX]
+	// Variable: Name
 	// BODY名
-	char Name[FNAMEMAX];	
+	std::string	Name;
 
 	// Variable: *Mom
 	// 自分が属する親(BodyList)のアドレス

@@ -338,7 +338,7 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 {
 	Mom = BodyList->add(this);				// 読み込んだIGESデータをBODYListに登録する
 //	GuiIFB.AddBodyNameToWin(BodyName);		// BodyリストウィンドウにBODY名を登録
-	strcpy(Name,BodyName);					// ファイル名をbody名として登録
+	Name = BodyName;						// ファイル名をbody名として登録
 }
 
 // Function: RegistNurbsCtoBody
@@ -356,7 +356,7 @@ void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char B
 	ChangeStatColor(this->NurbsC[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	BodyList->add(this);											// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
-	strcpy(Name,BodyName);											// 新しいBODY名を登録
+	Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: RegistNurbsCtoBodyN
@@ -376,8 +376,8 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const NURBSC* Nurb,const char 
 		ChangeStatColor(this->NurbsC[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	}
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
-//	GuiIFB.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
-	strcpy(Name,BodyName);											// 新しいBODY名を登録
+//	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
+	Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: RegistNurbsStoBody
@@ -395,8 +395,8 @@ void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char B
 	TypeNum[_NURBSS] = 1;											// NURBS曲面の数1にする
 	ChangeStatColor(this->NurbsS[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
-//	GuiIFB.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
-	strcpy(Name,BodyName);											// 新しいBODY名を登録
+//	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
+	Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: RegistNurbsStoBodyN
@@ -417,8 +417,8 @@ void BODY::RegistNurbsStoBodyN(BODYList *BodyList,const NURBSS* Nurb,const char 
 		ChangeStatColor(this->NurbsS[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	}
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
-//	GuiIFB.AddBodyNameToWin(BodyName);									// BodyリストウィンドウにBODY名を登録
-	strcpy(Name,BodyName);											// 新しいBODY名を登録
+//	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
+	Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: ChangeStatColor
