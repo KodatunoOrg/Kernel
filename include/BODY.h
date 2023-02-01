@@ -3,6 +3,8 @@
 #ifndef _BODY_H_
 #define _BODY_H_
 
+#include <string>		// std::string
+
 // Constants: General Defines
 // ALL_ENTITY_TYPE_NUM -	全エンティティタイプの数(21)
 // CTLPNUMMAX -				NURBSで用いられるコントロールポイントの数の上限(1024)
@@ -728,9 +730,9 @@ public:
 	// 立体の寸法の最大値(この値で初期表示倍率を決定)
 	double MaxCoord;		
 
-	// Variable: Name[FNAMEMAX]
+	// Variable: Name
 	// BODY名
-	char Name[FNAMEMAX];	
+	std::string	Name;
 
 	// Variable: *Mom
 	// 自分が属する親(BodyList)のアドレス
