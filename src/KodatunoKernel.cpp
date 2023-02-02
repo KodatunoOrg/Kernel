@@ -10,6 +10,10 @@ Coord::Coord(const Coord& a)
 {
 	SetCoord(a);
 }
+Coord::Coord(double xx, double yy, double zz, double dd)
+{
+	SetCoord(xx, yy, zz, dd);
+}
 
 // Operator: =
 // 代入演算子のオーバーロード
@@ -433,13 +437,15 @@ void FreeCoord3(Coord ***a,int x,int y)
 //
 // Return:
 // 正規化された三次元ベクトル
-Coord NormalizeVec(Coord a)
+Coord Coord::NormalizeVec(void) const
 {
-	double len=0;
-
-	len = CalcEuclid(a);
-
-	return DivCoord(a,len);
+	double len=CalcEuclid();
+	return operator/(len);
+}
+Coord& Coord::NormalizeVec(void)
+{
+	double len=CalcEuclid();
+	return operator/=(len);		// 自分自身を正規化
 }
 
 // Function: NormalizeVec
@@ -450,14 +456,11 @@ Coord NormalizeVec(Coord a)
 //
 // Return:
 // 正規化された3次元ベクトル
-Coord NormalizeVec(double x,double y,double z)
+Coord Coord::NormalizeVec(double xx,double yy,double zz) const
 {
-	double len=0;
-	Coord a = SetCoord(x,y,z);
-
-	len = CalcEuclid(a);
-
-	return DivCoord(a,len);
+	Coord a(xx,yy,zz);
+	double len=a.CalcEuclid();
+	return a.operator/(len);
 }
 
 // Function: CalcEuclid
@@ -609,17 +612,18 @@ Coord Coord::CalcInterDivPt(const Coord& q,double t) const
 // 正射影された点の座標値
 Coord Coord::CalcOrthoProjection(const Coord& n, const Coord& q) const
 {
-	if(fabs(1-n.CalcEuclid()) > APPROX_ZERO){
+	Coord	nn(n);
+	if(fabs(1-nn.CalcEuclid()) > APPROX_ZERO){
 //		GuiIFB.SetMessage("ERROR:Norm vector is not unit vector.");
 //		GuiIFB.SetMessage("Norm vetor is resized to unit vector.");
-		NormalizeVec(n);
+		nn.NormalizeVec();
 	}
 //	double inn = CalcInnerProduct(SubCoord(q,p),n);
 //	return (SubCoord(q,MulCoord(n,inn)));
 	Coord	r(q);
 	r -= *this;
-	double inn = r.CalcInnerProduct(n);
-	return q - (n * inn);
+	double inn = r.CalcInnerProduct(nn);
+	return q - (nn * inn);
 }
 
 // Function: CalcDistPtToPlane

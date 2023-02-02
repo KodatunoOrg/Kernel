@@ -75,6 +75,7 @@ public:
 	// コンストラクタ
 	Coord();
 	Coord(const Coord&);
+	Coord(double,double,double,double=0.0);
 
 	// Variables: x,y,z,dmy
 	// 三次元座標値(x, y, z)及び，汎用としてdmyを用意
@@ -201,6 +202,15 @@ public:
 	// Function: CalcNormVecFrom3Pts
 	// 空間上の3点からなる平面の法線ベクトルを求める
 	Coord CalcNormVecFrom3Pts(const Coord&, const Coord&) const;
+
+	// Function: NormalizeVec
+	// 3次元ベクトルを正規化(単位ベクトル化)
+	Coord  NormalizeVec(void) const;
+	Coord& NormalizeVec(void);
+
+	// Function: NormalizeVec
+	// 3次元ベクトルを正規化(単位ベクトル化)(オーバーロード)
+	Coord  NormalizeVec(double,double,double) const;
 };
 
 
@@ -230,15 +240,6 @@ typedef struct{
 // Package: グローバルな関数の定義
 
 // Group: Functions(3次元ベクトル幾何演算)
-
-// Function: NormalizeVec
-// 3次元ベクトルを正規化(単位ベクトル化)
-Coord NormalizeVec(Coord);						
-
-// Function: NormalizeVec
-// 3次元ベクトルを正規化(単位ベクトル化)(オーバーロード)
-Coord NormalizeVec(double,double,double);		
-
 
 // Group: Functions(2次元ベクトル幾何演算)
 
