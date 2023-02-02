@@ -401,19 +401,19 @@ double Round(double);
 
 // Function: DrawPoint
 // 点を描画
-void DrawPoint(Coord,double,double,double []);			
+void DrawPoint(const Coord&,double,double,double []);
 
 // Function: DrawPoints
 // 点群を描画
-void DrawPoints(Coord *,int,double,double,double []);	
+void DrawPoints(const Coord *,int,double,double,double []);
 
 // Function: DrawVector
 // ベクトルを描画
-void DrawVector(Coord,Coord,double,double,double []);	
+void DrawVector(const Coord&, const Coord&, double,double,double []);	
 
 // Function: DrawLine
 // 2点間に線分を描画
-void DrawLine(Coord,Coord,double,double []);			
+void DrawLine(const Coord&, const Coord&, double,double []);			
 
 // Function: SetColorStat
 // カラーステータスを変更

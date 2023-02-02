@@ -676,7 +676,7 @@ double Coord::CalcAnglePlaneVec(const Coord& n) const
 // Scale - pをScale倍する  
 // Width - 点のサイズ  
 // Color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawPoint(Coord p,double scale,double width,double color[3])
+void DrawPoint(const Coord& p,double scale,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glPointSize(width);
@@ -696,7 +696,7 @@ void DrawPoint(Coord p,double scale,double width,double color[3])
 // scale -  pをScale倍する
 // width - 点のサイズ
 // color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawPoints(Coord *p,int n,double scale,double width,double color[3])
+void DrawPoints(const Coord *p,int n,double scale,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glPointSize(width);
@@ -717,15 +717,15 @@ void DrawPoints(Coord *p,int n,double scale,double width,double color[3])
 // vec_len - 表示するベクトルの長さの倍率
 // width - 描画する線分の太さ
 // color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawVector(Coord s,Coord e,double vec_len,double width,double color[3])
+void DrawVector(const Coord& s, const Coord& e, double vec_len,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glLineWidth(width);
 	glColor3f(color[0],color[1],color[2]);
-	e = MulCoord(e,vec_len);
+	Coord ee = e * vec_len;
 	glBegin(GL_LINES);
 	glVertex3d(s.x,s.y,s.z);
-	glVertex3d(s.x+e.x,s.y+e.y,s.z+e.z);
+	glVertex3d(s.x+ee.x,s.y+ee.y,s.z+ee.z);
 	glEnd();
 	glEnable(GL_LIGHTING);
 }
@@ -737,7 +737,7 @@ void DrawVector(Coord s,Coord e,double vec_len,double width,double color[3])
 // s,e - 描画する線分の始点と終点座標
 // width - 描画する線分の太さ
 // color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawLine(Coord s,Coord e,double width,double color[3])
+void DrawLine(const Coord& s, const Coord& e,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glLineWidth(width);
