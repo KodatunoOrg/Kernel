@@ -127,6 +127,17 @@ public:
 	Coord CalcOuterProduct(const Coord&) const;
 	double CalcOuterProduct2D(const Coord&) const;
 	Coord operator &&(const Coord&) const;
+
+	// -- 比較関数
+	// Function: ZoroCoord
+	// (0,0,0)でないときKOD_TRUEを返す
+	int ZoroCoord(void);							
+	int ZoroCoord2D(void);							
+
+	// Function: DiffCoord
+	// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す
+	int DiffCoord(const Coord&, double=APPROX_ZERO);
+	int DiffCoord2D(const Coord&, double=APPROX_ZERO);
 };
 
 
@@ -157,21 +168,9 @@ typedef struct{
 
 // Group: Functions(3次元ベクトル幾何演算)
 
-// Function: DiffCoord
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-int DiffCoord(Coord,Coord);						
-
-// Function: DiffCoord
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す(オーバーロード(精度指定))
-int DiffCoord(Coord,Coord,double);				
-
 // Function: AbsCoord
 // 座標値の絶対値を返す
 Coord AbsCoord(Coord);							
-
-// Function: ZoroCoord
-// (0,0,0)の場合にKOD_TRUEを返す
-int ZoroCoord(Coord);							
 
 // Function: CalcEuclid
 // ユークリッド距離をもとめる
@@ -236,21 +235,9 @@ Coord CalcNormVecFrom3Pts(Coord,Coord,Coord);
 
 // Group: Functions(2次元ベクトル幾何演算)
 
-// Function: DiffCoord2D
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す (2D Ver.)
-int DiffCoord2D(Coord,Coord);					
-
-// Function: DiffCoord2D
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す(オーバーロード(精度指定)) (2D Ver.)
-int DiffCoord2D(Coord,Coord,double);			
-
 // Function: AbsCoord2D
 // 座標値の絶対値を返す (2D Ver.)
 Coord AbsCoord2D(Coord);						
-
-// Function: ZoroCoord2D
-// (0,0,0)の場合にKOD_TRUEを返す (2D Ver.)
-int ZoroCoord2D(Coord);							
 
 // Function: CalcEuclid2D
 // ユークリッド距離をもとめる (2D Ver.)

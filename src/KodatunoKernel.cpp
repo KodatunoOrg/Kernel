@@ -138,23 +138,6 @@ Coord Coord::operator &&(const Coord& a) const
 }
 
 // Function: DiffCoord
-// 座標値がAPPROX_ZEROの精度で同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-//
-// Parameter: 
-// a,b - 比較する2つの座標値
-//
-// Return:
-// A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord(Coord a,Coord b)
-{
-	if(fabs(a.x-b.x) <= APPROX_ZERO && fabs(a.y-b.y) <= APPROX_ZERO && fabs(a.z-b.z) <= APPROX_ZERO)
-	//if(fabs(a.x-b.x) == 0 && fabs(a.y-b.y) == 0 && fabs(a.z-b.z) == 0)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
-}
-
-// Function: DiffCoord
 // 座標値が指定の精度で同じならKOD_TRUE、異なっているならKOD_FALSEを返す(オーバーロード) 
 //
 // Parameter: 
@@ -163,29 +146,9 @@ int DiffCoord(Coord a,Coord b)
 //
 // Return:
 // A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord(Coord a,Coord b,double App)
+int Coord::DiffCoord(const Coord& b,double App)
 {
-	if(fabs(a.x-b.x) <= App && fabs(a.y-b.y) <= App && fabs(a.z-b.z) <= App)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
-}
-
-// Function: DiffCoord2D
-// 2D平面での座標値がAPPROX_ZEROの精度で同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-//
-// Parameter: 
-// a,b - 比較する2つの座標値
-//
-// Return:
-// A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord2D(Coord a,Coord b)
-{
-	if(fabs(a.x-b.x) <= APPROX_ZERO && fabs(a.y-b.y) <= APPROX_ZERO)
-	//if(fabs(a.x-b.x) == 0 && fabs(a.y-b.y) == 0 && fabs(a.z-b.z) == 0)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
+	return (fabs(x-b.x)<=App && fabs(y-b.y)<=App && fabs(z-b.z)<=App) ? KOD_TRUE : KOD_FALSE;
 }
 
 // Function: DiffCoord2D
@@ -197,13 +160,9 @@ int DiffCoord2D(Coord a,Coord b)
 //
 // Return:
 // A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord2D(Coord a,Coord b,double App)
+int Coord::DiffCoord2D(const Coord& b,double App)
 {
-	if(fabs(a.x-b.x) <= App && fabs(a.y-b.y) <= App)
-	//if(fabs(a.x-b.x) == 0 && fabs(a.y-b.y) == 0 && fabs(a.z-b.z) == 0)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
+	return (fabs(x-b.x)<=App && fabs(y-b.y)<=App) ? KOD_TRUE : KOD_FALSE;
 }
 
 // Function: AbsCoord
@@ -279,12 +238,9 @@ Coord& Coord::SetCoord(double xx,double yy,double zz,double dd)
 // Parameters:
 // a - 検証する座標値
 // KOD_TRUE: (0,0,0)でない．  KOD_FALSE: (0,0,0)
-int ZoroCoord(Coord a)
+int Coord::ZoroCoord(void)
 {
-	if(a.x == 0.0 && a.y == 0.0 && a.z == 0.0)
-		return KOD_FALSE;
-
-	return KOD_TRUE;
+	return (x==0.0 && y==0.0 && z==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
 // Function: ZoroCoord2D
@@ -293,12 +249,9 @@ int ZoroCoord(Coord a)
 // Parameters:
 // a - 検証する座標値
 // KOD_TRUE: (0,0)でない．  KOD_FALSE: (0,0)
-int ZoroCoord2D(Coord a)
+int Coord::ZoroCoord2D(void)
 {
-	if(a.x == 0.0 && a.y == 0.0)
-		return KOD_FALSE;
-
-	return KOD_TRUE;
+	return (x==0.0 && y==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
 // Function: NewVector
