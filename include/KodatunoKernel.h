@@ -88,41 +88,41 @@ public:
 	// Coordの足し算(AddCoord())
 	void	AddCoord(double, double, double=0.0, double=0.0);		// 兼2D ver.
 	Coord& operator +=(const Coord&);
-	Coord& operator + (const Coord&) const;
 	Coord& operator +=(double);
+	Coord  operator + (const Coord&) const;
 
 	// Oeprator: -
 	// Coordの引き算(SubCoord())
 	void	SubCoord(double, double, double=0.0, double=0.0);
 	Coord& operator -=(const Coord&);
-	Coord& operator - (const Coord&) const;
 	Coord& operator -=(double);
+	Coord  operator - (const Coord&) const;
 
 	// Oeprator: *
 	// Coordの掛け算(MulCoord())
 	void	MulCoord(double, double, double=1.0, double=1.0);
 	Coord& operator *=(const Coord&);
-	Coord& operator * (const Coord&) const;
 	Coord& operator *=(double);
+	Coord  operator * (const Coord&) const;
 
 	// Operator: /
 	// Coordの割り算(DivCoord())
 	void	DivCoord(double, double, double=1.0, double=1.0);
 	Coord& operator /=(const Coord&);
-	Coord& operator / (const Coord&) const;
 	Coord& operator /=(double);
-
-	// Operator: /
-	// Coordとdoubleとの割り算（オーバーロード）
-	Coord operator /(double);	// オーバーロード
+	Coord  operator / (const Coord&) const;
 
 	// Operator: &
-	// Coord同士の内積(CalcInnerProduct())
-	double operator &(Coord);
+	// Coordの内積(CalcInnerProduct())
+	double CalcInnerProduct(const Coord&) const;
+	double CalcInnerProduct(double,double,double) const;
+	double operator &(const Coord&) const;
 
 	// Operator: &&
-	// Coord同士の外積(CalcOuterProduct())
-	Coord operator &&(Coord);
+	// Coordの外積(CalcOuterProduct())
+	Coord CalcOuterProduct(const Coord&) const;
+	double CalcOuterProduct2D(const Coord&) const;
+	Coord operator &&(const Coord&) const;
 };
 
 
@@ -221,18 +221,6 @@ Coord NormalizeVec(Coord);
 // 3次元ベクトルを正規化(単位ベクトル化)(オーバーロード)
 Coord NormalizeVec(double,double,double);		
 
-// Function: CalcInnerProduct
-// 内積を求める
-double CalcInnerProduct(Coord,Coord);			
-
-// Function: CalcInnerProduct
-// 内積を求める(オーバーロード)
-double CalcInnerProduct(Coord,double,double,double);	
-
-// Function: CalcOuterProduct
-// 外積を求める
-Coord CalcOuterProduct(Coord,Coord);			
-
 // Function: CalcInterDivPt
 // 2点間の内分点を求める
 Coord CalcInterDivPt(Coord,Coord,double);		
@@ -311,10 +299,6 @@ double CalcVecAngle2D(Coord,Coord);
 // Function: CalcRotVec2D
 // 任意のベクトルを回転させたベクトルを求める(2D平面)
 Coord CalcRotVec2D(Coord,double);				
-
-// Function: CalcOuterProduct2D
-// 外積を求める (2D Ver.)
-double CalcOuterProduct2D(Coord,Coord);			
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る

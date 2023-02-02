@@ -23,7 +23,7 @@ Coord& Coord::operator =(const Coord& a)
 }
 
 // Operator: +
-// Coord同士の足し算(AddCoord())
+// Coordの足し算(AddCoord())
 void Coord::AddCoord(double xx, double yy, double zz, double dmy)
 {
 	x += xx;
@@ -36,19 +36,19 @@ Coord& Coord::operator +=(const Coord& a)
 	AddCoord(a.x, a.y, a.z);
 	return *this;
 }
-Coord& Coord::operator + (const Coord& a) const
-{
-	Coord	c(*this);
-	return c+=a;
-}
 Coord& Coord::operator +=(double n)
 {
 	AddCoord(n, n, n);
 	return *this;
 }
+Coord Coord::operator + (const Coord& a) const
+{
+	Coord	c(*this);
+	return c+=a;
+}
 
 // Operator: -
-// Coord同士の引き算(SubCoord())
+// Coordの引き算(SubCoord())
 void Coord::SubCoord(double xx, double yy, double zz, double dmy)
 {
 	x -= xx;
@@ -61,19 +61,19 @@ Coord& Coord::operator -=(const Coord& a)
 	SubCoord(a.x, a.y, a.z);
 	return *this;
 }
-Coord& Coord::operator - (const Coord& a) const
-{
-	Coord	c(*this);
-	return c-=a;
-}
 Coord& Coord::operator -=(double n)
 {
 	SubCoord(n, n, n);
 	return *this;
 }
+Coord Coord::operator - (const Coord& a) const
+{
+	Coord	c(*this);
+	return c-=a;
+}
 
 // Oeprator: *
-// Coord同士の掛け算(MulCoord())
+// Coordの掛け算(MulCoord())
 void Coord::MulCoord(double xx, double yy, double zz=1.0, double dmy=1.0)
 {
 	x *= xx;
@@ -86,19 +86,19 @@ Coord& Coord::operator *=(const Coord& a)
 	MulCoord(a.x, a.y, a.z);
 	return *this;
 }
-Coord& Coord::operator * (const Coord& a) const
-{
-	Coord	c(*this);
-	return c*=a;
-}
 Coord& Coord::operator *=(double n)
 {
 	MulCoord(n, n, n);
 	return *this;
 }
+Coord Coord::operator * (const Coord& a) const
+{
+	Coord	c(*this);
+	return c*=a;
+}
 
 // Operator: /
-// Coord同士の割り算(DivCoord())
+// Coordの割り算(DivCoord())
 void Coord::DivCoord(double xx, double yy, double zz, double dmy)
 {
 	if ( xx==0 || yy==0 || zz==0 || dmy==0) {
@@ -116,29 +116,29 @@ Coord& Coord::operator /=(const Coord& a)
 	DivCoord(a.x, a.y, a.z);
 	return *this;
 }
-Coord& Coord::operator / (const Coord& a) const
-{
-	Coord	c(*this);
-	return c/=a;
-}
 Coord& Coord::operator /=(double n)
 {
 	DivCoord(n, n, n);
 	return *this;
 }
+Coord Coord::operator / (const Coord& a) const
+{
+	Coord	c(*this);
+	return c/=a;
+}
 
 // Operator: &
-// Coord同士の内積(CalcInnerProduct())
-double Coord::operator &(Coord a)
+// Coordの内積(CalcInnerProduct())
+double Coord::operator &(const Coord& a) const
 {
-	return(CalcInnerProduct(*this,a));
+	return CalcInnerProduct(a);
 }
 
 // Operator: &&
-// Coord同士の外積(CalcOuterProduct())
-Coord Coord::operator &&(Coord a)
+// Coordの外積(CalcOuterProduct())
+Coord Coord::operator &&(const Coord& a) const
 {
-	return(CalcOuterProduct(*this,a));
+	return CalcOuterProduct(a);
 }
 
 // Function: InitCoord
@@ -661,9 +661,9 @@ double CalcDistance2D(Coord a,Coord b)
 //
 // Return:
 // 内積
-double CalcInnerProduct(Coord a,Coord b)
+double Coord::CalcInnerProduct(const Coord& b) const
 {
-	return(a.x*b.x+a.y*b.y+a.z*b.z);
+	return x*b.x + y*b.y + z*b.z;
 }
 
 // Function: CalcInnerProduct
@@ -675,9 +675,9 @@ double CalcInnerProduct(Coord a,Coord b)
 //
 // Return:
 // 内積
-double CalcInnerProduct(Coord a,double x,double y,double z)
+double Coord::CalcInnerProduct(double xx,double yy,double zz) const
 {
-	return(a.x*x+a.y*y+a.z*z);
+	return x*xx + y*yy + z*zz;
 }
 
 // Function: CalcOuterProduct
@@ -688,13 +688,13 @@ double CalcInnerProduct(Coord a,double x,double y,double z)
 //
 // Return:
 // 外積
-Coord CalcOuterProduct(Coord a,Coord b)
+Coord Coord::CalcOuterProduct(const Coord& b) const
 {
 	Coord c;
 
-	c.x = a.y*b.z - a.z*b.y;
-	c.y = a.z*b.x - a.x*b.z;
-	c.z = a.x*b.y - a.y*b.x;
+	c.x = y*b.z - z*b.y;
+	c.y = z*b.x - x*b.z;
+	c.z = x*b.y - y*b.x;
 
 	return c;
 }
@@ -707,9 +707,9 @@ Coord CalcOuterProduct(Coord a,Coord b)
 //
 // Return:
 // 外積
-double CalcOuterProduct2D(Coord a,Coord b)
+double Coord::CalcOuterProduct2D(const Coord& b) const
 {
-	return(a.x*b.y - a.y*b.x);
+	return x*b.y - y*b.x;
 }
 
 // Function: CalcVecAngle
