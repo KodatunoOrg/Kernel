@@ -92,6 +92,11 @@ Coord Coord::operator * (const Coord& a) const
 	Coord	c(*this);
 	return c*=a;
 }
+Coord Coord::operator * (double n) const
+{
+	Coord	c(*this);
+	return c*=n;
+}
 
 // Operator: /
 // Coordの割り算(DivCoord())
@@ -122,6 +127,11 @@ Coord Coord::operator / (const Coord& a) const
 	Coord	c(*this);
 	return c/=a;
 }
+Coord Coord::operator / (double n) const
+{
+	Coord	c(*this);
+	return c/=n;
+}
 
 // Operator: &
 // Coordの内積(CalcInnerProduct())
@@ -146,7 +156,7 @@ Coord Coord::operator &&(const Coord& a) const
 //
 // Return:
 // A==B: KOD_TRUE, A!=B: KOD_FALSE
-int Coord::DiffCoord(const Coord& b,double App)
+int Coord::DiffCoord(const Coord& b,double App) const
 {
 	return (fabs(x-b.x)<=App && fabs(y-b.y)<=App && fabs(z-b.z)<=App) ? KOD_TRUE : KOD_FALSE;
 }
@@ -160,7 +170,7 @@ int Coord::DiffCoord(const Coord& b,double App)
 //
 // Return:
 // A==B: KOD_TRUE, A!=B: KOD_FALSE
-int Coord::DiffCoord2D(const Coord& b,double App)
+int Coord::DiffCoord2D(const Coord& b,double App) const
 {
 	return (fabs(x-b.x)<=App && fabs(y-b.y)<=App) ? KOD_TRUE : KOD_FALSE;
 }
@@ -173,13 +183,13 @@ int Coord::DiffCoord2D(const Coord& b,double App)
 //
 // Return:
 // x,y,z各座標の絶対値を返す
-Coord AbsCoord(Coord a)
+Coord Coord::AbsCoord(void) const
 {
 	Coord ans;
 
-	ans.x = fabs(a.x);
-	ans.y = fabs(a.y);
-	ans.z = fabs(a.z);
+	ans.x = fabs(x);
+	ans.y = fabs(y);
+	ans.z = fabs(z);
 
 	return ans;
 }
@@ -192,12 +202,12 @@ Coord AbsCoord(Coord a)
 //
 // Return:
 // x,y,z各座標の絶対値を返す
-Coord AbsCoord2D(Coord a)
+Coord Coord::AbsCoord2D(void) const
 {
 	Coord ans;
 
-	ans.x = fabs(a.x);
-	ans.y = fabs(a.y);
+	ans.x = fabs(x);
+	ans.y = fabs(y);
 
 	return ans;
 }
@@ -238,7 +248,7 @@ Coord& Coord::SetCoord(double xx,double yy,double zz,double dd)
 // Parameters:
 // a - 検証する座標値
 // KOD_TRUE: (0,0,0)でない．  KOD_FALSE: (0,0,0)
-int Coord::ZoroCoord(void)
+int Coord::ZoroCoord(void) const
 {
 	return (x==0.0 && y==0.0 && z==0.0) ? KOD_FALSE : KOD_TRUE;
 }
@@ -249,7 +259,7 @@ int Coord::ZoroCoord(void)
 // Parameters:
 // a - 検証する座標値
 // KOD_TRUE: (0,0)でない．  KOD_FALSE: (0,0)
-int Coord::ZoroCoord2D(void)
+int Coord::ZoroCoord2D(void) const
 {
 	return (x==0.0 && y==0.0) ? KOD_FALSE : KOD_TRUE;
 }
@@ -458,22 +468,9 @@ Coord NormalizeVec(double x,double y,double z)
 //
 // Return:
 // ユークリッド距離
-double CalcEuclid(Coord a)
+double Coord::CalcEuclid(void) const
 {
-	return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
-}
-
-// Function: CalcEuclid2D
-// 2次元ユークリッド距離を算出
-//
-// Parameters:
-// a,b - 2次元ベクトル(a,b)
-//
-// Return:
-// ユークリッド距離
-double CalcEuclid2D(double a,double b)
-{
-	return sqrt(a*a+b*b);
+	return sqrt(x*x + y*y + z*z);
 }
 
 // Function: CalcDistance
@@ -484,9 +481,12 @@ double CalcEuclid2D(double a,double b)
 //
 // Return:
 // 2点間のユークリッド距離
-double CalcDistance(Coord a,Coord b)
+double Coord::CalcDistance(const Coord& b) const
 {
-	return(CalcEuclid(SubCoord(a,b)));
+//--return(CalcEuclid(SubCoord(a,b)));
+//	Coord	ans(operator-(b));
+//	return ans.CalcEuclid();
+	return Coord(operator-(b)).CalcEuclid();
 }
 
 // Function: CalcDistance2D
@@ -497,9 +497,9 @@ double CalcDistance(Coord a,Coord b)
 //
 // Return:
 // 2点間のユークリッド距離
-double CalcDistance2D(Coord a,Coord b)
+double Coord::CalcDistance2D(const Coord& b) const
 {
-	return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+	return sqrt((x-b.x)*(x-b.x) + (y-b.y)*(y-b.y));
 }
 
 // Function: CalcInnerProduct
@@ -569,11 +569,11 @@ double Coord::CalcOuterProduct2D(const Coord& b) const
 //
 // Return:
 // 2つのベクトルのなす角(rad)
-double CalcVecAngle(Coord a,Coord b)
+double Coord::CalcVecAngle(const Coord& b) const
 {
-	double inn = CalcInnerProduct(a,b);
-	double abs_a = CalcEuclid(a);
-	double abs_b = CalcEuclid(b);
+	double inn = CalcInnerProduct(b);
+	double abs_a =   CalcEuclid();
+	double abs_b = b.CalcEuclid();
 
 	return(acos(inn/abs_a/abs_b));
 }
@@ -587,45 +587,54 @@ double CalcVecAngle(Coord a,Coord b)
 // 
 // Return:
 // 内分点座標
-Coord CalcInterDivPt(Coord p,Coord q,double t)
+Coord Coord::CalcInterDivPt(const Coord& q,double t) const
 {
-	return(AddCoord(p,MulCoord(SubCoord(q,p),t)));
+//	return (AddCoord(p,MulCoord(SubCoord(q,p),t)));
+	Coord	r(q);
+	r -= *this;
+	r *= t;
+	r += *this;
+	return r;
 }
 
 // Function: CalcOrthoProjection
 // 任意の点を任意の平面へ正射影する
 //
 // Parameters:
-// p - 任意の平面上の点
+// p - 任意の平面上の点（自分自身）
 // n - 任意の平面の単位法線ベクトル
 // q - 正射影したい点
 //
 // Return:
 // 正射影された点の座標値
-Coord CalcOrthoProjection(Coord p,Coord n,Coord q)
+Coord Coord::CalcOrthoProjection(const Coord& n, const Coord& q) const
 {
-	if(fabs(1-CalcEuclid(n)) > APPROX_ZERO){
+	if(fabs(1-n.CalcEuclid()) > APPROX_ZERO){
 //		GuiIFB.SetMessage("ERROR:Norm vector is not unit vector.");
 //		GuiIFB.SetMessage("Norm vetor is resized to unit vector.");
 		NormalizeVec(n);
 	}
-	double inn = CalcInnerProduct(SubCoord(q,p),n);
-	return (SubCoord(q,MulCoord(n,inn)));
+//	double inn = CalcInnerProduct(SubCoord(q,p),n);
+//	return (SubCoord(q,MulCoord(n,inn)));
+	Coord	r(q);
+	r -= *this;
+	double inn = r.CalcInnerProduct(n);
+	return q - (n * inn);
 }
 
 // Function: CalcDistPtToPlane
 // 任意の点から任意の平面までの距離を求める
 //
 // Parameters:
-// Pt - 任意の点  
+// Pt - 任意の点（自分自身）
 // P0 - 平面上の1点  
 // N - 平面の法線ベクトル
 //
 // Return:
 // 計算結果
-double CalcDistPtToPlane(Coord Pt,Coord P0,Coord N)
+double Coord::CalcDistPtToPlane(const Coord& P0, const Coord& N) const
 {
-	return((fabs(N.x*Pt.x + N.y*Pt.y + N.z*Pt.z - (N.x*P0.x + N.y*P0.y + N.z*P0.z)))/CalcEuclid(N));
+	return((fabs(N.x*x + N.y*y + N.z*z - (N.x*P0.x + N.y*P0.y + N.z*P0.z)))/N.CalcEuclid());
 }
 
 // Function: CalcScalarTriProduct
@@ -636,9 +645,9 @@ double CalcDistPtToPlane(Coord Pt,Coord P0,Coord N)
 //
 // Return:
 // スカラー三重積
-double CalcScalarTriProduct(Coord a,Coord b,Coord c)
+double Coord::CalcScalarTriProduct(const Coord& b, const Coord& c) const
 {
-	return(CalcInnerProduct(a,CalcOuterProduct(b,c)));
+	return CalcInnerProduct(b.CalcOuterProduct(c));
 }
 
 // Function: CalcAnglePlaneVec
@@ -650,9 +659,9 @@ double CalcScalarTriProduct(Coord a,Coord b,Coord c)
 //
 // Return:
 // 計算結果(radian)
-double CalcAnglePlaneVec(Coord a,Coord n)
+double Coord::CalcAnglePlaneVec(const Coord& n) const
 {
-	return(PI/2 - CalcVecAngle(a,n));
+	return(PI/2 - CalcVecAngle(n));
 }
 
 // Function: DrawPoint
@@ -807,19 +816,19 @@ double RadToDeg(double radian)
 // 円の中心点(vec[0])から円上に接する任意の2本の接線が交わる点へのベクトル(中心角0<θ<π)
 //
 // Parameters:
-// a - 円弧をなすベクトル1  
+// a - 円弧をなすベクトル1（自分自身）
 // b - 円弧をなすベクトル2  
 // cos - 中心角の余弦
 //
 // Return:
 // 計算結果
-Coord Arc_CP(Coord a, Coord b, double cos)
+Coord Coord::Arc_CP(const Coord& b, double cos) const
 {
 	Coord ans;
 
-	ans.x = (a.x + b.x)/(1 + cos);
-	ans.y = (a.y + b.y)/(1 + cos);
-	ans.z = (a.z + b.z)/(1 + cos);
+	ans.x = (x + b.x)/(1 + cos);
+	ans.y = (y + b.y)/(1 + cos);
+	ans.z = (z + b.z)/(1 + cos);
 
 	return ans;
 }
@@ -832,12 +841,12 @@ Coord Arc_CP(Coord a, Coord b, double cos)
 //
 // Return: 
 // 計算結果
-double CalcVecAngle2D(Coord a, Coord b)
+double Coord::CalcVecAngle2D(const Coord& b) const
 {
 	double angle,sin,cos;
 
-	sin = (a.x*b.y - b.x*a.y)/(a.x*a.x + a.y*a.y);
-	cos = (a.x*b.x + a.y*b.y)/(a.x*a.x + a.y*a.y);
+	sin = (x*b.y - b.x*y)/(x*x + y*y);
+	cos = (x*b.x + y*b.y)/(x*x + y*y);
 
 	angle = atan2(sin,cos);
 	if(angle < 0) angle = angle + 2.0*PI;
@@ -849,18 +858,18 @@ double CalcVecAngle2D(Coord a, Coord b)
 // 任意のベクトルを回転させたベクトルを求める(2D平面)
 // 
 // Parameters:
-// a - 任意の2次元ベクトル
+// a - 任意の2次元ベクトル（自分自身）
 // angle - 回転角度(rad)
 //
 // Return:
 // 回転後の2次元ベクトル
-Coord CalcRotVec2D(Coord a, double angle)
+Coord Coord::CalcRotVec2D(double angle) const
 {
 	Coord ans;
 
-	ans.x = a.x*cos(angle) - a.y*sin(angle);
-	ans.y = a.x*sin(angle) + a.y*cos(angle);
-	ans.z = a.z;
+	ans.x = x*cos(angle) - y*sin(angle);
+	ans.y = x*sin(angle) + y*cos(angle);
+	ans.z = z;
 
 	return ans;
 }
@@ -869,22 +878,22 @@ Coord CalcRotVec2D(Coord a, double angle)
 // 任意のベクトルを原点を通る任意軸周りに回転させたベクトルを求める(ロドリゲスの回転公式)
 //
 // Parameters:
-// a - 回転させたいベクトル  
+// a - 回転させたいベクトル（自分自身）
 // e - 原点を通る任意軸(単位ベクトルであること)  
 // ang - 回転角(rad)
 //
 // Return: 
 // 回転後のベクトル
-Coord CalcRotVec(Coord a,Coord e,double ang)
+Coord Coord::CalcRotVec(const Coord& e,double ang) const
 {
-	if(ang == 0.0)	return a;
+	if(ang == 0.0)	return *this;
 
 	Coord ans;
 	double ca = 1-cos(ang);
 
-	ans.x = (e.x*e.x*ca+cos(ang))*a.x + (e.x*e.y*ca-e.z*sin(ang))*a.y + (e.x*e.z*ca+e.y*sin(ang))*a.z;
-	ans.y = (e.x*e.y*ca+e.z*sin(ang))*a.x + (e.y*e.y*ca+cos(ang))*a.y + (e.y*e.z*ca-e.x*sin(ang))*a.z;
-	ans.z = (e.x*e.z*ca-e.y*sin(ang))*a.x + (e.y*e.z*ca+e.x*sin(ang))*a.y + (e.z*e.z*ca+cos(ang))*a.z;
+	ans.x = (e.x*e.x*ca+cos(ang))*x + (e.x*e.y*ca-e.z*sin(ang))*y + (e.x*e.z*ca+e.y*sin(ang))*z;
+	ans.y = (e.x*e.y*ca+e.z*sin(ang))*x + (e.y*e.y*ca+cos(ang))*y + (e.y*e.z*ca-e.x*sin(ang))*z;
+	ans.z = (e.x*e.z*ca-e.y*sin(ang))*x + (e.y*e.z*ca+e.x*sin(ang))*y + (e.z*e.z*ca+cos(ang))*z;
 
 	return ans;
 }
@@ -893,17 +902,19 @@ Coord CalcRotVec(Coord a,Coord e,double ang)
 // 任意の点Pから任意の直線(点Aを通り単位ベクトルuの方向を持つ)へ下ろした点を求める
 //
 // Parameters:
-// P - 任意の点
+// P - 任意の点（自分自身）
 // A - 任意の直線上の点
 // u - 任意の直線の単位方向ベクトル
 //
 // Return:
 // 計算結果
-Coord CalcNormalLine(Coord P,Coord A,Coord u)
+Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 {
-	double k = CalcInnerProduct(SubCoord(P,A),u);
-
-	return(AddCoord(A,MulCoord(u,k)));
+//	double k = CalcInnerProduct(SubCoord(P,A),u);
+//	return(AddCoord(A,MulCoord(u,k)));
+	Coord	r(operator-(A));
+	double k = r.CalcInnerProduct(u);
+	return A + (u*k);
 }
 
 // Function: BubbleSort
@@ -1340,37 +1351,37 @@ int CheckMag(double val1,double val2,int flag)
 // 注目点の多角形内外判別(x-y平面内)
 //
 // Parameters:
-// TargetPoint - 注目点  
+// TargetPoint - 注目点（自分自身）  
 // *BorderPoint - 多角形の頂点群配列   
 // CountPoint - 頂点の数
 // 
 // Returns:
 // KOD_TRUE:内  KOD_FALSE:外  KOD_ONEDGE:エッジ上
-int IsPointInPolygon(Coord TargetPoint,Coord *BorderPoint,int CountPoint)
+int Coord::IsPointInPolygon(const Coord* BorderPoint, int CountPoint) const
 {
 	int i;
-	int iCountCrossing = 0;				// 内外判定カウンタ
-	Coord p0;					// 多角形の一辺(ベクトル)の始点
-	Coord p1;					// 多角形の一辺(ベクトル)の終点
+	int iCountCrossing = 0;			// 内外判定カウンタ
+	Coord p0;						// 多角形の一辺(ベクトル)の始点
+	Coord p1;						// 多角形の一辺(ベクトル)の終点
 
-	p0 = SetCoord(BorderPoint[0]);			// 境界線ループ(多角形)の始点を用意
-	bool bFlag0x = (TargetPoint.x <= p0.x);	// 対象点のx座標と境界線の始点(多角形の一つ目の辺の始点)のx座標の大小比較
-	bool bFlag0y = (TargetPoint.y <= p0.y);		// 対象点のy座標と境界線の始点(多角形の一つ目の辺の始点)のy座標の大小比較
+	p0 = BorderPoint[0];			// 境界線ループ(多角形)の始点を用意
+	bool bFlag0x = (x <= p0.x);		// 対象点のx座標と境界線の始点(多角形の一つ目の辺の始点)のx座標の大小比較
+	bool bFlag0y = (y <= p0.y);		// 対象点のy座標と境界線の始点(多角形の一つ目の辺の始点)のy座標の大小比較
 
 	// 内外判定する点に対してその点から伸びる半直線により内外判定を行う(半直線の方向は、Ｘプラス方向)
 	for(i=1;i<CountPoint+1;i++)
 	{
-		p1 = SetCoord(BorderPoint[i%CountPoint]);	// 最後は始点が入る（多角形データの始点と終点が一致していないデータ対応）
+		p1 = BorderPoint[i%CountPoint];	// 最後は始点が入る（多角形データの始点と終点が一致していないデータ対応）
 
 		// TargetPointがエッジ上(p0とp1の線上)にあるかチェック
-		double a = (p1.x-p0.x)*(TargetPoint.x-p0.x) + (p1.y-p0.y)*(TargetPoint.y-p0.y);
-		double L1 = CalcDistance2D(p1,p0);
-		double L2 = CalcDistance2D(TargetPoint,p0);
+		double a = (p1.x-p0.x)*(x-p0.x) + (p1.y-p0.y)*(y-p0.y);
+		double L1 = p1.CalcDistance2D(p0);
+		double L2 =    CalcDistance2D(p0);
 		if(CheckZero(a-L1*L2,MID_ACCURACY) == KOD_TRUE && L1 >= L2){	// エッジ上だった
 			return KOD_ONEDGE;		// 問答無用でreturn
 		}
-		bool bFlag1x = (TargetPoint.x <= p1.x);		
-		bool bFlag1y = (TargetPoint.y <= p1.y);	
+		bool bFlag1x = (x <= p1.x);		
+		bool bFlag1y = (y <= p1.y);	
 
 		if(bFlag0y != bFlag1y){			// 線分は半直線を横切る可能性あり
 			if(bFlag0x == bFlag1x){		// 線分の２端点は対象点に対して両方右か両方左にある
@@ -1379,7 +1390,7 @@ int IsPointInPolygon(Coord TargetPoint,Coord *BorderPoint,int CountPoint)
 				}
 			}
 			else{					// 半直線と交差するかどうか、対象点と同じ高さで、対象点の右で交差するか、左で交差するかを求める。
-				if(TargetPoint.x <= (p0.x + (p1.x - p0.x)*(TargetPoint.y - p0.y )/(p1.y - p0.y))){	// 線分は、対象点と同じ高さで、対象点の右で交差する。線分は半直線を横切る
+				if(x <= (p0.x + (p1.x - p0.x)*(y - p0.y )/(p1.y - p0.y))){	// 線分は、対象点と同じ高さで、対象点の右で交差する。線分は半直線を横切る
 					iCountCrossing += (bFlag0y ? -1 : 1);	// 上から下に半直線を横切るときには、交差回数を１引く、下から上は１足す。
 				}
 			}
@@ -1406,12 +1417,12 @@ int IsPointInPolygon(Coord TargetPoint,Coord *BorderPoint,int CountPoint)
 //
 // Return:
 // 計算結果
-Coord CalcNormVecFrom3Pts(Coord p1,Coord p2,Coord p3)
+Coord Coord::CalcNormVecFrom3Pts(const Coord& p2, const Coord& p3) const
 {
-	Coord denom = (p2-p1)&&(p3-p1);
-	double numer = CalcEuclid(denom);
+	Coord denom = operator-(p2)&&operator-(p3);
+	double numer = denom.CalcEuclid();
 
-	return DivCoord(denom,numer);
+	return denom.operator/(numer);
 }
 
 // Function: CalcPolygonArea
@@ -1428,7 +1439,7 @@ double CalcPolygonArea(Coord p[],int Vnum)
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
-		area += CalcEuclid(CalcOuterProduct(p[i],p[(i+1)%Vnum]));
+		area += p[i].CalcOuterProduct(p[(i+1)%Vnum]).CalcEuclid();
 	}
 
 	return(area/2);
@@ -1448,7 +1459,7 @@ double ClacPolygonArea2D(Coord p[],int Vnum)
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
-		area += CalcOuterProduct2D(p[i],p[(i+1)%Vnum]);
+		area += p[i].CalcOuterProduct2D(p[(i+1)%Vnum]);
 	}
 
 	return(area/2);

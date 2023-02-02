@@ -108,6 +108,7 @@ public:
 	Coord& operator *=(const Coord&);
 	Coord& operator *=(double);
 	Coord  operator * (const Coord&) const;
+	Coord  operator * (double) const;
 
 	// Operator: /
 	// Coordの割り算(DivCoord())
@@ -115,6 +116,7 @@ public:
 	Coord& operator /=(const Coord&);
 	Coord& operator /=(double);
 	Coord  operator / (const Coord&) const;
+	Coord  operator / (double) const;
 
 	// Operator: &
 	// Coordの内積(CalcInnerProduct())
@@ -131,13 +133,74 @@ public:
 	// -- 比較関数
 	// Function: ZoroCoord
 	// (0,0,0)でないときKOD_TRUEを返す
-	int ZoroCoord(void);							
-	int ZoroCoord2D(void);							
+	int ZoroCoord(void) const;
+	int ZoroCoord2D(void) const;
 
 	// Function: DiffCoord
 	// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-	int DiffCoord(const Coord&, double=APPROX_ZERO);
-	int DiffCoord2D(const Coord&, double=APPROX_ZERO);
+	int DiffCoord(const Coord&, double=APPROX_ZERO) const;
+	int DiffCoord2D(const Coord&, double=APPROX_ZERO) const;
+
+	// Function: IsPointInPolygon
+	// 注目点の多角形内外判別
+	int IsPointInPolygon(const Coord*, int) const;
+
+	// -- 計算関数
+	// Function: AbsCoord
+	// 座標値の絶対値を返す
+	Coord AbsCoord(void) const;
+	Coord AbsCoord2D(void) const;
+
+	// Function: CalcEuclid
+	// ユークリッド距離をもとめる
+	double CalcEuclid(void) const;
+
+	// Function: CalcDistance
+	// 2点間のユークリッド距離を求める
+	double CalcDistance(const Coord&) const;
+	double CalcDistance2D(const Coord&) const;
+
+	// Function: CalcRotVec
+	// 任意のベクトルを原点を通る任意軸周りに回転させたベクトルを求める(3D平面)
+	Coord CalcRotVec(const Coord&,double) const;
+	Coord CalcRotVec2D(double) const;
+
+	// Function: CalcVecAngle
+	// 2つのベクトルのなす角を求める
+	double CalcVecAngle(const Coord&) const;
+	double CalcVecAngle2D(const Coord&) const;
+
+	// Function: CalcAnglePlaneVec
+	// 平面と直線とのなす角を求める
+	double CalcAnglePlaneVec(const Coord&) const;
+
+	// Function: CalcInterDivPt
+	// 2点間の内分点を求める
+	Coord CalcInterDivPt(const Coord&,double) const;
+
+	// Function: CalcOrthoProjection
+	// 任意の点を任意の平面へ正射影する
+	Coord CalcOrthoProjection(const Coord&, const Coord&) const;
+
+	// Function: CalcDistPtToPlane
+	// 任意の点から任意の平面までの距離を求める
+	double CalcDistPtToPlane(const Coord&, const Coord&) const;
+
+	// Function: CalcScalarTriProduct
+	// スカラー三重積を求める
+	double CalcScalarTriProduct(const Coord&, const Coord&) const;
+
+	// Function: CalcNormalLine
+	// 任意の点から任意の直線へ下ろした点を求める
+	Coord CalcNormalLine(const Coord&, const Coord&) const;
+
+	// Function: Arc_CP
+	// 円の中心点(vec[0])から円上に接する任意の2本の接線が交わる点へのベクトル(中心角0<θ<π)
+	Coord Arc_CP(const Coord&, double) const;
+
+	// Function: CalcNormVecFrom3Pts
+	// 空間上の3点からなる平面の法線ベクトルを求める
+	Coord CalcNormVecFrom3Pts(const Coord&, const Coord&) const;
 };
 
 
@@ -168,30 +231,6 @@ typedef struct{
 
 // Group: Functions(3次元ベクトル幾何演算)
 
-// Function: AbsCoord
-// 座標値の絶対値を返す
-Coord AbsCoord(Coord);							
-
-// Function: CalcEuclid
-// ユークリッド距離をもとめる
-double CalcEuclid(Coord);						
-
-// Function: CalcDistance
-// 2点間のユークリッド距離を求める
-double CalcDistance(Coord,Coord);				
-
-// Function: CalcRotVec
-// 任意のベクトルを原点を通る任意軸周りに回転させたベクトルを求める(3D平面)
-Coord CalcRotVec(Coord,Coord,double);			
-
-// Function: CalcVecAngle
-// 2つのベクトルのなす角を求める
-double CalcVecAngle(Coord,Coord);				
-
-// Function: CalcAnglePlaneVec
-// 平面と直線とのなす角を求める
-double CalcAnglePlaneVec(Coord,Coord);			
-
 // Function: NormalizeVec
 // 3次元ベクトルを正規化(単位ベクトル化)
 Coord NormalizeVec(Coord);						
@@ -200,60 +239,8 @@ Coord NormalizeVec(Coord);
 // 3次元ベクトルを正規化(単位ベクトル化)(オーバーロード)
 Coord NormalizeVec(double,double,double);		
 
-// Function: CalcInterDivPt
-// 2点間の内分点を求める
-Coord CalcInterDivPt(Coord,Coord,double);		
-
-// Function: CalcOrthoProjection
-// 任意の点を任意の平面へ正射影する
-Coord CalcOrthoProjection(Coord,Coord,Coord);	
-
-// Function: CalcDistPtToPlane
-// 任意の点から任意の平面までの距離を求める
-double CalcDistPtToPlane(Coord,Coord,Coord);	
-
-// Function: CalcScalarTriProduct
-// スカラー三重積を求める
-double CalcScalarTriProduct(Coord,Coord,Coord);	
-
-// Function: CalcNormalLine
-// 任意の点から任意の直線へ下ろした点を求める
-Coord CalcNormalLine(Coord,Coord,Coord);		
-
-// Function: Arc_CP
-// 円の中心点(vec[0])から円上に接する任意の2本の接線が交わる点へのベクトル(中心角0<θ<π)
-Coord Arc_CP(Coord,Coord,double);				
-
-// Function: IsPointInPolygon
-// 注目点の多角形内外判別
-int IsPointInPolygon(Coord,Coord *,int);		
-
-// Function: CalcNormVecFrom3Pts
-// 空間上の3点からなる平面の法線ベクトルを求める
-Coord CalcNormVecFrom3Pts(Coord,Coord,Coord);	
-
 
 // Group: Functions(2次元ベクトル幾何演算)
-
-// Function: AbsCoord2D
-// 座標値の絶対値を返す (2D Ver.)
-Coord AbsCoord2D(Coord);						
-
-// Function: CalcEuclid2D
-// ユークリッド距離をもとめる (2D Ver.)
-double CalcEuclid2D(double,double);				
-
-// Function: CalcDistance2D
-// 2次元座標上での2点間のユークリッド距離を算出 (2D Ver.)
-double CalcDistance2D(Coord,Coord);				
-
-// Function: CalcVecAngle2D
-// 2つのベクトルのなす角を求める (2D Ver.)
-double CalcVecAngle2D(Coord,Coord);				
-
-// Function: CalcRotVec2D
-// 任意のベクトルを回転させたベクトルを求める(2D平面)
-Coord CalcRotVec2D(Coord,double);				
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る
