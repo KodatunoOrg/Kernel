@@ -8,18 +8,14 @@ Coord::Coord()
 }
 Coord::Coord(const Coord& a)
 {
-	operator=(a);
+	SetCoord(a);
 }
 
 // Operator: =
 // 代入演算子のオーバーロード
 Coord& Coord::operator =(const Coord& a)
 {
-	x = a.x;
-	y = a.y;
-	z = a.z;
-	dmy = a.dmy;
-	return *this;
+	return SetCoord(a);
 }
 
 // Operator: +
@@ -141,47 +137,6 @@ Coord Coord::operator &&(const Coord& a) const
 	return CalcOuterProduct(a);
 }
 
-// Function: InitCoord
-// 座標値の初期化
-// 
-// Parameters:
-// *a - 初期化したい座標値のポインタ
-void InitCoord(Coord *a)
-{
-	a->x = 0;
-	a->y = 0;
-	a->z = 0;
-	a->dmy = 0;
-}
-// Function: InitCoord
-// 座標値配列の初期化(オーバーロード)
-// 
-// Parameters:
-// *a - 初期化したい座標値配列
-// n - 配列要素数
-void InitCoord(Coord *a,int n)
-{
-	for(int i=0;i<n;i++){
-		a[i].x = 0;
-		a[i].y = 0;
-		a[i].z = 0;
-		a[i].dmy = 0;
-	}
-}
-
-// Function: InitCoord
-// 座標値の初期化(オーバーロード)
-// 
-// Return:
-// 初期化された座標値
-Coord InitCoord()
-{
-	Coord a;
-	InitCoord(&a);
-
-	return a;
-}
-
 // Function: DiffCoord
 // 座標値がAPPROX_ZEROの精度で同じならKOD_TRUE、異なっているならKOD_FALSEを返す
 //
@@ -296,9 +251,9 @@ Coord AbsCoord2D(Coord a)
 // 
 // Return:
 // 引数aの値がそのまま返る
-Coord SetCoord(Coord a)
+Coord& Coord::SetCoord(const Coord& a)
 {
-	return a;
+	return SetCoord(a.x, a.y, a.z, a.dmy);
 }
 
 // Function: SetCoord
@@ -309,72 +264,13 @@ Coord SetCoord(Coord a)
 // 
 // Return:
 // (x,y,z)の値がCoordとして返る
-Coord SetCoord(double x,double y,double z)
+Coord& Coord::SetCoord(double xx,double yy,double zz,double dd)
 {
-	Coord ans;
-
-	ans.x = x;
-	ans.y = y;
-	ans.z = z;
-
-	return ans;
-}
-
-// Function: SetCoord2D
-// 座標値を代入する(2D Ver.)
-// 
-// Parameter:
-// a - 代入する座標値
-// 
-// Return:
-// 引数aの値がそのまま返る
-Coord SetCoord2D(Coord a)
-{
-	return a;
-}
-
-// Function: SetCoord2D
-// 座標値を代入する(オーバーロード)(2D Ver.)
-// 
-// Parameter:
-// x,y - 代入する座標値を要素ごとに指定
-// 
-// Return:
-// (x,y)の値がCoordとして返る
-Coord SetCoord2D(double x,double y)
-{
-	Coord ans;
-
-	ans.x = x;
-	ans.y = y;
-
-	return ans;
-}
-
-// Function: CopyCoord
-// 座標値群のコピー(b<--a)
-// 
-// Parameter:
-// *a - 代入する座標値配列
-// n - 配列の要素数
-// *b - 代入される方の座標値配列
-void CopyCoord(Coord *a,int n,Coord *b)
-{
-	for(int i=0;i<n;i++)
-		b[i] = SetCoord(a[i]);
-}
-
-// Function: CopyCoord2D
-// 座標値群のコピー(b<--a)(2D Ver.)
-// 
-// Parameter:
-// *a - 代入する座標値配列
-// n - 配列の要素数
-// *b - 代入される方の座標値配列
-void CopyCoord2D(Coord *a,int n,Coord *b)
-{
-	for(int i=0;i<n;i++)
-		b[i] = SetCoord2D(a[i]);
+	x = xx;
+	y = yy;
+	z = zz;
+	dmy = dd;
+	return *this;
 }
 
 // Function: ZoroCoord

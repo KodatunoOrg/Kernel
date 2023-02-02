@@ -80,13 +80,17 @@ public:
 	// 三次元座標値(x, y, z)及び，汎用としてdmyを用意
 	double x,y,z,dmy;
 
+	// 代入関数
+	Coord& SetCoord(const Coord&);
+	Coord& SetCoord(double,double,double=0.0,double=0.0);		// 兼2D ver.
+
 	// Operator: =
 	// 代入演算子のオーバーロード
 	Coord& operator  =(const Coord&);
 
 	// Operator: +
 	// Coordの足し算(AddCoord())
-	void	AddCoord(double, double, double=0.0, double=0.0);		// 兼2D ver.
+	void	AddCoord(double, double, double=0.0, double=0.0);
 	Coord& operator +=(const Coord&);
 	Coord& operator +=(double);
 	Coord  operator + (const Coord&) const;
@@ -152,30 +156,6 @@ typedef struct{
 // Package: グローバルな関数の定義
 
 // Group: Functions(3次元ベクトル幾何演算)
-
-// Function: InitCoord
-// 座標値の初期化
-void InitCoord(Coord *);
-
-// Function: InitCoord
-// 座標値の初期化(オーバーロード)
-void InitCoord(Coord *,int);				
-
-// Function: InitCoord
-// 座標値の初期化(オーバーロード)
-Coord InitCoord();
-
-// Function: SetCoord
-// 座標値を代入
-Coord SetCoord(Coord);							
-
-// Function: SetCoord
-// 座標値を代入(オーバーロード)
-Coord SetCoord(double,double,double);			
-
-// Function: CopyCoord
-// 座標値群をコピー
-void CopyCoord(Coord *,int,Coord *);			
 
 // Function: DiffCoord
 // 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す
@@ -255,18 +235,6 @@ Coord CalcNormVecFrom3Pts(Coord,Coord,Coord);
 
 
 // Group: Functions(2次元ベクトル幾何演算)
-
-// Function: SetCoord2D
-// 座標値を代入 (2D Ver.)
-Coord SetCoord2D(Coord);						
-
-// Function: SetCoord2D
-// オーバーロード (2D Ver.)
-Coord SetCoord2D(double,double);				
-
-// Function: CopyCoord2D
-// 座標値群をコピー (2D Ver.)
-void CopyCoord2D(Coord *,int,Coord *);			
 
 // Function: DiffCoord2D
 // 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す (2D Ver.)
