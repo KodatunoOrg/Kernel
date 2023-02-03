@@ -1597,7 +1597,7 @@ void MulMxVec(Matrix A,int A_row,int A_col,Coord *B,Coord *C)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(Coord A[],Coord d)
+Coord MulMxCoord(Coord A[], const Coord& d)
 {
 	Coord ans;
 
@@ -1617,7 +1617,7 @@ Coord MulMxCoord(Coord A[],Coord d)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(Matrix A,Coord d)
+Coord MulMxCoord(Matrix A, const Coord& d)
 {
 	Coord ans;
 
@@ -1675,7 +1675,7 @@ void TranMx(Coord **A,int m,int n,Coord **B)
 // Parameters:
 // A[3] - 元の行列
 // B[3] - 転置行列を格納
-void TranMx(Coord A[],Coord B[])
+void TranMx(const Coord A[],Coord B[])
 {
 	B[0].x = A[0].x;
 	B[0].y = A[1].x;
@@ -1698,7 +1698,7 @@ void TranMx(Coord A[],Coord B[])
 // 
 // Return: 
 // 計算結果
-Coord MulFrameCoord(double R[][3],double T[],Coord I)
+Coord MulFrameCoord(double R[][3],double T[],const Coord& I)
 {
 	Coord O;
 
@@ -1718,13 +1718,13 @@ Coord MulFrameCoord(double R[][3],double T[],Coord I)
 // 
 // Return: 
 // 計算結果
-Coord MulFrameCoord(FRAME f,Coord I)
+Coord FRAME::MulFrameCoord(const Coord& I) const
 {
 	Coord O;
 
-	O.x = f.Rot[0].x*I.x + f.Rot[1].x*I.y + f.Rot[2].x*I.z + f.Trl.x;
-	O.y = f.Rot[0].y*I.x + f.Rot[1].y*I.y + f.Rot[2].y*I.z + f.Trl.y;
-	O.z = f.Rot[0].z*I.x + f.Rot[1].z*I.y + f.Rot[2].z*I.z + f.Trl.z;
+	O.x = Rot[0].x*I.x + Rot[1].x*I.y + Rot[2].x*I.z + Trl.x;
+	O.y = Rot[0].y*I.x + Rot[1].y*I.y + Rot[2].y*I.z + Trl.y;
+	O.z = Rot[0].z*I.x + Rot[1].z*I.y + Rot[2].z*I.z + Trl.z;
 
 	return O;
 }
@@ -1739,15 +1739,15 @@ Coord MulFrameCoord(FRAME f,Coord I)
 //
 // Return:
 // 計算結果
-FRAME InvFrame(FRAME F)
+FRAME& FRAME::InvFrame(void)
 {
 	FRAME f;
 
-	TranMx(F.Rot,f.Rot);				// F.Rotの転置行列F.Rot^Tを得る
-	f.Trl = MulMxCoord(f.Rot,F.Trl);	// F.Rot^T * F.Trl
-	f.Trl *= -1;						// -(F.Rot^T * F.Trl)
+	TranMx(Rot,f.Rot);					// F.Rotの転置行列F.Rot^Tを得る
+	Trl = MulMxCoord(f.Rot,Trl);		// F.Rot^T * F.Trl
+	Trl *= -1;						// -(F.Rot^T * F.Trl)
 
-	return f;
+	return *this;
 }
 
 // Function: MulFrame
@@ -1758,24 +1758,24 @@ FRAME InvFrame(FRAME F)
 //
 // Return:
 // 計算結果
-FRAME MulFrame(FRAME a,FRAME b)
+FRAME& FRAME::MulFrame(const FRAME& b)
 {
-	FRAME f;
+	FRAME a(*this);
 
-	f.Rot[0].x = a.Rot[2].x*b.Rot[0].z + a.Rot[1].x*b.Rot[0].y + a.Rot[0].x*b.Rot[0].x;
-	f.Rot[1].x = a.Rot[2].x*b.Rot[1].z + a.Rot[1].x*b.Rot[1].y + a.Rot[0].x*b.Rot[1].x;
-	f.Rot[2].x = a.Rot[2].x*b.Rot[2].z + a.Rot[1].x*b.Rot[2].y + a.Rot[0].x*b.Rot[2].x;
-	f.Rot[0].y = a.Rot[2].y*b.Rot[0].z + a.Rot[1].y*b.Rot[0].y + a.Rot[0].y*b.Rot[0].x;
-	f.Rot[1].y = a.Rot[2].y*b.Rot[1].z + a.Rot[1].y*b.Rot[1].y + a.Rot[0].y*b.Rot[1].x;
-	f.Rot[2].y = a.Rot[2].y*b.Rot[2].z + a.Rot[1].y*b.Rot[2].y + a.Rot[0].y*b.Rot[2].x;
-	f.Rot[0].z = a.Rot[2].z*b.Rot[0].z + a.Rot[1].z*b.Rot[0].y + a.Rot[0].z*b.Rot[0].x;
-	f.Rot[1].z = a.Rot[2].z*b.Rot[1].z + a.Rot[1].z*b.Rot[1].y + a.Rot[0].z*b.Rot[1].x;
-	f.Rot[2].z = a.Rot[2].z*b.Rot[2].z + a.Rot[1].z*b.Rot[2].y + a.Rot[0].z*b.Rot[2].x;
-	f.Trl.x = a.Rot[2].x*b.Trl.z + a.Rot[1].x*b.Trl.y + a.Rot[0].x*b.Trl.x + a.Trl.x;
-	f.Trl.y = a.Rot[2].y*b.Trl.z + a.Rot[1].y*b.Trl.y + a.Rot[0].y*b.Trl.x + a.Trl.y;
-	f.Trl.z = a.Rot[2].z*b.Trl.z + a.Rot[1].z*b.Trl.y + a.Rot[0].z*b.Trl.x + a.Trl.z;
+	Rot[0].x = a.Rot[2].x*b.Rot[0].z + a.Rot[1].x*b.Rot[0].y + a.Rot[0].x*b.Rot[0].x;
+	Rot[1].x = a.Rot[2].x*b.Rot[1].z + a.Rot[1].x*b.Rot[1].y + a.Rot[0].x*b.Rot[1].x;
+	Rot[2].x = a.Rot[2].x*b.Rot[2].z + a.Rot[1].x*b.Rot[2].y + a.Rot[0].x*b.Rot[2].x;
+	Rot[0].y = a.Rot[2].y*b.Rot[0].z + a.Rot[1].y*b.Rot[0].y + a.Rot[0].y*b.Rot[0].x;
+	Rot[1].y = a.Rot[2].y*b.Rot[1].z + a.Rot[1].y*b.Rot[1].y + a.Rot[0].y*b.Rot[1].x;
+	Rot[2].y = a.Rot[2].y*b.Rot[2].z + a.Rot[1].y*b.Rot[2].y + a.Rot[0].y*b.Rot[2].x;
+	Rot[0].z = a.Rot[2].z*b.Rot[0].z + a.Rot[1].z*b.Rot[0].y + a.Rot[0].z*b.Rot[0].x;
+	Rot[1].z = a.Rot[2].z*b.Rot[1].z + a.Rot[1].z*b.Rot[1].y + a.Rot[0].z*b.Rot[1].x;
+	Rot[2].z = a.Rot[2].z*b.Rot[2].z + a.Rot[1].z*b.Rot[2].y + a.Rot[0].z*b.Rot[2].x;
+	Trl.x = a.Rot[2].x*b.Trl.z + a.Rot[1].x*b.Trl.y + a.Rot[0].x*b.Trl.x + a.Trl.x;
+	Trl.y = a.Rot[2].y*b.Trl.z + a.Rot[1].y*b.Trl.y + a.Rot[0].y*b.Trl.x + a.Trl.y;
+	Trl.z = a.Rot[2].z*b.Trl.z + a.Rot[1].z*b.Trl.y + a.Rot[0].z*b.Trl.x + a.Trl.z;
 
-	return f;
+	return *this;
 }
 
 // Function: RotToZYZEuler
@@ -1808,19 +1808,6 @@ Coord RotToZYZEuler( Coord rot[])
 	tmp *= 180/PI;
 
 	return tmp;
-}
-
-// Function: InitFrame
-// FRAMEの初期化
-//
-// Parameters:
-// *f - 初期化するFRAMEへのポインタ
-void InitFrame(FRAME *f)
-{
-	f->Rot[0] = 0;
-	f->Rot[1] = 0;
-	f->Rot[2] = 0;
-	f->Trl = 0;
 }
 
 // Function: Gauss
@@ -2294,7 +2281,7 @@ int CheckTheSamePoints2D(Coord *P,int N)
 // Parameters:
 // a - Coord値
 // b[3] - double配列
-void CoordToArray(Coord a,double b[3])
+void CoordToArray(const Coord& a,double b[3])
 {
 	b[0] = a.x;
 	b[1] = a.y;
@@ -2307,8 +2294,16 @@ void CoordToArray(Coord a,double b[3])
 // Parameters:
 // a - Coord値
 // b[2] - double配列
-void CoordToArray2D(Coord a,double b[2])
+void CoordToArray2D(const Coord& a,double b[2])
 {
 	b[0] = a.x;
 	b[1] = a.y;
+}
+
+// コンストラクタ
+FRAME::FRAME(const FRAME& f)
+{
+	Trl = f.Trl;
+	for ( int i=0; i<COORDINDEX; i++ )
+		Rot[i] = f.Rot[i];
 }

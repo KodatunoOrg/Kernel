@@ -72,14 +72,14 @@ typedef double *Vector;
 class Coord
 {
 public:
+	// Variables: x,y,z,dmy
+	// 三次元座標値(x, y, z)及び，汎用としてdmyを用意
+	double x,y,z,dmy;
+
 	// コンストラクタ
 	Coord();
 	Coord(const Coord&);
 	Coord(double,double,double,double=0.0);
-
-	// Variables: x,y,z,dmy
-	// 三次元座標値(x, y, z)及び，汎用としてdmyを用意
-	double x,y,z,dmy;
 
 	// 代入関数
 	Coord& SetCoord(const Coord&);
@@ -221,10 +221,27 @@ public:
 // Variables:
 // Coord Rot[COORINDEX] -	// 回転行列
 // Coord Trl -				// 並進成分
-typedef struct{
-	Coord Rot[COORDINDEX];		
+class FRAME{
+public:
+	Coord Rot[COORDINDEX];
 	Coord Trl;
-}FRAME;
+
+	// コンストラクタ
+	FRAME() {}
+	FRAME(const FRAME&);
+
+	// Function: MulFrame
+	// 同次変換行列の掛け算
+	FRAME& MulFrame(const FRAME&);
+
+	// Function: InvFrame
+	// 同次変換行列の逆行列を得る
+	FRAME& InvFrame(void);
+
+	// Function: MulFrameCoord
+	// 同次変換行列と座標値(3Dベクトル)との掛け算(オーバーロード)
+	Coord MulFrameCoord(const Coord&) const;
+};
 
 
 // Structure: DispStat
@@ -257,27 +274,11 @@ int DiscriminateCW2D(Coord [],int);
 
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算
-Coord MulFrameCoord(double[][3],double[],Coord);	
-
-// Function: MulFrameCoord
-// 同次変換行列と座標値(3Dベクトル)との掛け算(オーバーロード)
-Coord MulFrameCoord(FRAME,Coord);				 
-
-// Function: MulFrame
-// 同次変換行列の掛け算
-FRAME MulFrame(FRAME ,FRAME);					
-
-// Function: InvFrame
-// 同次変換行列の逆行列を得る
-FRAME InvFrame(FRAME);							
+Coord MulFrameCoord(double[][3],double[],const Coord&);
 
 // Function: RotToZYZEuler
 // 回転行列をZYZオイラー角へ変換
 Coord RotToZYZEuler(Coord []);					
-
-// Function: InitFrame
-// FRAMEの初期化
-void InitFrame(FRAME *);						
 
 
 // Group: Functions(多次元ベクトル、多次元行列の演算)
@@ -312,11 +313,11 @@ void MulMxVec(Matrix,int,int,Coord *,Coord *);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(Coord [],Coord);				
+Coord MulMxCoord(Coord [], const Coord&);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(Matrix,Coord);					
+Coord MulMxCoord(Matrix, const Coord&);
 
 // Function: TranMx
 // 転置行列を得る
@@ -328,7 +329,7 @@ void TranMx(Coord **,int,int,Coord **);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(Coord [],Coord []);					
+void TranMx(const Coord [],Coord []);					
 
 // Function: Gauss
 // 連立1次方程式の解を求める
@@ -524,11 +525,11 @@ int CheckTheSamePoints2D(Coord *,int);
 
 // Function: CoordToArray
 // Coordをdouble配列に代入
-void CoordToArray(Coord,double []);		
+void CoordToArray(const Coord&,double []);
 
 // Function: CoordToArray2D
 // Coordをdouble配列に代入
-void CoordToArray2D(Coord,double []);	
+void CoordToArray2D(const Coord&,double []);
 
 #include "KodListFunc.h"
 #include "Quaternion.h"
