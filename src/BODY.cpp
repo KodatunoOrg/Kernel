@@ -468,10 +468,8 @@ CIRA *BODY::NewCirA(int N)
 
 	for(int i=0;i<N;i++){
 		CirA[i].zt = 0;
-        CirA[i].cp[0] = CirA[i].cp[1] = CirA[i].cp[2] = SetCoord(0,0,0);
 		CirA[i].R = 0;
 		CirA[i].t[0] = CirA[i].t[1] = 0;
-		CirA[i].U = CirA[i].V = SetCoord(0,0,0);
 		CirA[i].EntUseFlag = 0;
 		CirA[i].pD = 0;
 		CirA[i].Dstat.Color[0] = CirA[i].Dstat.Color[1] = CirA[i].Dstat.Color[2] = CirA[i].Dstat.Color[3] = 0;
@@ -512,7 +510,6 @@ CONA *BODY::NewConA(int N)
 	ConA = new CONA[N];
 
 	for(int i=0;i<N;i++){
-		ConA[i].cp[0] = ConA[i].cp[1] = SetCoord(0,0,0);
 		ConA[i].Dstat.Color[0] = ConA[i].Dstat.Color[1] = ConA[i].Dstat.Color[2] = ConA[i].Dstat.Color[3] = 0;
 		ConA[i].pD = 0;
 		InitVector(ConA[i].prop,6);
@@ -533,7 +530,6 @@ LINE_ *BODY::NewLine(int N)
 	Line = new LINE_[N];
 
 	for(int i=0;i<N;i++){
-		Line[i].cp[0] = Line[i].cp[1] = SetCoord(0,0,0);
 		Line[i].Dstat.Color[0] = Line[i].Dstat.Color[1] = Line[i].Dstat.Color[2] = Line[i].Dstat.Color[3] = 0;
 		Line[i].EntUseFlag = 0;
 		Line[i].pD = 0;
@@ -579,7 +575,7 @@ NURBSC *BODY::NewNurbsC(int N)
 		NurbsC[i].K = 0;
 		NurbsC[i].M = 0;
 		NurbsC[i].N = 0;
-		NurbsC[i].norm = SetCoord(0,0,0);
+//		NurbsC[i].norm = SetCoord(0,0,0);
 		NurbsC[i].OriginEnt = 0;
 		NurbsC[i].pD = 0;
 		NurbsC[i].pOriginEnt = NULL;
@@ -760,11 +756,11 @@ int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)
 	Coord	vec[2];
 	
 	// 円/円弧の中心点O-始点Psベクトル成分、中心点-終点Peベクトル成分をそれぞれ求める
-	vec[0] = SubCoord(CirA[CirCount].cp[1],CirA[CirCount].cp[0]);
-	vec[1] = SubCoord(CirA[CirCount].cp[2],CirA[CirCount].cp[0]);	
+	vec[0] = CirA[CirCount].cp[1] - CirA[CirCount].cp[0];
+	vec[1] = CirA[CirCount].cp[2] - CirA[CirCount].cp[0];	
 
 	radius = CirA[CirCount].R;	// 円/円弧の中心点と始点の距離(半径)
-	angle_rad = CalcVecAngle2D(vec[0],vec[1]);			// 円/円弧を成す中心角の大きさ(degree)を求める
+	angle_rad = vec[0].CalcVecAngle2D(vec[1]);		// 円/円弧を成す中心角の大きさ(degree)を求める
 	angle_deg = RadToDeg(angle_rad);				// 円/円弧を成す中心角の大きさ(radian)を求める
 
 	// 中心角(degree)の大きさごとにセグメント数を変更する
@@ -838,7 +834,7 @@ try {
 		}
 	}
 		
-	vec_cp = Arc_CP(vec[0], vec[1], cos(angle_rad));	//　円の中心点からコントロールポイントP1へのベクトルを求める
+	vec_cp = vec[0].Arc_CP(vec[1], cos(angle_rad));	//　円の中心点からコントロールポイントP1へのベクトルを求める
 	
 	// コントロールポイントの座標値
 	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
@@ -925,9 +921,9 @@ try {
 		
 	angle_rad2 = angle_rad/2;	// (中心角)÷2
 	
-	vec_cp[1] = CalcRotVec2D(vec[0], angle_rad2);		// 円の中心点から中心角の半分の位置(コントロールポイントP2)へのベクトルを求める
-	vec_cp[0] = Arc_CP(vec[0], vec_cp[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP1へのベクトルを求める
-	vec_cp[2] = Arc_CP(vec_cp[1], vec[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP3へのベクトルを求める
+	vec_cp[1] = vec[0].CalcRotVec2D(angle_rad2);			// 円の中心点から中心角の半分の位置(コントロールポイントP2)へのベクトルを求める
+	vec_cp[0] = vec[0].Arc_CP(vec_cp[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP1へのベクトルを求める
+	vec_cp[2] = vec_cp[1].Arc_CP(vec[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP3へのベクトルを求める
 	
 	// コントロールポイントの座標値
 	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
@@ -1020,11 +1016,11 @@ try {
 
 	angle_rad3 = angle_rad/3;	// (中心角)÷3
 	
-	vec_cp[1] = CalcRotVec2D(vec[0], angle_rad3);		// 円の中心点から中心角の1/3の位置(コントロールポイントP2)へのベクトルを求める
-	vec_cp[0] = Arc_CP(vec[0], vec_cp[1], cos(angle_rad3));	// 円の中心点からコントロールポイントP1へのベクトルを求める
-	vec_cp[3] = CalcRotVec2D(vec_cp[1], angle_rad3);		// 円の中心点から中心角の2/3の位置(コントロールポイントP4)へのベクトルを求める
-	vec_cp[2] = Arc_CP(vec_cp[1], vec_cp[3], cos(angle_rad3));	// 円の中心点からコントロールポイントP3へのベクトルを求める
-	vec_cp[4] = Arc_CP(vec_cp[3], vec[1], cos(angle_rad3));	// 円の中心点からコントロールポイントP4へのベクトルを求める
+	vec_cp[1] = vec[0].CalcRotVec2D(angle_rad3);				// 円の中心点から中心角の1/3の位置(コントロールポイントP2)へのベクトルを求める
+	vec_cp[0] = vec[0].Arc_CP(vec_cp[1], cos(angle_rad3));		// 円の中心点からコントロールポイントP1へのベクトルを求める
+	vec_cp[3] = vec_cp[1].CalcRotVec2D(angle_rad3);				// 円の中心点から中心角の2/3の位置(コントロールポイントP4)へのベクトルを求める
+	vec_cp[2] = vec_cp[1].Arc_CP(vec_cp[3], cos(angle_rad3));	// 円の中心点からコントロールポイントP3へのベクトルを求める
+	vec_cp[4] = vec_cp[3].Arc_CP(vec[1], cos(angle_rad3));		// 円の中心点からコントロールポイントP4へのベクトルを求める
 		
 	// コントロールポイントの座標値
 	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
@@ -1253,7 +1249,7 @@ NURBSC *BODY::CheckTheSameNurbsC(NURBSC *Tnurbs, int N, NURBSC *Inurbs)
         if(Tnurbs[i].K == Inurbs->K){
             flag = true;
             for(int j=0;j<Inurbs->K;j++){
-                if(DiffCoord(Tnurbs[i].cp[j],Inurbs->cp[j]) == KOD_FALSE){
+                if(Tnurbs[i].cp[j].DiffCoord(Inurbs->cp[j]) == KOD_FALSE){
                     flag = false;
                     break;
                 }

@@ -117,8 +117,6 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 		double V[2] = {0,NORM_KNOT_VAL};
 		int prop[4] = {0,0,1,0};
 		Coord cp[2];
-		InitCoord(&cp[0]);
-		InitCoord(&cp[1]);
 
 		for(int i=0;i<body->TypeNum[_COMPOSITE_CURVE];i++){
 			 NFunc.GenNurbsC(&body->CompC[i].DegeNurbs,2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
@@ -136,7 +134,7 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 				Coord s,e;
 				s = NFunc.CalcNurbsCCoord(body->CompC[i].pDE[0].NurbsC,body->CompC[i].pDE[0].NurbsC->V[0]);					// 始点
 				e = NFunc.CalcNurbsCCoord(body->CompC[i].pDE[body->CompC[i].N-1].NurbsC,body->CompC[i].pDE[body->CompC[i].N-1].NurbsC->V[1]);	// 終点
-				if(DiffCoord(s,e,1.0E-5) == KOD_FALSE){				// 始点≠終点
+				if(s.DiffCoord(e,1.0E-5) == KOD_FALSE){				// 始点≠終点
 					body->CompC[i].DegeNurbs.cp[0] = e;
 					body->CompC[i].DegeNurbs.cp[1] = s;
 					body->CompC[i].DegeFlag = KOD_FALSE;			// 縮退ありのフラグを立てる
@@ -172,16 +170,16 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 		for(int j=1;j<body->TrmS[i].pTO->pB.CompC->N;j++){
 			bc = body->TrmS[i].pTO->pB.CompC->pDE[j-1].NurbsC;
 			nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-			if(DiffCoord2D(bc->cp[bc->K-1],nc->cp[0]) == KOD_FALSE)
-				nc->cp[0] = SetCoord(bc->cp[bc->K-1]);
+			if(bc->cp[bc->K-1].DiffCoord2D(nc->cp[0]) == KOD_FALSE)
+				nc->cp[0] = bc->cp[bc->K-1];
 		}
 		// 内側トリム
 		for(int j=0;j<body->TrmS[i].n2;j++){
 			for(int k=1;k<body->TrmS[i].pTI[j]->pB.CompC->N;k++){
 				bc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k-1].NurbsC;
 				nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-				if(DiffCoord2D(bc->cp[bc->K-1],nc->cp[0]) == KOD_FALSE)
-					nc->cp[0] = SetCoord(bc->cp[bc->K-1]);
+				if(bc->cp[bc->K-1].DiffCoord2D(nc->cp[0]) == KOD_FALSE)
+					nc->cp[0] = bc->cp[bc->K-1];
 			}
 		}
 	}
@@ -402,7 +400,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 			// 外側トリムを構成する各NURBS曲線の始点を取り出す
 			for(int j=0;j<otrmnum;j++){
 				NURBSC *nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-				p[j] = SetCoord(nc->cp[0]);		
+				p[j] = nc->cp[0];
 			}
 			flag = DiscriminateCW2D(p,otrmnum);	// 時計・反時計周りを調べる
 
@@ -436,7 +434,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 				// 内側トリムを構成する各NURBS曲線の始点を取り出す
 				for(int k=0;k<otrmnum;k++){
 					NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-					p[k] = SetCoord(nc->cp[0]);
+					p[k] = nc->cp[0];
 				}
 				flag = DiscriminateCW2D(p,otrmnum);	// 時計・反時計周りを調べる
 

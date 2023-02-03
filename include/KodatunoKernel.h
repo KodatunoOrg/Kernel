@@ -88,6 +88,7 @@ public:
 	// Operator: =
 	// 代入演算子のオーバーロード
 	Coord& operator  =(const Coord&);
+	Coord& operator  =(double);
 
 	// Operator: +
 	// Coordの足し算(AddCoord())

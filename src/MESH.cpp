@@ -206,11 +206,11 @@ int MESH::CalcFaceNorm(HEface *f)
 		e = e->GetNextHE();
 	}
 	if(f->GetVetexNum() == TRIMESHVERTNUM){						// 三角メッシュの場合は
-		f->SetNormVec(CalcNormVecFrom3Pts(a[0],a[1],a[2]));		// 3点から法線ベクトルを計算し、f->normにセット
+		f->SetNormVec(a[0].CalcNormVecFrom3Pts(a[1],a[2]));		// 3点から法線ベクトルを計算し、f->normにセット
 		return KOD_TRUE;
 	}
 	else{									// 三角メッシュ以外の場合はFALSE
-		f->SetNormVec(SetCoord(0,0,0));
+		f->SetNormVec(Coord(0,0,0));
 		return KOD_FALSE;
 	}
 }
@@ -233,7 +233,7 @@ int MESH::CalcFaceArea(HEface *f)
 		e = e->GetNextHE();
 	}
 	if(f->GetVetexNum() == TRIMESHVERTNUM){
-		f->SetFaceArea(CalcEuclid((a[1]-a[0])&&(a[2]-a[0]))/2);		// 三角メッシュの面積を計算し、f->areaにセット
+		f->SetFaceArea( ((a[1]-a[0])&&(a[2]-a[0])).CalcEuclid() / 2 );		// 三角メッシュの面積を計算し、f->areaにセット
 		return KOD_TRUE;
 	}
 	else{

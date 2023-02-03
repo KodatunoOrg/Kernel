@@ -21,6 +21,10 @@ Coord& Coord::operator =(const Coord& a)
 {
 	return SetCoord(a);
 }
+Coord& Coord::operator  =(double n)
+{
+	return SetCoord(n, n, n, n);
+}
 
 // Operator: +
 // Coordの足し算(AddCoord())
@@ -74,7 +78,7 @@ Coord Coord::operator - (const Coord& a) const
 
 // Oeprator: *
 // Coordの掛け算(MulCoord())
-void Coord::MulCoord(double xx, double yy, double zz=1.0, double dmy=1.0)
+void Coord::MulCoord(double xx, double yy, double zz, double dmy)
 {
 	x *= xx;
 	y *= yy;
@@ -622,7 +626,7 @@ Coord Coord::CalcOrthoProjection(const Coord& n, const Coord& q) const
 //	return (SubCoord(q,MulCoord(n,inn)));
 	Coord	r(q);
 	r -= *this;
-	double inn = r.CalcInnerProduct(nn);
+	double inn = r & nn;
 	return q - (nn * inn);
 }
 
@@ -651,7 +655,8 @@ double Coord::CalcDistPtToPlane(const Coord& P0, const Coord& N) const
 // スカラー三重積
 double Coord::CalcScalarTriProduct(const Coord& b, const Coord& c) const
 {
-	return CalcInnerProduct(b.CalcOuterProduct(c));
+//	return(CalcInnerProduct(a,CalcOuterProduct(b,c)));
+	return CalcInnerProduct(b&&c);
 }
 
 // Function: CalcAnglePlaneVec
@@ -917,7 +922,7 @@ Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 //	double k = CalcInnerProduct(SubCoord(P,A),u);
 //	return(AddCoord(A,MulCoord(u,k)));
 	Coord	r(operator-(A));
-	double k = r.CalcInnerProduct(u);
+	double k = r & u;
 	return A + (u*k);
 }
 
@@ -999,9 +1004,9 @@ void Reverse(Coord p[],int n)
 	Coord temp;
 
 	for(i=0,j=n-1;i<j;i++,j--){
-		temp = SetCoord(p[i]);
-		p[i] = SetCoord(p[j]);
-		p[j] = SetCoord(temp);
+		temp = p[i];
+		p[i] = p[j];
+		p[j] = temp;
 	}
 }
 
@@ -1443,7 +1448,8 @@ double CalcPolygonArea(Coord p[],int Vnum)
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
-		area += p[i].CalcOuterProduct(p[(i+1)%Vnum]).CalcEuclid();
+//		area += CalcEuclid(CalcOuterProduct(p[i],p[(i+1)%Vnum]));
+		area += (p[i]&&p[(i+1)%Vnum]).CalcEuclid();
 	}
 
 	return(area/2);
@@ -1571,9 +1577,10 @@ void MulMxVec(Matrix A,int A_row,int A_col,Vector B,int B_row,Vector C)
 void MulMxVec(Matrix A,int A_row,int A_col,Coord *B,Coord *C)
 {
 	for(int i=0;i<A_row;i++){
-		C[i] = SetCoord(0,0,0);
+		C[i] = 0;
 		for(int j=0;j<A_col;j++){
-			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
+//			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
+			C[i] += B[j] * A[i][j];
 		}
 	}
 }
@@ -1654,7 +1661,7 @@ void TranMx(Coord **A,int m,int n,Coord **B)
 {
 	for(int i=0;i<m;i++){
 		for(int j=0;j<n;j++){
-			B[j][i] = SetCoord(A[i][j]);
+			B[j][i] = A[i][j];
 		}
 	}
 }
@@ -1738,7 +1745,7 @@ FRAME InvFrame(FRAME F)
 
 	TranMx(F.Rot,f.Rot);				// F.Rotの転置行列F.Rot^Tを得る
 	f.Trl = MulMxCoord(f.Rot,F.Trl);	// F.Rot^T * F.Trl
-	f.Trl = MulCoord(f.Trl,-1);			// -(F.Rot^T * F.Trl)
+	f.Trl *= -1;						// -(F.Rot^T * F.Trl)
 
 	return f;
 }
@@ -1781,7 +1788,7 @@ FRAME MulFrame(FRAME a,FRAME b)
 // 計算結果(deg)
 Coord RotToZYZEuler( Coord rot[])
 {
-	Coord tmp = SetCoord(0,0,0);
+	Coord tmp;	// 0
 
 	tmp.y = atan2( sqrt( rot[0].z * rot[0].z + rot[1].z * rot[1].z ), rot[2].z );
 
@@ -1798,7 +1805,7 @@ Coord RotToZYZEuler( Coord rot[])
 		tmp.x = atan2( rot[2].y / sin( tmp.y ), rot[2].x / sin( tmp.y ) );
 		tmp.z = atan2( rot[1].z / sin( tmp.y ), -rot[0].z / sin( tmp.y ) );
 	}	
-	tmp = MulCoord(tmp,180/PI);
+	tmp *= 180/PI;
 
 	return tmp;
 }
@@ -1810,10 +1817,10 @@ Coord RotToZYZEuler( Coord rot[])
 // *f - 初期化するFRAMEへのポインタ
 void InitFrame(FRAME *f)
 {
-	f->Rot[0] = SetCoord(0,0,0);
-	f->Rot[1] = SetCoord(0,0,0);
-	f->Rot[2] = SetCoord(0,0,0);
-	f->Trl = SetCoord(0,0,0);
+	f->Rot[0] = 0;
+	f->Rot[1] = 0;
+	f->Rot[2] = 0;
+	f->Trl = 0;
 }
 
 // Function: Gauss
@@ -1910,17 +1917,17 @@ void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
 
 	for(int i=0;i<n;i++) {       // Gauss消去法の残り
 		ii = ip[i];
-		t = SetCoord(b[ii]);
+		t = b[ii];
 		for(int j=0;j<i;j++)
-			t = SubCoord(t,MulCoord(x[j],a[ii][j]));
-		x[i] = SetCoord(t);
+			t -= x[j] * a[ii][j];
+		x[i] = t;
 	}
 	for(int i=n-1;i>=0;i--){  // 後退代入
-		t = SetCoord(x[i]);  
+		t = x[i];  
 		ii = ip[i];
 		for(int j=i+1;j<n;j++) 
-			t = SubCoord(t,MulCoord(x[j],a[ii][j]));
-		x[i] = DivCoord(t,a[ii][i]);
+			t -= x[j] * a[ii][j];
+		x[i] = t / a[ii][i];
 	}
 }
 
@@ -2166,7 +2173,7 @@ int CatCoord(Coord a[],Coord b[],int alim,int anum,int bnum)
 	}
 
 	for(int i=0;i<bnum;i++){
-		a[anum+i] = SetCoord(b[i]);
+		a[anum+i] = b[i];
 	}
 
 	return anum+bnum;
@@ -2189,7 +2196,7 @@ int CheckTheSamePoints(Coord *P,int N)
 	for(int i=0;i<N;i++){
 		if(P[i].dmy == KOD_FALSE){
 			for(int j=i+1;j<N;j++){
-				if(DiffCoord(P[i],P[j],APPROX_ZERO_L) == KOD_TRUE){
+				if(P[i].DiffCoord(P[j],APPROX_ZERO_L) == KOD_TRUE){
 					P[j].dmy = KOD_TRUE;
 				}
 			}
@@ -2198,7 +2205,7 @@ int CheckTheSamePoints(Coord *P,int N)
 	int k=0;
 	for(int i=0;i<N;i++){
 		if(P[i].dmy != KOD_TRUE){
-			P[k] = SetCoord(P[i]);
+			P[k] = P[i];
 			k++;
 		}
 	}
@@ -2263,9 +2270,9 @@ int CheckTheSamePoints2D(Coord *P,int N)
 	int k=0;
 	for(int i=0;i<N;i++){
 		if(P[i].dmy == KOD_FALSE){
-			Q[k] = SetCoord(P[i]);
+			Q[k] = P[i];
 			for(int j=0;j<N;j++){
-				if(DiffCoord(Q[k],P[j]) == KOD_TRUE){
+				if(Q[k].DiffCoord(P[j]) == KOD_TRUE){
 					P[j].dmy = KOD_TRUE;
 				}
 			}
@@ -2274,7 +2281,7 @@ int CheckTheSamePoints2D(Coord *P,int N)
 	}
 
 	for(int i=0;i<k;i++)
-		P[i] = SetCoord(Q[i]);
+		P[i] = Q[i];
 
 	FreeCoord1(Q);
 

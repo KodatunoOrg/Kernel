@@ -205,8 +205,8 @@ int DXF_PARSER::GetArcData(FILE *fp,BODY *body)
 int DXF_PARSER::CalcUVvec(CIRA *Cira)
 {
 	// X-Y平面
-	Cira->U = SetCoord(1,0,0);
-	Cira->V = SetCoord(0,1,0);
+	Cira->U.SetCoord(1,0,0);
+	Cira->V.SetCoord(0,1,0);
 
 	return KOD_TRUE;
 }
