@@ -225,7 +225,7 @@ Quat QUATERNION::CtoQ(Coord a)
 // 補間された点を表すクォータニオン
 Quat QUATERNION::QSlerp(Quat p,Quat q,double t)
 {
-	double ca = CalcInnerProduct(QtoC(p),QtoC(q));	// cos(a)
+	double ca = QtoC(p) & QtoC(q);	// cos(a)
 	double sa = sqrt(1-ca*ca);			// sin(a)
 	
 	if(sa == 0.0)

@@ -72,42 +72,146 @@ typedef double *Vector;
 class Coord
 {
 public:
+	// コンストラクタ
+	Coord();
+	Coord(const Coord&);
+	Coord(double,double,double,double=0.0);
 
 	// Variables: x,y,z,dmy
 	// 三次元座標値(x, y, z)及び，汎用としてdmyを用意
 	double x,y,z,dmy;
 
+	// 代入関数
+	Coord& SetCoord(const Coord&);
+	Coord& SetCoord(double,double,double=0.0,double=0.0);		// 兼2D ver.
+
+	// Operator: =
+	// 代入演算子のオーバーロード
+	Coord& operator  =(const Coord&);
+	Coord& operator  =(double);
+
 	// Operator: +
-	// Coord同士の足し算(AddCoord())
-	Coord operator +(Coord);
+	// Coordの足し算(AddCoord())
+	void	AddCoord(double, double, double=0.0, double=0.0);
+	Coord& operator +=(const Coord&);
+	Coord& operator +=(double);
+	Coord  operator + (const Coord&) const;
 
 	// Oeprator: -
-	// Coord同士の引き算(SubCoord())
-	Coord operator -(Coord);	
+	// Coordの引き算(SubCoord())
+	void	SubCoord(double, double, double=0.0, double=0.0);
+	Coord& operator -=(const Coord&);
+	Coord& operator -=(double);
+	Coord  operator - (const Coord&) const;
 
 	// Oeprator: *
-	// Coord同士の掛け算(MulCoord())
-	Coord operator *(Coord);
-
-	// Oeprator: *
-	// Coordとdoubleとの掛け算（オーバーロード）
-	Coord operator *(double);
-
-	// Operator: /
-	// Coord同士の割り算(DivCoord())
-	Coord operator /(Coord);
+	// Coordの掛け算(MulCoord())
+	void	MulCoord(double, double, double=1.0, double=1.0);
+	Coord& operator *=(const Coord&);
+	Coord& operator *=(double);
+	Coord  operator * (const Coord&) const;
+	Coord  operator * (double) const;
 
 	// Operator: /
-	// Coordとdoubleとの割り算（オーバーロード）
-	Coord operator /(double);	// オーバーロード
+	// Coordの割り算(DivCoord())
+	void	DivCoord(double, double, double=1.0, double=1.0);
+	Coord& operator /=(const Coord&);
+	Coord& operator /=(double);
+	Coord  operator / (const Coord&) const;
+	Coord  operator / (double) const;
 
 	// Operator: &
-	// Coord同士の内積(CalcInnerProduct())
-	double operator &(Coord);
+	// Coordの内積(CalcInnerProduct())
+	double CalcInnerProduct(const Coord&) const;
+	double CalcInnerProduct(double,double,double) const;
+	double operator &(const Coord&) const;
 
 	// Operator: &&
-	// Coord同士の外積(CalcOuterProduct())
-	Coord operator &&(Coord);
+	// Coordの外積(CalcOuterProduct())
+	Coord CalcOuterProduct(const Coord&) const;
+	double CalcOuterProduct2D(const Coord&) const;
+	Coord operator &&(const Coord&) const;
+
+	// -- 比較関数
+	// Function: ZoroCoord
+	// (0,0,0)でないときKOD_TRUEを返す
+	int ZoroCoord(void) const;
+	int ZoroCoord2D(void) const;
+
+	// Function: DiffCoord
+	// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す
+	int DiffCoord(const Coord&, double=APPROX_ZERO) const;
+	int DiffCoord2D(const Coord&, double=APPROX_ZERO) const;
+
+	// Function: IsPointInPolygon
+	// 注目点の多角形内外判別
+	int IsPointInPolygon(const Coord*, int) const;
+
+	// -- 計算関数
+	// Function: AbsCoord
+	// 座標値の絶対値を返す
+	Coord AbsCoord(void) const;
+	Coord AbsCoord2D(void) const;
+
+	// Function: CalcEuclid
+	// ユークリッド距離をもとめる
+	double CalcEuclid(void) const;
+
+	// Function: CalcDistance
+	// 2点間のユークリッド距離を求める
+	double CalcDistance(const Coord&) const;
+	double CalcDistance2D(const Coord&) const;
+
+	// Function: CalcRotVec
+	// 任意のベクトルを原点を通る任意軸周りに回転させたベクトルを求める(3D平面)
+	Coord CalcRotVec(const Coord&,double) const;
+	Coord CalcRotVec2D(double) const;
+
+	// Function: CalcVecAngle
+	// 2つのベクトルのなす角を求める
+	double CalcVecAngle(const Coord&) const;
+	double CalcVecAngle2D(const Coord&) const;
+
+	// Function: CalcAnglePlaneVec
+	// 平面と直線とのなす角を求める
+	double CalcAnglePlaneVec(const Coord&) const;
+
+	// Function: CalcInterDivPt
+	// 2点間の内分点を求める
+	Coord CalcInterDivPt(const Coord&,double) const;
+
+	// Function: CalcOrthoProjection
+	// 任意の点を任意の平面へ正射影する
+	Coord CalcOrthoProjection(const Coord&, const Coord&) const;
+
+	// Function: CalcDistPtToPlane
+	// 任意の点から任意の平面までの距離を求める
+	double CalcDistPtToPlane(const Coord&, const Coord&) const;
+
+	// Function: CalcScalarTriProduct
+	// スカラー三重積を求める
+	double CalcScalarTriProduct(const Coord&, const Coord&) const;
+
+	// Function: CalcNormalLine
+	// 任意の点から任意の直線へ下ろした点を求める
+	Coord CalcNormalLine(const Coord&, const Coord&) const;
+
+	// Function: Arc_CP
+	// 円の中心点(vec[0])から円上に接する任意の2本の接線が交わる点へのベクトル(中心角0<θ<π)
+	Coord Arc_CP(const Coord&, double) const;
+
+	// Function: CalcNormVecFrom3Pts
+	// 空間上の3点からなる平面の法線ベクトルを求める
+	Coord CalcNormVecFrom3Pts(const Coord&, const Coord&) const;
+
+	// Function: NormalizeVec
+	// 3次元ベクトルを正規化(単位ベクトル化)
+	Coord  NormalizeVec(void) const;
+	Coord& NormalizeVec(void);
+
+	// Function: NormalizeVec
+	// 3次元ベクトルを正規化(単位ベクトル化)(オーバーロード)
+	Coord  NormalizeVec(double,double,double) const;
 };
 
 
@@ -138,264 +242,7 @@ typedef struct{
 
 // Group: Functions(3次元ベクトル幾何演算)
 
-// Function: InitCoord
-// 座標値の初期化
-void InitCoord(Coord *);
-
-// Function: InitCoord
-// 座標値の初期化(オーバーロード)
-void InitCoord(Coord *,int);				
-
-// Function: InitCoord
-// 座標値の初期化(オーバーロード)
-Coord InitCoord();
-
-// Function: AddCoord
-// 座標値の足し算
-Coord AddCoord(Coord,Coord);					
-
-// Function: AddCoord
-// 座標値の足し算(オーバーロード)
-Coord AddCoord(Coord,double);					
-
-// Function: AddCoord
-//  座標値の足し算(オーバーロード)
-Coord AddCoord(Coord,double,double,double);		
-
-// Function: DivCoord
-// 座標値の割り算
-Coord DivCoord(Coord,Coord);					
-
-// Function: DivCoord
-// 座標値の割り算(オーバーロード)
-Coord DivCoord(Coord,double);					
-
-// Function: DivCoord
-// 座標値の割り算(オーバーロード)
-Coord DivCoord(Coord,double,double,double);		
-
-// Function: MulCoord
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意)
-Coord MulCoord(Coord,Coord);					
-
-// Function: MulCoord
-// 座標値の掛け算(オーバーロード)
-Coord MulCoord(Coord,double);					
-
-// Function: MulCoord
-// 座標値の掛け算(オーバーロード)
-Coord MulCoord(Coord,double,double,double);		
-
-// Function: SubCoord
-// 座標値の引き算
-Coord SubCoord(Coord,Coord);					
-
-// Function: SubCoord
-// 座標値の引き算(オーバーロード)
-Coord SubCoord(Coord,double);					
-
-// Function: SubCoord
-// 座標値の引き算(オーバーロード)
-Coord SubCoord(Coord,double,double,double);
-
-// Function: SetCoord
-// 座標値を代入
-Coord SetCoord(Coord);							
-
-// Function: SetCoord
-// 座標値を代入(オーバーロード)
-Coord SetCoord(double,double,double);			
-
-// Function: CopyCoord
-// 座標値群をコピー
-void CopyCoord(Coord *,int,Coord *);			
-
-// Function: DiffCoord
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-int DiffCoord(Coord,Coord);						
-
-// Function: DiffCoord
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す(オーバーロード(精度指定))
-int DiffCoord(Coord,Coord,double);				
-
-// Function: AbsCoord
-// 座標値の絶対値を返す
-Coord AbsCoord(Coord);							
-
-// Function: ZoroCoord
-// (0,0,0)の場合にKOD_TRUEを返す
-int ZoroCoord(Coord);							
-
-// Function: CalcEuclid
-// ユークリッド距離をもとめる
-double CalcEuclid(Coord);						
-
-// Function: CalcDistance
-// 2点間のユークリッド距離を求める
-double CalcDistance(Coord,Coord);				
-
-// Function: CalcRotVec
-// 任意のベクトルを原点を通る任意軸周りに回転させたベクトルを求める(3D平面)
-Coord CalcRotVec(Coord,Coord,double);			
-
-// Function: CalcVecAngle
-// 2つのベクトルのなす角を求める
-double CalcVecAngle(Coord,Coord);				
-
-// Function: CalcAnglePlaneVec
-// 平面と直線とのなす角を求める
-double CalcAnglePlaneVec(Coord,Coord);			
-
-// Function: NormalizeVec
-// 3次元ベクトルを正規化(単位ベクトル化)
-Coord NormalizeVec(Coord);						
-
-// Function: NormalizeVec
-// 3次元ベクトルを正規化(単位ベクトル化)(オーバーロード)
-Coord NormalizeVec(double,double,double);		
-
-// Function: CalcInnerProduct
-// 内積を求める
-double CalcInnerProduct(Coord,Coord);			
-
-// Function: CalcInnerProduct
-// 内積を求める(オーバーロード)
-double CalcInnerProduct(Coord,double,double,double);	
-
-// Function: CalcOuterProduct
-// 外積を求める
-Coord CalcOuterProduct(Coord,Coord);			
-
-// Function: CalcInterDivPt
-// 2点間の内分点を求める
-Coord CalcInterDivPt(Coord,Coord,double);		
-
-// Function: CalcOrthoProjection
-// 任意の点を任意の平面へ正射影する
-Coord CalcOrthoProjection(Coord,Coord,Coord);	
-
-// Function: CalcDistPtToPlane
-// 任意の点から任意の平面までの距離を求める
-double CalcDistPtToPlane(Coord,Coord,Coord);	
-
-// Function: CalcScalarTriProduct
-// スカラー三重積を求める
-double CalcScalarTriProduct(Coord,Coord,Coord);	
-
-// Function: CalcNormalLine
-// 任意の点から任意の直線へ下ろした点を求める
-Coord CalcNormalLine(Coord,Coord,Coord);		
-
-// Function: Arc_CP
-// 円の中心点(vec[0])から円上に接する任意の2本の接線が交わる点へのベクトル(中心角0<θ<π)
-Coord Arc_CP(Coord,Coord,double);				
-
-// Function: IsPointInPolygon
-// 注目点の多角形内外判別
-int IsPointInPolygon(Coord,Coord *,int);		
-
-// Function: CalcNormVecFrom3Pts
-// 空間上の3点からなる平面の法線ベクトルを求める
-Coord CalcNormVecFrom3Pts(Coord,Coord,Coord);	
-
-
 // Group: Functions(2次元ベクトル幾何演算)
-
-// Function: AddCoord2D
-// 座標値の足し算 (2D Ver.)
-Coord AddCoord2D(Coord,Coord);
-
-// Function: AddCoord2D
-// 座標値の足し算(オーバーロード) (2D Ver.)
-Coord AddCoord2D(Coord,double);					
-
-// Function: AddCoord2D
-// 座標値の足し算(オーバーロード) (2D Ver.)
-Coord AddCoord2D(Coord,double,double);			
-
-// Function: DivCoord2D
-// 座標値の割り算 (2D Ver.)
-Coord DivCoord2D(Coord,Coord);					
-
-// Function: DivCoord2D
-// 座標値の割り算(オーバーロード) (2D Ver.)
-Coord DivCoord2D(Coord,double);					
-
-// Function: DivCoord2D
-// 座標値の割り算(オーバーロード) (2D Ver.)
-Coord DivCoord2D(Coord,double,double);			
-
-// Function: MulCoord2D
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意) (2D Ver.)
-Coord MulCoord2D(Coord,Coord);					
-
-// Function: MulCoord2D
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意)(オーバーロード) (2D Ver.)
-Coord MulCoord2D(Coord,double);					
-
-// Function: MulCoord2D
-// 座標値の掛け算(ベクトルの内積,外積ではないので注意)(オーバーロード) (2D Ver.)
-Coord MulCoord2D(Coord,double,double);			
-
-// Function: SubCoord2D
-// 座標値の引き算 (2D Ver.)
-Coord SubCoord2D(Coord,Coord);					
-
-// Function: SubCoord2D
-// 座標値の引き算(オーバーロード) (2D Ver.)
-Coord SubCoord2D(Coord,double);					
-
-// Function: SubCoord2D
-// 座標値の引き算(オーバーロード) (2D Ver.)
-Coord SubCoord2D(Coord,double,double);			
-
-// Function: SetCoord2D
-// 座標値を代入 (2D Ver.)
-Coord SetCoord2D(Coord);						
-
-// Function: SetCoord2D
-// オーバーロード (2D Ver.)
-Coord SetCoord2D(double,double);				
-
-// Function: CopyCoord2D
-// 座標値群をコピー (2D Ver.)
-void CopyCoord2D(Coord *,int,Coord *);			
-
-// Function: DiffCoord2D
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す (2D Ver.)
-int DiffCoord2D(Coord,Coord);					
-
-// Function: DiffCoord2D
-// 座標値が同じならKOD_TRUE、異なっているならKOD_FALSEを返す(オーバーロード(精度指定)) (2D Ver.)
-int DiffCoord2D(Coord,Coord,double);			
-
-// Function: AbsCoord2D
-// 座標値の絶対値を返す (2D Ver.)
-Coord AbsCoord2D(Coord);						
-
-// Function: ZoroCoord2D
-// (0,0,0)の場合にKOD_TRUEを返す (2D Ver.)
-int ZoroCoord2D(Coord);							
-
-// Function: CalcEuclid2D
-// ユークリッド距離をもとめる (2D Ver.)
-double CalcEuclid2D(double,double);				
-
-// Function: CalcDistance2D
-// 2次元座標上での2点間のユークリッド距離を算出 (2D Ver.)
-double CalcDistance2D(Coord,Coord);				
-
-// Function: CalcVecAngle2D
-// 2つのベクトルのなす角を求める (2D Ver.)
-double CalcVecAngle2D(Coord,Coord);				
-
-// Function: CalcRotVec2D
-// 任意のベクトルを回転させたベクトルを求める(2D平面)
-Coord CalcRotVec2D(Coord,double);				
-
-// Function: CalcOuterProduct2D
-// 外積を求める (2D Ver.)
-double CalcOuterProduct2D(Coord,Coord);			
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る
@@ -555,19 +402,19 @@ double Round(double);
 
 // Function: DrawPoint
 // 点を描画
-void DrawPoint(Coord,double,double,double []);			
+void DrawPoint(const Coord&,double,double,double []);
 
 // Function: DrawPoints
 // 点群を描画
-void DrawPoints(Coord *,int,double,double,double []);	
+void DrawPoints(const Coord *,int,double,double,double []);
 
 // Function: DrawVector
 // ベクトルを描画
-void DrawVector(Coord,Coord,double,double,double []);	
+void DrawVector(const Coord&, const Coord&, double,double,double []);	
 
 // Function: DrawLine
 // 2点間に線分を描画
-void DrawLine(Coord,Coord,double,double []);			
+void DrawLine(const Coord&, const Coord&, double,double []);			
 
 // Function: SetColorStat
 // カラーステータスを変更

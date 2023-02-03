@@ -24,7 +24,7 @@ class HEvert{
 public:
 	// Constructor: HEvert
 	// コンストラクタ
-	HEvert() {cod=InitCoord(); edge=NULL; index=-1; mom = NULL; qemQ=NULL; NewQEM(); flag = false;}
+	HEvert() {edge=NULL; index=-1; mom = NULL; qemQ=NULL; NewQEM(); flag = false;}
 
 	// Function: GetCoord
 	// この頂点の座標値を返す
@@ -203,7 +203,7 @@ public:
 	
 	// Function: InitQEMP
 	// QEM法用三次元座標値(Edge Collapse適用後の頂点位置)qemPの初期化
-	void InitQEMP()	{qemP = InitCoord();}
+	void InitQEMP()	{}
 
 	// Function: InitQEMD
 	// QEM法用パラメータ(Edge Collapse適用のコスト)qemDの初期化 

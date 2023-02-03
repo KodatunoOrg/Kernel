@@ -152,10 +152,10 @@ struct CIRA
 
 	CIRA() {
 		zt = 0;
-		cp[0] = cp[1] = cp[2] = SetCoord(0,0,0);
+//		cp[0] = cp[1] = cp[2] = SetCoord(0,0,0);	// Coordコンストラクタで不要に
 		R = 0;
 		t[0] = t[1] = 0;
-		U = V = SetCoord(0,0,0);
+//		U = V = SetCoord(0,0,0);
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;
@@ -182,7 +182,7 @@ struct CONA
 	CONA() {
 		InitVector(prop,6);
 		zt = 0;
-		cp[0] = cp[1] = SetCoord(0,0,0);
+//		cp[0] = cp[1] = SetCoord(0,0,0);
 		pD = 0;
 	}
 };
@@ -205,7 +205,7 @@ struct LINE_
 	DispStat Dstat;
 
 	LINE_() {
-		cp[0] = cp[1] = SetCoord(0,0,0);
+//		cp[0] = cp[1] = SetCoord(0,0,0);
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;
@@ -282,7 +282,7 @@ struct NURBSC{
 		W = NULL;
 		cp = NULL;
 		V[0] = V[1] = 0;
-		norm = SetCoord(0,0,0);
+//		norm = SetCoord(0,0,0);
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;

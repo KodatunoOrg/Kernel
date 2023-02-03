@@ -1,593 +1,158 @@
 ﻿#include <stdexcept>	// throw
 #include "KodatunoKernel.h"
 
-// Operator: +
-// Coord同士の足し算(AddCoord())
-Coord Coord::operator +(Coord a)
+// コンストラクタ
+Coord::Coord()
 {
-	return(AddCoord(*this,a));
+	x = y = z = dmy = 0;
+}
+Coord::Coord(const Coord& a)
+{
+	SetCoord(a);
+}
+Coord::Coord(double xx, double yy, double zz, double dd)
+{
+	SetCoord(xx, yy, zz, dd);
+}
+
+// Operator: =
+// 代入演算子のオーバーロード
+Coord& Coord::operator =(const Coord& a)
+{
+	return SetCoord(a);
+}
+Coord& Coord::operator  =(double n)
+{
+	return SetCoord(n, n, n, n);
+}
+
+// Operator: +
+// Coordの足し算(AddCoord())
+void Coord::AddCoord(double xx, double yy, double zz, double dmy)
+{
+	x += xx;
+	y += yy;
+	z += zz;
+	dmy += dmy;
+}
+Coord& Coord::operator +=(const Coord& a)
+{
+	AddCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator +=(double n)
+{
+	AddCoord(n, n, n);
+	return *this;
+}
+Coord Coord::operator + (const Coord& a) const
+{
+	Coord	c(*this);
+	return c+=a;
 }
 
 // Operator: -
-// Coord同士の引き算(SubCoord())
-Coord Coord::operator -(Coord a)
+// Coordの引き算(SubCoord())
+void Coord::SubCoord(double xx, double yy, double zz, double dmy)
 {
-	return(SubCoord(*this,a));
+	x -= xx;
+	y -= yy;
+	z -= zz;
+	dmy -= dmy;
+}
+Coord& Coord::operator -=(const Coord& a)
+{
+	SubCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator -=(double n)
+{
+	SubCoord(n, n, n);
+	return *this;
+}
+Coord Coord::operator - (const Coord& a) const
+{
+	Coord	c(*this);
+	return c-=a;
 }
 
 // Oeprator: *
-// Coord同士の掛け算(MulCoord())
-Coord Coord::operator *(Coord a)
+// Coordの掛け算(MulCoord())
+void Coord::MulCoord(double xx, double yy, double zz, double dmy)
 {
-	return(MulCoord(*this,a));
+	x *= xx;
+	y *= yy;
+	z *= zz;
+	dmy *= dmy;
 }
-
-// Oeprator: *
-// Coordとdoubleとの掛け算（オーバーロード）
-Coord Coord::operator *(double a)
+Coord& Coord::operator *=(const Coord& a)
 {
-	return(MulCoord(*this,a));
+	MulCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator *=(double n)
+{
+	MulCoord(n, n, n);
+	return *this;
+}
+Coord Coord::operator * (const Coord& a) const
+{
+	Coord	c(*this);
+	return c*=a;
+}
+Coord Coord::operator * (double n) const
+{
+	Coord	c(*this);
+	return c*=n;
 }
 
 // Operator: /
-// Coord同士の割り算(DivCoord())
-Coord Coord::operator /(Coord a)
+// Coordの割り算(DivCoord())
+void Coord::DivCoord(double xx, double yy, double zz, double dmy)
 {
-	return(DivCoord(*this,a));
+	if ( xx==0 || yy==0 || zz==0 || dmy==0) {
+		SetCoord(0, 0, 0);
+	}
+	else {
+		x /= xx;
+		y /= yy;
+		z /= zz;
+		dmy /= dmy;
+	}
 }
-
-// Operator: /
-// Coordとdoubleとの割り算（オーバーロード）
-Coord Coord::operator /(double a)
+Coord& Coord::operator /=(const Coord& a)
 {
-	return(DivCoord(*this,a));
+	DivCoord(a.x, a.y, a.z);
+	return *this;
+}
+Coord& Coord::operator /=(double n)
+{
+	DivCoord(n, n, n);
+	return *this;
+}
+Coord Coord::operator / (const Coord& a) const
+{
+	Coord	c(*this);
+	return c/=a;
+}
+Coord Coord::operator / (double n) const
+{
+	Coord	c(*this);
+	return c/=n;
 }
 
 // Operator: &
-// Coord同士の内積(CalcInnerProduct())
-double Coord::operator &(Coord a)
+// Coordの内積(CalcInnerProduct())
+double Coord::operator &(const Coord& a) const
 {
-	return(CalcInnerProduct(*this,a));
+	return CalcInnerProduct(a);
 }
 
 // Operator: &&
-// Coord同士の外積(CalcOuterProduct())
-Coord Coord::operator &&(Coord a)
+// Coordの外積(CalcOuterProduct())
+Coord Coord::operator &&(const Coord& a) const
 {
-	return(CalcOuterProduct(*this,a));
-}
-
-// Function: InitCoord
-// 座標値の初期化
-// 
-// Parameters:
-// *a - 初期化したい座標値のポインタ
-void InitCoord(Coord *a)
-{
-	a->x = 0;
-	a->y = 0;
-	a->z = 0;
-	a->dmy = 0;
-}
-// Function: InitCoord
-// 座標値配列の初期化(オーバーロード)
-// 
-// Parameters:
-// *a - 初期化したい座標値配列
-// n - 配列要素数
-void InitCoord(Coord *a,int n)
-{
-	for(int i=0;i<n;i++){
-		a[i].x = 0;
-		a[i].y = 0;
-		a[i].z = 0;
-		a[i].dmy = 0;
-	}
-}
-
-// Function: InitCoord
-// 座標値の初期化(オーバーロード)
-// 
-// Return:
-// 初期化された座標値
-Coord InitCoord()
-{
-	Coord a;
-	InitCoord(&a);
-
-	return a;
-}
-
-// Function: AddCoord
-// 座標値同士の足し算
-//
-// Parameter: 
-// a, b - 加算する2つの座標値
-//
-// Return:
-// 演算結果(a.x+b.x, a.y+b.y, a.z+b.z)
-Coord AddCoord(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x + b.x;
-	ans.y = a.y + b.y;
-	ans.z = a.z + b.z;
-
-	return ans;
-}
-// Function: AddCoord
-// 座標値同士の足し算(オーバーロード)
-//
-// Parameter: 
-// a - 加算される座標値
-// b - 加算するdouble値(a.x, a.y, a.zそれぞれにbが加算される)
-//
-// Return:
-// 演算結果(a.x+b, a.y+b, a.z+b)
-Coord AddCoord(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x + b;
-	ans.y = a.y + b;
-	ans.z = a.z + b;
-
-	return ans;
-}
-
-// Function: AddCoord
-// 座標値同士の足し算(オーバーロード)
-//
-// Parameter: 
-// a - 加算される座標値
-// x,y,z - 加算するdouble値(a.x, a.y, a.zそれぞれにx,y,zが加算される)
-//
-// Return:
-// 演算結果(a.x+x, a.y+y, a.z+z)
-Coord AddCoord(Coord a,double x,double y,double z)
-{
-	Coord ans;
-
-	ans.x = a.x + x;
-	ans.y = a.y + y;
-	ans.z = a.z + z;
-
-	return ans;
-}
-
-// Function: AddCoord2D
-// 座標値同士の足し算 (2D Ver.)
-//
-// Parameter: 
-// a, b - 加算する2つの座標値
-//
-// Return:
-// 演算結果(a.x+b.x, a.y+b.y)
-Coord AddCoord2D(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x + b.x;
-	ans.y = a.y + b.y;
-
-	return ans;
-}
-
-// Function: AddCoord2D
-// 座標値同士の足し算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 加算される座標値
-// b - 加算するdouble値(a.x, a.yそれぞれにbが加算される)
-//
-// Return:
-// 演算結果(a.x+b, a.y+b)
-Coord AddCoord2D(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x + b;
-	ans.y = a.y + b;
-
-	return ans;
-}
-
-// Function: AddCoord
-// 座標値同士の足し算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 加算される座標値
-// x,y,z - 加算するdouble値(a.x, a.yそれぞれにx,yが加算される)
-//
-// Return:
-// 演算結果(a.x+x, a.y+y)
-Coord AddCoord2D(Coord a,double x,double y)
-{
-	Coord ans;
-
-	ans.x = a.x + x;
-	ans.y = a.y + y;
-
-	return ans;
-}
-
-// Function: DivCoord
-// 座標値同士の割り算
-//
-// Parameter: 
-// a,b - 除算する2つの座標値
-//
-// Return:
-// 演算結果(a.x/b.x, a.y/b.y, a.z/b.z)
-Coord DivCoord(Coord a,Coord b)
-{
-	if(b.x == 0.0 || b.y == 0.0 || b.z == 0.0)
-		return SetCoord(0.0,0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b.x;
-	ans.y = a.y / b.y;
-	ans.z = a.z / b.z;
-
-	return ans;
-}
-
-// Function: DivCoord
-// 座標値同士の割り算(オーバーロード)
-//
-// Parameter: 
-// a - 除算される座標値
-// b - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/b, a.y/b, a.z/b)
-Coord DivCoord(Coord a,double b)
-{
-	if(b == 0.0)	return SetCoord(0.0,0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b;
-	ans.y = a.y / b;
-	ans.z = a.z / b;
-
-	return ans;
-}
-
-// Function: DivCoord
-// 座標値同士の割り算(オーバーロード)
-//
-// Parameter: 
-// a - 除算される座標値
-// b - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/x, a.y/y, a.z/z)
-Coord DivCoord(Coord a,double x,double y,double z)
-{
-	if(x == 0.0 || y == 0.0 || z == 0.0)
-		return SetCoord(0.0,0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x/x;
-	ans.y = a.y/y;
-	ans.z = a.z/z;
-
-	return ans;
-}
-
-// Function: DivCoord2D
-// 座標値同士の割り算 (2D Ver.)
-//
-// Parameter: 
-// a,b - 除算する2つの座標値
-//
-// Return:
-// 演算結果(a.x/b.x, a.y/b.y)
-Coord DivCoord2D(Coord a,Coord b)
-{
-	if(b.x == 0.0 || b.y == 0.0)
-		return SetCoord2D(0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b.x;
-	ans.y = a.y / b.y;
-
-	return ans;
-}
-
-// Function: DivCoord2D
-// 座標値同士の割り算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 除算される座標値
-// b - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/b, a.y/b)
-Coord DivCoord2D(Coord a,double b)
-{
-	if(b == 0.0)	return SetCoord2D(0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x / b;
-	ans.y = a.y / b;
-
-	return ans;
-}
-
-// Function: DivCoord2D
-// 座標値同士の割り算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 除算される座標値
-// x,y - 除算するdouble値
-// 
-// Return:
-// 演算結果(a.x/x, a.y/y)
-Coord DivCoord2D(Coord a,double x,double y)
-{
-	if(x == 0.0 || y == 0.0)
-		return SetCoord2D(0.0,0.0);
-
-	Coord ans;
-
-	ans.x = a.x/x;
-	ans.y = a.y/y;
-
-	return ans;
-}
-
-// Function: SubCoord
-// 座標値同士の引き算
-//
-// Parameter: 
-// a,b - 引き算する2つの座標値
-//
-// Return:
-// 演算結果(a.x-b.x, a.y-b.y, a.z-b.z)
-Coord SubCoord(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x - b.x;
-	ans.y = a.y - b.y;
-	ans.z = a.z - b.z;
-
-	return ans;
-}
-
-// Function: SubCoord
-// 座標値同士の引き算(オーバーロード)
-//
-// Parameter: 
-// a - 引き算される座標値
-// b - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-b, a.y-b, a.z-b)
-Coord SubCoord(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x - b;
-	ans.y = a.y - b;
-	ans.z = a.z - b;
-
-	return ans;
-}
-
-// Function: SubCoord
-// 座標値同士の引き算(オーバーロード)
-//
-// Parameter: 
-// a - 引き算される座標値
-// x,x,z - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-x, a.y-y, a.z-z)
-Coord SubCoord(Coord a,double x,double y,double z)
-{
-	Coord ans;
-
-	ans.x = a.x - x;
-	ans.y = a.y - y;
-	ans.z = a.z - z;
-
-	return ans;
-}
-
-// Function: SubCoord2D
-// 座標値同士の引き算 (2D Ver.)
-//
-// Parameter: 
-// a,b - 引き算する2つの座標値
-//
-// Return:
-// 演算結果(a.x-b.x, a.y-b.y)
-Coord SubCoord2D(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x - b.x;
-	ans.y = a.y - b.y;
-
-	return ans;
-}
-
-// Function: SubCoord2D
-// 座標値同士の引き算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 引き算される座標値
-// b - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-b, a.y-b)
-Coord SubCoord2D(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x - b;
-	ans.y = a.y - b;
-
-	return ans;
-}
-
-// Function: SubCoord2D
-// 座標値同士の引き算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 引き算される座標値
-// x,y - 引き算するdouble値
-//
-// Return:
-// 演算結果(a.x-x, a.y-y)
-Coord SubCoord2D(Coord a,double x,double y)
-{
-	Coord ans;
-
-	ans.x = a.x - x;
-	ans.y = a.y - y;
-
-	return ans;
-}
-
-// Function: MulCoord
-// 座標値同士の掛け算
-//
-// Parameter: 
-// a,b - 掛け算する2つの座標値
-//
-// Return:
-// 演算結果(a.x*b.x, a.y*b.y, a.z*b.z)
-Coord MulCoord(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x * b.x;
-	ans.y = a.y * b.y;
-	ans.z = a.z * b.z;
-
-	return ans;
-}
-
-// Function: MulCoord
-// 座標値同士の掛け算(オーバーロード)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// b - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*b, a.y*b, a.z*b)
-Coord MulCoord(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x * b;
-	ans.y = a.y * b;
-	ans.z = a.z * b;
-
-	return ans;
-}
-
-// Function: MulCoord
-// 座標値同士の掛け算(オーバーロード)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// x,y,z - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*x, a.y*y, a.z*z)
-Coord MulCoord(Coord a,double x,double y,double z)
-{
-	Coord ans;
-
-	ans.x = a.x * x;
-	ans.y = a.y * y;
-	ans.z = a.z * z;
-
-	return ans;
-}
-
-// Function: MulCoord2D
-// 座標値同士の掛け算 (2D Ver.)
-//
-// Parameter: 
-// a,b - 掛け算する2つの座標値
-//
-// Return:
-// 演算結果(a.x*b.x, a.y*b.y)
-Coord MulCoord2D(Coord a,Coord b)
-{
-	Coord ans;
-
-	ans.x = a.x * b.x;
-	ans.y = a.y * b.y;
-
-	return ans;
-}
-
-// Function: MulCoord2D
-// 座標値同士の掛け算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// b - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*b, a.y*b)
-Coord MulCoord2D(Coord a,double b)
-{
-	Coord ans;
-
-	ans.x = a.x * b;
-	ans.y = a.y * b;
-
-	return ans;
-}
-
-// Function: MulCoord2D
-// 座標値同士の掛け算(オーバーロード) (2D Ver.)
-//
-// Parameter: 
-// a - 掛け算される座標値
-// x,y - 掛け算するdouble値
-// 
-// Return:
-// 演算結果(a.x*x, a.y*y)
-Coord MulCoord2D(Coord a,double x,double y)
-{
-	Coord ans;
-
-	ans.x = a.x * x;
-	ans.y = a.y * y;
-
-	return ans;
-}
-
-// Function: DiffCoord
-// 座標値がAPPROX_ZEROの精度で同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-//
-// Parameter: 
-// a,b - 比較する2つの座標値
-//
-// Return:
-// A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord(Coord a,Coord b)
-{
-	if(fabs(a.x-b.x) <= APPROX_ZERO && fabs(a.y-b.y) <= APPROX_ZERO && fabs(a.z-b.z) <= APPROX_ZERO)
-	//if(fabs(a.x-b.x) == 0 && fabs(a.y-b.y) == 0 && fabs(a.z-b.z) == 0)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
+	return CalcOuterProduct(a);
 }
 
 // Function: DiffCoord
@@ -599,29 +164,9 @@ int DiffCoord(Coord a,Coord b)
 //
 // Return:
 // A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord(Coord a,Coord b,double App)
+int Coord::DiffCoord(const Coord& b,double App) const
 {
-	if(fabs(a.x-b.x) <= App && fabs(a.y-b.y) <= App && fabs(a.z-b.z) <= App)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
-}
-
-// Function: DiffCoord2D
-// 2D平面での座標値がAPPROX_ZEROの精度で同じならKOD_TRUE、異なっているならKOD_FALSEを返す
-//
-// Parameter: 
-// a,b - 比較する2つの座標値
-//
-// Return:
-// A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord2D(Coord a,Coord b)
-{
-	if(fabs(a.x-b.x) <= APPROX_ZERO && fabs(a.y-b.y) <= APPROX_ZERO)
-	//if(fabs(a.x-b.x) == 0 && fabs(a.y-b.y) == 0 && fabs(a.z-b.z) == 0)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
+	return (fabs(x-b.x)<=App && fabs(y-b.y)<=App && fabs(z-b.z)<=App) ? KOD_TRUE : KOD_FALSE;
 }
 
 // Function: DiffCoord2D
@@ -633,13 +178,9 @@ int DiffCoord2D(Coord a,Coord b)
 //
 // Return:
 // A==B: KOD_TRUE, A!=B: KOD_FALSE
-int DiffCoord2D(Coord a,Coord b,double App)
+int Coord::DiffCoord2D(const Coord& b,double App) const
 {
-	if(fabs(a.x-b.x) <= App && fabs(a.y-b.y) <= App)
-	//if(fabs(a.x-b.x) == 0 && fabs(a.y-b.y) == 0 && fabs(a.z-b.z) == 0)
-		return KOD_TRUE;
-	else
-		return KOD_FALSE;
+	return (fabs(x-b.x)<=App && fabs(y-b.y)<=App) ? KOD_TRUE : KOD_FALSE;
 }
 
 // Function: AbsCoord
@@ -650,13 +191,13 @@ int DiffCoord2D(Coord a,Coord b,double App)
 //
 // Return:
 // x,y,z各座標の絶対値を返す
-Coord AbsCoord(Coord a)
+Coord Coord::AbsCoord(void) const
 {
 	Coord ans;
 
-	ans.x = fabs(a.x);
-	ans.y = fabs(a.y);
-	ans.z = fabs(a.z);
+	ans.x = fabs(x);
+	ans.y = fabs(y);
+	ans.z = fabs(z);
 
 	return ans;
 }
@@ -669,12 +210,12 @@ Coord AbsCoord(Coord a)
 //
 // Return:
 // x,y,z各座標の絶対値を返す
-Coord AbsCoord2D(Coord a)
+Coord Coord::AbsCoord2D(void) const
 {
 	Coord ans;
 
-	ans.x = fabs(a.x);
-	ans.y = fabs(a.y);
+	ans.x = fabs(x);
+	ans.y = fabs(y);
 
 	return ans;
 }
@@ -687,9 +228,9 @@ Coord AbsCoord2D(Coord a)
 // 
 // Return:
 // 引数aの値がそのまま返る
-Coord SetCoord(Coord a)
+Coord& Coord::SetCoord(const Coord& a)
 {
-	return a;
+	return SetCoord(a.x, a.y, a.z, a.dmy);
 }
 
 // Function: SetCoord
@@ -700,72 +241,13 @@ Coord SetCoord(Coord a)
 // 
 // Return:
 // (x,y,z)の値がCoordとして返る
-Coord SetCoord(double x,double y,double z)
+Coord& Coord::SetCoord(double xx,double yy,double zz,double dd)
 {
-	Coord ans;
-
-	ans.x = x;
-	ans.y = y;
-	ans.z = z;
-
-	return ans;
-}
-
-// Function: SetCoord2D
-// 座標値を代入する(2D Ver.)
-// 
-// Parameter:
-// a - 代入する座標値
-// 
-// Return:
-// 引数aの値がそのまま返る
-Coord SetCoord2D(Coord a)
-{
-	return a;
-}
-
-// Function: SetCoord2D
-// 座標値を代入する(オーバーロード)(2D Ver.)
-// 
-// Parameter:
-// x,y - 代入する座標値を要素ごとに指定
-// 
-// Return:
-// (x,y)の値がCoordとして返る
-Coord SetCoord2D(double x,double y)
-{
-	Coord ans;
-
-	ans.x = x;
-	ans.y = y;
-
-	return ans;
-}
-
-// Function: CopyCoord
-// 座標値群のコピー(b<--a)
-// 
-// Parameter:
-// *a - 代入する座標値配列
-// n - 配列の要素数
-// *b - 代入される方の座標値配列
-void CopyCoord(Coord *a,int n,Coord *b)
-{
-	for(int i=0;i<n;i++)
-		b[i] = SetCoord(a[i]);
-}
-
-// Function: CopyCoord2D
-// 座標値群のコピー(b<--a)(2D Ver.)
-// 
-// Parameter:
-// *a - 代入する座標値配列
-// n - 配列の要素数
-// *b - 代入される方の座標値配列
-void CopyCoord2D(Coord *a,int n,Coord *b)
-{
-	for(int i=0;i<n;i++)
-		b[i] = SetCoord2D(a[i]);
+	x = xx;
+	y = yy;
+	z = zz;
+	dmy = dd;
+	return *this;
 }
 
 // Function: ZoroCoord
@@ -774,12 +256,9 @@ void CopyCoord2D(Coord *a,int n,Coord *b)
 // Parameters:
 // a - 検証する座標値
 // KOD_TRUE: (0,0,0)でない．  KOD_FALSE: (0,0,0)
-int ZoroCoord(Coord a)
+int Coord::ZoroCoord(void) const
 {
-	if(a.x == 0.0 && a.y == 0.0 && a.z == 0.0)
-		return KOD_FALSE;
-
-	return KOD_TRUE;
+	return (x==0.0 && y==0.0 && z==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
 // Function: ZoroCoord2D
@@ -788,12 +267,9 @@ int ZoroCoord(Coord a)
 // Parameters:
 // a - 検証する座標値
 // KOD_TRUE: (0,0)でない．  KOD_FALSE: (0,0)
-int ZoroCoord2D(Coord a)
+int Coord::ZoroCoord2D(void) const
 {
-	if(a.x == 0.0 && a.y == 0.0)
-		return KOD_FALSE;
-
-	return KOD_TRUE;
+	return (x==0.0 && y==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
 // Function: NewVector
@@ -965,13 +441,15 @@ void FreeCoord3(Coord ***a,int x,int y)
 //
 // Return:
 // 正規化された三次元ベクトル
-Coord NormalizeVec(Coord a)
+Coord Coord::NormalizeVec(void) const
 {
-	double len=0;
-
-	len = CalcEuclid(a);
-
-	return DivCoord(a,len);
+	double len=CalcEuclid();
+	return operator/(len);
+}
+Coord& Coord::NormalizeVec(void)
+{
+	double len=CalcEuclid();
+	return operator/=(len);		// 自分自身を正規化
 }
 
 // Function: NormalizeVec
@@ -982,14 +460,11 @@ Coord NormalizeVec(Coord a)
 //
 // Return:
 // 正規化された3次元ベクトル
-Coord NormalizeVec(double x,double y,double z)
+Coord Coord::NormalizeVec(double xx,double yy,double zz) const
 {
-	double len=0;
-	Coord a = SetCoord(x,y,z);
-
-	len = CalcEuclid(a);
-
-	return DivCoord(a,len);
+	Coord a(xx,yy,zz);
+	double len=a.CalcEuclid();
+	return a.operator/(len);
 }
 
 // Function: CalcEuclid
@@ -1000,22 +475,9 @@ Coord NormalizeVec(double x,double y,double z)
 //
 // Return:
 // ユークリッド距離
-double CalcEuclid(Coord a)
+double Coord::CalcEuclid(void) const
 {
-	return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
-}
-
-// Function: CalcEuclid2D
-// 2次元ユークリッド距離を算出
-//
-// Parameters:
-// a,b - 2次元ベクトル(a,b)
-//
-// Return:
-// ユークリッド距離
-double CalcEuclid2D(double a,double b)
-{
-	return sqrt(a*a+b*b);
+	return sqrt(x*x + y*y + z*z);
 }
 
 // Function: CalcDistance
@@ -1026,9 +488,12 @@ double CalcEuclid2D(double a,double b)
 //
 // Return:
 // 2点間のユークリッド距離
-double CalcDistance(Coord a,Coord b)
+double Coord::CalcDistance(const Coord& b) const
 {
-	return(CalcEuclid(SubCoord(a,b)));
+//--return(CalcEuclid(SubCoord(a,b)));
+//	Coord	ans(operator-(b));
+//	return ans.CalcEuclid();
+	return Coord(operator-(b)).CalcEuclid();
 }
 
 // Function: CalcDistance2D
@@ -1039,9 +504,9 @@ double CalcDistance(Coord a,Coord b)
 //
 // Return:
 // 2点間のユークリッド距離
-double CalcDistance2D(Coord a,Coord b)
+double Coord::CalcDistance2D(const Coord& b) const
 {
-	return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+	return sqrt((x-b.x)*(x-b.x) + (y-b.y)*(y-b.y));
 }
 
 // Function: CalcInnerProduct
@@ -1052,9 +517,9 @@ double CalcDistance2D(Coord a,Coord b)
 //
 // Return:
 // 内積
-double CalcInnerProduct(Coord a,Coord b)
+double Coord::CalcInnerProduct(const Coord& b) const
 {
-	return(a.x*b.x+a.y*b.y+a.z*b.z);
+	return x*b.x + y*b.y + z*b.z;
 }
 
 // Function: CalcInnerProduct
@@ -1066,9 +531,9 @@ double CalcInnerProduct(Coord a,Coord b)
 //
 // Return:
 // 内積
-double CalcInnerProduct(Coord a,double x,double y,double z)
+double Coord::CalcInnerProduct(double xx,double yy,double zz) const
 {
-	return(a.x*x+a.y*y+a.z*z);
+	return x*xx + y*yy + z*zz;
 }
 
 // Function: CalcOuterProduct
@@ -1079,13 +544,13 @@ double CalcInnerProduct(Coord a,double x,double y,double z)
 //
 // Return:
 // 外積
-Coord CalcOuterProduct(Coord a,Coord b)
+Coord Coord::CalcOuterProduct(const Coord& b) const
 {
 	Coord c;
 
-	c.x = a.y*b.z - a.z*b.y;
-	c.y = a.z*b.x - a.x*b.z;
-	c.z = a.x*b.y - a.y*b.x;
+	c.x = y*b.z - z*b.y;
+	c.y = z*b.x - x*b.z;
+	c.z = x*b.y - y*b.x;
 
 	return c;
 }
@@ -1098,9 +563,9 @@ Coord CalcOuterProduct(Coord a,Coord b)
 //
 // Return:
 // 外積
-double CalcOuterProduct2D(Coord a,Coord b)
+double Coord::CalcOuterProduct2D(const Coord& b) const
 {
-	return(a.x*b.y - a.y*b.x);
+	return x*b.y - y*b.x;
 }
 
 // Function: CalcVecAngle
@@ -1111,11 +576,11 @@ double CalcOuterProduct2D(Coord a,Coord b)
 //
 // Return:
 // 2つのベクトルのなす角(rad)
-double CalcVecAngle(Coord a,Coord b)
+double Coord::CalcVecAngle(const Coord& b) const
 {
-	double inn = CalcInnerProduct(a,b);
-	double abs_a = CalcEuclid(a);
-	double abs_b = CalcEuclid(b);
+	double inn = CalcInnerProduct(b);
+	double abs_a =   CalcEuclid();
+	double abs_b = b.CalcEuclid();
 
 	return(acos(inn/abs_a/abs_b));
 }
@@ -1129,45 +594,55 @@ double CalcVecAngle(Coord a,Coord b)
 // 
 // Return:
 // 内分点座標
-Coord CalcInterDivPt(Coord p,Coord q,double t)
+Coord Coord::CalcInterDivPt(const Coord& q,double t) const
 {
-	return(AddCoord(p,MulCoord(SubCoord(q,p),t)));
+//	return (AddCoord(p,MulCoord(SubCoord(q,p),t)));
+	Coord	r(q);
+	r -= *this;
+	r *= t;
+	r += *this;
+	return r;
 }
 
 // Function: CalcOrthoProjection
 // 任意の点を任意の平面へ正射影する
 //
 // Parameters:
-// p - 任意の平面上の点
+// p - 任意の平面上の点（自分自身）
 // n - 任意の平面の単位法線ベクトル
 // q - 正射影したい点
 //
 // Return:
 // 正射影された点の座標値
-Coord CalcOrthoProjection(Coord p,Coord n,Coord q)
+Coord Coord::CalcOrthoProjection(const Coord& n, const Coord& q) const
 {
-	if(fabs(1-CalcEuclid(n)) > APPROX_ZERO){
+	Coord	nn(n);
+	if(fabs(1-nn.CalcEuclid()) > APPROX_ZERO){
 //		GuiIFB.SetMessage("ERROR:Norm vector is not unit vector.");
 //		GuiIFB.SetMessage("Norm vetor is resized to unit vector.");
-		NormalizeVec(n);
+		nn.NormalizeVec();
 	}
-	double inn = CalcInnerProduct(SubCoord(q,p),n);
-	return (SubCoord(q,MulCoord(n,inn)));
+//	double inn = CalcInnerProduct(SubCoord(q,p),n);
+//	return (SubCoord(q,MulCoord(n,inn)));
+	Coord	r(q);
+	r -= *this;
+	double inn = r & nn;
+	return q - (nn * inn);
 }
 
 // Function: CalcDistPtToPlane
 // 任意の点から任意の平面までの距離を求める
 //
 // Parameters:
-// Pt - 任意の点  
+// Pt - 任意の点（自分自身）
 // P0 - 平面上の1点  
 // N - 平面の法線ベクトル
 //
 // Return:
 // 計算結果
-double CalcDistPtToPlane(Coord Pt,Coord P0,Coord N)
+double Coord::CalcDistPtToPlane(const Coord& P0, const Coord& N) const
 {
-	return((fabs(N.x*Pt.x + N.y*Pt.y + N.z*Pt.z - (N.x*P0.x + N.y*P0.y + N.z*P0.z)))/CalcEuclid(N));
+	return((fabs(N.x*x + N.y*y + N.z*z - (N.x*P0.x + N.y*P0.y + N.z*P0.z)))/N.CalcEuclid());
 }
 
 // Function: CalcScalarTriProduct
@@ -1178,9 +653,10 @@ double CalcDistPtToPlane(Coord Pt,Coord P0,Coord N)
 //
 // Return:
 // スカラー三重積
-double CalcScalarTriProduct(Coord a,Coord b,Coord c)
+double Coord::CalcScalarTriProduct(const Coord& b, const Coord& c) const
 {
-	return(CalcInnerProduct(a,CalcOuterProduct(b,c)));
+//	return(CalcInnerProduct(a,CalcOuterProduct(b,c)));
+	return CalcInnerProduct(b&&c);
 }
 
 // Function: CalcAnglePlaneVec
@@ -1192,9 +668,9 @@ double CalcScalarTriProduct(Coord a,Coord b,Coord c)
 //
 // Return:
 // 計算結果(radian)
-double CalcAnglePlaneVec(Coord a,Coord n)
+double Coord::CalcAnglePlaneVec(const Coord& n) const
 {
-	return(PI/2 - CalcVecAngle(a,n));
+	return(PI/2 - CalcVecAngle(n));
 }
 
 // Function: DrawPoint
@@ -1205,7 +681,7 @@ double CalcAnglePlaneVec(Coord a,Coord n)
 // Scale - pをScale倍する  
 // Width - 点のサイズ  
 // Color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawPoint(Coord p,double scale,double width,double color[3])
+void DrawPoint(const Coord& p,double scale,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glPointSize(width);
@@ -1225,7 +701,7 @@ void DrawPoint(Coord p,double scale,double width,double color[3])
 // scale -  pをScale倍する
 // width - 点のサイズ
 // color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawPoints(Coord *p,int n,double scale,double width,double color[3])
+void DrawPoints(const Coord *p,int n,double scale,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glPointSize(width);
@@ -1246,15 +722,15 @@ void DrawPoints(Coord *p,int n,double scale,double width,double color[3])
 // vec_len - 表示するベクトルの長さの倍率
 // width - 描画する線分の太さ
 // color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawVector(Coord s,Coord e,double vec_len,double width,double color[3])
+void DrawVector(const Coord& s, const Coord& e, double vec_len,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glLineWidth(width);
 	glColor3f(color[0],color[1],color[2]);
-	e = MulCoord(e,vec_len);
+	Coord ee = e * vec_len;
 	glBegin(GL_LINES);
 	glVertex3d(s.x,s.y,s.z);
-	glVertex3d(s.x+e.x,s.y+e.y,s.z+e.z);
+	glVertex3d(s.x+ee.x,s.y+ee.y,s.z+ee.z);
 	glEnd();
 	glEnable(GL_LIGHTING);
 }
@@ -1266,7 +742,7 @@ void DrawVector(Coord s,Coord e,double vec_len,double width,double color[3])
 // s,e - 描画する線分の始点と終点座標
 // width - 描画する線分の太さ
 // color[3] - 点の色をRGBで指定　(0<= r,g,b <=1) 
-void DrawLine(Coord s,Coord e,double width,double color[3])
+void DrawLine(const Coord& s, const Coord& e,double width,double color[3])
 {
 	glDisable(GL_LIGHTING);
 	glLineWidth(width);
@@ -1349,19 +825,19 @@ double RadToDeg(double radian)
 // 円の中心点(vec[0])から円上に接する任意の2本の接線が交わる点へのベクトル(中心角0<θ<π)
 //
 // Parameters:
-// a - 円弧をなすベクトル1  
+// a - 円弧をなすベクトル1（自分自身）
 // b - 円弧をなすベクトル2  
 // cos - 中心角の余弦
 //
 // Return:
 // 計算結果
-Coord Arc_CP(Coord a, Coord b, double cos)
+Coord Coord::Arc_CP(const Coord& b, double cos) const
 {
 	Coord ans;
 
-	ans.x = (a.x + b.x)/(1 + cos);
-	ans.y = (a.y + b.y)/(1 + cos);
-	ans.z = (a.z + b.z)/(1 + cos);
+	ans.x = (x + b.x)/(1 + cos);
+	ans.y = (y + b.y)/(1 + cos);
+	ans.z = (z + b.z)/(1 + cos);
 
 	return ans;
 }
@@ -1374,12 +850,12 @@ Coord Arc_CP(Coord a, Coord b, double cos)
 //
 // Return: 
 // 計算結果
-double CalcVecAngle2D(Coord a, Coord b)
+double Coord::CalcVecAngle2D(const Coord& b) const
 {
 	double angle,sin,cos;
 
-	sin = (a.x*b.y - b.x*a.y)/(a.x*a.x + a.y*a.y);
-	cos = (a.x*b.x + a.y*b.y)/(a.x*a.x + a.y*a.y);
+	sin = (x*b.y - b.x*y)/(x*x + y*y);
+	cos = (x*b.x + y*b.y)/(x*x + y*y);
 
 	angle = atan2(sin,cos);
 	if(angle < 0) angle = angle + 2.0*PI;
@@ -1391,18 +867,18 @@ double CalcVecAngle2D(Coord a, Coord b)
 // 任意のベクトルを回転させたベクトルを求める(2D平面)
 // 
 // Parameters:
-// a - 任意の2次元ベクトル
+// a - 任意の2次元ベクトル（自分自身）
 // angle - 回転角度(rad)
 //
 // Return:
 // 回転後の2次元ベクトル
-Coord CalcRotVec2D(Coord a, double angle)
+Coord Coord::CalcRotVec2D(double angle) const
 {
 	Coord ans;
 
-	ans.x = a.x*cos(angle) - a.y*sin(angle);
-	ans.y = a.x*sin(angle) + a.y*cos(angle);
-	ans.z = a.z;
+	ans.x = x*cos(angle) - y*sin(angle);
+	ans.y = x*sin(angle) + y*cos(angle);
+	ans.z = z;
 
 	return ans;
 }
@@ -1411,22 +887,22 @@ Coord CalcRotVec2D(Coord a, double angle)
 // 任意のベクトルを原点を通る任意軸周りに回転させたベクトルを求める(ロドリゲスの回転公式)
 //
 // Parameters:
-// a - 回転させたいベクトル  
+// a - 回転させたいベクトル（自分自身）
 // e - 原点を通る任意軸(単位ベクトルであること)  
 // ang - 回転角(rad)
 //
 // Return: 
 // 回転後のベクトル
-Coord CalcRotVec(Coord a,Coord e,double ang)
+Coord Coord::CalcRotVec(const Coord& e,double ang) const
 {
-	if(ang == 0.0)	return a;
+	if(ang == 0.0)	return *this;
 
 	Coord ans;
 	double ca = 1-cos(ang);
 
-	ans.x = (e.x*e.x*ca+cos(ang))*a.x + (e.x*e.y*ca-e.z*sin(ang))*a.y + (e.x*e.z*ca+e.y*sin(ang))*a.z;
-	ans.y = (e.x*e.y*ca+e.z*sin(ang))*a.x + (e.y*e.y*ca+cos(ang))*a.y + (e.y*e.z*ca-e.x*sin(ang))*a.z;
-	ans.z = (e.x*e.z*ca-e.y*sin(ang))*a.x + (e.y*e.z*ca+e.x*sin(ang))*a.y + (e.z*e.z*ca+cos(ang))*a.z;
+	ans.x = (e.x*e.x*ca+cos(ang))*x + (e.x*e.y*ca-e.z*sin(ang))*y + (e.x*e.z*ca+e.y*sin(ang))*z;
+	ans.y = (e.x*e.y*ca+e.z*sin(ang))*x + (e.y*e.y*ca+cos(ang))*y + (e.y*e.z*ca-e.x*sin(ang))*z;
+	ans.z = (e.x*e.z*ca-e.y*sin(ang))*x + (e.y*e.z*ca+e.x*sin(ang))*y + (e.z*e.z*ca+cos(ang))*z;
 
 	return ans;
 }
@@ -1435,17 +911,19 @@ Coord CalcRotVec(Coord a,Coord e,double ang)
 // 任意の点Pから任意の直線(点Aを通り単位ベクトルuの方向を持つ)へ下ろした点を求める
 //
 // Parameters:
-// P - 任意の点
+// P - 任意の点（自分自身）
 // A - 任意の直線上の点
 // u - 任意の直線の単位方向ベクトル
 //
 // Return:
 // 計算結果
-Coord CalcNormalLine(Coord P,Coord A,Coord u)
+Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 {
-	double k = CalcInnerProduct(SubCoord(P,A),u);
-
-	return(AddCoord(A,MulCoord(u,k)));
+//	double k = CalcInnerProduct(SubCoord(P,A),u);
+//	return(AddCoord(A,MulCoord(u,k)));
+	Coord	r(operator-(A));
+	double k = r & u;
+	return A + (u*k);
 }
 
 // Function: BubbleSort
@@ -1526,9 +1004,9 @@ void Reverse(Coord p[],int n)
 	Coord temp;
 
 	for(i=0,j=n-1;i<j;i++,j--){
-		temp = SetCoord(p[i]);
-		p[i] = SetCoord(p[j]);
-		p[j] = SetCoord(temp);
+		temp = p[i];
+		p[i] = p[j];
+		p[j] = temp;
 	}
 }
 
@@ -1882,37 +1360,37 @@ int CheckMag(double val1,double val2,int flag)
 // 注目点の多角形内外判別(x-y平面内)
 //
 // Parameters:
-// TargetPoint - 注目点  
+// TargetPoint - 注目点（自分自身）  
 // *BorderPoint - 多角形の頂点群配列   
 // CountPoint - 頂点の数
 // 
 // Returns:
 // KOD_TRUE:内  KOD_FALSE:外  KOD_ONEDGE:エッジ上
-int IsPointInPolygon(Coord TargetPoint,Coord *BorderPoint,int CountPoint)
+int Coord::IsPointInPolygon(const Coord* BorderPoint, int CountPoint) const
 {
 	int i;
-	int iCountCrossing = 0;				// 内外判定カウンタ
-	Coord p0;					// 多角形の一辺(ベクトル)の始点
-	Coord p1;					// 多角形の一辺(ベクトル)の終点
+	int iCountCrossing = 0;			// 内外判定カウンタ
+	Coord p0;						// 多角形の一辺(ベクトル)の始点
+	Coord p1;						// 多角形の一辺(ベクトル)の終点
 
-	p0 = SetCoord(BorderPoint[0]);			// 境界線ループ(多角形)の始点を用意
-	bool bFlag0x = (TargetPoint.x <= p0.x);	// 対象点のx座標と境界線の始点(多角形の一つ目の辺の始点)のx座標の大小比較
-	bool bFlag0y = (TargetPoint.y <= p0.y);		// 対象点のy座標と境界線の始点(多角形の一つ目の辺の始点)のy座標の大小比較
+	p0 = BorderPoint[0];			// 境界線ループ(多角形)の始点を用意
+	bool bFlag0x = (x <= p0.x);		// 対象点のx座標と境界線の始点(多角形の一つ目の辺の始点)のx座標の大小比較
+	bool bFlag0y = (y <= p0.y);		// 対象点のy座標と境界線の始点(多角形の一つ目の辺の始点)のy座標の大小比較
 
 	// 内外判定する点に対してその点から伸びる半直線により内外判定を行う(半直線の方向は、Ｘプラス方向)
 	for(i=1;i<CountPoint+1;i++)
 	{
-		p1 = SetCoord(BorderPoint[i%CountPoint]);	// 最後は始点が入る（多角形データの始点と終点が一致していないデータ対応）
+		p1 = BorderPoint[i%CountPoint];	// 最後は始点が入る（多角形データの始点と終点が一致していないデータ対応）
 
 		// TargetPointがエッジ上(p0とp1の線上)にあるかチェック
-		double a = (p1.x-p0.x)*(TargetPoint.x-p0.x) + (p1.y-p0.y)*(TargetPoint.y-p0.y);
-		double L1 = CalcDistance2D(p1,p0);
-		double L2 = CalcDistance2D(TargetPoint,p0);
+		double a = (p1.x-p0.x)*(x-p0.x) + (p1.y-p0.y)*(y-p0.y);
+		double L1 = p1.CalcDistance2D(p0);
+		double L2 =    CalcDistance2D(p0);
 		if(CheckZero(a-L1*L2,MID_ACCURACY) == KOD_TRUE && L1 >= L2){	// エッジ上だった
 			return KOD_ONEDGE;		// 問答無用でreturn
 		}
-		bool bFlag1x = (TargetPoint.x <= p1.x);		
-		bool bFlag1y = (TargetPoint.y <= p1.y);	
+		bool bFlag1x = (x <= p1.x);		
+		bool bFlag1y = (y <= p1.y);	
 
 		if(bFlag0y != bFlag1y){			// 線分は半直線を横切る可能性あり
 			if(bFlag0x == bFlag1x){		// 線分の２端点は対象点に対して両方右か両方左にある
@@ -1921,7 +1399,7 @@ int IsPointInPolygon(Coord TargetPoint,Coord *BorderPoint,int CountPoint)
 				}
 			}
 			else{					// 半直線と交差するかどうか、対象点と同じ高さで、対象点の右で交差するか、左で交差するかを求める。
-				if(TargetPoint.x <= (p0.x + (p1.x - p0.x)*(TargetPoint.y - p0.y )/(p1.y - p0.y))){	// 線分は、対象点と同じ高さで、対象点の右で交差する。線分は半直線を横切る
+				if(x <= (p0.x + (p1.x - p0.x)*(y - p0.y )/(p1.y - p0.y))){	// 線分は、対象点と同じ高さで、対象点の右で交差する。線分は半直線を横切る
 					iCountCrossing += (bFlag0y ? -1 : 1);	// 上から下に半直線を横切るときには、交差回数を１引く、下から上は１足す。
 				}
 			}
@@ -1948,12 +1426,12 @@ int IsPointInPolygon(Coord TargetPoint,Coord *BorderPoint,int CountPoint)
 //
 // Return:
 // 計算結果
-Coord CalcNormVecFrom3Pts(Coord p1,Coord p2,Coord p3)
+Coord Coord::CalcNormVecFrom3Pts(const Coord& p2, const Coord& p3) const
 {
-	Coord denom = (p2-p1)&&(p3-p1);
-	double numer = CalcEuclid(denom);
+	Coord denom = operator-(p2)&&operator-(p3);
+	double numer = denom.CalcEuclid();
 
-	return DivCoord(denom,numer);
+	return denom.operator/(numer);
 }
 
 // Function: CalcPolygonArea
@@ -1970,7 +1448,8 @@ double CalcPolygonArea(Coord p[],int Vnum)
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
-		area += CalcEuclid(CalcOuterProduct(p[i],p[(i+1)%Vnum]));
+//		area += CalcEuclid(CalcOuterProduct(p[i],p[(i+1)%Vnum]));
+		area += (p[i]&&p[(i+1)%Vnum]).CalcEuclid();
 	}
 
 	return(area/2);
@@ -1990,7 +1469,7 @@ double ClacPolygonArea2D(Coord p[],int Vnum)
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
-		area += CalcOuterProduct2D(p[i],p[(i+1)%Vnum]);
+		area += p[i].CalcOuterProduct2D(p[(i+1)%Vnum]);
 	}
 
 	return(area/2);
@@ -2098,9 +1577,10 @@ void MulMxVec(Matrix A,int A_row,int A_col,Vector B,int B_row,Vector C)
 void MulMxVec(Matrix A,int A_row,int A_col,Coord *B,Coord *C)
 {
 	for(int i=0;i<A_row;i++){
-		C[i] = SetCoord(0,0,0);
+		C[i] = 0;
 		for(int j=0;j<A_col;j++){
-			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
+//			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
+			C[i] += B[j] * A[i][j];
 		}
 	}
 }
@@ -2181,7 +1661,7 @@ void TranMx(Coord **A,int m,int n,Coord **B)
 {
 	for(int i=0;i<m;i++){
 		for(int j=0;j<n;j++){
-			B[j][i] = SetCoord(A[i][j]);
+			B[j][i] = A[i][j];
 		}
 	}
 }
@@ -2265,7 +1745,7 @@ FRAME InvFrame(FRAME F)
 
 	TranMx(F.Rot,f.Rot);				// F.Rotの転置行列F.Rot^Tを得る
 	f.Trl = MulMxCoord(f.Rot,F.Trl);	// F.Rot^T * F.Trl
-	f.Trl = MulCoord(f.Trl,-1);			// -(F.Rot^T * F.Trl)
+	f.Trl *= -1;						// -(F.Rot^T * F.Trl)
 
 	return f;
 }
@@ -2308,7 +1788,7 @@ FRAME MulFrame(FRAME a,FRAME b)
 // 計算結果(deg)
 Coord RotToZYZEuler( Coord rot[])
 {
-	Coord tmp = SetCoord(0,0,0);
+	Coord tmp;	// 0
 
 	tmp.y = atan2( sqrt( rot[0].z * rot[0].z + rot[1].z * rot[1].z ), rot[2].z );
 
@@ -2325,7 +1805,7 @@ Coord RotToZYZEuler( Coord rot[])
 		tmp.x = atan2( rot[2].y / sin( tmp.y ), rot[2].x / sin( tmp.y ) );
 		tmp.z = atan2( rot[1].z / sin( tmp.y ), -rot[0].z / sin( tmp.y ) );
 	}	
-	tmp = MulCoord(tmp,180/PI);
+	tmp *= 180/PI;
 
 	return tmp;
 }
@@ -2337,10 +1817,10 @@ Coord RotToZYZEuler( Coord rot[])
 // *f - 初期化するFRAMEへのポインタ
 void InitFrame(FRAME *f)
 {
-	f->Rot[0] = SetCoord(0,0,0);
-	f->Rot[1] = SetCoord(0,0,0);
-	f->Rot[2] = SetCoord(0,0,0);
-	f->Trl = SetCoord(0,0,0);
+	f->Rot[0] = 0;
+	f->Rot[1] = 0;
+	f->Rot[2] = 0;
+	f->Trl = 0;
 }
 
 // Function: Gauss
@@ -2437,17 +1917,17 @@ void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
 
 	for(int i=0;i<n;i++) {       // Gauss消去法の残り
 		ii = ip[i];
-		t = SetCoord(b[ii]);
+		t = b[ii];
 		for(int j=0;j<i;j++)
-			t = SubCoord(t,MulCoord(x[j],a[ii][j]));
-		x[i] = SetCoord(t);
+			t -= x[j] * a[ii][j];
+		x[i] = t;
 	}
 	for(int i=n-1;i>=0;i--){  // 後退代入
-		t = SetCoord(x[i]);  
+		t = x[i];  
 		ii = ip[i];
 		for(int j=i+1;j<n;j++) 
-			t = SubCoord(t,MulCoord(x[j],a[ii][j]));
-		x[i] = DivCoord(t,a[ii][i]);
+			t -= x[j] * a[ii][j];
+		x[i] = t / a[ii][i];
 	}
 }
 
@@ -2693,7 +2173,7 @@ int CatCoord(Coord a[],Coord b[],int alim,int anum,int bnum)
 	}
 
 	for(int i=0;i<bnum;i++){
-		a[anum+i] = SetCoord(b[i]);
+		a[anum+i] = b[i];
 	}
 
 	return anum+bnum;
@@ -2716,7 +2196,7 @@ int CheckTheSamePoints(Coord *P,int N)
 	for(int i=0;i<N;i++){
 		if(P[i].dmy == KOD_FALSE){
 			for(int j=i+1;j<N;j++){
-				if(DiffCoord(P[i],P[j],APPROX_ZERO_L) == KOD_TRUE){
+				if(P[i].DiffCoord(P[j],APPROX_ZERO_L) == KOD_TRUE){
 					P[j].dmy = KOD_TRUE;
 				}
 			}
@@ -2725,7 +2205,7 @@ int CheckTheSamePoints(Coord *P,int N)
 	int k=0;
 	for(int i=0;i<N;i++){
 		if(P[i].dmy != KOD_TRUE){
-			P[k] = SetCoord(P[i]);
+			P[k] = P[i];
 			k++;
 		}
 	}
@@ -2790,9 +2270,9 @@ int CheckTheSamePoints2D(Coord *P,int N)
 	int k=0;
 	for(int i=0;i<N;i++){
 		if(P[i].dmy == KOD_FALSE){
-			Q[k] = SetCoord(P[i]);
+			Q[k] = P[i];
 			for(int j=0;j<N;j++){
-				if(DiffCoord(Q[k],P[j]) == KOD_TRUE){
+				if(Q[k].DiffCoord(P[j]) == KOD_TRUE){
 					P[j].dmy = KOD_TRUE;
 				}
 			}
@@ -2801,7 +2281,7 @@ int CheckTheSamePoints2D(Coord *P,int N)
 	}
 
 	for(int i=0;i<k;i++)
-		P[i] = SetCoord(Q[i]);
+		P[i] = Q[i];
 
 	FreeCoord1(Q);
 
