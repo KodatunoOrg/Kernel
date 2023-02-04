@@ -63,6 +63,7 @@ public:
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
 	int GenNurbsC(NURBSC *,int,int,int,double [],double [],Coord [],double [],int[],int);	
+	int GenNurbsC(NURBSC *,int,int, const ublasVector&, const ublasVector&, Coord [],double [],int[],int);	
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
@@ -71,6 +72,7 @@ public:
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
 	int GenNurbsS(NURBSS *,int,int,int,int,double *,double *,double **,Coord **,double,double,double,double);	
+	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, Coord **,double,double,double,double);	
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
@@ -111,6 +113,7 @@ public:
 	// Function: CalcBSbasis
 	// Bスプライン基底関数を計算し、計算結果を返す
 	double CalcBSbasis(double,double [],int,int,int);			
+	double CalcBSbasis(double, const ublasVector&, int, int);
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
@@ -395,6 +398,7 @@ public:
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
 	void GetEqIntervalKont(int,int,Vector);						
+	ublasVector	GetEqIntervalKont(int,int);
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルのパラメータ定義域を変更する
@@ -577,6 +581,7 @@ private:
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
 	void GetCurveKnotParam2(Coord *,int,Vector);					
+	ublasVector	GetCurveKnotParam2(const Coord*, int);
 
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
@@ -585,6 +590,7 @@ private:
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
 	void GetInterpolatedKnot(Vector,int,int,int,Vector);			
+	ublasVector	GetInterpolatedKnot(const ublasVector&, int, int, int);
 
 	// Function: GetApproximatedKnot
 	// (private)曲線/曲面パラメータから近似用ノットベクトルを算出

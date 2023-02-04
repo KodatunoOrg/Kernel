@@ -465,7 +465,7 @@ void BODY::InitSurfaceColor(float *col)
 CIRA *BODY::NewCirA(int N)
 {
 	CirA = new CIRA[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		CirA[i].zt = 0;
 		CirA[i].R = 0;
@@ -474,8 +474,8 @@ CIRA *BODY::NewCirA(int N)
 		CirA[i].pD = 0;
 		CirA[i].Dstat.Color[0] = CirA[i].Dstat.Color[1] = CirA[i].Dstat.Color[2] = CirA[i].Dstat.Color[3] = 0;
 	}
+*/
 	TypeNum[_CIRCLE_ARC] = N;
-
 	return CirA;
 }
 
@@ -487,7 +487,7 @@ CIRA *BODY::NewCirA(int N)
 COMPC *BODY::NewCompC(int N)
 {
 	CompC = new COMPC[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		CompC[i].DegeFlag = 0;
 		CompC[i].DEType = NULL;
@@ -495,8 +495,8 @@ COMPC *BODY::NewCompC(int N)
 		CompC[i].pD = 0;
 		CompC[i].pDE = NULL;
 	}
+*/
 	TypeNum[_COMPOSITE_CURVE] = N;
-
 	return CompC;
 }
 
@@ -508,15 +508,15 @@ COMPC *BODY::NewCompC(int N)
 CONA *BODY::NewConA(int N)
 {
 	ConA = new CONA[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		ConA[i].Dstat.Color[0] = ConA[i].Dstat.Color[1] = ConA[i].Dstat.Color[2] = ConA[i].Dstat.Color[3] = 0;
 		ConA[i].pD = 0;
 		InitVector(ConA[i].prop,6);
 		ConA[i].zt = 0;
 	}
+*/
 	TypeNum[_CONIC_ARC] = N;
-
 	return ConA;
 }
 
@@ -528,14 +528,14 @@ CONA *BODY::NewConA(int N)
 LINE_ *BODY::NewLine(int N)
 {
 	Line = new LINE_[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		Line[i].Dstat.Color[0] = Line[i].Dstat.Color[1] = Line[i].Dstat.Color[2] = Line[i].Dstat.Color[3] = 0;
 		Line[i].EntUseFlag = 0;
 		Line[i].pD = 0;
 	}
+*/
 	TypeNum[_LINE] = N;
-
 	return Line;
 }
 
@@ -547,15 +547,15 @@ LINE_ *BODY::NewLine(int N)
 TMAT *BODY::NewTMat(int N)
 {
 	TMat = new TMAT[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		for(int j=0;j<3;j++)
 			InitVector(TMat[i].R[j],3);
 		InitVector(TMat[i].T,3);
 		TMat[i].pD = 0;
 	}
+*/
 	TypeNum[_TRANSFORMATION_MATRIX] = N;
-
 	return TMat;
 }
 
@@ -567,7 +567,7 @@ TMAT *BODY::NewTMat(int N)
 NURBSC *BODY::NewNurbsC(int N)
 {
 	NurbsC = new NURBSC[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		NurbsC[i].cp = NULL;
 		NurbsC[i].Dstat.Color[0] = NurbsC[i].Dstat.Color[1] = NurbsC[i].Dstat.Color[2] = NurbsC[i].Dstat.Color[3] = 0;
@@ -575,7 +575,6 @@ NURBSC *BODY::NewNurbsC(int N)
 		NurbsC[i].K = 0;
 		NurbsC[i].M = 0;
 		NurbsC[i].N = 0;
-//		NurbsC[i].norm = SetCoord(0,0,0);
 		NurbsC[i].OriginEnt = 0;
 		NurbsC[i].pD = 0;
 		NurbsC[i].pOriginEnt = NULL;
@@ -584,8 +583,8 @@ NURBSC *BODY::NewNurbsC(int N)
 		NurbsC[i].V[0] = NurbsC[i].V[1] = 0;
 		NurbsC[i].W = NULL;
 	}
+*/
 	TypeNum[_NURBSC] = N;
-
 	return NurbsC;
 }
 
@@ -597,7 +596,7 @@ NURBSC *BODY::NewNurbsC(int N)
 NURBSS *BODY::NewNurbsS(int N)
 {
 	NurbsS = new NURBSS[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		NurbsS[i].cp = NULL;
 		NurbsS[i].Dstat.Color[0] = NurbsS[i].Dstat.Color[1] = NurbsS[i].Dstat.Color[2] = NurbsS[i].Dstat.Color[3] = 0;
@@ -613,8 +612,8 @@ NURBSS *BODY::NewNurbsS(int N)
 		NurbsS[i].V[0] = NurbsS[i].V[1] = 0;
 		NurbsS[i].W = NULL;
 	}
+*/
 	TypeNum[_NURBSS] = N;
-
 	return NurbsS;
 }
 
@@ -626,7 +625,7 @@ NURBSS *BODY::NewNurbsS(int N)
 CONPS *BODY::NewConpS(int N)
 {
 	ConpS = new CONPS[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		ConpS[i].BType = 0;
 		ConpS[i].crtn = 0;
@@ -638,8 +637,8 @@ CONPS *BODY::NewConpS(int N)
 		ConpS[i].pS = NULL;
 		ConpS[i].SType = 0;
 	}
+*/
 	TypeNum[_CURVE_ON_PARAMETRIC_SURFACE] = N;
-
 	return ConpS;
 }
 
@@ -651,7 +650,7 @@ CONPS *BODY::NewConpS(int N)
 TRMS *BODY::NewTrmS(int N)
 {
 	TrmS = new TRMS[N];
-
+/*	-- コンストラクタで初期化済み
 	for(int i=0;i<N;i++){
 		TrmS[i].n1 = 0;
 		TrmS[i].n2 = 0;
@@ -660,8 +659,8 @@ TRMS *BODY::NewTrmS(int N)
 		TrmS[i].pTO = NULL;
 		TrmS[i].pts = NULL;
 	}
+*/
 	TypeNum[_TRIMMED_SURFACE] = N;
-
 	return TrmS;
 }
 

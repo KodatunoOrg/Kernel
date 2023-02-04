@@ -287,7 +287,7 @@ Vector NewVector(int len)
 	return a;
 }
 
-// Function: NewVector
+// Function: NewMatrix
 // double型2次元配列のメモリー確保
 //
 // Parameters:
@@ -1834,6 +1834,21 @@ double Gauss(int n,Matrix a,Vector b,Vector x)
 
 	return det;					// 戻り値は行列式
 }
+double Gauss(ublasMatrix& a, const ublasVector& b, ublasVector& x)
+{
+	long double det;	// 行列式
+	int *ip;			// 行交換の情報
+
+	ip = new int[a.size1()];	// size1()==rows
+
+	det = LU(a,ip);						// LU分解
+	if(det == 0) return KOD_FALSE;		// 行列式が0
+	else x = LU_Solver(a,b,ip);			// LU分解の結果を使って連立方程式を解く
+
+	delete[] ip;
+
+	return det;					// 戻り値は行列式
+}
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
@@ -1854,6 +1869,22 @@ double Gauss(int n,Matrix a,Coord *b,Coord *x)
 	det = LU(n,a,ip);					// LU分解
 	if(det == 0) return KOD_FALSE;		// 行列式が0
 	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
+
+	delete[] ip;                   
+
+	return det;					// 戻り値は行列式
+}
+double Gauss(ublasMatrix& a, Coord* b, Coord* x)
+{
+	int n = a.size1();
+	long double det;	// 行列式
+	int *ip;			// 行交換の情報
+
+	ip = new int[n];
+
+	det = LU(a,ip);						// LU分解
+	if(det == 0) return KOD_FALSE;		// 行列式が0
+	else LU_Solver(a,b,ip,x);			// LU分解の結果を使って連立方程式を解く
 
 	delete[] ip;                   
 
@@ -1888,6 +1919,30 @@ void LU_Solver(int n,Matrix a,Vector b,int *ip,Vector x)
 		x[i] = t/a[ii][i];
 	}
 }
+ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, int* ip)
+{
+	ublasVector	x;
+	int n = a.size1();
+	int ii;
+	double t;
+
+	for(int i=0;i<n;i++) {       // Gauss消去法の残り
+		ii = ip[i];
+		t = b[ii];
+		for(int j=0;j<i;j++)
+			t -= a(ii,j)*x[j];
+		x[i] = t;
+	}
+	for(int i=n-1;i>=0;i--){  // 後退代入
+		t = x[i];  
+		ii = ip[i];
+		for(int j=i+1;j<n;j++) 
+			t -= a(ii,j)*x[j];
+		x[i] = t/a(ii,i);;
+	}
+
+	return x;
+}
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
@@ -1915,6 +1970,27 @@ void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
 		for(int j=i+1;j<n;j++) 
 			t -= x[j] * a[ii][j];
 		x[i] = t / a[ii][i];
+	}
+}
+void LU_Solver(const ublasMatrix& a, const Coord* b, const int* ip, Coord* x)
+{
+	int n = a.size1();
+	int ii;
+	Coord t;
+
+	for(int i=0;i<n;i++) {       // Gauss消去法の残り
+		ii = ip[i];
+		t = b[ii];
+		for(int j=0;j<i;j++)
+			t -= x[j] * a(ii,j);
+		x[i] = t;
+	}
+	for(int i=n-1;i>=0;i--){  // 後退代入
+		t = x[i];  
+		ii = ip[i];
+		for(int j=i+1;j<n;j++) 
+			t -= x[j] * a(ii,j);
+		x[i] = t / a(ii,i);
 	}
 }
 
@@ -1974,11 +2050,10 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 double LU(int n,Matrix a,int *ip)
 {
 	int i, j, k, ii, ik;
-	long double t, u, det;
-	Vector weight;
+	long double t, u,
+		det = 0;				// 行列式
+	ublasVector	weight(n);		// weight[0..n-1] の記憶領域確保
 
-	weight = NewVector(n);    /* weight[0..n-1] の記憶領域確保 */
-	det = 0;                   /* 行列式 */
 	for (k = 0; k < n; k++) {  /* 各行について */
 		ip[k] = k;             /* 行交換情報の初期値 */
 		u = 0;                 /* その行の絶対値最大の要素を求める */
@@ -2016,7 +2091,53 @@ double LU(int n,Matrix a,int *ip)
 	}
 
 EXIT:
-	FreeVector(weight);  /* 記憶領域を解放 */
+	return det;           /* 戻り値は行列式 */
+}
+double LU(ublasMatrix& a, int* ip)
+{
+	int n = a.size1();	// size1()==rows
+	int i, j, k, ii, ik;
+	long double t, u,
+		det = 0;				// 行列式
+	ublasVector	weight(n);		// weight[0..n-1] の記憶領域確保
+
+	for (k = 0; k < n; k++) {  /* 各行について */
+		ip[k] = k;             /* 行交換情報の初期値 */
+		u = 0;                 /* その行の絶対値最大の要素を求める */
+		for (j = 0; j < n; j++) {
+			t = fabs(a(k,j));  if (t > u) u = t;
+		}
+		if (u == 0){
+			goto EXIT; /* 0 なら行列はLU分解できない */
+		}
+		weight[k] = 1 / u;     /* 最大絶対値の逆数 */
+	}
+	det = 1;                   /* 行列式の初期値 */
+	for (k = 0; k < n; k++) {  /* 各行について */
+		u = -1;
+		for (i = k; i < n; i++) {  /* より下の各行について */
+			ii = ip[i];            /* 重み×絶対値 が最大の行を見つける */
+			t = fabs(a(ii,k)) * weight[ii];
+			if (t > u) {  u = t;  j = i;  }
+		}
+		ik = ip[j];
+		if (j != k) {
+			ip[j] = ip[k];  ip[k] = ik;  /* 行番号を交換 */
+			det = -det;  /* 行を交換すれば行列式の符号が変わる */
+		}
+		u = a(ik,k);  det *= u;  /* 対角成分 */
+		if (u == 0){
+			goto EXIT;    /* 0 なら行列はLU分解できない */
+		}
+		for (i = k + 1; i < n; i++) {  /* Gauss消去法 */
+			ii = ip[i];
+			t = (a(ii,k) /= u);
+			for (j = k + 1; j < n; j++)
+				a(ii,j) -= t * a(ik,j);
+		}
+	}
+
+EXIT:
 	return det;           /* 戻り値は行列式 */
 }
 

@@ -2,10 +2,11 @@
 #define _STD_AFX_H_
 
 #include <math.h>
-#include <string.h>
-#include <iostream>
-
 #include <GL/glu.h>
+
+#include "boost/numeric/ublas/vector.hpp"
+#include "boost/numeric/ublas/matrix.hpp"
+namespace ublas = boost::numeric::ublas;
 
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
@@ -62,10 +63,12 @@
 // Typedef: double **
 // Matrix - double形の2次元配列をMatrixとして定義
 typedef double **Matrix;
+typedef ublas::matrix<double>	ublasMatrix;
 
 // Typedef: double *
 // Vector - double形の1次元配列をVectorとして定義
 typedef double *Vector;
+typedef ublas::vector<double>	ublasVector;
 
 // Class: Coord 
 // 座標値用クラスを定義
@@ -334,22 +337,27 @@ void TranMx(const Coord [],Coord []);
 // Function: Gauss
 // 連立1次方程式の解を求める
 double Gauss(int,Matrix,Vector,Vector);			
+double Gauss(ublasMatrix&, const ublasVector&, ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
 double Gauss(int,Matrix,Coord *,Coord *);		
+double Gauss(ublasMatrix&, Coord*, Coord*);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
 void LU_Solver(int,Matrix,Vector,int *,Vector);	
+ublasVector LU_Solver(ublasMatrix&, const ublasVector&, int*);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
 void LU_Solver(int,Matrix,Coord *,int *,Coord *);
+void LU_Solver(const ublasMatrix&, const Coord*, const int*, Coord*);
 
 // Function: LU
 // LU分解
 double LU(int,Matrix,int *);					
+double LU(ublasMatrix&, int*);
 
 // Function: MatInv
 // 逆行列を求める

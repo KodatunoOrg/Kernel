@@ -152,10 +152,8 @@ struct CIRA
 
 	CIRA() {
 		zt = 0;
-//		cp[0] = cp[1] = cp[2] = SetCoord(0,0,0);	// Coordコンストラクタで不要に
 		R = 0;
 		t[0] = t[1] = 0;
-//		U = V = SetCoord(0,0,0);
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;
@@ -180,9 +178,8 @@ struct CONA
 	DispStat Dstat;
 
 	CONA() {
-		InitVector(prop,6);
+		for (auto& a:prop) a=0;
 		zt = 0;
-//		cp[0] = cp[1] = SetCoord(0,0,0);
 		pD = 0;
 	}
 };
@@ -205,7 +202,6 @@ struct LINE_
 	DispStat Dstat;
 
 	LINE_() {
-//		cp[0] = cp[1] = SetCoord(0,0,0);
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;
@@ -221,14 +217,11 @@ struct LINE_
 // int pD -			ディレクトリ部への逆ポインタ
 struct TMAT
 {
-	double R[3][3];
-	double T[3];
+	ublasMatrix		R;
+	ublasVector		T;
 	int pD;
 
-	TMAT() {
-		for(int j=0;j<3;j++)
-			InitVector(R[j],3);
-		InitVector(T,3);
+	TMAT() : R(3,3), T(3) {
 		pD = 0;
 	}
 };
@@ -282,7 +275,6 @@ struct NURBSC{
 		W = NULL;
 		cp = NULL;
 		V[0] = V[1] = 0;
-//		norm = SetCoord(0,0,0);
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;
@@ -457,7 +449,8 @@ struct CONPS
 
 // Class TRMS
 // トリム面定義クラス
-struct TRMS{
+class TRMS{
+public:
 	TRMS() {
 		pts = NULL;
 		n1 = 0;

@@ -245,6 +245,37 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,double T[],double W[],
 
 	return KOD_TRUE;
 }
+int NURBS_Func::GenNurbsC(NURBSC* Nurbs, int K, int M, const ublasVector& T, const ublasVector& W, Coord cp[], double V[], int prop[], int euflag)
+{
+	int i;
+
+	Nurbs->K = K;
+	Nurbs->M = M;
+	Nurbs->N = T.size();
+	Nurbs->V[0] = V[0];
+	Nurbs->V[1] = V[1];
+	Nurbs->T = new double[Nurbs->N];
+	Nurbs->W = new double[Nurbs->K];
+	Nurbs->cp = new Coord[Nurbs->K];
+	Nurbs->EntUseFlag = euflag;
+    Nurbs->BlankStat = DISPLAY;     // デフォルトで描画要素に設定
+	
+	for(i=0;i<4;i++){
+		Nurbs->prop[i] = prop[i];
+	}
+	for(i=0;i<Nurbs->N;i++){
+		Nurbs->T[i] = T[i];
+	}
+	for(i=0;i<K;i++){
+		Nurbs->W[i] = W[i];
+		Nurbs->cp[i] = cp[i];
+	}
+	Nurbs->Dstat.Color[0] = Nurbs->Dstat.Color[1] = Nurbs->Dstat.Color[2] = 1.0;
+	Nurbs->Dstat.Color[3] = 0.5;
+
+	return KOD_TRUE;
+}	
+
 
 // Function: GenNurbsC
 // 1つのNurbs曲線を生成する(NURBS曲線のコピー)(オーバーロード)
@@ -345,6 +376,45 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,double *S,do
 
 	return KOD_TRUE;
 }
+int NURBS_Func::GenNurbsS(NURBSS* Nurbs, int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, Coord** Cp, double U_s, double U_e, double V_s, double V_e)
+{
+	Nurbs->K[0] = W.size1();
+	Nurbs->K[1] = W.size2();
+	Nurbs->M[0] = Mu;
+	Nurbs->M[1] = Mv;
+	Nurbs->U[0] = U_s;
+	Nurbs->U[1] = U_e;
+	Nurbs->V[0] = V_s;
+	Nurbs->V[1] = V_e;
+	Nurbs->N[0] = Mu+Nurbs->K[0];
+	Nurbs->N[1] = Mv+Nurbs->K[1];
+
+	for(int i=0;i<5;i++)
+		Nurbs->prop[i] = 0;
+
+	Nurbs->Dstat.Color[0] = Nurbs->Dstat.Color[1] = Nurbs->Dstat.Color[2] = 0.2;
+	Nurbs->Dstat.Color[3] = 0.5;
+
+	if(New_NurbsS(Nurbs,Nurbs->K,Nurbs->N) == KOD_ERR){
+//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
+		return KOD_ERR;
+	}
+
+	for(int i=0;i<Nurbs->N[0];i++)
+		Nurbs->S[i] = S[i];
+
+	for(int i=0;i<Nurbs->N[1];i++)
+		Nurbs->T[i] = T[i];
+
+	for(int i=0;i<Nurbs->K[0];i++){
+		for(int j=0;j<Nurbs->K[1];j++){
+			Nurbs->W[i][j] = W(i,j);
+			Nurbs->cp[i][j] = Cp[i][j];
+		}
+	}
+
+	return KOD_TRUE;
+}	
 
 // Function: GenNurbsS
 // 1つのNurbs曲面を生成する(NURBS曲面のコピー)
@@ -936,6 +1006,41 @@ double NURBS_Func::CalcBSbasis(double t, double knot[],int N,int I,int M)
 		denom = knot[I+M] - knot[I+1];
 		if(denom > 0.0){
 			n2 = (knot[I+M]-t)/denom * CalcBSbasis(t,knot,N,I+1,M-1);	// 2項目
+		}
+
+		return(n1+n2);
+	}
+}
+double NURBS_Func::CalcBSbasis(double t, const ublasVector& knot, int I, int M)
+{
+	// 階数(order)が1の時
+	if(M == 1){
+		// 注目中のノットの値がノットベクトルの終端値と同じ場合、基底関数が1を取りうる範囲をknot[I+1]も含むようにする
+		// こうしないと、このときだけ全ての基底関数値が0になってしまう。
+		if(t==knot[knot.max_size()-1]){
+			if(knot[I] <= t && t <= knot[I+1])	return 1.0;
+			else		return 0.0;
+		}
+		else{
+			if(knot[I] <= t && t < knot[I+1])	return 1.0;
+			else	return 0.0;
+		}
+	}
+
+	// それ以外の時
+	else{
+		double n1=0.0;
+		double n2=0.0;
+		double denom;
+
+		denom = knot[I+M-1] - knot[I];	// 分母
+		if(denom > 0.0){
+			n1 = (t-knot[I])/denom * CalcBSbasis(t,knot,I,M-1);		// 1項目
+		}
+
+		denom = knot[I+M] - knot[I+1];
+		if(denom > 0.0){
+			n2 = (knot[I+M]-t)/denom * CalcBSbasis(t,knot,I+1,M-1);	// 2項目
 		}
 
 		return(n1+n2);
@@ -4230,30 +4335,30 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,Coord *P,int PNum,int M)
 	int prop[4] = {0,0,1,0};// パラメータ
 	double V[2] = {0,1};	// ノットベクトルの開始値,終了値
 
-	Vector T_ = NewVector(K);	// 通過点上の曲線パラメータ
-	Vector T = NewVector(N);	// ノットベクトル
-	Matrix B = NewMatrix(K,K);	// Bスプライン基底関数行列
-	Matrix B_ = NewMatrix(K,K);	// Bスプライン基底関数行列の逆行列格納用
-	Vector W = NewVector(K);	// 重み
-	Coord *Q = NewCoord1(K);	// コントロールポイント
+	ublasVector	T_(K);		// 通過点上の曲線パラメータ
+	ublasVector	T(N);		// ノットベクトル
+	ublasMatrix	B(K,K);		// Bスプライン基底関数行列
+	ublasMatrix	B(K,K);		// Bスプライン基底関数行列の逆行列格納用
+	ublasVector	W(K);		// 重み
+	Coord *Q = NewCoord1(K);			// コントロールポイント
 
 	// 通過点上の曲線パラメータを得る
-	GetCurveKnotParam2(P,PNum,T_);
+	T_ = GetCurveKnotParam2(P,PNum);
 	for(int i=0;i<PNum;i++)
 		P[i].dmy = T_[i];
 
 	// ノットベクトルを得る
-	GetInterpolatedKnot(T_,N,K,M,T);
+	T = GetInterpolatedKnot(T_,N,K,M);
 
 	// Bスプライン基底関数行列を生成
 	for(int i=0;i<K;i++){
 		for(int j=0;j<K;j++){
-			B[i][j] = CalcBSbasis(T_[i],T,N,j,M);
+			B(i,j)  = CalcBSbasis(T_[i],T,j,M);
 		}
 	}
 
 	// Bスプライン基底関数行列の逆行列を求める
-	double det = Gauss(K,B,P,Q);
+	double det = Gauss(B,P,Q);
 	if(det == 0){
 //		GuiIFB.SetMessage("NURBS ERROR:Determinant is 0");
 		retflag = KOD_ERR;
@@ -4268,16 +4373,11 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,Coord *P,int PNum,int M)
 
 	// NURBS曲線を生成する
 	if(M == 2)
-		GenNurbsC(Nurbs,K,M,N,T,W,P,V,prop,0);
+		GenNurbsC(Nurbs,K,M,T,W,P,V,prop,0);
 	else
-		GenNurbsC(Nurbs,K,M,N,T,W,Q,V,prop,0);
+		GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);
 
 EXIT:
-	FreeVector(T_);
-	FreeVector(T);
-	FreeVector(W);
-	FreeMatrix(B,K);
-	FreeMatrix(B_,K);
 	FreeCoord1(Q);
 
 	return retflag;
@@ -4455,19 +4555,16 @@ int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,Coord *P,int PNum,int M)
 	int Nnum = M+PNum;				// ノットベクトルの数
 	int prop[4] = {0,0,1,0};		// パラメータ
 	double V[2] = {0,1};			// ノットベクトルの開始値,終了値
-	Vector T = NewVector(Nnum);		// ノットベクトル
-	Vector W = NewVector(PNum);		// 重み
+	ublasVector T(Nnum);			// ノットベクトル
+	ublasVector W(PNum);			// 重み
 
-	GetEqIntervalKont(PNum,M,T);	// ノットベクトルを得る
+	T = GetEqIntervalKont(PNum,M);	// ノットベクトルを得る
 
 	for(int i=0;i<PNum;i++){	// 重みは1で固定
 		W[i] = 1;
 	}
 
-	GenNurbsC(Nurbs,PNum,M,Nnum,T,W,P,V,prop,0);	// NURBS曲線生成
-
-	FreeVector(T);
-	FreeVector(W);
+	GenNurbsC(Nurbs,PNum,M,T,W,P,V,prop,0);	// NURBS曲線生成
 
 	return KOD_TRUE;
 }
@@ -4745,25 +4842,21 @@ int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,in
 	int prop[5] = {0,0,1,0,0};			// パラメータ
 	double U[2] = {0,1};				// u方向ノットベクトルの開始値、終了値
 	double V[2] = {0,1};				// v方向ノットベクトルの開始値、終了値
-	Vector S = NewVector(N[0]);			// u方向のノットベクトル
-	Vector T = NewVector(N[1]);			// v方向のノットベクトル
-	Matrix W = NewMatrix(K[0],K[1]);	// 重み
+	ublasVector S(N[0]);				// u方向のノットベクトル
+	ublasVector T(N[1]);				// v方向のノットベクトル
+	ublasMatrix W(K[0],K[1]);			// 重み
 
-	GetEqIntervalKont(K[0],Mu,S);		// u方向ノットベクトルを得る
-	GetEqIntervalKont(K[1],Mv,T);		// v方向ノットベクトルを得る
+	S = GetEqIntervalKont(K[0],Mu);		// u方向ノットベクトルを得る
+	T = GetEqIntervalKont(K[1],Mv);		// v方向ノットベクトルを得る
 
 	// 重みを得る
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			W[i][j] = 1;
+			W(i,j) = 1;
 		}
 	}
 
-	GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
-
-	FreeVector(S);
-	FreeVector(T);
-	FreeMatrix(W,K[0]);
+	GenNurbsS(Nurbs,Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
 
 	return KOD_TRUE;
 }
@@ -6238,6 +6331,21 @@ void NURBS_Func::GetCurveKnotParam2(Coord *P,int PNum,Vector T_)
 		T_[i] = T_[i-1] + d/d_sum;
 	}
 }
+ublasVector NURBS_Func::GetCurveKnotParam2(const Coord* P, int PNum)
+{
+	ublasVector	T_(PNum);
+	double d_sum=0;
+	for(int i=1;i<PNum;i++){
+		d_sum += sqrt((P[i]-P[i-1]).CalcEuclid());
+	}
+	T_[0] = 0;
+	T_[PNum-1] = 1;
+	for(int i=1;i<PNum-1;i++){
+		double d = sqrt((P[i]-P[i-1]).CalcEuclid());
+		T_[i] = T_[i-1] + d/d_sum;
+	}
+	return T_;
+}
 
 // Funciton: GetSurfaceKnotParam
 // (private)補間曲面用u,vパラメータを得る
@@ -6317,13 +6425,26 @@ void NURBS_Func::GetEqIntervalKont(int K,int M,Vector T)
 	for(int i=K;i<K+M;i++)
 		T[i] = NORM_KNOT_VAL;
 }
+ublasVector NURBS_Func::GetEqIntervalKont(int K, int M)
+{
+	ublasVector	T(K+M);
+
+	for(int i=0;i<M;i++)
+		T[i] = 0;
+	for(int i=M;i<K;i++)
+		T[i] = ((double)i-(double)M+1)/((double)K-(double)M+1)*NORM_KNOT_VAL;
+	for(int i=K;i<K+M;i++)
+		T[i] = NORM_KNOT_VAL;
+
+	return T;
+}
 
 // Function: GetInterpolatedKnot
 // (private)曲線/曲面パラメータから補間用ノットベクトルを算出
 // 
 // Parameters:
 // T_ - 曲線パラメータ列  
-// N - ノットベクトルの数  
+// N - ノットベクトルの数(M+K)
 // K - コントロールポイントの数  
 // M - 階数   
 // T - 格納するノットベクトル列
@@ -6347,6 +6468,30 @@ void NURBS_Func::GetInterpolatedKnot(Vector T_,int N,int K,int M,Vector T)
 
 	for(int i=K;i<K+M;i++)
 		T[i] = 1;
+}
+ublasVector NURBS_Func::GetInterpolatedKnot(const ublasVector& T_, int N, int K, int M)
+{
+	ublasVector	T(N);
+	for(int i=0;i<M;i++)
+		T[i] = 0;
+
+	// T_を参考にする
+	for(int j=1;j<K-M+1;j++){
+		double d=0;
+		for(int i=j;i<j+M-1;i++){
+			d += T_[i];
+		}
+		T[j+M-1] = d/((double)M-1);
+	}
+
+	// 等間隔に設定
+	//for(int i=M;i<K;i++)
+	//	T[i] = ((double)i-(double)M+1)/((double)K-(double)M+1);
+
+	for(int i=K;i<K+M;i++)
+		T[i] = 1;
+
+	return T;
 }
 
 // Function: GetApproximatedKnot
