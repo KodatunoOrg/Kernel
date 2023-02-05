@@ -63,11 +63,11 @@ public:
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
 	int GenNurbsC(NURBSC *,int,int,int,double [],double [],Coord [],double [],int[],int);	
-	int GenNurbsC(NURBSC *,int,int, const ublasVector&, const ublasVector&, Coord [],double [],int[],int);	
+	int GenNurbsC(NURBSC*, int, int, const ublasVector&, const ublasVector&, Coord [], double [], int[], int);	
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-	int GenNurbsC(NURBSC *,NURBSC *);	// Update by K.Magara								
+	int GenNurbsC(NURBSC *,NURBSC *);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
@@ -403,6 +403,8 @@ public:
 	// Function: ChangeKnotVecRange
 	// ノットベクトルのパラメータ定義域を変更する
 	void ChangeKnotVecRange(Vector,int,int,int,double,double);	
+	ublasVector ChangeKnotVecRange2(const double*, int, int, int, double, double);	// 2はあとで取る
+	ublasVector ChangeKnotVecRange2(const ublasVector&, int, int, double, double);
 
 
 	int CalcExtSearchCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地探索線を得る(準備中)

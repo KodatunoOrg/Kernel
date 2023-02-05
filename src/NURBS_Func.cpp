@@ -5091,12 +5091,8 @@ void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 	uc = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// S_のノットベクトル範囲を得る
-	Vector U1 = NewVector(S1->N[0]);	
-	Vector U2 = NewVector(S2->N[0]);	
-	CopyVector(S1->S,S1->N[0],U1);		// S1のノットベクトルをU1にコピー
-	CopyVector(S2->S,S2->N[0],U2);		// S2のノットベクトルをU2にコピー
-	ChangeKnotVecRange(U1,S1->N[0],S1->M[0],S1->K[0],us,uc);	// S1(U1)のノットベクトルの範囲を変更
-	ChangeKnotVecRange(U2,S2->N[0],S2->M[0],S2->K[0],uc,ue);	// S2(U2)のノットベクトルの範囲を変更
+	ublasVector U1 = ChangeKnotVecRange2(S1->S,S1->N[0],S1->M[0],S1->K[0],us,uc);	// S1のノットベクトルの範囲を変更
+	ublasVector U2 = ChangeKnotVecRange2(S2->S,S2->N[0],S2->M[0],S2->K[0],uc,ue);	// S2のノットベクトルの範囲を変更
 	S_->U[0] = us;						// S_のU方向ノットベクトルの範囲
 	S_->U[1] = ue;
 	S_->N[0] = S1->N[0] + S2->N[0] - S2->M[0] - 1;	// S_のノットベクトル数
@@ -5106,9 +5102,6 @@ void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 		S_->S[i] = U1[i];
 	for(int i=1;i<S2->N[0];i++)
 		S_->S[S1->K[0]+i-1] = U2[i];
-
-	FreeVector(U1);
-	FreeVector(U2);
 }
 
 // Function: SetCPSV_ConnectS
@@ -5163,12 +5156,8 @@ void NURBS_Func::SetKnotVecSV_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 	vc = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// S_のノットベクトル範囲を得る
-	Vector V1 = NewVector(S1->N[1]);	
-	Vector V2 = NewVector(S2->N[1]);	
-	CopyVector(S1->T,S1->N[1],V1);		// S1のノットベクトルをV1にコピー
-	CopyVector(S2->T,S2->N[1],V2);		// S2のノットベクトルをV2にコピー
-	ChangeKnotVecRange(V1,S1->N[1],S1->M[1],S1->K[1],vs,vc);	// S1(V1)のノットベクトルの範囲を変更
-	ChangeKnotVecRange(V2,S2->N[1],S2->M[1],S2->K[1],vc,ve);	// S2(V2)のノットベクトルの範囲を変更
+	ublasVector V1 = ChangeKnotVecRange2(S1->T,S1->N[1],S1->M[1],S1->K[1],vs,vc);	// S1のノットベクトルの範囲を変更
+	ublasVector V2 = ChangeKnotVecRange2(S2->T,S2->N[1],S2->M[1],S2->K[1],vc,ve);	// S2のノットベクトルの範囲を変更
 	S_->V[0] = vs;						// S_のV方向ノットベクトルの範囲
 	S_->V[1] = ve;
 	S_->N[1] = S1->N[1] + S2->N[1] - S2->M[1] - 1;	// S_のノットベクトル数
@@ -5178,9 +5167,6 @@ void NURBS_Func::SetKnotVecSV_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 		S_->T[i] = V1[i];
 	for(int i=1;i<S2->N[1];i++)
 		S_->T[S1->K[1]+i-1] = V2[i];
-
-	FreeVector(V1);
-	FreeVector(V2);
 }
 
 // Function: CalcuIntersecPtNurbsLine
@@ -6538,8 +6524,27 @@ void NURBS_Func::ChangeKnotVecRange(Vector T, int N, int M, int K, double Ts, do
 
 	FreeVector(T_);
 }
+ublasVector NURBS_Func::ChangeKnotVecRange2(const double* T, int N, int M, int K, double Ts, double Te)
+{
+	ublasVector T_(N);
+	
+	for(int i=0;i<N;i++)
+		T_[i] = (Te-Ts)/(T[K]-T[M-1])*T[i] + (Ts*T[K]-Te*T[M-1])/(T[K]-T[M-1]);
 
-// Function: ChangeKnotVecRange
+	return T_;
+}
+ublasVector NURBS_Func::ChangeKnotVecRange2(const ublasVector& T, int M, int K, double Ts, double Te)
+{
+	int		N = T.size();
+	ublasVector T_(N);
+	
+	for(int i=0;i<N;i++)
+		T_[i] = (Te-Ts)/(T[K]-T[M-1])*T[i] + (Ts*T[K]-Te*T[M-1])/(T[K]-T[M-1]);
+
+	return T_;
+}
+
+// Function: CalcApproximationCP_LSM
 // (private)最小2乗法で近似コントロールポイントを求める
 // 
 // Parameters:
@@ -7168,11 +7173,11 @@ int NURBS_Func::DivNurbsCParam(NURBSC *C0, NURBSC *C1, NURBSC *C2, double t)
 	int N2 = C0_.N - k + deg+1;
 	int K2 = N2 - C0->M;
 
-	Vector T1 = NewVector(N1);
-	Vector W1 = NewVector(K1);
+	ublasVector T1(N1);
+	ublasVector W1(K1);
 	Coord  *cp1 = NewCoord1(K1);
-	Vector T2 = NewVector(N2);
-	Vector W2 = NewVector(K2);
+	ublasVector T2(N2);
+	ublasVector W2(K2);
 	Coord  *cp2 = NewCoord1(K2);
 
 	// ノットベクトル，コントロールポイント，ウェイトをC1,C2に分配
@@ -7208,18 +7213,14 @@ int NURBS_Func::DivNurbsCParam(NURBSC *C0, NURBSC *C1, NURBSC *C2, double t)
 	//	fprintf(stderr,"%d:%lf\n",i+1,T2[i]);
 
 	// ノットの範囲を0-1に変更
-	ChangeKnotVecRange(T1,N1,C0->M,K1,0,1);
-	ChangeKnotVecRange(T2,N2,C0->M,K2,0,1);
+	T1 = ChangeKnotVecRange2(T1,C0->M,K1,0,1);
+	T2 = ChangeKnotVecRange2(T2,C0->M,K2,0,1);
 
 	// C1,C2生成
-	GenNurbsC(C1,K1,C0->M,N1,T1,W1,cp1,C0->V,C0->prop,0);
-	GenNurbsC(C2,K2,C0->M,N2,T2,W2,cp2,C0->V,C0->prop,0);
+	GenNurbsC(C1,K1,C0->M,T1,W1,cp1,C0->V,C0->prop,0);
+	GenNurbsC(C2,K2,C0->M,T2,W2,cp2,C0->V,C0->prop,0);
 	
-	FreeVector(T1);
-	FreeVector(W1);
 	FreeCoord1(cp1);
-	FreeVector(T2);
-	FreeVector(W2);
 	FreeCoord1(cp2);
 
 	return KOD_TRUE;
@@ -7324,12 +7325,8 @@ void NURBS_Func::SetKnotVecC_ConnectC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
 	c = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// C_のノットベクトル範囲を得る
-	Vector T1 = NewVector(C1->N);	
-	Vector T2 = NewVector(C2->N);	
-	CopyVector(C1->T,C1->N,T1);		// C1のノットベクトルをT1にコピー
-	CopyVector(C2->T,C2->N,T2);		// C2のノットベクトルをT2にコピー
-	ChangeKnotVecRange(T1,C1->N,C1->M,C1->K,s,c);	// C1(T1)のノットベクトルの範囲を変更
-	ChangeKnotVecRange(T2,C2->N,C2->M,C2->K,c,e);	// C2(U2)のノットベクトルの範囲を変更
+	ublasVector T1 = ChangeKnotVecRange2(C1->T,C1->N,C1->M,C1->K,s,c);	// C1のノットベクトルの範囲を変更
+	ublasVector T2 = ChangeKnotVecRange2(C2->T,C2->N,C2->M,C2->K,c,e);	// C2(U2)のノットベクトルの範囲を変更
 	C_->V[0] = s;						// C_のノットベクトルの範囲
 	C_->V[1] = e;
 	C_->N = C1->N + C2->N - C2->M - 1;	// C_のノットベクトル数
@@ -7339,9 +7336,6 @@ void NURBS_Func::SetKnotVecC_ConnectC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
 		C_->T[i] = T1[i];
 	for(int i=1;i<C2->N;i++)
 		C_->T[C1->K+i-1] = T2[i];
-
-	FreeVector(T1);
-	FreeVector(T2);
 }
 
 // Function: SetCPC_ConnectC
