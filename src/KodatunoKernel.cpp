@@ -1560,6 +1560,17 @@ void MulMxVec(Matrix A,int A_row,int A_col,Vector B,int B_row,Vector C)
 		}
 	}
 }
+ublasVector MulMxVec(const ublasMatrix& A, const ublasVector& B)
+{
+	ublasVector	C(A.size1());	// A_row
+	for(int i=0;i<A.size1();i++){
+		C[i] = 0;
+		for(int j=0;j<A.size2();j++){
+			C[i] += A(i,j) * B[j];
+		}
+	}
+	return C;
+}
 
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算(オーバーロード)
@@ -1581,6 +1592,17 @@ void MulMxVec(Matrix A,int A_row,int A_col,Coord *B,Coord *C)
 		for(int j=0;j<A_col;j++){
 //			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
 			C[i] += B[j] * A[i][j];
+		}
+	}
+}
+void MulMxVec(const ublasMatrix& A, const Coord* B, Coord* C)
+{
+	int		A_row = A.size1(),
+			A_col = A.size2();
+	for(int i=0;i<A_row;i++){
+		C[i] = 0;
+		for(int j=0;j<A_col;j++){
+			C[i] += B[j] * A(i,j);
 		}
 	}
 }
@@ -1645,6 +1667,18 @@ void TranMx(Matrix A,int m,int n,Matrix B)
 			B[j][i] = A[i][j];
 		}
 	}
+}
+ublasMatrix TranMx(const ublasMatrix& A)
+{
+	int		m = A.size1(),
+			n = A.size2();
+	ublasMatrix	B(n, m);
+	for(int i=0;i<m;i++){
+		for(int j=0;j<n;j++){
+			B(j,i) = A(i,j);
+		}
+	}
+	return B;
 }
 
 // Function: TranMx
@@ -2035,6 +2069,40 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 	delete[] ip;
 
 	return det;
+}
+ublasMatrix MatInv(const ublasMatrix& a)
+{
+	int			n = a.size1();
+	ublasMatrix	a_inv(a.size1(),a.size2());
+	int i, j, k, ii;
+	long double t, det;
+	int *ip;		// 行交換の情報
+
+	ip = new int[n];
+
+	det = LU(a,ip);		// LU分解
+	if(det != 0){
+		for(k=0;k<n;k++){
+			for(i=0;i<n;i++){
+				ii = ip[i];
+				t = (ii==k);
+				for(j=0;j<i;j++)
+					t -= a(ii,j)*a_inv(j,k);
+				a_inv(i,k) = t;
+			}
+			for(i=n-1;i>=0;i--){
+				t = a_inv(i,k);
+				ii = ip[i];
+				for(j=i+1;j<n;j++)
+					t -= a(ii,j)*a_inv(j,k);
+				a_inv(i,k) = t/a(ii,i);
+			}
+		}
+	}
+
+	delete[] ip;
+
+	return a_inv;
 }
 
 // Function: LU

@@ -376,7 +376,7 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,double *S,do
 
 	return KOD_TRUE;
 }
-int NURBS_Func::GenNurbsS(NURBSS* Nurbs, int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, Coord** Cp, double U_s, double U_e, double V_s, double V_e)
+int NURBS_Func::GenNurbsS(NURBSS* Nurbs, int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, const Coord** Cp, double U_s, double U_e, double V_s, double V_e)
 {
 	Nurbs->K[0] = W.size1();
 	Nurbs->K[1] = W.size2();
@@ -4375,7 +4375,7 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,Coord *P,int PNum,int M)
 		P[i].dmy = T_[i];
 
 	// ノットベクトルを得る
-	T = GetInterpolatedKnot(T_,N,K,M);
+	T = GetInterpolatedKnot(T_,K,M);
 
 	// Bスプライン基底関数行列を生成
 	for(int i=0;i<K;i++){
@@ -4669,81 +4669,72 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,Coord **P,int PNum_u,int PN
 	double U[2] = {0,1};			// u方向ノットベクトルの開始値、終了値
 	double V[2] = {0,1};			// v方向ノットベクトルの開始値、終了値
 
-	Vector S_ = NewVector(K[0]);		// u方向の通過点上の曲線パラメータ
-	Vector S = NewVector(N[0]);			// u方向のノットベクトル
-	Vector T_ = NewVector(K[1]);		// v方向の通過点上の曲線パラメータ
-	Vector T = NewVector(N[1]);			// v方向のノットベクトル
-	Matrix Bu = NewMatrix(K[0],K[0]);	// u方向のBスプライン基底関数行列
-	Matrix Bu_ = NewMatrix(K[0],K[0]);	// u方向のBスプライン基底関数行列の逆行列格納用
-	Matrix Bv = NewMatrix(K[1],K[1]);	// v方向のBスプライン基底関数行列
-	Matrix Bv_ = NewMatrix(K[1],K[1]);	// v方向のBスプライン基底関数行列の逆行列格納用
-	Matrix W = NewMatrix(K[0],K[1]);	// 重み
+	ublasVector S_(K[0]);				// u方向の通過点上の曲線パラメータ
+	ublasVector S(N[0]);				// u方向のノットベクトル
+	ublasVector T_(K[1]);				// v方向の通過点上の曲線パラメータ
+	ublasVector T(N[1]);				// v方向のノットベクトル
+	ublasMatrix Bu(K[0],K[0]);			// u方向のBスプライン基底関数行列
+	ublasMatrix Bu_(K[0],K[0]);			// u方向のBスプライン基底関数行列の逆行列格納用
+	ublasMatrix Bv(K[1],K[1]);			// v方向のBスプライン基底関数行列
+	ublasMatrix Bv_(K[1],K[1]);			// v方向のBスプライン基底関数行列の逆行列格納用
+	ublasMatrix W(K[0],K[1]);			// 重み
 	Coord **PT = NewCoord2(K[1],K[0]);	// 転置した点列P
 	Coord **R = NewCoord2(K[0],K[1]);	// アイソパラ曲線のコントロールポイント
 	Coord **RT = NewCoord2(K[1],K[0]);	// 転置したコントロールポイントR
 	Coord **Q = NewCoord2(K[0],K[1]);	// NURBS曲面のコントロールポイント
 
 
-	GetSurfaceKnotParam(S_,T_,P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
+	boost::tie(S_,T_) = GetSurfaceKnotParam(P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
 
-	GetInterpolatedKnot(S_,N[0],K[0],Mu,S);			// ノットベクトルSを得る
+	S = GetInterpolatedKnot(S_,K[0],Mu);			// ノットベクトルSを得る
 
-	GetInterpolatedKnot(T_,N[1],K[1],Mv,T);			// ノットベクトルTを得る
+	T = GetInterpolatedKnot(T_,K[1],Mv);			// ノットベクトルTを得る
 
 	// u方向のBスプライン基底関数行列を生成
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[0];j++){
-			Bu[i][j] = CalcBSbasis(S_[i],S,N[0],j,Mu);
+			Bu(i,j) = CalcBSbasis(S_[i],S,j,Mu);
 		}
 	}
 
 	// v方向のBスプライン基底関数行列を生成
 	for(int i=0;i<K[1];i++){
 		for(int j=0;j<K[1];j++){
-			Bv[i][j] = CalcBSbasis(T_[i],T,N[1],j,Mv);
+			Bv(i,j) = CalcBSbasis(T_[i],T,j,Mv);
 		}
 	}
 
 	// u方向のBスプライン基底関数行列の逆行列を求める
-	MatInv(K[0],Bu,Bu_);
+	Bu_ = MatInv(Bu);
 
 	// v方向のBスプライン基底関数行列の逆行列を求める
-	MatInv(K[1],Bv,Bv_);
+	Bv_ = MatInv(Bv);
 
 	// アイソパラ曲線のコントロールポイントを得る
 	TranMx(P,K[0],K[1],PT);
 	for(int i=0;i<K[1];i++){
-		MulMxVec(Bu_,K[0],K[0],PT[i],RT[i]);
+		MulMxVec(Bu_,PT[i],RT[i]);
 	}
 
 	// NURBS曲面のコントロールポイントを得る
 	TranMx(RT,K[1],K[0],R);
 	for(int i=0;i<K[0];i++){
- 		MulMxVec(Bv_,K[1],K[1],R[i],Q[i]);
+ 		MulMxVec(Bv_,R[i],Q[i]);
  	}
 
 	// 重みを得る
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			W[i][j] = 1;
+			W(i,j) = 1;
 		}
 	}
 
 	// NURBS曲面を生成する
 	if(Mu == 2 && Mv == 2)
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+		GenNurbsS(Nurbs,Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);
 	else
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,Q,U[0],U[1],V[0],V[1]);
+		GenNurbsS(Nurbs,Mu,Mv,S,T,W,Q,U[0],U[1],V[0],V[1]);
 
-	FreeVector(S_);
-	FreeVector(S);
-	FreeVector(T_);
-	FreeVector(T);
-	FreeMatrix(Bu,K[0]);
-	FreeMatrix(Bu_,K[0]);
-	FreeMatrix(Bv,K[1]);
-	FreeMatrix(Bv_,K[1]);
-	FreeMatrix(W,K[0]);
 	FreeCoord2(PT,K[1]);
 	FreeCoord2(R,K[0]);
 	FreeCoord2(RT,K[1]);
@@ -6432,6 +6423,61 @@ void NURBS_Func::GetSurfaceKnotParam(Vector S,Vector T,Coord **P,int uNum,int vN
 	
 	FreeMatrix(p_,uNum);
 }
+boost::tuple<ublasVector, ublasVector> NURBS_Func::GetSurfaceKnotParam(const Coord** P, int uNum, int vNum)
+{
+	double d;
+	ublasVector	S(uNum), T(vNum);
+	ublasMatrix p_(uNum,vNum);
+
+	// u方向の通過点上の曲線パラメータを得る
+	for(int j=0;j<vNum;j++){
+		d = 0;
+		for(int i=1;i<uNum;i++){
+			d += P[i][j].CalcDistance(P[i-1][j]);
+		}
+		for(int i=0;i<uNum;i++){
+			if(i==0)
+				p_(i,j) = 0;
+			else if(i==uNum-1)
+				p_(i,j) = 1;
+			else
+				p_(i,j) = p_(i-1,j) + P[i][j].CalcDistance(P[i-1][j])/d;
+		}
+	}
+	for(int i=0;i<uNum;i++){
+		S[i] = 0;
+		for(int j=0;j<vNum;j++){
+			S[i] += p_(i,j);
+		}
+		S[i] /= (double)vNum;
+	}
+
+	// v方向の通過点上の曲線パラメータを得る
+	for(int i=0;i<uNum;i++){
+		d = 0;
+		for(int j=1;j<vNum;j++){
+			d += P[i][j].CalcDistance(P[i][j-1]);
+		}
+		for(int j=0;j<vNum;j++){
+			if(j==0)
+				p_(i,j) = 0;
+			else if(j==vNum-1)
+				p_(i,j) = 1;
+			else
+				p_(i,j) = p_(i,j-1) + P[i][j].CalcDistance(P[i][j-1])/d;
+		}
+	}
+	for(int j=0;j<vNum;j++){
+		T[j] = 0;
+		for(int i=0;i<uNum;i++){
+			T[j] += p_(i,j);
+		}
+		T[j] /= (double)uNum;
+	}
+	
+	return boost::make_tuple(S,T);
+}
+
 
 // Function: GetEqIntervalKont
 // (private)曲線/曲面パラメータから等間隔なノットベクトルを算出
@@ -6493,8 +6539,9 @@ void NURBS_Func::GetInterpolatedKnot(Vector T_,int N,int K,int M,Vector T)
 	for(int i=K;i<K+M;i++)
 		T[i] = 1;
 }
-ublasVector NURBS_Func::GetInterpolatedKnot(const ublasVector& T_, int N, int K, int M)
+ublasVector NURBS_Func::GetInterpolatedKnot(const ublasVector& T_, int K, int M)
 {
+	int			N = T_.size();
 	ublasVector	T(N);
 	for(int i=0;i<M;i++)
 		T[i] = 0;
@@ -6538,6 +6585,23 @@ void NURBS_Func::GetApproximatedKnot(Vector T_,int N,int M,int K,Vector T)
 		T[j+M-1] = (1-a)*T_[i-1] + a*T_[i];
 		T[j+M-1] += 0.0001;					// 肝!  TとT_が同値になると、最小２乗法がうまくいかないので、便宜的に同値にならないようにしている。
 	}
+}
+ublasVector NURBS_Func::GetApproximatedKnot(const ublasVector& T_, int M, int K)
+{
+	int			N(T_.size());
+	ublasVector	T(N);
+
+	for(int i=0;i<M;i++)	T[i] = 0;
+	for(int i=K;i<K+M;i++)	T[i] = 1;
+	double d = (double)N/(double)(K-M+1);
+	for(int j=1;j<K-M+1;j++){
+		int i = (int)(j*d);
+		double a = (double)j*d - (double)i;
+		T[j+M-1] = (1-a)*T_[i-1] + a*T_[i];
+		T[j+M-1] += 0.0001;					// 肝!  TとT_が同値になると、最小２乗法がうまくいかないので、便宜的に同値にならないようにしている。
+	}
+
+	return T;
 }
 
 // Function: ChangeKnotVecRange

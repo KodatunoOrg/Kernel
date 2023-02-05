@@ -309,10 +309,12 @@ void MulMxMx(Matrix,int,int,Matrix,int,int,Matrix);
 // Function: MulMxVec
 // 行列とベクトルの掛け算
 void MulMxVec(Matrix,int,int,Vector,int,Vector);	
+ublasVector MulMxVec(const ublasMatrix&, const ublasVector&);
 
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算
 void MulMxVec(Matrix,int,int,Coord *,Coord *);	
+void MulMxVec(const ublasMatrix&, const Coord*, Coord *);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
@@ -325,6 +327,7 @@ Coord MulMxCoord(Matrix, const Coord&);
 // Function: TranMx
 // 転置行列を得る
 void TranMx(Matrix,int,int,Matrix);				
+ublasMatrix TranMx(const ublasMatrix&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
@@ -362,6 +365,7 @@ double LU(ublasMatrix&, int*);
 // Function: MatInv
 // 逆行列を求める
 double MatInv(int,Matrix,Matrix);				
+ublasMatrix MatInv(const ublasMatrix&);
 
 // Function: MatInv3
 // 3x3の逆行列

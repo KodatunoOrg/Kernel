@@ -1,6 +1,8 @@
 ﻿#ifndef _NURBS_FUNC_H_
 #define _NURBS_FUNC_H_
 
+#include "boost/tuple/tuple.hpp"	// 関数から2つ以上の値を返す
+
 // Constants: General Defines
 // PTNUMMAX -			NURBSの点列の最大数(10000)
 // RANKMAX -			NURBSの階数の最大値(9)
@@ -72,7 +74,7 @@ public:
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
 	int GenNurbsS(NURBSS *,int,int,int,int,double *,double *,double **,Coord **,double,double,double,double);	
-	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, Coord **,double,double,double,double);	
+	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const Coord**, double,double,double,double);	
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
@@ -591,15 +593,17 @@ private:
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
 	void GetSurfaceKnotParam(Vector,Vector,Coord **,int,int);		
+	boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const Coord**, int, int);
 
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
 	void GetInterpolatedKnot(Vector,int,int,int,Vector);			
-	ublasVector	GetInterpolatedKnot(const ublasVector&, int, int, int);
+	ublasVector	GetInterpolatedKnot(const ublasVector&, int, int);
 
 	// Function: GetApproximatedKnot
 	// (private)曲線/曲面パラメータから近似用ノットベクトルを算出
 	void GetApproximatedKnot(Vector,int,int,int,Vector);			
+	ublasVector GetApproximatedKnot(const ublasVector&, int, int);
 
 	// Function: SetApproximationCPnum
 	// (private)点列数から生成するコントロールポイント数を算定する
