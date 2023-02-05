@@ -2908,8 +2908,8 @@ int NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Di
 	double u = NurbsS->U[0];				// NURBS曲面S(u,v)のuパラメータの現在値
 	double v = NurbsS->V[0];				// NURBS曲面S(u,v)のvパラメータの現在値
 	double t = NurbsC->V[0];				// NURBS曲線C(t)のtパラメータ
-	Matrix A = NewMatrix(3,3);				// Fu,Fv,Ftを構成する3x3行列
-	Matrix A_ = NewMatrix(3,3);				// Aの逆行列を格納
+	ublasMatrix A(3,3);						// Fu,Fv,Ftを構成する3x3行列
+	ublasMatrix A_(3,3);					// Aの逆行列を格納
 	bool flag = false;						// 収束フラグ
 	double dt = (NurbsC->V[1] - NurbsC->V[0])/(double)Divnum;	// 収束演算用のtパラメータのインターバル値
 	int loopcount = 0;						// 収束計算回数
@@ -2928,17 +2928,18 @@ int NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Di
 			Fu = CalcDiffuNurbsS(NurbsS,u,v);			// Fu = dF/du = dS/du
 			Fv = CalcDiffvNurbsS(NurbsS,u,v);			// Fv = dF/dv = dS/dv
 			Ft = CalcDiffNurbsC(NurbsC,t);				// Ft = dF/dt = dC/dt
-			A[0][0] = Fu.x;				// Fu,Fv,Ftを3x3行列Aに代入
-			A[0][1] = Fv.x;				//     |Fu.x Fv.x Ft.x|       |du|       |F.x|
-			A[0][2] = Ft.x;				// A = |Fu.y Fv.y Ft.y| , d = |dv| , F = |F.y|
-			A[1][0] = Fu.y;				//     |Fu.z Fv.z Ft.z|       |dt|       |F.z|
-			A[1][1] = Fv.y;
-			A[1][2] = Ft.y;				// A・d = F   --->   d = A_・F
-			A[2][0] = Fu.z;
-			A[2][1] = Fv.z;
-			A[2][2] = Ft.z;	
-			if(MatInv3(A,A_) == KOD_FALSE)	break;		// 逆行列を求める
-			d = MulMxCoord(A_,F)*(-1);			// dを算出
+			A(0,0) = Fu.x;				// Fu,Fv,Ftを3x3行列Aに代入
+			A(0,1) = Fv.x;				//     |Fu.x Fv.x Ft.x|       |du|       |F.x|
+			A(0,2) = Ft.x;				// A = |Fu.y Fv.y Ft.y| , d = |dv| , F = |F.y|
+			A(1,0) = Fu.y;				//     |Fu.z Fv.z Ft.z|       |dt|       |F.z|
+			A(1,1) = Fv.y;
+			A(1,2) = Ft.y;				// A・d = F   --->   d = A_・F
+			A(2,0) = Fu.z;
+			A(2,1) = Fv.z;
+			A(2,2) = Ft.z;	
+//			if(MatInv3(A,A_) == KOD_FALSE)	break;		// 逆行列を求める
+			A_ = MatInv3(A);
+			d = MulMxCoord(A_,F)*(-1);					// dを算出
 
 			if(fabs(d.x) <= APPROX_ZERO && fabs(d.y) <= APPROX_ZERO && fabs(d.z) <= APPROX_ZERO){	// 真値に収束したらloopを抜ける
 				flag = true;		// 収束フラグtrue
@@ -2968,9 +2969,6 @@ int NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Di
 			}
 		}
 	}// end of i loop
-
-	FreeMatrix(A,3);
-	FreeMatrix(A_,3);
 
 	anscount = CheckTheSamePoints(ans,anscount);		// 同一点は除去する
 
@@ -3541,8 +3539,8 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 	int loopcount = 0;			// ループ回数
 	bool flag = false;			// 収束フラグ
 	int anscount = 0;			// 交点の数をカウント
-	Matrix A = NewMatrix(2,2);	// Ft,Fuを成分ごとに格納した行列
-	Matrix A_ = NewMatrix(2,2);	// Aの逆行列を格納
+	ublasMatrix A(2,2);			// Ft,Fuを成分ごとに格納した行列
+	ublasMatrix A_(2,2);		// Aの逆行列を格納
 	
 
 	for(int i=0;i<Divnum;i++){
@@ -3554,13 +3552,13 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 			F  = CalcNurbsCCoord(NurbA,t) - CalcNurbsCCoord(NurbB,u);
 			Ft = CalcDiffNurbsC(NurbA,t);
 			Fu = CalcDiffNurbsC(NurbB,u);
-			A[0][0] = Ft.x;
-            A[0][1] = -Fu.x;
-			A[1][0] = Ft.y;
-            A[1][1] = -Fu.y;
-			MatInv2(A,A_);
-			dt = -(A_[0][0]*F.x + A_[0][1]*F.y);
-			du = -(A_[1][0]*F.x + A_[1][1]*F.y);
+			A(0,0) = Ft.x;
+            A(0,1) = -Fu.x;
+			A(1,0) = Ft.y;
+            A(1,1) = -Fu.y;
+			A_ = MatInv2(A);
+			dt = -(A_(0,0)*F.x + A_(0,1)*F.y);
+			du = -(A_(1,0)*F.x + A_(1,1)*F.y);
 
 			if(CheckZero(dt,HIGH_ACCURACY) == KOD_TRUE && CheckZero(du,HIGH_ACCURACY) == KOD_TRUE){		// 更新値が閾値以下になったら、whileを抜け、解として登録
 				flag = true;
@@ -3587,9 +3585,6 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 
 	anscount = CheckTheSamePoints2D(ans,anscount);		// 同一点は除去する
 
-	FreeMatrix(A,2);
-	FreeMatrix(A_,2);
-
 	return anscount;
 }
 
@@ -3607,8 +3602,8 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 // 交点の有無（KOD_TRUE：交点あり， KOD_FALSE：交点なし）
 int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t1,double *t2)
 {
-    Matrix A = NewMatrix(2,2);
-    Matrix A_ = NewMatrix(2,2);
+    ublasMatrix A(2,2);
+    ublasMatrix A_(2,2);
     bool conv_flag = false;
 
     *t1 = (C->V[0]+C->V[1])/2;
@@ -3618,14 +3613,15 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
         Coord Ct = CalcDiffNurbsC(C,*t1);
         Coord Lt = r;
         Coord B = (P+(r*(*t2))) - CalcNurbsCCoord(C,*t1);
-        A[0][0] = Ct.x;
-        A[1][0] = Ct.y;
-        A[0][1] = -Lt.x;
-        A[1][1] = -Lt.y;
-        double det = MatInv2(A,A_);
-        if(det == 0) break;
-        double dt1 = A_[0][0]*B.x + A_[0][1]*B.y;
-        double dt2 = A_[1][0]*B.x + A_[1][1]*B.y;
+        A(0,0) = Ct.x;
+        A(1,0) = Ct.y;
+        A(0,1) = -Lt.x;
+        A(1,1) = -Lt.y;
+//		double det = MatInv2(A,A_);
+//		if(det == 0) break;
+		A_ = MatInv2(A);
+        double dt1 = A_(0,0)*B.x + A_(0,1)*B.y;
+        double dt2 = A_(1,0)*B.x + A_(1,1)*B.y;
         //fprintf(stderr,"    %lf,%lf,%lf,%lf,%lf\n",*t1,*t2,dt1,dt2,det);		// fro debug
         if(CheckZero(dt1,LOW_ACCURACY) == KOD_TRUE && CheckZero(dt2,LOW_ACCURACY) == KOD_TRUE){		// 交点に収束したらwhile break
             conv_flag = true;
@@ -3638,9 +3634,6 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
         if(*t1 < C->V[0] || *t1 > C->V[1])	// 現在注目中のエッジの範囲を超えたらbreak
             break;
     }
-
-    FreeMatrix(A,2);
-    FreeMatrix(A_,2);
 
     if(conv_flag == true)
         return KOD_TRUE;
@@ -4530,27 +4523,24 @@ int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs,Coord *P,int PNum,int M)
 	int prop[4] = {0,0,1,0};		// パラメータ
 	double V[2] = {0,1};			// ノットベクトルの開始値,終了値
 
-	Vector T_ = NewVector(PNum);	// 通過点上の曲線パラメータ
-	Vector T = NewVector(Nnum);		// ノットベクトル
+	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
+	ublasVector T(Nnum);			// ノットベクトル
 	Coord *Q = NewCoord1(K);		// コントロールポイント
-	Vector W = NewVector(K);		// 重み
+	ublasVector W(K);				// 重み
 
-	GetCurveKnotParam1(P,PNum,T_);		// 通過点上の曲線パラメータを得る
+	T_ = GetCurveKnotParam1(P,PNum);		// 通過点上の曲線パラメータを得る
 
-	GetApproximatedKnot(T_,PNum,M,K,T);	// ノットベクトルを設定する
+	T = GetApproximatedKnot(T_,M,K);		// ノットベクトルを設定する
 
-	CalcApproximationCP_LSM(P,T_,T,PNum,Nnum,M,K,Q);	// 最小2乗法で近似コントロールポイントを求める
+	CalcApproximationCP_LSM(P,T_,T,M,K,Q);	// 最小2乗法で近似コントロールポイントを求める
 
 	for(int i=0;i<K;i++){	// 重みは1で固定
 		W[i] = 1;
 	}
 
-	GenNurbsC(Nurbs,K,M,Nnum,T,W,Q,V,prop,0);	// NURBS曲線生成
+	GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);	// NURBS曲線生成
 
 	FreeCoord1(Q);
-	FreeVector(T);
-	FreeVector(T_);
-	FreeVector(W);
 
 	return KOD_TRUE;
 }
@@ -4614,8 +4604,8 @@ int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,Coord *P,int PNum)
 	int N=PNum+2;				// ノットベクトルの数
 	int prop[4] = {0,0,1,0};	// パラメータ
 	double V[2] = {0,1};		// ノットベクトルの開始値,終了値
-	Vector T = NewVector(N);	// ノットベクトル
-	Vector W = NewVector(K);	// 重み
+	ublasVector T(N);			// ノットベクトル
+	ublasVector W(K);			// 重み
 
 	// ノットベクトルを求める
 	T[0] = T[1] = 0.0;
@@ -4634,10 +4624,7 @@ int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,Coord *P,int PNum)
 	}
 
 	// NURBS曲線を生成する
-	GenNurbsC(Nurbs,K,M,N,T,W,P,V,prop,0);
-
-	FreeVector(T);
-	FreeVector(W);
+	GenNurbsC(Nurbs,K,M,T,W,P,V,prop,0);
 
 	return KOD_TRUE;
 }
@@ -4687,7 +4674,6 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,Coord **P,int PNum_u,int PN
 	boost::tie(S_,T_) = GetSurfaceKnotParam(P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
 
 	S = GetInterpolatedKnot(S_,K[0],Mu);			// ノットベクトルSを得る
-
 	T = GetInterpolatedKnot(T_,K[1],Mv);			// ノットベクトルTを得る
 
 	// u方向のBスプライン基底関数行列を生成
@@ -4773,56 +4759,51 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,Coord **P,int PNum_u,int PN
 	double U[2] = {0,1};			// u方向ノットベクトルの開始値、終了値
 	double V[2] = {0,1};			// v方向ノットベクトルの開始値、終了値
 
-	Vector S_ = NewVector(PNum_u);		// u方向の通過点上の曲線パラメータ
-	Vector S = NewVector(N[0]);			// u方向のノットベクトル
-	Vector T_ = NewVector(PNum_v);		// v方向の通過点上の曲線パラメータ
-	Vector T = NewVector(N[1]);			// v方向のノットベクトル
-	Coord **Q1 = NewCoord2(PNum_u,K[1]);	// NURBS曲面のコントロールポイント
+	ublasVector S_(PNum_u);				// u方向の通過点上の曲線パラメータ
+	ublasVector S(N[0]);				// u方向のノットベクトル
+	ublasVector T_(PNum_v);				// v方向の通過点上の曲線パラメータ
+	ublasVector T(N[1]);				// v方向のノットベクトル
+	Coord **Q1 = NewCoord2(PNum_u,K[1]);// NURBS曲面のコントロールポイント
 	Coord **Q2 = NewCoord2(K[1],PNum_u);	
 	Coord **Q3 = NewCoord2(K[1],K[0]);
 	Coord **Q4 = NewCoord2(K[0],K[1]);
 	Coord **P_ = NewCoord2(K[1],K[0]);
-	Matrix W = NewMatrix(K[0],K[1]);	// 重み
+	ublasMatrix W(K[0],K[1]);			// 重み
 
-	GetSurfaceKnotParam(S_,T_,P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
+	boost::tie(S_, T_) = GetSurfaceKnotParam(P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
 
-	GetApproximatedKnot(S_,PNum_u,Mu,K[0],S);		// ノットベクトルSを設定する
-	GetApproximatedKnot(T_,PNum_v,Mv,K[1],T);		// ノットベクトルTを設定する
+	S = GetApproximatedKnot(S_,Mu,K[0]);			// ノットベクトルSを設定する
+	T = GetApproximatedKnot(T_,Mv,K[1]);			// ノットベクトルTを設定する
 
 	// v方向の点列から近似NURBS曲線をPNum_u個作成する
 	for(int i=0;i<PNum_u;i++){
-		CalcApproximationCP_LSM(P[i],T_,T,PNum_v,N[1],Mv,K[1],Q1[i]);	// 最小2乗法で近似コントロールポイントを求める
+		CalcApproximationCP_LSM(P[i],T_,T,Mv,K[1],Q1[i]);				// 最小2乗法で近似コントロールポイントを求める
 	}
 	TranMx(Q1,PNum_u,K[1],Q2);					// Qの転置
 
 	for(int i=0;i<K[1];i++){
-		CalcApproximationCP_LSM(Q2[i],S_,S,PNum_u,N[0],Mu,K[0],Q3[i]);	// 最小2乗法で近似コントロールポイントを求める
+		CalcApproximationCP_LSM(Q2[i],S_,S,Mu,K[0],Q3[i]);				// 最小2乗法で近似コントロールポイントを求める
 	}
 	TranMx(Q3,K[1],K[0],Q4);					// Qの転置
 
 	// 重みを得る
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			W[i][j] = 1;
+			W(i,j) = 1;
 		}
 	}
 
 	// NURBS曲面を生成する
 	if(Mu == 2 && Mv == 2)
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+		GenNurbsS(Nurbs,Mu,Mv,S,T,W,P, U[0],U[1],V[0],V[1]);
 	else
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,Q4,U[0],U[1],V[0],V[1]);
+		GenNurbsS(Nurbs,Mu,Mv,S,T,W,Q4,U[0],U[1],V[0],V[1]);
 
-	FreeVector(S);
-	FreeVector(T);
-	FreeVector(S_);
-	FreeVector(T_);
 	FreeCoord2(Q1,PNum_u);
 	FreeCoord2(Q2,K[1]);
 	FreeCoord2(Q3,K[1]);
 	FreeCoord2(Q4,K[0]);
 	FreeCoord2(P_,K[1]);
-	FreeMatrix(W,K[0]);
 
 	return KOD_TRUE;
 }
@@ -4894,13 +4875,12 @@ int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_
 	int prop[4] = {0,0,1,0};		// パラメータ
 	double U[2] = {0,1};			// u方向ノットベクトルの開始値、終了値
 	double V[2] = {0,1};			// v方向ノットベクトルの開始値、終了値
-	Vector S = NewVector(N[0]);			// u方向のノットベクトル
-	Vector T = NewVector(N[1]);			// v方向のノットベクトル
-	Matrix W = NewMatrix(K[0],K[1]);	// 重み
+	ublasVector S(N[0]);			// u方向のノットベクトル
+	ublasVector T(N[1]);			// v方向のノットベクトル
+	ublasMatrix W(K[0],K[1]);		// 重み
 
 	// u方向ノットベクトルを求める
-	Vector du_sum = NewVector(K[1]);
-	InitVector(du_sum,K[1]);
+	ublasVector du_sum(K[1], 0);
 	for(int i=0;i<K[1];i++){
 		for(int j=1;j<K[0];j++){
 			du_sum[i] += (P[j][i]-P[j-1][i]).CalcEuclid();
@@ -4918,8 +4898,7 @@ int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_
 	S[K[0]] = S[K[0]+1] = 1.0;
 	
 	// v方向ノットベクトルを求める
-	Vector dv_sum = NewVector(K[0]);
-	InitVector(dv_sum,K[0]);
+	ublasVector dv_sum(K[0], 0);
 	for(int i=0;i<K[0];i++){
 		for(int j=1;j<K[1];j++){
 			dv_sum[i] += (P[i][j]-P[i][j-1]).CalcEuclid();
@@ -4939,18 +4918,12 @@ int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_
 	// ウェイト
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			W[i][j] = 1.0;
+			W(i,j) = 1.0;
 		}
 	}
 
 	// NURBS曲面を生成する
-	GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
-
-	FreeVector(S);
-	FreeVector(T);
-	FreeMatrix(W,K[0]);
-	FreeVector(du_sum);
-	FreeVector(dv_sum);
+	GenNurbsS(Nurbs,Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);
 
 	return KOD_TRUE;
 }
@@ -6078,22 +6051,20 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 	num = CalcIntersecPtsPlaneSearch(Trm->pts,pt,nvec,0.5,5,t,2000,RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
 	
 	// パラメトリック領域内で直線近似(最小2乗法で近似直線の係数2つを求める)
-	Matrix A = NewMatrix(2,2);
-	Matrix A_ = NewMatrix(2,2);
-	Vector B = NewVector(2);
-	Vector B_ = NewVector(2);
-	InitMatrix(A,2,2);
-	InitVector(B,2);
+	ublasMatrix A(2,2,0);
+	ublasMatrix A_(2,2);
+	ublasVector B(2,0);
+	ublasVector B_(2);
 	for(int i=0;i<num;i++){
-		A[0][0] += t[i].x*t[i].x;
-		A[0][1] += t[i].x;
+		A(0,0) += t[i].x*t[i].x;
+		A(0,1) += t[i].x;
 		B[0] += t[i].x*t[i].y;
 		B[1] += t[i].y;
 	}
-	A[1][0] = A[0][1];
-	A[1][1] = (double)num;
-	MatInv2(A,A_);
-	MulMxVec(A_,2,2,B,2,B_);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
+	A(1,0) = A(0,1);
+	A(1,1) = (double)num;
+	A_ = MatInv2(A);
+	B_ = MulMxVec(A_,B);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
 
 	// 端点抽出
 	// パラメトリック領域内のU-Vの範囲を決める4点から得られる4本の直線と、さっき求めた近似直線との交点4つを求める
@@ -6700,6 +6671,47 @@ void NURBS_Func::CalcApproximationCP_LSM(Coord *P,Vector T_,Vector T,int Pnum,in
 	FreeMatrix(NT,K-2);
 	FreeCoord1(R);
 	FreeMatrix(N,Pnum-2);
+}
+void NURBS_Func::CalcApproximationCP_LSM(const Coord* P, const ublasVector& T_, const ublasVector& T, int M, int K, Coord* Q)
+{
+	int	Pnum = T_.size(),
+		Nnum = T.size();
+	ublasMatrix N(Pnum-2,K-2);
+
+	for(int i=0;i<Pnum-2;i++){
+		for(int j=0;j<K-2;j++){
+			N(i,j) =  CalcBSbasis(T_[i+1],T,j+1,M);
+		}
+	}
+	
+	Coord *R = NewCoord1(K-2);
+	for(int i=0;i<K-2;i++){
+		R[i] = 0;
+		for(int j=0;j<Pnum-2;j++){
+			Coord NP0 = P[0]      * CalcBSbasis(T_[j+1],T,0,M);
+			Coord NPN = P[Pnum-1] * CalcBSbasis(T_[j+1],T,K-1,M);
+			Coord R_ = P[j+1]-(NP0+NPN);
+			R[i] += R_*N(j,i);
+		}
+	}
+
+	ublasMatrix N_(K-2,K-2);				// (NTN)^-1
+	ublasMatrix NTN(K-2,K-2);				// NT*N
+	ublasMatrix NT(K-2,Pnum-2);				// Nの転置行列NT
+	NT = TranMx(N);							// calc NT
+	NTN = ublas::prod(NT, N);				// calc NTN
+
+	Coord *Q_ = NewCoord1(K-2);
+	Gauss(NTN,R,Q_);
+
+	// コントロールポイント
+	Q[0]   = P[0];
+	Q[K-1] = P[Pnum-1];
+	for(int i=1;i<K-1;i++){
+		Q[i] = Q_[i-1];
+	}
+
+	FreeCoord1(Q_);
 }
 
 // Function: SetApproximationCPnum

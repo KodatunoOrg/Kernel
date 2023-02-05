@@ -323,6 +323,7 @@ Coord MulMxCoord(Coord [], const Coord&);
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
 Coord MulMxCoord(Matrix, const Coord&);
+Coord MulMxCoord(const ublasMatrix&, const Coord&);
 
 // Function: TranMx
 // 転置行列を得る
@@ -370,11 +371,12 @@ ublasMatrix MatInv(const ublasMatrix&);
 // Function: MatInv3
 // 3x3の逆行列
 double MatInv3(Matrix,Matrix);					
+ublasMatrix MatInv3(const ublasMatrix&);
 
 // Function: MatInv2
 // 2x2の逆行列
 double MatInv2(Matrix,Matrix);					
-
+ublasMatrix MatInv2(const ublasMatrix&);
 
 // Group: Functions(数値計算)
 

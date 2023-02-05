@@ -1649,6 +1649,16 @@ Coord MulMxCoord(Matrix A, const Coord& d)
 
 	return ans;
 }
+Coord MulMxCoord(const ublasMatrix& A, const Coord& d)
+{
+	Coord ans;
+
+	ans.x = A(0,0)*d.x + A(0,1)*d.y + A(0,2)*d.z;
+	ans.y = A(1,0)*d.x + A(1,1)*d.y + A(1,2)*d.z;
+	ans.z = A(2,0)*d.x + A(2,1)*d.y + A(2,2)*d.z;
+
+	return ans;
+}
 
 // Function: TranMx
 // 転置行列を得る
@@ -2238,6 +2248,25 @@ double MatInv3(Matrix A,Matrix A_inv)
 
 	return det;
 }
+ublasMatrix MatInv3(const ublasMatrix& A)
+{
+	ublasMatrix	A_inv(A.size1(), A.size2());
+	double det = A(0,0)*A(1,1)*A(2,2) + A(1,0)*A(2,1)*A(0,2) + A(2,0)*A(0,1)*A(1,2)
+					- A(0,0)*A(2,1)*A(1,2) - A(2,0)*A(1,1)*A(0,2) - A(1,0)*A(0,1)*A(2,2);
+	if(det == 0) return A_inv;		// 行列式が0(空の行列)
+
+	A_inv(0,0) = (A(1,1)*A(2,2)-A(1,2)*A(2,1))/det;
+	A_inv(0,1) = (A(0,2)*A(2,1)-A(0,1)*A(2,2))/det;
+	A_inv(0,2) = (A(0,1)*A(1,2)-A(0,2)*A(1,1))/det;
+	A_inv(1,0) = (A(1,2)*A(2,0)-A(1,0)*A(2,2))/det;
+	A_inv(1,1) = (A(0,0)*A(2,2)-A(0,2)*A(2,0))/det;
+	A_inv(1,2) = (A(0,2)*A(1,0)-A(0,0)*A(1,2))/det;
+	A_inv(2,0) = (A(1,0)*A(2,1)-A(1,1)*A(2,0))/det;
+	A_inv(2,1) = (A(0,1)*A(2,0)-A(0,0)*A(2,1))/det;
+	A_inv(2,2) = (A(0,0)*A(1,1)-A(0,1)*A(1,0))/det;
+
+	return A_inv;
+}
 
 // Function: MatInv2
 // 2x2の逆行列を求める
@@ -2262,6 +2291,19 @@ double MatInv2(Matrix A,Matrix A_inv)
 	A_inv[1][1] = A[0][0]/det;
 
 	return det;
+}
+ublasMatrix MatInv2(const ublasMatrix& A)
+{
+	ublasMatrix	A_inv(A.size1(), A.size2(), 0);
+	double det = A(0,0)*A(1,1) - A(0,1)*A(1,0);
+	if(det == 0) return A_inv;		// 行列式が0(空の行列)
+
+	A_inv(0,0) = A(1,1)/det;
+	A_inv(0,1) = -A(0,1)/det;
+	A_inv(1,0) = -A(1,0)/det;
+	A_inv(1,1) = A(0,0)/det;
+
+	return A_inv;
 }
 
 // Function: nCr

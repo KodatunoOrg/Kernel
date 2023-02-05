@@ -612,6 +612,7 @@ private:
 	// Function: CalcApproximationCP_LSM
 	// (private)最小2乗法で近似コントロールポイントを求める
 	void CalcApproximationCP_LSM(Coord *,Vector,Vector,int,int,int,int,Coord *);	
+	void CalcApproximationCP_LSM(const Coord*, const ublasVector&, const ublasVector&, int, int, Coord*);
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
