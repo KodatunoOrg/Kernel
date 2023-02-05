@@ -1070,6 +1070,17 @@ double NURBS_Func::CalcDiffBSbasis(double t,double knot[],int N,int I,int M)
 	
 	return(n1-n2);
 }
+double NURBS_Func::CalcDiffBSbasis(double t, const ublasVector& knot, int I, int M)
+{
+	double n1 = knot[I+M-1]-knot[I];
+	double n2 = knot[I+M]-knot[I+1];
+
+	if(n1 != 0.0) n1 = (M-1)/n1*CalcBSbasis(t,knot,I,M-1);
+	
+	if(n2 != 0.0) n2 = (M-1)/n2*CalcBSbasis(t,knot,I+1,M-1);
+	
+	return(n1-n2);
+}
 
 // Function: CalcDiffBSbasisN
 // Bスプライン基底関数のN階微分係数を求める
@@ -1097,6 +1108,22 @@ double NURBS_Func::CalcDiffBSbasisN(double t,double knot[],int N,int I,int M, in
 	}
 	if(n1 != 0) n1 = (M-1)/n1*CalcDiffBSbasisN(t,knot,N,I,M-1,Dn-1);
 	if(n2 != 0) n2 = (M-1)/n2*CalcDiffBSbasisN(t,knot,N,I+1,M-1,Dn-1);
+
+	return(n1-n2);
+}
+double NURBS_Func::CalcDiffBSbasisN(double t, const ublasVector& knot, int I, int M, int Dn)
+{
+	double n1 = knot[I+M-1]-knot[I];
+	double n2 = knot[I+M]-knot[I+1];
+
+	if(Dn==0){
+		return(CalcBSbasis(t,knot,I,M));
+	}
+	if(Dn==1){
+		return(CalcDiffBSbasis(t,knot,I,M));
+	}
+	if(n1 != 0) n1 = (M-1)/n1*CalcDiffBSbasisN(t,knot,I,M-1,Dn-1);
+	if(n2 != 0) n2 = (M-1)/n2*CalcDiffBSbasisN(t,knot,I+1,M-1,Dn-1);
 
 	return(n1-n2);
 }
@@ -4412,12 +4439,12 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 	int prop[4] = {0,0,1,0};	// パラメータ
 	double V[2] = {0,1};		// ノットベクトルの開始値,終了値
 
-	Vector T_ = NewVector(PNum);	// 通過点上の曲線パラメータ
-	Vector T = NewVector(N);		// ノットベクトル
+	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
+	ublasVector T(N);				// ノットベクトル
 	Coord *P = NewCoord1(N);		// 通過点列を格納
 	Coord *Q = NewCoord1(K);		// コントロールポイント
-	Matrix B = NewMatrix(K,K);		// Bスプライン基底関数行列
-	Vector W = NewVector(K);		// 重み
+	ublasMatrix B(K,K);				// Bスプライン基底関数行列
+	ublasVector W(K);				// 重み
 
 	// 通過点列ベクトルを生成
 	for(int i=0;i<PNum;i++){
@@ -4427,7 +4454,7 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 	P[PNum+1] = 0;
 
 	// 通過点上の曲線パラメータを得る
-	GetCurveKnotParam1(P_,PNum,T_);
+	T_ = GetCurveKnotParam1(P_,PNum);
 
 	// ノットベクトルを得る
 	for(int i=0;i<N;i++){
@@ -4441,24 +4468,24 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 	// Bスプライン基底関数行列を生成
 	for(int i=0;i<K;i++){
 		for(int j=0;j<K;j++){
-			B[i][j] = 0;
+			B(i,j) = 0;
 			if(i<K-2 && (j==i || j==i+1 || j==i+2))
-				B[i][j] = CalcBSbasis(T_[i],T,N,j,M);
+				B(i,j) = CalcBSbasis(T_[i],T,j,M);
 		}
 	}
-	B[K-2][0] = CalcDiffBSbasis(T_[0],T,N,0,M);
-	B[K-2][1] = CalcDiffBSbasis(T_[0],T,N,1,M);
-	B[K-2][K-2] = -CalcDiffBSbasis(T_[PNum-1],T,N,K-2,M);
-	B[K-2][K-1] = -CalcDiffBSbasis(T_[PNum-1],T,N,K-1,M);
-	B[K-1][0] = CalcDiffBSbasisN(T_[0],T,N,0,M,2);
-	B[K-1][1] = CalcDiffBSbasisN(T_[0],T,N,1,M,2);
-	B[K-1][2] = CalcDiffBSbasisN(T_[0],T,N,2,M,2);
-	B[K-1][K-3] = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-3,M,2);
-	B[K-1][K-2] = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-2,M,2);
-	B[K-1][K-1] = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-1,M,2);
+	B(K-2,0)	= CalcDiffBSbasis(T_[0],T,0,M);
+	B(K-2,1)	= CalcDiffBSbasis(T_[0],T,1,M);
+	B(K-2,K-2)	= -CalcDiffBSbasis(T_[PNum-1],T,K-2,M);
+	B(K-2,K-1)	= -CalcDiffBSbasis(T_[PNum-1],T,K-1,M);
+	B(K-1,0)	= CalcDiffBSbasisN(T_[0],T,0,M,2);
+	B(K-1,1)	= CalcDiffBSbasisN(T_[0],T,1,M,2);
+	B(K-1,2)	= CalcDiffBSbasisN(T_[0],T,2,M,2);
+	B(K-1,K-3)	= -CalcDiffBSbasisN(T_[PNum-1],T,K-3,M,2);
+	B(K-1,K-2)	= -CalcDiffBSbasisN(T_[PNum-1],T,K-2,M,2);
+	B(K-1,K-1)	= -CalcDiffBSbasisN(T_[PNum-1],T,K-1,M,2);
 
 	// コントロールポイントを得る
-	Gauss(K,B,P,Q);
+	Gauss(B,P,Q);
 
 	//for(int i=0;i<K;i++)
 	//	fprintf(stderr,"%lf,%lf,%lf\n",Q[i].x,Q[i].y,Q[i].z);
@@ -4470,14 +4497,10 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 
 	// NURBS曲線を生成する
 	if(M == 2)
-		GenNurbsC(Nurbs,K,M,N,T,W,P,V,prop,0);
+		GenNurbsC(Nurbs,K,M,T,W,P,V,prop,0);
 	else
-		GenNurbsC(Nurbs,K,M,N,T,W,Q,V,prop,0);
+		GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);
 
-	FreeVector(T_);
-	FreeVector(T);
-	FreeVector(W);
-	FreeMatrix(B,K);
 	FreeCoord1(Q);
 	FreeCoord1(P);
 	
@@ -6295,6 +6318,21 @@ void NURBS_Func::GetCurveKnotParam1(Coord *P,int PNum,Vector T_)
 		double d = (P[i]-P[i-1]).CalcEuclid();
 		T_[i] = T_[i-1] + d/d_sum;
 	}
+}
+ublasVector NURBS_Func::GetCurveKnotParam1(const Coord* P, int PNum)
+{
+	ublasVector T_(PNum);
+	double d_sum=0;
+	for(int i=1;i<PNum;i++){
+		d_sum += (P[i]-P[i-1]).CalcEuclid();
+	}
+	T_[0] = 0;
+	T_[PNum-1] = 1;
+	for(int i=1;i<PNum-1;i++){
+		double d = (P[i]-P[i-1]).CalcEuclid();
+		T_[i] = T_[i-1] + d/d_sum;
+	}
+	return T_;
 }
 
 // Function: GetCurveKnotParam2

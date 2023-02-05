@@ -118,10 +118,12 @@ public:
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
 	double CalcDiffBSbasis(double,double [],int,int,int);		
+	double CalcDiffBSbasis(double, const ublasVector&, int, int);
 
 	// Function: CalcDiffBSbasisN
 	// Bスプライン基底関数のN階微分係数を求める
 	double CalcDiffBSbasisN(double,double [],int,int,int,int);	
+	double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
 
 	// Function: CalcDiffNurbsC
 	// NURBS曲線の1階微分係数を求める
@@ -579,6 +581,7 @@ private:
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
 	void GetCurveKnotParam1(Coord *,int,Vector);					
+	ublasVector GetCurveKnotParam1(const Coord*, int);
 
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
