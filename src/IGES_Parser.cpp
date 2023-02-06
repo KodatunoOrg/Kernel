@@ -750,7 +750,7 @@ int IGES_PARSER::GetTMatPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 	for(i=0;i<3;i++){
 		for(j=0;j<4;j++){
 			if(j != 3){
-				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].R[i][j] = CatchStringD(&p);	// 3×3回転行列成分
+				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].R(i,j) = CatchStringD(&p);		// 3×3回転行列成分
 			}
 			else{
 				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].T[i] = CatchStringD(&p);		// 並進ベクトル成分

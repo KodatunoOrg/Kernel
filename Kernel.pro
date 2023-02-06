@@ -9,7 +9,7 @@ CONFIG += c++17
 # Boost C++ のインクルードパスを各自の環境に合わせて追加
 # BoostライブラリはヘッダーのみでOK（ビルドする必要なし）
 INCLUDEPATH += include/ \
-    ..\boost
+    ../boost
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

@@ -74,7 +74,7 @@ public:
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
 	int GenNurbsS(NURBSS *,int,int,int,int,double *,double *,double **,Coord **,double,double,double,double);	
-	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const Coord**, double,double,double,double);	
+	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, Coord**, double,double,double,double);	
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
@@ -593,7 +593,7 @@ private:
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
 	void GetSurfaceKnotParam(Vector,Vector,Coord **,int,int);		
-	boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const Coord**, int, int);
+	boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(Coord**, int, int);
 
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出

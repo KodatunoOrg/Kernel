@@ -278,6 +278,7 @@ int DiscriminateCW2D(Coord [],int);
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算
 Coord MulFrameCoord(double[][3],double[],const Coord&);
+Coord MulFrameCoord(const ublasMatrix&, const ublasVector&, const Coord&);
 
 // Function: RotToZYZEuler
 // 回転行列をZYZオイラー角へ変換
@@ -366,7 +367,7 @@ double LU(ublasMatrix&, int*);
 // Function: MatInv
 // 逆行列を求める
 double MatInv(int,Matrix,Matrix);				
-ublasMatrix MatInv(const ublasMatrix&);
+ublasMatrix MatInv(ublasMatrix&);
 
 // Function: MatInv3
 // 3x3の逆行列

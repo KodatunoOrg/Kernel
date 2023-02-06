@@ -376,7 +376,7 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,double *S,do
 
 	return KOD_TRUE;
 }
-int NURBS_Func::GenNurbsS(NURBSS* Nurbs, int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, const Coord** Cp, double U_s, double U_e, double V_s, double V_e)
+int NURBS_Func::GenNurbsS(NURBSS* Nurbs, int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, Coord** Cp, double U_s, double U_e, double V_s, double V_e)
 {
 	Nurbs->K[0] = W.size1();
 	Nurbs->K[1] = W.size2();
@@ -4358,7 +4358,7 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,Coord *P,int PNum,int M)
 	ublasVector	T_(K);		// 通過点上の曲線パラメータ
 	ublasVector	T(N);		// ノットベクトル
 	ublasMatrix	B(K,K);		// Bスプライン基底関数行列
-	ublasMatrix	B(K,K);		// Bスプライン基底関数行列の逆行列格納用
+	ublasMatrix	B_(K,K);	// Bスプライン基底関数行列の逆行列格納用
 	ublasVector	W(K);		// 重み
 	Coord *Q = NewCoord1(K);			// コントロールポイント
 
@@ -4671,7 +4671,7 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,Coord **P,int PNum_u,int PN
 	Coord **Q = NewCoord2(K[0],K[1]);	// NURBS曲面のコントロールポイント
 
 
-	boost::tie(S_,T_) = GetSurfaceKnotParam(P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
+	boost::tie(S_, T_) = GetSurfaceKnotParam(P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
 
 	S = GetInterpolatedKnot(S_,K[0],Mu);			// ノットベクトルSを得る
 	T = GetInterpolatedKnot(T_,K[1],Mv);			// ノットベクトルTを得る
@@ -5182,9 +5182,9 @@ int NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb,Coord r,Coord p,int Divnum
 	double u = Nurb->U[0];					// NURBS曲面S(u,v)のuパラメータの現在値
 	double v = Nurb->V[0];					// NURBS曲面S(u,v)のvパラメータの現在値
 	double t = 0;							// 直線N(t)のtパラメータ
-	Matrix A = NewMatrix(3,3);				// Fu,Fv,Ftを構成する3x3行列
-	Matrix A_ = NewMatrix(3,3);				// Aの逆行列を格納
-	int flag = KOD_FALSE;						// 収束フラグ
+	ublasMatrix A(3,3);						// Fu,Fv,Ftを構成する3x3行列
+	ublasMatrix A_(3,3);					// Aの逆行列を格納
+	int flag = KOD_FALSE;					// 収束フラグ
 	double dv = (Nurb->V[1] - Nurb->V[0])/(double)Divnum;	// 収束演算用のvパラメータのインターバル値
 	double du = (Nurb->U[1] - Nurb->U[0])/(double)Divnum;	// 収束演算用のuパラメータのインターバル値
 	int loopcount = 0;						// 収束計算回数
@@ -5205,20 +5205,21 @@ int NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb,Coord r,Coord p,int Divnum
 				Fu = CalcDiffuNurbsS(Nurb,u,v);			// Fu = dF/du = dS/du
 				Fv = CalcDiffvNurbsS(Nurb,u,v);			// Fv = dF/dv = dS/dv
 				Ft = p*(-1);				// Ft = dF/dt = -dN/dt = -p
-				A[0][0] = Fu.x;				// Fu,Fv,Ftを3x3行列Aに代入
-				A[0][1] = Fv.x;				//     |Fu.x Fv.x Ft.x|       |du|       |F.x|
-				A[0][2] = Ft.x;				// A = |Fu.y Fv.y Ft.y| , d = |dv| , F = |F.y|
-				A[1][0] = Fu.y;				//     |Fu.z Fv.z Ft.z|       |dt|       |F.z|
-				A[1][1] = Fv.y;
-				A[1][2] = Ft.y;				// A・d = F   --->   d = A_・F
-				A[2][0] = Fu.z;
-				A[2][1] = Fv.z;
-				A[2][2] = Ft.z;	
+				A(0,0) = Fu.x;				// Fu,Fv,Ftを3x3行列Aに代入
+				A(0,1) = Fv.x;				//     |Fu.x Fv.x Ft.x|       |du|       |F.x|
+				A(0,2) = Ft.x;				// A = |Fu.y Fv.y Ft.y| , d = |dv| , F = |F.y|
+				A(1,0) = Fu.y;				//     |Fu.z Fv.z Ft.z|       |dt|       |F.z|
+				A(1,1) = Fv.y;
+				A(1,2) = Ft.y;				// A・d = F   --->   d = A_・F
+				A(2,0) = Fu.z;
+				A(2,1) = Fv.z;
+				A(2,2) = Ft.z;	
 				//fprintf(stderr,"   %lf,%lf,%lf,%lf,%lf\n",u,v,Fu.x,Fu.y,Fu.z);
-				if(MatInv3(A,A_) == KOD_FALSE){		// 逆行列を求める
-					flag = KOD_ERR;
-					break;		
-				}
+//				if(MatInv3(A,A_) == KOD_FALSE){		// 逆行列を求める
+//					flag = KOD_ERR;
+//					break;
+//				}
+				A_ = MatInv3(A);
 				d = MulMxCoord(A_,F)*(-1);			// dを算出
 				
 				if(fabs(d.x) <= APPROX_ZERO && fabs(d.y) <= APPROX_ZERO && fabs(d.z) <= APPROX_ZERO){	// 真値に収束したらloopを抜ける
@@ -5255,9 +5256,6 @@ int NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb,Coord r,Coord p,int Divnum
 		}// end of j loop
 	}// end of i loop
 
-	FreeMatrix(A,3);
-	FreeMatrix(A_,3);
-
 	anscount = CheckTheSamePoints(ans,anscount);		// 同一点は除去する
 
 	return anscount;
@@ -5286,8 +5284,8 @@ int NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb,Coord r,Coord p,int Divnum
 // KOD_TRUE：収束した    KOD_FALSE:収束しなかった
 int NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S,Coord P,int Divnum,int LoD,Coord *Q)
 {
-	Matrix dF = NewMatrix(3,3);		// Fu,Fv,Ftを構成する3x3行列
-	Matrix dF_ = NewMatrix(3,3);	// dFの逆行列を格納
+	ublasMatrix dF(3,3);			// Fu,Fv,Ftを構成する3x3行列
+	ublasMatrix dF_(3,3);			// dFの逆行列を格納
 	Coord F,Fu,Fv,Ft;				// F(u,v,t) = S(u,v) - P - t・N(u,v)	ニュートン法にかける関数
 	Coord N,Nu,Nv;					// N(u,v):S(u,v)上の法線ベクトル
 	Coord d;						// ニュートン法によって更新されるステップサイズパラメータ
@@ -5316,20 +5314,21 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S,Coord P,int Divnum,int LoD,Coord
 				Fu = CalcDiffuNurbsS(S,u,v)-(Nu*t);			// Fのu方向偏微分
 				Fv = CalcDiffvNurbsS(S,u,v)-(Nv*t);			// Fのv方向偏微分
 				Ft = N*(-1);												// Fのt方向偏微分
-				dF[0][0] = Fu.x;		// 3x3マトリックスにFu,Fv,Ftを代入
-				dF[0][1] = Fv.x;
-				dF[0][2] = Ft.x;
-				dF[1][0] = Fu.y;
-				dF[1][1] = Fv.y;
-				dF[1][2] = Ft.y;
-				dF[2][0] = Fu.z;
-				dF[2][1] = Fv.z;
-				dF[2][2] = Ft.z;
+				dF(0,0) = Fu.x;		// 3x3マトリックスにFu,Fv,Ftを代入
+				dF(0,1) = Fv.x;
+				dF(0,2) = Ft.x;
+				dF(1,0) = Fu.y;
+				dF(1,1) = Fv.y;
+				dF(1,2) = Ft.y;
+				dF(2,0) = Fu.z;
+				dF(2,1) = Fv.z;
+				dF(2,2) = Ft.z;
 
-				if((flag = MatInv3(dF,dF_)) == KOD_FALSE){		// 逆行列算出 detが0なら次の初期値へ
+//				if((flag = MatInv3(dF,dF_)) == KOD_FALSE){		// 逆行列算出 detが0なら次の初期値へ
 					//fprintf(stderr,"%d:det = 0\n",loopcount);	// debug
-					break;
-				}
+//					break;
+//				}
+				dF_ = MatInv3(dF);
 
 				d = MulMxCoord(dF_,F)*(-1);		// ステップサイズパラメータの更新値を算出
 
@@ -5356,8 +5355,6 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S,Coord P,int Divnum,int LoD,Coord
 
 	flag = GetMinDist(S,P,Q_,Divnum*Divnum,Q);		// 極小解にならないよう，全ての解のうち，距離が最小のものを真の解として選び出す
 
-	FreeMatrix(dF,3);
-	FreeMatrix(dF_,3);
 	FreeCoord1(Q_);
 
 	return flag;
@@ -6394,7 +6391,7 @@ void NURBS_Func::GetSurfaceKnotParam(Vector S,Vector T,Coord **P,int uNum,int vN
 	
 	FreeMatrix(p_,uNum);
 }
-boost::tuple<ublasVector, ublasVector> NURBS_Func::GetSurfaceKnotParam(const Coord** P, int uNum, int vNum)
+boost::tuple<ublasVector, ublasVector> NURBS_Func::GetSurfaceKnotParam(Coord** P, int uNum, int vNum)
 {
 	double d;
 	ublasVector	S(uNum), T(vNum);
@@ -6446,7 +6443,7 @@ boost::tuple<ublasVector, ublasVector> NURBS_Func::GetSurfaceKnotParam(const Coo
 		T[j] /= (double)uNum;
 	}
 	
-	return boost::make_tuple(S,T);
+	return boost::make_tuple(S, T);
 }
 
 
@@ -6631,10 +6628,10 @@ ublasVector NURBS_Func::ChangeKnotVecRange2(const ublasVector& T, int M, int K, 
 // *Q - 算出されたコントロールポイント列
 void NURBS_Func::CalcApproximationCP_LSM(Coord *P,Vector T_,Vector T,int Pnum,int Nnum,int M,int K,Coord *Q)
 {
-	Matrix N = NewMatrix(Pnum-2,K-2);
+	ublasMatrix N(Pnum-2,K-2);
 	for(int i=0;i<Pnum-2;i++){
 		for(int j=0;j<K-2;j++){
-			N[i][j] =  CalcBSbasis(T_[i+1],T,Nnum,j+1,M);
+			N(i,j) =  CalcBSbasis(T_[i+1],T,Nnum,j+1,M);
 		}
 	}
 	
@@ -6645,18 +6642,18 @@ void NURBS_Func::CalcApproximationCP_LSM(Coord *P,Vector T_,Vector T,int Pnum,in
 			Coord NP0 = P[0]      * CalcBSbasis(T_[j+1],T,Nnum,0,M);
 			Coord NPN = P[Pnum-1] * CalcBSbasis(T_[j+1],T,Nnum,K-1,M);
 			Coord R_ = P[j+1]-(NP0+NPN);
-			R[i] += R_*N[j][i];
+			R[i] += R_*N(j,i);
 		}
 	}
 
-	Matrix N_ = NewMatrix(K-2,K-2);			// (NTN)^-1
-	Matrix NTN = NewMatrix(K-2,K-2);		// NT*N
-	Matrix NT = NewMatrix(K-2,Pnum-2);		// Nの転置行列NT
-	TranMx(N,Pnum-2,K-2,NT);				// calc NT
-	MulMxMx(NT,K-2,Pnum-2,N,Pnum-2,K-2,NTN);// calc NTN
+	ublasMatrix N_(K-2,K-2);				// (NTN)^-1
+	ublasMatrix NTN(K-2,K-2);				// NT*N
+	ublasMatrix NT(K-2,Pnum-2);				// Nの転置行列NT
+	NT = TranMx(N);							// calc NT
+	NTN = ublas::prod(NT,N);				// calc NTN
 
 	Coord *Q_ = NewCoord1(K-2);
-	Gauss(K-2,NTN,R,Q_);
+	Gauss(NTN,R,Q_);
 
 	// コントロールポイント
 	Q[0]   = P[0];
@@ -6666,11 +6663,7 @@ void NURBS_Func::CalcApproximationCP_LSM(Coord *P,Vector T_,Vector T,int Pnum,in
 	}
 
 	FreeCoord1(Q_);
-	FreeMatrix(N_,K-2);
-	FreeMatrix(NTN,K-2);
-	FreeMatrix(NT,K-2);
 	FreeCoord1(R);
-	FreeMatrix(N,Pnum-2);
 }
 void NURBS_Func::CalcApproximationCP_LSM(const Coord* P, const ublasVector& T_, const ublasVector& T, int M, int K, Coord* Q)
 {

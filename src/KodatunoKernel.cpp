@@ -1752,6 +1752,16 @@ Coord MulFrameCoord(double R[][3],double T[],const Coord& I)
 
 	return O;
 }
+Coord MulFrameCoord(const ublasMatrix& R, const ublasVector& T, const Coord& I)
+{
+	Coord O;
+
+	O.x = R(0,0)*I.x + R(0,1)*I.y + R(0,2)*I.z + T[0];
+	O.y = R(1,0)*I.x + R(1,1)*I.y + R(1,2)*I.z + T[1];
+	O.z = R(2,0)*I.x + R(2,1)*I.y + R(2,2)*I.z + T[2];
+
+	return O;
+}
 
 // Function: MulFrameCoord
 // 同次変換行列(f)と座標値(I(3Dベクトル))との掛け算(オーバーロード)
@@ -2080,7 +2090,7 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 
 	return det;
 }
-ublasMatrix MatInv(const ublasMatrix& a)
+ublasMatrix MatInv(ublasMatrix& a)
 {
 	int			n = a.size1();
 	ublasMatrix	a_inv(a.size1(),a.size2());
