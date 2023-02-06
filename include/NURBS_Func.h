@@ -277,15 +277,15 @@ public:
 
 	// Function: GetBSplCoef3
 	// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
-	int GetBSplCoef3(int,int,int,double *,double **);			
+	ublasMatrix GetBSplCoef3(int,int,int,double *);
 
 	// Function: GetBSplCoef2
 	// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
-	int GetBSplCoef2(int,int,int,double *,double **);			
+	ublasMatrix GetBSplCoef2(int,int,int,double *);
 
 	// Function: GetBSplCoef1
 	// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
-	int GetBSplCoef1(int,int,int,double *,double **);			
+	ublasMatrix GetBSplCoef1(int,int,int,double *);
 
 	// Function: ShiftNurbsS
 	// NURBS曲面のシフト
@@ -401,7 +401,6 @@ public:
 
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
-	void GetEqIntervalKont(int,int,Vector);						
 	ublasVector	GetEqIntervalKont(int,int);
 
 	// Function: ChangeKnotVecRange
@@ -534,7 +533,7 @@ private:
 
 	// Function: GetNurbsCCoef
 	// (private)NURBS曲線の係数を求める(最高3次)
-	int GetNurbsCCoef(NURBSC *,double **,int,Coord *,double *);	
+	int GetNurbsCCoef(NURBSC *,const ublasMatrix&,int,Coord *,double *);	
 
 	// Function: CalcEquation
 	// (private)3次方程式までを判別して解く
@@ -542,7 +541,7 @@ private:
 
 	// Function: GetNurbsSCoef
 	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める
-	void GetNurbsSCoef(int,double **,double *,Coord *,int,Coord *,double *);	
+	void GetNurbsSCoef(int, const ublasMatrix&,double *,Coord *,int,Coord *,double *);	
 
 	// Function: GetIntersecEquation
 	// (private)NURBS曲線と平面の交線導出用3次方程式を得る

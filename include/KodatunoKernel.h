@@ -277,7 +277,6 @@ int DiscriminateCW2D(Coord [],int);
 
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算
-Coord MulFrameCoord(double[][3],double[],const Coord&);
 Coord MulFrameCoord(const ublasMatrix&, const ublasVector&, const Coord&);
 
 // Function: RotToZYZEuler
@@ -286,14 +285,6 @@ Coord RotToZYZEuler(Coord []);
 
 
 // Group: Functions(多次元ベクトル、多次元行列の演算)
-
-// Function: InitVector
-// 1次元配列の初期化(引数:ベクトル,配列長)
-void InitVector(Vector,int);					
-
-// Function: InitMatrix
-// 2次元配列の初期化
-void InitMatrix(Matrix,int,int);				
 
 // Function: CopyVector
 // ベクトルのコピー
@@ -309,12 +300,10 @@ void MulMxMx(Matrix,int,int,Matrix,int,int,Matrix);
 
 // Function: MulMxVec
 // 行列とベクトルの掛け算
-void MulMxVec(Matrix,int,int,Vector,int,Vector);	
 ublasVector MulMxVec(const ublasMatrix&, const ublasVector&);
 
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算
-void MulMxVec(Matrix,int,int,Coord *,Coord *);	
 void MulMxVec(const ublasMatrix&, const Coord*, Coord *);
 
 // Function: MulMxCoord
@@ -323,12 +312,10 @@ Coord MulMxCoord(Coord [], const Coord&);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(Matrix, const Coord&);
 Coord MulMxCoord(const ublasMatrix&, const Coord&);
 
 // Function: TranMx
 // 転置行列を得る
-void TranMx(Matrix,int,int,Matrix);				
 ublasMatrix TranMx(const ublasMatrix&);
 
 // Function: TranMx
@@ -341,42 +328,34 @@ void TranMx(const Coord [],Coord []);
 
 // Function: Gauss
 // 連立1次方程式の解を求める
-double Gauss(int,Matrix,Vector,Vector);			
 double Gauss(ublasMatrix&, const ublasVector&, ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
-double Gauss(int,Matrix,Coord *,Coord *);		
 double Gauss(ublasMatrix&, Coord*, Coord*);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
-void LU_Solver(int,Matrix,Vector,int *,Vector);	
 ublasVector LU_Solver(ublasMatrix&, const ublasVector&, int*);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
-void LU_Solver(int,Matrix,Coord *,int *,Coord *);
 void LU_Solver(const ublasMatrix&, const Coord*, const int*, Coord*);
 
 // Function: LU
 // LU分解
-double LU(int,Matrix,int *);					
 double LU(ublasMatrix&, int*);
 
 // Function: MatInv
 // 逆行列を求める
-double MatInv(int,Matrix,Matrix);				
 ublasMatrix MatInv(ublasMatrix&);
 
 // Function: MatInv3
 // 3x3の逆行列
-double MatInv3(Matrix,Matrix);					
 ublasMatrix MatInv3(const ublasMatrix&);
 
 // Function: MatInv2
 // 2x2の逆行列
-double MatInv2(Matrix,Matrix);					
 ublasMatrix MatInv2(const ublasMatrix&);
 
 // Group: Functions(数値計算)

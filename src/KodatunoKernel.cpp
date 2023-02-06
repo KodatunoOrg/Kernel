@@ -1028,34 +1028,6 @@ void Reverse(double p[],int n)
 	}
 }
 
-// Function: InitVector
-// 1次元配列の初期化
-// 
-// Parameters:
-// vec - 1次元配列へのポインタ
-// size - 配列要素数
-void InitVector(Vector vec,int size)
-{
-	for(int i=0;i<size;i++){
-		vec[i] = 0.0;
-	}
-}
-
-// Function: InitMatrix
-// 2次元配列の初期化
-// 
-// Parameters:
-// mat - 2次元配列へのポインタ
-// size_x,size_y - 行列要素数
-void InitMatrix(Matrix mat,int size_x,int size_y)
-{
-	for(int i=0;i<size_x;i++){
-		for(int j=0;j<size_y;j++){
-			mat[i][j] = 0.0;
-		}
-	}
-}
-
 // Function: CopyVector
 // ベクトルのコピー(aベクトルをbベクトルへ代入)
 //
@@ -1551,15 +1523,6 @@ void MulMxMx(Matrix A,int A_row,int A_col,Matrix B,int B_row,int B_col,Matrix C)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(Matrix A,int A_row,int A_col,Vector B,int B_row,Vector C)
-{
-	for(int i=0;i<A_row;i++){
-		C[i] = 0;
-		for(int j=0;j<A_col;j++){
-			C[i] += A[i][j] * B[j];
-		}
-	}
-}
 ublasVector MulMxVec(const ublasMatrix& A, const ublasVector& B)
 {
 	ublasVector	C(A.size1());	// A_row
@@ -1585,16 +1548,6 @@ ublasVector MulMxVec(const ublasMatrix& A, const ublasVector& B)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(Matrix A,int A_row,int A_col,Coord *B,Coord *C)
-{
-	for(int i=0;i<A_row;i++){
-		C[i] = 0;
-		for(int j=0;j<A_col;j++){
-//			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
-			C[i] += B[j] * A[i][j];
-		}
-	}
-}
 void MulMxVec(const ublasMatrix& A, const Coord* B, Coord* C)
 {
 	int		A_row = A.size1(),
@@ -1639,16 +1592,6 @@ Coord MulMxCoord(Coord A[], const Coord& d)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(Matrix A, const Coord& d)
-{
-	Coord ans;
-
-	ans.x = A[0][0]*d.x + A[0][1]*d.y + A[0][2]*d.z;
-	ans.y = A[1][0]*d.x + A[1][1]*d.y + A[1][2]*d.z;
-	ans.z = A[2][0]*d.x + A[2][1]*d.y + A[2][2]*d.z;
-
-	return ans;
-}
 Coord MulMxCoord(const ublasMatrix& A, const Coord& d)
 {
 	Coord ans;
@@ -1670,14 +1613,6 @@ Coord MulMxCoord(const ublasMatrix& A, const Coord& d)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-void TranMx(Matrix A,int m,int n,Matrix B)
-{
-	for(int i=0;i<m;i++){
-		for(int j=0;j<n;j++){
-			B[j][i] = A[i][j];
-		}
-	}
-}
 ublasMatrix TranMx(const ublasMatrix& A)
 {
 	int		m = A.size1(),
@@ -1742,16 +1677,6 @@ void TranMx(const Coord A[],Coord B[])
 // 
 // Return: 
 // 計算結果
-Coord MulFrameCoord(double R[][3],double T[],const Coord& I)
-{
-	Coord O;
-
-	O.x = R[0][0]*I.x + R[0][1]*I.y + R[0][2]*I.z + T[0];
-	O.y = R[1][0]*I.x + R[1][1]*I.y + R[1][2]*I.z + T[1];
-	O.z = R[2][0]*I.x + R[2][1]*I.y + R[2][2]*I.z + T[2];
-
-	return O;
-}
 Coord MulFrameCoord(const ublasMatrix& R, const ublasVector& T, const Coord& I)
 {
 	Coord O;
@@ -1873,21 +1798,6 @@ Coord RotToZYZEuler( Coord rot[])
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,Matrix a,Vector b,Vector x)
-{
-	long double det;	// 行列式
-	int *ip;			// 行交換の情報
-
-	ip = new int[n];
-
-	det = LU(n,a,ip);					// LU分解
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
-
-	delete[] ip;
-
-	return det;					// 戻り値は行列式
-}
 double Gauss(ublasMatrix& a, const ublasVector& b, ublasVector& x)
 {
 	long double det;	// 行列式
@@ -1913,21 +1823,6 @@ double Gauss(ublasMatrix& a, const ublasVector& b, ublasVector& x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,Matrix a,Coord *b,Coord *x)
-{
-	long double det;	// 行列式
-	int *ip;			// 行交換の情報
-
-	ip = new int[n];
-
-	det = LU(n,a,ip);					// LU分解
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
-
-	delete[] ip;                   
-
-	return det;					// 戻り値は行列式
-}
 double Gauss(ublasMatrix& a, Coord* b, Coord* x)
 {
 	int n = a.size1();
@@ -1953,26 +1848,6 @@ double Gauss(ublasMatrix& a, Coord* b, Coord* x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺ベクトル  
 // ip - 行交換の情報
-void LU_Solver(int n,Matrix a,Vector b,int *ip,Vector x)
-{
-	int ii;
-	double t;
-
-	for(int i=0;i<n;i++) {       // Gauss消去法の残り
-		ii = ip[i];
-		t = b[ii];
-		for(int j=0;j<i;j++)
-			t -= a[ii][j]*x[j];
-		x[i] = t;
-	}
-	for(int i=n-1;i>=0;i--){  // 後退代入
-		t = x[i];  
-		ii = ip[i];
-		for(int j=i+1;j<n;j++) 
-			t -= a[ii][j]*x[j];
-		x[i] = t/a[ii][i];
-	}
-}
 ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, int* ip)
 {
 	ublasVector	x;
@@ -2006,26 +1881,6 @@ ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, int* ip)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺Coord配列  
 // ip - 行交換の情報
-void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
-{
-	int ii;
-	Coord t;
-
-	for(int i=0;i<n;i++) {       // Gauss消去法の残り
-		ii = ip[i];
-		t = b[ii];
-		for(int j=0;j<i;j++)
-			t -= x[j] * a[ii][j];
-		x[i] = t;
-	}
-	for(int i=n-1;i>=0;i--){  // 後退代入
-		t = x[i];  
-		ii = ip[i];
-		for(int j=i+1;j<n;j++) 
-			t -= x[j] * a[ii][j];
-		x[i] = t / a[ii][i];
-	}
-}
 void LU_Solver(const ublasMatrix& a, const Coord* b, const int* ip, Coord* x)
 {
 	int n = a.size1();
@@ -2058,38 +1913,6 @@ void LU_Solver(const ublasMatrix& a, const Coord* b, const int* ip, Coord* x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double MatInv(int n,Matrix a,Matrix a_inv)
-{
-	int i, j, k, ii;
-	long double t, det;
-	int *ip;		// 行交換の情報
-
-	ip = new int[n];
-
-	det = LU(n,a,ip);		// LU分解
-	if(det != 0){
-		for(k=0;k<n;k++){
-			for(i=0;i<n;i++){
-				ii = ip[i];
-				t = (ii==k);
-				for(j=0;j<i;j++)
-					t -= a[ii][j]*a_inv[j][k];
-				a_inv[i][k] = t;
-			}
-			for(i=n-1;i>=0;i--){
-				t = a_inv[i][k];
-				ii = ip[i];
-				for(j=i+1;j<n;j++)
-					t -= a[ii][j]*a_inv[j][k];
-				a_inv[i][k] = t/a[ii][i];
-			}
-		}
-	}
-
-	delete[] ip;
-
-	return det;
-}
 ublasMatrix MatInv(ublasMatrix& a)
 {
 	int			n = a.size1();
@@ -2135,52 +1958,6 @@ ublasMatrix MatInv(ublasMatrix& a)
 //
 // Return:
 // 行列式
-double LU(int n,Matrix a,int *ip)
-{
-	int i, j, k, ii, ik;
-	long double t, u,
-		det = 0;				// 行列式
-	ublasVector	weight(n);		// weight[0..n-1] の記憶領域確保
-
-	for (k = 0; k < n; k++) {  /* 各行について */
-		ip[k] = k;             /* 行交換情報の初期値 */
-		u = 0;                 /* その行の絶対値最大の要素を求める */
-		for (j = 0; j < n; j++) {
-			t = fabs(a[k][j]);  if (t > u) u = t;
-		}
-		if (u == 0){
-			goto EXIT; /* 0 なら行列はLU分解できない */
-		}
-		weight[k] = 1 / u;     /* 最大絶対値の逆数 */
-	}
-	det = 1;                   /* 行列式の初期値 */
-	for (k = 0; k < n; k++) {  /* 各行について */
-		u = -1;
-		for (i = k; i < n; i++) {  /* より下の各行について */
-			ii = ip[i];            /* 重み×絶対値 が最大の行を見つける */
-			t = fabs(a[ii][k]) * weight[ii];
-			if (t > u) {  u = t;  j = i;  }
-		}
-		ik = ip[j];
-		if (j != k) {
-			ip[j] = ip[k];  ip[k] = ik;  /* 行番号を交換 */
-			det = -det;  /* 行を交換すれば行列式の符号が変わる */
-		}
-		u = a[ik][k];  det *= u;  /* 対角成分 */
-		if (u == 0){
-			goto EXIT;    /* 0 なら行列はLU分解できない */
-		}
-		for (i = k + 1; i < n; i++) {  /* Gauss消去法 */
-			ii = ip[i];
-			t = (a[ii][k] /= u);
-			for (j = k + 1; j < n; j++)
-				a[ii][j] -= t * a[ik][j];
-		}
-	}
-
-EXIT:
-	return det;           /* 戻り値は行列式 */
-}
 double LU(ublasMatrix& a, int* ip)
 {
 	int n = a.size1();	// size1()==rows
@@ -2238,26 +2015,6 @@ EXIT:
 //
 // Return:
 // 行列式
-double MatInv3(Matrix A,Matrix A_inv)
-{
-	double det;
-	det = A[0][0]*A[1][1]*A[2][2] + A[1][0]*A[2][1]*A[0][2] + A[2][0]*A[0][1]*A[1][2]
-	      - A[0][0]*A[2][1]*A[1][2] - A[2][0]*A[1][1]*A[0][2] - A[1][0]*A[0][1]*A[2][2];
-
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-
-	A_inv[0][0] = (A[1][1]*A[2][2]-A[1][2]*A[2][1])/det;
-	A_inv[0][1] = (A[0][2]*A[2][1]-A[0][1]*A[2][2])/det;
-	A_inv[0][2] = (A[0][1]*A[1][2]-A[0][2]*A[1][1])/det;
-	A_inv[1][0] = (A[1][2]*A[2][0]-A[1][0]*A[2][2])/det;
-	A_inv[1][1] = (A[0][0]*A[2][2]-A[0][2]*A[2][0])/det;
-	A_inv[1][2] = (A[0][2]*A[1][0]-A[0][0]*A[1][2])/det;
-	A_inv[2][0] = (A[1][0]*A[2][1]-A[1][1]*A[2][0])/det;
-	A_inv[2][1] = (A[0][1]*A[2][0]-A[0][0]*A[2][1])/det;
-	A_inv[2][2] = (A[0][0]*A[1][1]-A[0][1]*A[1][0])/det;
-
-	return det;
-}
 ublasMatrix MatInv3(const ublasMatrix& A)
 {
 	ublasMatrix	A_inv(A.size1(), A.size2());
@@ -2287,21 +2044,6 @@ ublasMatrix MatInv3(const ublasMatrix& A)
 //
 // Return:
 // 行列式
-double MatInv2(Matrix A,Matrix A_inv)
-{
-	double det;
-
-	det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
-
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-
-	A_inv[0][0] = A[1][1]/det;
-	A_inv[0][1] = -A[0][1]/det;
-	A_inv[1][0] = -A[1][0]/det;
-	A_inv[1][1] = A[0][0]/det;
-
-	return det;
-}
 ublasMatrix MatInv2(const ublasMatrix& A)
 {
 	ublasMatrix	A_inv(A.size1(), A.size2(), 0);
