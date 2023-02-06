@@ -14,6 +14,11 @@ Coord::Coord(double xx, double yy, double zz, double dd)
 {
 	SetCoord(xx, yy, zz, dd);
 }
+FRAME::FRAME(const FRAME& f)
+{
+	Trl = f.Trl;
+	Rot = f.Rot;
+}
 
 // Operator: =
 // 代入演算子のオーバーロード
@@ -494,7 +499,6 @@ double Coord::CalcDistPtToPlane(const Coord& P0, const Coord& N) const
 // スカラー三重積
 double Coord::CalcScalarTriProduct(const Coord& b, const Coord& c) const
 {
-//	return(CalcInnerProduct(a,CalcOuterProduct(b,c)));
 	return CalcInnerProduct(b&&c);
 }
 
@@ -774,14 +778,18 @@ Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 //
 // Return:
 // 解が3つとも実根の場合は3、1つだけ実根の場合は1  a[0]==0の場合はKOD_ERR
-int CalcCubicEquation(double *p,double *ans)
+boost::tuple<int, A3double> CalcCubicEquation(const A4double& p)
 {
+
 	// x^3の係数が0の場合
 	if(fabs(p[0]) < APPROX_ZERO_H){
-		p[0] = p[1];
-		p[1] = p[2];
-		p[2] = p[3];
-		return(CalcQuadraticEquation(p,ans));	// 2次方程式を解く
+		int r;
+		A2double a2;
+		A3double a3 = {p[1], p[2], p[3]};
+		boost::tie(r, a2) = CalcQuadraticEquation(a3);	// 2次方程式を解く
+		a3[0] = a2[0];
+		a3[1] = a2[1];
+		return boost::make_tuple(r, a3);
 	}
 
 	double a = p[0];
@@ -791,6 +799,7 @@ int CalcCubicEquation(double *p,double *ans)
 	double x0[3];
 	int k;
 	int ansnum=0;
+	A3double	ans;
 
 	double D = b*b-3*a*c;		// 1階微分された2次方程式の判別式
 	if(D<0){					// 判別式が負-->極値無し
@@ -857,7 +866,7 @@ int CalcCubicEquation(double *p,double *ans)
 		ans[i] = x;
 	}
 
-	return ansnum;
+	return boost::make_tuple(ansnum, ans);
 }
 
 // Function: CalcQuadraticEquation
@@ -869,29 +878,33 @@ int CalcCubicEquation(double *p,double *ans)
 //
 // Return:
 // 解が実根の場合は2、虚根の場合はKOD_ERR  a[0]==0の場合はKOD_ERR
-int CalcQuadraticEquation(double *a,double *ans)
+boost::tuple<int, A2double> CalcQuadraticEquation(const A3double& a)
 {
-	double Q,R;
+	A2double	ans;
+	double		Q,R;
 
 	if(fabs(a[0]) < APPROX_ZERO_H){
-		a[0] = a[1];
-		a[1] = a[2];
-		return(CalcLinearEquation(a,ans));
+		A2double a2 = {a[1], a[2]};
+		boost::optional<double> r = CalcLinearEquation(a2);
+		if ( r ) {
+			a2[0] = *r;
+			return boost::make_tuple(1, a2);
+		}
+		else {
+			return boost::make_tuple(KOD_ERR, A2double());
+		}
 	}
 
 	Q = a[1]*a[1] - 4*a[0]*a[2];
 
 	if(Q<0){
-		ans[0] = ans[1] = 0;
-		return KOD_ERR;
+		return boost::make_tuple(KOD_ERR, A2double());
 	}
 
-	else{
-		R = -(a[1]+sgn(a[1])*sqrt(Q))/2;
-		ans[0] = R/a[0];
-		ans[1] = a[2]/R;
-		return 2;
-	}
+	R = -(a[1]+sgn(a[1])*sqrt(Q))/2;
+	ans[0] = R/a[0];
+	ans[1] = a[2]/R;
+	return boost::make_tuple(2, ans);
 }
 
 // Function: CalcLinearEquation
@@ -903,15 +916,13 @@ int CalcQuadraticEquation(double *a,double *ans)
 // 
 // Return:
 // a[0]==0の場合はKOD_ERR
-int CalcLinearEquation(double *a,double *ans)
+boost::optional<double> CalcLinearEquation(const A2double& a)
 {
 	if(fabs(a[0]) < APPROX_ZERO_H){
-		return KOD_FALSE;
+		return boost::optional<double>();	// 無効値を返す
 	}
 
-	ans[0] = -a[1]/a[0];
-
-	return 1;
+	return -a[1]/a[0];						// 正常値
 }
 
 // Function: sgn
@@ -1144,7 +1155,6 @@ double CalcPolygonArea(Coord p[],int Vnum)
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
-//		area += CalcEuclid(CalcOuterProduct(p[i],p[(i+1)%Vnum]));
 		area += (p[i]&&p[(i+1)%Vnum]).CalcEuclid();
 	}
 
@@ -1302,13 +1312,19 @@ ublasMatrix TranMx(const ublasMatrix& A)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-void TranMx(Coord **A,int m,int n,Coord **B)
+VVCoord TranMx(const VVCoord& A)
 {
-	for(int i=0;i<m;i++){
-		for(int j=0;j<n;j++){
-			B[j][i] = A[i][j];
+	VCoord	b;
+	VVCoord	B;
+
+	for(size_t i=0;i<A.size();i++){
+		b.clear();
+		for(size_t j=0;j<A[i].size();j++){
+			b.push_back(A[i][j]);	// B[j][i] = A[i][j];
 		}
+		B.push_back(b);
 	}
+	return B;
 }
 
 // Function: TranMx
@@ -1915,10 +1931,3 @@ void CoordToArray2D(const Coord& a,double b[2])
 	b[1] = a.y;
 }
 */
-// コンストラクタ
-FRAME::FRAME(const FRAME& f)
-{
-	Trl = f.Trl;
-	for ( int i=0; i<COORDINDEX; i++ )
-		Rot[i] = f.Rot[i];
-}

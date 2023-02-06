@@ -1,8 +1,6 @@
 ﻿#ifndef _NURBS_FUNC_H_
 #define _NURBS_FUNC_H_
 
-#include "boost/tuple/tuple.hpp"	// 関数から2つ以上の値を返す
-
 // Constants: General Defines
 // PTNUMMAX -			NURBSの点列の最大数(10000)
 // RANKMAX -			NURBSの階数の最大値(9)

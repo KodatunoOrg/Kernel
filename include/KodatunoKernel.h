@@ -8,7 +8,9 @@
 #include "boost/numeric/ublas/vector.hpp"	// ublas::vector
 #include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
 namespace ublas = boost::numeric::ublas;
-#include "boost/array.hpp"
+#include "boost/array.hpp"					// 固定長配列
+#include "boost/tuple/tuple.hpp"			// 関数から2つ以上の値を返す
+#include "boost/optional.hpp"				// 無効値表現
 
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
@@ -72,6 +74,12 @@ typedef ublas::vector<double>	ublasVector;
 typedef std::vector<Vdouble>	VVdouble;
 typedef ublas::matrix<double>	ublasMatrix;
 
+// Typedef: array<double, 3>
+// A3double - double型の固定配列をA[n]doubleとして定義
+typedef boost::array<double, 4>	A4double;
+typedef boost::array<double, 3>	A3double;
+typedef boost::array<double, 2>	A2double;
+
 // Typedef: vector<Coord>
 // VCoord - Coord型の1次元配列をVCoordとして定義
 class Coord;
@@ -82,7 +90,7 @@ typedef std::vector<Coord>		VCoord;
 typedef std::vector<VCoord>		VVCoord;
 
 // Typedef: array<Coord, 3>
-// A3Coord - Coord型の3要素固定配列をACoordとして定義
+// A3Coord - Coord型の3要素固定配列をA3Coordとして定義
 typedef boost::array<Coord, COORDINDEX>	A3Coord;
 
 
@@ -308,7 +316,7 @@ VCoord MulMxVec(const ublasMatrix&, const VCoord&);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(const Coord[], const Coord&);
+Coord MulMxCoord(const A3Coord&, const Coord&);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
@@ -320,7 +328,7 @@ ublasMatrix TranMx(const ublasMatrix&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(Coord **,int,int,Coord **);			
+VVCoord TranMx(const VVCoord&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
@@ -370,15 +378,15 @@ double RadToDeg(double radian);
 
 // Function: CalcCubicEquation
 // 3次方程式の解を求める
-int CalcCubicEquation(double *,double *);		
+boost::tuple<int, A3double> CalcCubicEquation(const A4double&);
 
 // Function: CalcQuadraticEquation
 // 2次方程式の解を求める
-int CalcQuadraticEquation(double *,double *);	
+boost::tuple<int, A2double> CalcQuadraticEquation(const A3double&);
 
 // Function: CalcLinearEquation
 // 1次方程式の解を求める
-int CalcLinearEquation(double *,double *);		
+boost::optional<double> CalcLinearEquation(const A2double&);
 
 // Function: nCr
 // 2項係数(nCrの組合せ総数)を求める
