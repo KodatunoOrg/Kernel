@@ -277,11 +277,11 @@ typedef struct{
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る
-double ClacPolygonArea2D(Coord [],int);			
+double ClacPolygonArea2D(const VCoord&);
 
 // Function: DiscriminateCW2D
 // 2D平面上の多角形が時計回りか反時計回りかを判別する
-int DiscriminateCW2D(Coord [],int);				
+int DiscriminateCW2D(const VCoord&);
 
 
 // Group: Functions(同次変換行列、回転行列の演算)
@@ -297,29 +297,13 @@ Coord RotToZYZEuler(Coord []);
 
 // Group: Functions(多次元ベクトル、多次元行列の演算)
 
-// Function: CopyVector
-// ベクトルのコピー
-void CopyVector(Vector,int,Vector);				
-
-// Function: AddMxMx
-// 行列同士の足し算
-void AddMxMx(Matrix,Matrix,Matrix,int,int);		
-
-// Function: MulMxMx
-// 行列同士の掛け算
-void MulMxMx(Matrix,int,int,Matrix,int,int,Matrix);	
-
-// Function: MulMxVec
-// 行列とベクトルの掛け算
-ublasVector MulMxVec(const ublasMatrix&, const ublasVector&);
-
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算
-void MulMxVec(const ublasMatrix&, const Coord*, Coord *);
+VCoord MulMxVec(const ublasMatrix&, const VCoord&);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(Coord [], const Coord&);
+Coord MulMxCoord(const VCoord&, const Coord&);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
@@ -339,19 +323,19 @@ void TranMx(const Coord [],Coord []);
 
 // Function: Gauss
 // 連立1次方程式の解を求める
-double Gauss(ublasMatrix&, const ublasVector&, ublasVector&);
+double Gauss(const ublasMatrix&, const ublasVector&, ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
-double Gauss(ublasMatrix&, Coord*, Coord*);
+double Gauss(const ublasMatrix&, const VCoord&, VCoord&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
-ublasVector LU_Solver(ublasMatrix&, const ublasVector&, int*);
+ublasVector LU_Solver(const ublasMatrix&, const ublasVector&, const int*);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
-void LU_Solver(const ublasMatrix&, const Coord*, const int*, Coord*);
+VCoord LU_Solver(const ublasMatrix&, const VCoord&, const int*);
 
 // Function: LU
 // LU分解
@@ -431,49 +415,6 @@ void SetColorStat(DispStat *ds,float r, float g, float b, float a=0.5);
 void DrawSolidCone(double,double);		
 
 
-// Group: Functions(メモリー関連)
-
-// Function: NewMatrix
-// 2次元double型配列のメモリー確保
-Matrix NewMatrix(int,int);			
-
-// Function: NewVector
-// 1次元double型配列のメモリー確保
-Vector NewVector(int);				
-
-// Function: FreeMatrix
-// 2次元double型配列のメモリー解放
-void FreeMatrix(Matrix,int);		
-
-// Function: FreeVector
-// 1次元double型配列のメモリー解放
-void FreeVector(Vector);			
-
-// Function: NewCoord1
-// 1次元Coord型配列のメモリー確保
-Coord *NewCoord1(int);				
-
-// Function: FreeCoord1
-// 1次元Coord型配列のメモリー解放
-void FreeCoord1(Coord *);			
-
-// Function: NewCoord2
-// 2次元Coord型配列のメモリー確保
-Coord **NewCoord2(int,int);			
-
-// Function: FreeCoord2
-// 2次元Coord型配列のメモリー解放
-void FreeCoord2(Coord **,int);		
-
-// Function: NewCoord3
-// 3次元Coord型配列のメモリー確保
-Coord ***NewCoord3(int,int,int);	
-
-// Function: FreeCoord3
-// 3次元Coord型配列のメモリー解放
-void FreeCoord3(Coord ***,int,int);	
-
-
 // Group: Functions(その他)
 
 // Function: sgn
@@ -492,49 +433,25 @@ int CheckRange(double,double,double,int);
 // 2つの値の大小比較 
 int CheckMag(double,double,int);		
 
-// Function: BubbleSort
-// バブルソート(基本交換法)
-void BubbleSort(int[],int);				
-
-// Function: BubbleSort
-// オーバーロード
-void BubbleSort(double[],int);			
-
-// Function: QCmp
-// クイックソート 
-int QCmp(const void *,const void *);	
-
-// Function: Reverse
-// Coord配列の反転操作
-void Reverse(Coord [],int);				
-
-// Function: Reverse
-// double配列の反転操作
-void Reverse(double [],int);			
-
-// Function: CatCoord
-// ある配列の後ろに新たな配列を繋げる
-int CatCoord(Coord [],Coord [],int,int,int);	
+// Function: CheckTheSamePoints
+// 同一点を除去する
+VCoord CheckTheSamePoints(const VCoord&);
 
 // Function: CheckTheSamePoints
 // 同一点を除去する
-int CheckTheSamePoints(Coord *,int);	
-
-// Function: CheckTheSamePoints
-// 同一点を除去する
-int CheckTheSamePoints(double *,int);	
+Vdouble CheckTheSamePoints(const Vdouble&);
 
 // Function: CheckTheSamePoints2D
 // 2D平面内の同一点を除去する
-int CheckTheSamePoints2D(Coord *,int);	
+VCoord CheckTheSamePoints2D(const VCoord&);
 
-// Function: CoordToArray
+// Function: CoordToArray 不要マーク
 // Coordをdouble配列に代入
-void CoordToArray(const Coord&,double []);
+//void CoordToArray(const Coord&,double []);
 
-// Function: CoordToArray2D
+// Function: CoordToArray2D 不要マーク
 // Coordをdouble配列に代入
-void CoordToArray2D(const Coord&,double []);
+//void CoordToArray2D(const Coord&,double []);
 
 #include "KodListFunc.h"
 #include "Quaternion.h"

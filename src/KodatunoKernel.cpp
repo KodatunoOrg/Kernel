@@ -272,167 +272,6 @@ int Coord::ZoroCoord2D(void) const
 	return (x==0.0 && y==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
-// Function: NewVector
-// double型1次元配列のメモリー確保
-//
-// Parameters:
-// len - メモリー確保するdouble型配列要素数
-//
-// Return:
-// 確保されたdouble型1次元配列へのポインタ（メモリー確保に失敗：NULL）
-Vector NewVector(int len)
-{
-	Vector a;
-	a = new double[len];
-	return a;
-}
-
-// Function: NewMatrix
-// double型2次元配列のメモリー確保
-//
-// Parameters:
-// row, col - メモリー確保するdouble型2次元配列の行，列の要素数
-//
-// Return:
-// 確保されたdouble型2次元配列へのポインタ（メモリー確保に失敗：NULL）
-Matrix NewMatrix(int row,int col)
-{
-	int i;
-	Matrix a;
-
-	a = new double*[row];
-	for(i=0;i<row;i++) a[i] = new double[col];
-
-	return a;
-}
-
-// Function: FreeVector
-// double型1次元配列のメモリー解放
-//
-// Parameter:
-// a - メモリー解放するdouble型1次元配列へのポインタ
-void FreeVector(Vector a)
-{
-	delete[] a;
-}
-
-// Function: FreeMatrix
-// double型2次元配列のメモリー解放
-//
-// Parameter:
-// a - メモリー解放するdouble型2次元配列へのポインタ
-// col - aの行要素数
-void FreeMatrix(Matrix a,int col)
-{
-	for(int i=0;i<col;i++) delete[] a[i];
-	delete[] a;
-}
-
-// Function: NewCoord1
-// 1次元Coord型配列のメモリー確保
-//
-// Parameters:
-// len - メモリー確保するCoord型配列要素数
-//
-// Return:
-// 確保されたdouble型1次元配列へのポインタ（メモリー確保に失敗：NULL）
-Coord *NewCoord1(int len)
-{
-	Coord *a;
-
-	a = new Coord[len];
-	return a;
-}
-
-// Function: NewCoord2
-// 2次元Coord型配列のメモリー確保
-//
-// Parameters:
-// row, col - メモリー確保するCoord型2次元配列の行，列の要素数
-//
-// Return:
-// 確保されたCoord型2次元配列へのポインタ（メモリー確保に失敗：NULL）
-Coord **NewCoord2(int row,int col)
-{
-	int i;
-	Coord **a;
-
-	a = new Coord *[row];
-	for(i=0;i<row;i++) a[i] = new Coord[col];
-
-	return a;
-}
-
-// Function: NewCoord3
-// 3次元Coord型配列のメモリー確保
-//
-// Parameters:
-// x, y, z - メモリー確保するCoord型3次元配列の各配列要素数
-//
-// Return:
-// 確保されたCoord型3次元配列へのポインタ（メモリー確保に失敗：NULL）
-Coord ***NewCoord3(int x,int y,int z)
-{
-	int i,j;
-	Coord ***a;
-
-	a = new Coord **[x];
-	for(i=0;i<x;i++){
-		a[i] = new Coord *[y];
-		for(j=0;j<y;j++){
-			a[i][j] = new Coord[z];
-		}
-	}
-
-	return a;
-}
-
-// Function: FreeCoord1
-// 1次元Coord型配列のメモリー解放 
-//
-// Parameters:
-// *a - 解放する1次元Coord型配列へのポインタ
-void FreeCoord1(Coord *a)
-{
-	delete[] a;
-}
-
-// Function: FreeCoord2
-// 2次元Coord型配列のメモリー解放 
-//
-// Parameters:
-// *a - 解放する2次元Coord型配列へのポインタ
-// col - aの行要素数
-void FreeCoord2(Coord **a,int col)
-{
-	Coord **b;
-
-	b=a;
-	for(int i=0;i<col;i++){
-		delete[] b[i];
-	}
-	delete[] a;
-}
-
-// Function: FreeCoord3
-// 3次元Coord型配列のメモリー解放 
-//
-// Parameters:
-// *a - 解放する3次元Coord型配列へのポインタ
-// x,y - aの行,列要素数
-void FreeCoord3(Coord ***a,int x,int y)
-{
-	int i,j;
-
-	for(i=0;i<x;i++){
-		for(j=0;j<y;j++){
-			delete[] a[i][j];
-		}
-		delete[] a[i];
-	}
-	delete[] a;
-}
-
 // Function: NormalizeVec
 // ベクトルを正規化する
 //
@@ -926,121 +765,6 @@ Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 	return A + (u*k);
 }
 
-// Function: BubbleSort
-// int型配列のバブルソート(基本交換法)
-// 
-// Parameters:
-// array[] - ソートされる数値配列
-// array_size - 配列要素数
-void BubbleSort(int array[],int array_size)
-{
-	int i,j,temp;
-
-	for(i=0;i<array_size-1;i++){
-		for(j=array_size-1;j>i;j--){
-			if(array[j-1]>=array[j]) {
-				temp = array[j];
-				array[j] = array[j-1];
-				array[j-1] = temp;
-			}
-		}
-	}
-}
-
-// Function: BubbleSort
-// double型配列のバブルソート(基本交換法)(オーバーロード)
-// 
-// Parameters:
-// array[] - ソートされる数値配列
-// array_size - 配列要素数
-void BubbleSort(double array[],int array_size)
-{
-	int i,j;
-	double temp;
-
-	for(i=0;i<array_size-1;i++){
-		for(j=array_size-1;j>i;j--){
-			if(array[j-1]>=array[j]) {
-				temp = array[j];
-				array[j] = array[j-1];
-				array[j-1] = temp;
-			}
-		}
-	}
-}
-
-// Function: QCmp
-// C言語標準関数qsort(double型、降順)で用いる比較関数
-//
-// Parameters:
-// *a,*b - 比較するdouble型の数値
-//
-// Return:
-// a<b：1, a>b：-1, a=b：0
-int QCmp(const void*a,const void*b)
-{
-	double *x,*y;
-
-	x = (double*)a;
-	y = (double*)b;
-
-	if(*x < *y)
-		return 1;
-	else if(*x > *y)
-		return -1;
-	else
-		return 0;
-}
-
-// Function: Reverse
-// Coord配列の反転
-// 
-// Parameters:
-// p[] - Coord配列
-// n - pの要素数
-void Reverse(Coord p[],int n)
-{
-	int i,j;
-	Coord temp;
-
-	for(i=0,j=n-1;i<j;i++,j--){
-		temp = p[i];
-		p[i] = p[j];
-		p[j] = temp;
-	}
-}
-
-// Function: Reverse
-// double型配列の反転操作(オーバーロード)
-//
-// Parameters:
-// p[] - double配列
-// n - pの要素数
-void Reverse(double p[],int n)
-{
-	int i,j;
-	double temp;
-
-	for(i=0,j=n-1;i<j;i++,j--){
-		temp = p[i];
-		p[i] = p[j];
-		p[j] = temp;
-	}
-}
-
-// Function: CopyVector
-// ベクトルのコピー(aベクトルをbベクトルへ代入)
-//
-// Parameters:
-// a - コピー元1次元配列へのポインタ
-// n - aの要素数
-// b - コピー先1次元配列へのポインタ
-void CopyVector(Vector a,int n,Vector b)
-{
-	for(int i=0;i<n;i++)
-		b[i] = a[i];
-}
-
 // Function: CalcCubicEquation
 // 3次方程式を解く
 //
@@ -1432,12 +1156,12 @@ double CalcPolygonArea(Coord p[],int Vnum)
 //
 // Parameters:
 // p[] - 頂点列
-// Vnum - 頂点の数
 //
 // Return:
 // 計算結果
-double ClacPolygonArea2D(Coord p[],int Vnum)
+double ClacPolygonArea2D(const VCoord& p)
 {
+	size_t Vnum = p.size();
 	double area=0;
 
 	for(int i=0;i<Vnum;i++){
@@ -1452,19 +1176,19 @@ double ClacPolygonArea2D(Coord p[],int Vnum)
 //
 // Parameters:
 // p[] - 頂点列
-// Vnum - 頂点の数
 //
 // Return:
 // CCW：KOD_TRUE     CW：KOD_FALSE
-int DiscriminateCW2D(Coord p[],int Vnum)
+int DiscriminateCW2D(const VCoord& p)
 {
+	size_t	Vnum = p.size();
 	// 指定点数が1点以下の場合
 	if(Vnum <= 2)
 		return KOD_ERR;
 
 	// 指定点数が3点以上の場合
 	else{
-		if(ClacPolygonArea2D(p,Vnum) > 0)	// CCW
+		if(ClacPolygonArea2D(p) > 0)	// CCW
 			return CCW;
 
 		else	// CW
@@ -1472,67 +1196,6 @@ int DiscriminateCW2D(Coord p[],int Vnum)
 	}
 
 	return KOD_ERR;
-}
-
-// Function: AddMxMx
-// 行列同士の足し算
-//
-// Parameters:
-// A,B,C - [C] = [A] +[B]
-// row,col - 行，列要素数
-void AddMxMx(Matrix A,Matrix B,Matrix C,int row,int col)
-{
-	for(int i=0;i<row;i++){
-		for(int j=0;j<col;j++){
-			C[i][j] = A[i][j] + B[i][j];
-		}
-	}
-}
-
-// Function: MulMxMx
-// 行列同士の掛け算
-// 
-// Parameters:
-// A,B,C - [C] = [A][B]
-// A_row, A_col - 行列Aの行，列要素数
-// B_row, B_col - 行列Bの行，列要素数
-void MulMxMx(Matrix A,int A_row,int A_col,Matrix B,int B_row,int B_col,Matrix C)
-{
-	for(int i=0;i<A_row;i++){
-		for(int k=0;k<B_col;k++){
-			C[i][k] = 0;
-			if(A_col >= B_row){
-				for(int j=0;j<B_row;j++){
-					C[i][k] += A[i][j] * B[j][k];
-				}
-			}
-			else{
-				for(int j=0;j<A_col;j++){
-					C[i][k] += A[i][j] * B[j][k];
-				}
-			}
-		}
-	}
-}	
-
-// Function: MulMxVec
-// 行列とベクトルの掛け算
-// 
-// Parameters:
-// A,B,C - {C} = [A]{B}
-// A_row - 行数  
-// A_col - 列数  
-// B_row - ベクトルの次元数
-ublasVector MulMxVec(const ublasMatrix& A, const ublasVector& B)
-{
-	ublasVector	C(A.size1());	// A_row
-	for(int i=0;i<A.size1();i++){
-		C[i] = 0;
-		for(int j=0;j<A.size2();j++){
-			C[i] += A(i,j) * B[j];
-		}
-	}
-	return C;
 }
 
 // Function: MulMxVec
@@ -1548,16 +1211,19 @@ ublasVector MulMxVec(const ublasMatrix& A, const ublasVector& B)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(const ublasMatrix& A, const Coord* B, Coord* C)
+VCoord MulMxVec(const ublasMatrix& A, const VCoord& B)
 {
+	VCoord	C;
 	int		A_row = A.size1(),
 			A_col = A.size2();
 	for(int i=0;i<A_row;i++){
-		C[i] = 0;
+		Coord c;
 		for(int j=0;j<A_col;j++){
-			C[i] += B[j] * A(i,j);
+			c += B[j] * A(i,j);
 		}
+		C.push_back(c);
 	}
+	return C;
 }
 
 // Function: MulMxCoord
@@ -1572,7 +1238,7 @@ void MulMxVec(const ublasMatrix& A, const Coord* B, Coord* C)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(Coord A[], const Coord& d)
+Coord MulMxCoord(const VCoord& A, const Coord& d)
 {
 	Coord ans;
 
@@ -1798,7 +1464,7 @@ Coord RotToZYZEuler( Coord rot[])
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(ublasMatrix& a, const ublasVector& b, ublasVector& x)
+double Gauss(const ublasMatrix& a, const ublasVector& b, ublasVector& x)
 {
 	long double det;	// 行列式
 	int *ip;			// 行交換の情報
@@ -1823,7 +1489,7 @@ double Gauss(ublasMatrix& a, const ublasVector& b, ublasVector& x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(ublasMatrix& a, Coord* b, Coord* x)
+double Gauss(const ublasMatrix& a, const VCoord& b, VCoord& x)
 {
 	int n = a.size1();
 	long double det;	// 行列式
@@ -1833,7 +1499,7 @@ double Gauss(ublasMatrix& a, Coord* b, Coord* x)
 
 	det = LU(a,ip);						// LU分解
 	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else LU_Solver(a,b,ip,x);			// LU分解の結果を使って連立方程式を解く
+	else x = LU_Solver(a,b,ip);			// LU分解の結果を使って連立方程式を解く
 
 	delete[] ip;                   
 
@@ -1848,12 +1514,12 @@ double Gauss(ublasMatrix& a, Coord* b, Coord* x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺ベクトル  
 // ip - 行交換の情報
-ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, int* ip)
+ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, const int* ip)
 {
-	ublasVector	x;
 	int n = a.size1();
 	int ii;
 	double t;
+	ublasVector	x(n);
 
 	for(int i=0;i<n;i++) {       // Gauss消去法の残り
 		ii = ip[i];
@@ -1881,11 +1547,12 @@ ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, int* ip)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺Coord配列  
 // ip - 行交換の情報
-void LU_Solver(const ublasMatrix& a, const Coord* b, const int* ip, Coord* x)
+VCoord LU_Solver(const ublasMatrix& a, const VCoord& b, const int* ip)
 {
 	int n = a.size1();
 	int ii;
 	Coord t;
+	VCoord	x(n);
 
 	for(int i=0;i<n;i++) {       // Gauss消去法の残り
 		ii = ip[i];
@@ -1901,6 +1568,8 @@ void LU_Solver(const ublasMatrix& a, const Coord* b, const int* ip, Coord* x)
 			t -= x[j] * a(ii,j);
 		x[i] = t / a(ii,i);
 	}
+
+	return x;
 }
 
 // Function: MatInv
@@ -2123,141 +1792,104 @@ void SetColorStat(DispStat *ds,float r, float g, float b, float a)
 	ds->Color[3] = a;
 }
 
-// Function: CatCoord
-// ある座標値配列の後ろに新たな座標値配列を繋げる
-//
-// Parameters:
-// a[] - 代入される座標値配列		
-// b[] - 代入する座標値配列		
-// alim - a[]の配列要素数
-// anum - 現在のa[]にデータが格納されている最後尾番号
-// bnum - b[]の代入したい配列要素数
-//
-// Return: 
-// 合算された配列要素数
-int CatCoord(Coord a[],Coord b[],int alim,int anum,int bnum)
-{
-	if(alim < anum+bnum){
-//		GuiIFB.SetMessage("stack over flow");
-		return KOD_ERR;
-	}
-
-	for(int i=0;i<bnum;i++){
-		a[anum+i] = b[i];
-	}
-
-	return anum+bnum;
-}
-
 // Function: CheckTheSamePoints
 // 同一点を除去する
 //
 // Prameters:
-// *P - 点群(変更後の点群もここに格納される)   
-// N - 点数
+// P - 点群
 //
 // Return:
-// 変更後の点数
-int CheckTheSamePoints(Coord *P,int N)
+// 変更後の点群
+VCoord CheckTheSamePoints(const VCoord& P)
 {
-	for(int i=0;i<N;i++)
-		P[i].dmy = KOD_FALSE;
+	if (P.empty()) return VCoord();
 
-	for(int i=0;i<N;i++){
-		if(P[i].dmy == KOD_FALSE){
-			for(int j=i+1;j<N;j++){
-				if(P[i].DiffCoord(P[j],APPROX_ZERO_L) == KOD_TRUE){
-					P[j].dmy = KOD_TRUE;
+	VCoord Q(P);
+	std::vector<bool>	flag(P.size(), false);
+
+	for(size_t i=0;i<P.size();i++){
+		if(flag[i] == false){
+			for(size_t j=i+1;j<P.size();j++){
+				if(P[i].DiffCoord(P[j]) == KOD_TRUE){
+					flag[j] = true;
 				}
 			}
 		}
 	}
-	int k=0;
-	for(int i=0;i<N;i++){
-		if(P[i].dmy != KOD_TRUE){
-			P[k] = P[i];
-			k++;
+	for(size_t i=0;i<flag.size();i++){
+		if(flag[i] != KOD_TRUE){
+			Q.push_back(P[i]);
 		}
 	}
-	return k;
+
+	return Q;
 }
 // Function: CheckTheSamePoints
 // 同一値を除去する(オーバーロード)
 //
 // Prameters:
-// *P - 数値配列(変更後もここに格納される)   
-// N - 点数
+// P - 数値配列
 //
 // Return:
-// 変更後の点数
-int CheckTheSamePoints(double *P,int N)
+// 変更後の点群
+Vdouble CheckTheSamePoints(const Vdouble& P)
 {
-	if(!N) return 0;
+	if(P.empty()) return Vdouble();
 
-	bool *flag = new bool[N];
+	Vdouble	Q;
+	std::vector<bool>	flag(P.size(), false);
 
-	for(int i=0;i<N;i++)
-		flag[i] = false;
-
-	for(int i=0;i<N;i++){
+	for(size_t i=0;i<P.size();i++){
 		if(flag[i] == false){
-			for(int j=i+1;j<N;j++){
+			for(size_t j=i+1;j<P.size();j++){
 				if(CheckZero(P[i]-P[j],MID_ACCURACY) == KOD_TRUE){
 					flag[j] = true;
 				}
 			}
 		}
 	}
-	int k=0;
-	for(int i=0;i<N;i++){
+	for(size_t i=0;i<flag.size();i++){
 		if(flag[i] != KOD_TRUE){
-			P[k] = P[i];
-			k++;
+			Q.push_back(P[i]);
 		}
 	}
 
-	delete[] flag;
-
-	return k;
+	return Q;
 }
 
 // Function: CheckTheSamePoints2D
 // 2次元平面内の同一点を除去する (座標値はCoordのxとyで与える)
 // 
 // Parameters:
-// *P - 点群(変更後の点群もここに格納される)   
-// N - 点数
+// P - 点群
 //
 // Return:
-// 変更後の点数
-int CheckTheSamePoints2D(Coord *P,int N)
+// 変更後の点群
+VCoord CheckTheSamePoints2D(const VCoord& P)
 {
-	Coord *Q = NewCoord1(N);
+	if (P.empty()) return VCoord();
 
-	for(int i=0;i<N;i++)
-		P[i].dmy = KOD_FALSE;
+	VCoord Q(P);
+	std::vector<bool>	flag(P.size(), false);
 
-	int k=0;
-	for(int i=0;i<N;i++){
-		if(P[i].dmy == KOD_FALSE){
-			Q[k] = P[i];
-			for(int j=0;j<N;j++){
-				if(Q[k].DiffCoord(P[j]) == KOD_TRUE){
-					P[j].dmy = KOD_TRUE;
+	for(size_t i=0;i<P.size();i++){
+		if(flag[i] == false){
+			for(size_t j=i+1;j<P.size();j++){
+				if(P[i].DiffCoord2D(P[j]) == KOD_TRUE){
+					flag[j] = true;
 				}
 			}
-			k++;
+		}
+	}
+	for(size_t i=0;i<flag.size();i++){
+		if(flag[i] != KOD_TRUE){
+			Q.push_back(P[i]);
 		}
 	}
 
-	for(int i=0;i<k;i++)
-		P[i] = Q[i];
-
-	FreeCoord1(Q);
-
-	return k;
+	return Q;
 }
-
+/*
 // Function: CoordToArray
 // Coordをdouble配列に代入
 //
@@ -2282,7 +1914,7 @@ void CoordToArray2D(const Coord& a,double b[2])
 	b[0] = a.x;
 	b[1] = a.y;
 }
-
+*/
 // コンストラクタ
 FRAME::FRAME(const FRAME& f)
 {
