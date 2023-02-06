@@ -8,6 +8,7 @@
 #include "boost/numeric/ublas/vector.hpp"	// ublas::vector
 #include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
 namespace ublas = boost::numeric::ublas;
+#include "boost/array.hpp"
 
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
@@ -79,6 +80,10 @@ typedef std::vector<Coord>		VCoord;
 // Typedef: vector<VCoord>
 // VVCoord - Coord型の2次元配列をVVCoordとして定義
 typedef std::vector<VCoord>		VVCoord;
+
+// Typedef: array<Coord, 3>
+// A3Coord - Coord型の3要素固定配列をACoordとして定義
+typedef boost::array<Coord, COORDINDEX>	A3Coord;
 
 
 // Class: Coord 
@@ -237,8 +242,8 @@ public:
 // Coord Trl -				// 並進成分
 class FRAME{
 public:
-	Coord Rot[COORDINDEX];
-	Coord Trl;
+	A3Coord	Rot;
+	Coord	Trl;
 
 	// コンストラクタ
 	FRAME() {}
@@ -292,7 +297,7 @@ Coord MulFrameCoord(const ublasMatrix&, const ublasVector&, const Coord&);
 
 // Function: RotToZYZEuler
 // 回転行列をZYZオイラー角へ変換
-Coord RotToZYZEuler(Coord []);					
+Coord RotToZYZEuler(const A3Coord&);
 
 
 // Group: Functions(多次元ベクトル、多次元行列の演算)
@@ -303,7 +308,7 @@ VCoord MulMxVec(const ublasMatrix&, const VCoord&);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(const VCoord&, const Coord&);
+Coord MulMxCoord(const Coord[], const Coord&);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
@@ -319,7 +324,7 @@ void TranMx(Coord **,int,int,Coord **);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(const Coord [],Coord []);					
+A3Coord TranMx(const A3Coord&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める

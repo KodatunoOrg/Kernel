@@ -1238,7 +1238,7 @@ VCoord MulMxVec(const ublasMatrix& A, const VCoord& B)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(const VCoord& A, const Coord& d)
+Coord MulMxCoord(const A3Coord& A, const Coord& d)
 {
 	Coord ans;
 
@@ -1320,8 +1320,9 @@ void TranMx(Coord **A,int m,int n,Coord **B)
 // Parameters:
 // A[3] - 元の行列
 // B[3] - 転置行列を格納
-void TranMx(const Coord A[],Coord B[])
+A3Coord TranMx(const A3Coord& A)
 {
+	A3Coord	B;
 	B[0].x = A[0].x;
 	B[0].y = A[1].x;
 	B[0].z = A[2].x;
@@ -1331,6 +1332,7 @@ void TranMx(const Coord A[],Coord B[])
 	B[2].x = A[0].z;
 	B[2].y = A[1].z;
 	B[2].z = A[2].z;
+	return B;
 }
 
 // Function: MulFrameCoord
@@ -1386,10 +1388,8 @@ Coord FRAME::MulFrameCoord(const Coord& I) const
 // 計算結果
 FRAME& FRAME::InvFrame(void)
 {
-	FRAME f;
-
-	TranMx(Rot,f.Rot);					// F.Rotの転置行列F.Rot^Tを得る
-	Trl = MulMxCoord(f.Rot,Trl);		// F.Rot^T * F.Trl
+	Rot = TranMx(Rot);				// F.Rotの転置行列F.Rot^Tを得る
+	Trl = MulMxCoord(Rot,Trl);		// F.Rot^T * F.Trl
 	Trl *= -1;						// -(F.Rot^T * F.Trl)
 
 	return *this;
@@ -1431,7 +1431,7 @@ FRAME& FRAME::MulFrame(const FRAME& b)
 //
 // Return:
 // 計算結果(deg)
-Coord RotToZYZEuler( Coord rot[])
+Coord RotToZYZEuler(const A3Coord& rot)
 {
 	Coord tmp;	// 0
 
