@@ -2,10 +2,11 @@
 #define _STD_AFX_H_
 
 #include <math.h>
+#include <vector>							// std::vector
 #include <GL/glu.h>
 
-#include "boost/numeric/ublas/vector.hpp"
-#include "boost/numeric/ublas/matrix.hpp"
+#include "boost/numeric/ublas/vector.hpp"	// ublas::vector
+#include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
 namespace ublas = boost::numeric::ublas;
 
 // Constants: General Defines
@@ -60,15 +61,25 @@ namespace ublas = boost::numeric::ublas;
 #define CW  0
 #define CCW 1
 
-// Typedef: double **
-// Matrix - double形の2次元配列をMatrixとして定義
-typedef double **Matrix;
+// Typedef: vector<double>
+// double型の1次元配列をVdoubleとublasVectorとして定義
+typedef std::vector<double>		Vdouble;
+typedef ublas::vector<double>	ublasVector;
+
+// Typedef: vector<Vdouble>
+// double型の2次元配列をVVdoubleとublasMatrixとして定義
+typedef std::vector<Vdouble>	VVdouble;
 typedef ublas::matrix<double>	ublasMatrix;
 
-// Typedef: double *
-// Vector - double形の1次元配列をVectorとして定義
-typedef double *Vector;
-typedef ublas::vector<double>	ublasVector;
+// Typedef: vector<Coord>
+// VCoord - Coord型の1次元配列をVCoordとして定義
+class Coord;
+typedef std::vector<Coord>		VCoord;
+
+// Typedef: vector<VCoord>
+// VVCoord - Coord型の2次元配列をVVCoordとして定義
+typedef std::vector<VCoord>		VVCoord;
+
 
 // Class: Coord 
 // 座標値用クラスを定義
