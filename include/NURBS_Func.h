@@ -62,8 +62,7 @@ public:
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
-	int GenNurbsC(NURBSC *,int,int,int,double [],double [],Coord [],double [],int[],int);	
-	int GenNurbsC(NURBSC*, int, int, const ublasVector&, const ublasVector&, const VCoord&, double [], int[], int);	
+	int GenNurbsC(NURBSC*, int, int, const ublasVector&, const ublasVector&, const VCoord&, double [], int[], int);
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
@@ -71,8 +70,7 @@ public:
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
-	int GenNurbsS(NURBSS *,int,int,int,int,double *,double *,double **,Coord **,double,double,double,double);	
-	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, Coord**, double,double,double,double);	
+	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const VVCoord&, double,double,double,double);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
@@ -187,7 +185,7 @@ public:
 
 	// Function: CalcuIntersecPtNurbsLine
 	// NURBS曲面と直線の交点を算出
-	int CalcuIntersecPtNurbsLine(NURBSS *,Coord,Coord,int,Coord *,int,int);	
+	VCoord CalcuIntersecPtNurbsLine(NURBSS *, const Coord&, const Coord&, int, int);
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲面上の最近傍点を求める(ニュートン法)
@@ -207,15 +205,15 @@ public:
 
 	// Function: CalcIntersecIsparaCurveU
 	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecIsparaCurveU(NURBSS *,double,Coord,Coord,int,double *,int);	
+	Vdouble CalcIntersecIsparaCurveU(NURBSS *, double, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecIsparaCurveV
 	// v方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecIsparaCurveV(NURBSS *,double,Coord,Coord,int,double *,int); 
+	Vdouble CalcIntersecIsparaCurveV(NURBSS *, double, const Coord& , const Coord&, int);
 
 	// Function: CalcIntersecCurve
 	// NURBS曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecCurve(NURBSC *,Coord,Coord,int,double *,int,int);	
+	Vdouble CalcIntersecCurve(NURBSC *, const Coord&, const Coord&, int, int);	
 
 	// Function: CalcIntersecCurve3
 	// 3次以下のNURBS曲線と平面との交点を求める
@@ -247,7 +245,7 @@ public:
 
 	// Function: CalcIntersecPtsNurbsSNurbsC
 	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
-	int CalcIntersecPtsNurbsSNurbsC(NURBSS *,NURBSC *,int,Coord *,int);	
+	VCoord CalcIntersecPtsNurbsSNurbsC(NURBSS *,NURBSC *,int);
 
 	// Function: CalcIntersecPtsNurbsSGeom
 	// NURBS曲面同士の交線上の点を幾何学的にいくつか求める
@@ -315,15 +313,15 @@ public:
 
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
-	int GenInterpolatedNurbsC1(NURBSC *,Coord *,int,int);		
+	int GenInterpolatedNurbsC1(NURBSC *,const VCoord&, int);
 
 	// Function: GenInterpolatedNurbsC2
 	// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
-	int GenInterpolatedNurbsC2(NURBSC *, const VCoord&,int,int);
+	int GenInterpolatedNurbsC2(NURBSC *, const VCoord&, int);
 
 	// Function: GenApproximationNurbsC
 	// 与えられた点列を近似するn階のNURBS曲線を生成する
-	int GenApproximationNurbsC(NURBSC *,Coord *,int,int);		
+	int GenApproximationNurbsC(NURBSC *, const VCoord&, int);
 
 	// Function: GenNurbsCfromCP
 	// コントロールポイントからNURBS曲線を生成する
@@ -335,7 +333,7 @@ public:
 
 	// Function: GenInterpolatedNurbsS1
 	// 与えられた点列を補間するn階NURBS曲面を生成する
-	int GenInterpolatedNurbsS1(NURBSS *,Coord **,int,int,int,int);	
+	int GenInterpolatedNurbsS1(NURBSS *, const VVCoord&, int,int,int,int);
 
 	// Function: GenPolygonalSurface
 	// 折れ面を生成する
@@ -343,7 +341,7 @@ public:
 
 	// Function: GenApproximationNurbsS
 	// 与えられた点列を近似するn階のNURBS曲面を生成する
-	int GenApproximationNurbsS(NURBSS *,Coord **,int,int,int,int);	
+	int GenApproximationNurbsS(NURBSS *, const VVCoord&, int,int,int,int);
 
 	// Function: GenNurbsSfromCP
 	// 与えられたコントロールポイントからn階のNURBS曲面を生成する
@@ -395,7 +393,7 @@ public:
 
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
-	int CalcExtremumNurbsC(NURBSC *,Coord,double *,int);		
+	Vdouble CalcExtremumNurbsC(NURBSC *, const Coord&);
 
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
@@ -582,22 +580,18 @@ private:
 
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
-	void GetCurveKnotParam2(Coord *,int,Vector);					
-	ublasVector	GetCurveKnotParam2(const Coord*, int);
+	ublasVector	GetCurveKnotParam2(const VCoord&);
 
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
-	void GetSurfaceKnotParam(Vector,Vector,Coord **,int,int);		
-	boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(Coord**, int, int);
+	boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const VVCoord&, int, int);
 
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
-	void GetInterpolatedKnot(Vector,int,int,int,Vector);			
 	ublasVector	GetInterpolatedKnot(const ublasVector&, int, int);
 
 	// Function: GetApproximatedKnot
 	// (private)曲線/曲面パラメータから近似用ノットベクトルを算出
-	void GetApproximatedKnot(Vector,int,int,int,Vector);			
 	ublasVector GetApproximatedKnot(const ublasVector&, int, int);
 
 	// Function: SetApproximationCPnum
@@ -606,12 +600,11 @@ private:
 
 	// Function: CalcApproximationCP_LSM
 	// (private)最小2乗法で近似コントロールポイントを求める
-	void CalcApproximationCP_LSM(Coord *,Vector,Vector,int,int,int,int,Coord *);	
-	void CalcApproximationCP_LSM(const Coord*, const ublasVector&, const ublasVector&, int, int, Coord*);
+	VCoord CalcApproximationCP_LSM(const VCoord&, const ublasVector&, const ublasVector&, int, int);
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
-	int RemoveTheSamePoints(NURBSS *,Coord *,int);					
+	boost::tuple<int, VCoord> RemoveTheSamePoints(NURBSS *, int);
 
 	// Function: CalcDiffNurbsSDenom
 	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
@@ -627,11 +620,11 @@ private:
 
 	// Function: CalcIntersecPtsPlaneSearch_Sub
 	// (private)面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
-	Coord CalcIntersecPtsPlaneSearch_Sub(NURBSS *,double,double,Coord,Coord);	
+	Coord CalcIntersecPtsPlaneSearch_Sub(NURBSS *, double, double, const Coord&, const Coord&);
 
 	// Function: GetMinDistance
 	// (private)最小距離を持つ座標値を返す
-	Coord GetMinDistance(Coord,Coord *,int);						
+	Coord GetMinDistance(const Coord&, const VCoord&);
 
 	// Function: CheckClossedPoints
 	// (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる

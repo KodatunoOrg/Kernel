@@ -1812,14 +1812,14 @@ VCoord CheckTheSamePoints(const VCoord& P)
 {
 	if (P.empty()) return VCoord();
 
-	VCoord Q(P);
+	VCoord Q;
 	std::vector<bool>	flag(P.size(), false);
 
 	for(size_t i=0;i<P.size();i++){
 		if(flag[i] == false){
 			for(size_t j=i+1;j<P.size();j++){
 				if(P[i].DiffCoord(P[j]) == KOD_TRUE){
-					flag[j] = true;
+					flag[j] = KOD_TRUE;
 				}
 			}
 		}
@@ -1851,7 +1851,7 @@ Vdouble CheckTheSamePoints(const Vdouble& P)
 		if(flag[i] == false){
 			for(size_t j=i+1;j<P.size();j++){
 				if(CheckZero(P[i]-P[j],MID_ACCURACY) == KOD_TRUE){
-					flag[j] = true;
+					flag[j] = KOD_TRUE;
 				}
 			}
 		}
@@ -1877,7 +1877,7 @@ VCoord CheckTheSamePoints2D(const VCoord& P)
 {
 	if (P.empty()) return VCoord();
 
-	VCoord Q(P);
+	VCoord Q;
 	std::vector<bool>	flag(P.size(), false);
 
 	for(size_t i=0;i<P.size();i++){
