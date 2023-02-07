@@ -78,11 +78,11 @@ public:
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
-	int GenRotNurbsS(NURBSS *,NURBSC,Coord,double);				
+	int GenRotNurbsS(NURBSS *,NURBSC, const Coord&, double);
 
 	// Function: GenSweepNurbsS
 	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
-	int GenSweepNurbsS(NURBSS *,NURBSC,Coord,double);			
+	int GenSweepNurbsS(NURBSS *,NURBSC, const Coord&, double);			
 
 	// Function: GenIsoparamCurveU
 	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
@@ -189,7 +189,7 @@ public:
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲面上の最近傍点を求める(ニュートン法)
-	int CalcIntersecPtNurbsPt(NURBSS *,Coord,int,int,Coord *);		
+	boost::optional<Coord> CalcIntersecPtNurbsPt(NURBSS *, const Coord&, int, int);
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲線上の最近傍点を求める(ニュートン法)(オーバーロード)
@@ -229,11 +229,11 @@ public:
 
 	// Function: CalcIntersecPtsPlaneV
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	int CalcIntersecPtsPlaneV(NURBSS *,Coord,Coord,int,Coord *,int);	
+	VCoord CalcIntersecPtsPlaneV(NURBSS *, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneU
 	// U方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	int CalcIntersecPtsPlaneU(NURBSS *,Coord,Coord,int,Coord *,int);	
+	VCoord CalcIntersecPtsPlaneU(NURBSS *, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneSearch
 	// NURBS曲面と平面との交点群を交線追跡法で求める
@@ -353,15 +353,15 @@ public:
 
 	// Function: GetPtsOnOuterTRMSurf
 	// 外周トリム面内の点のみ残す
-	int GetPtsOnOuterTRMSurf(TRMS *,Coord *,int);					
+	VCoord GetPtsOnOuterTRMSurf(TRMS *, const VCoord&);
 
 	// Function: GetPtsOnInnerTRMSurf
 	// 内周トリム面外の点のみ残す
-	int GetPtsOnInnerTRMSurf(TRMS *,Coord *,int);					 
+	VCoord GetPtsOnInnerTRMSurf(TRMS *, const VCoord&);
 
 	// Function: GetPtsOnInnerOuterTRMSurf
 	// 内外周トリム面内の点のみ残す
-	int GetPtsOnInnerOuterTRMSurf(TRMS *,Coord *,int);				
+	VCoord GetPtsOnInnerOuterTRMSurf(TRMS *,const VCoord&);
 
 	// Function: DetectInterfereNurbsS
 	// NURBS曲面(トリム無)同士の干渉検出
@@ -572,7 +572,7 @@ private:
 
 	// Function: ApproxTrimBorder
 	// (private)トリム境界線を点群で近似する
-	int ApproxTrimBorder(COMPC *,Coord *);							
+	VCoord ApproxTrimBorder(COMPC *);
 
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
@@ -636,7 +636,7 @@ private:
 
 	// Function: GetMinDist
 	// (private)最小距離を調べる
-	int GetMinDist(NURBSS *,Coord ,Coord *,int ,Coord *);			
+	boost::optional<Coord> GetMinDist(NURBSS *, const Coord&, const VCoord&);
 
 	// Function: SetKnotVecSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)

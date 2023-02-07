@@ -1,5 +1,4 @@
-﻿#include <stdexcept>	// throw
-#include "KodatunoKernel.h"
+﻿#include "KodatunoKernel.h"
 
 // コンストラクタ
 Coord::Coord()
