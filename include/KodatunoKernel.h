@@ -3,8 +3,6 @@
 
 #include <math.h>
 #include <vector>							// std::vector
-#include <GL/glu.h>
-
 #include "boost/numeric/ublas/vector.hpp"	// ublas::vector
 #include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
 namespace ublas = boost::numeric::ublas;

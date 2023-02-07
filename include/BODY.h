@@ -250,13 +250,13 @@ struct TMAT
 // void *pOriginEnt - 元のエンティティへのポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
 struct NURBSC{
-    int K;
-    int M;
-    int N;
+//	int K;
+//	int M;
+//	int N;
     int prop[4];
-    double *T;
-    double *W;
-    Coord *cp;
+    Vdouble T;
+    Vdouble W;
+    VCoord cp;
     double V[2];
     Coord norm;
     int BlankStat;
@@ -267,24 +267,16 @@ struct NURBSC{
     DispStat Dstat;
 
 	NURBSC() {
-		K = 0;
-		M = 0;
-		N = 0;
+//		K = 0;
+//		M = 0;
+//		N = 0;
 		prop[0] = prop[1] = prop[2] = prop[3] = 0;
-		T = NULL;
-		W = NULL;
-		cp = NULL;
 		V[0] = V[1] = 0;
 		BlankStat = 0;
 		EntUseFlag = 0;
 		pD = 0;
 		OriginEnt = 0;
 		pOriginEnt = NULL;
-	}
-	~NURBSC() {
-		if ( T )	delete[]	T;
-		if ( W )	delete[]	W;
-		if ( cp )	delete[]	cp;
 	}
 };
 
@@ -311,14 +303,14 @@ struct NURBSC{
 // int TrmdSurfFlag - このNURBS曲面がトリム面として呼ばれているのか、独立して存在するのかを示すフラグ(トリム面:KOD_TRUE  独立面:KOD_FALSE)
 // DispStat Dstat - 表示属性（色r,g,b,）
 struct NURBSS{
-	int K[2];
-	int M[2];
-	int N[2];
+//	int K[2];
+//	int M[2];
+//	int N[2];
 	int prop[5];
-	double *S;
-	double *T;
-	double **W;
-	Coord  **cp;
+	Vdouble S;
+	Vdouble T;
+	VVdouble W;
+	VVCoord  cp;
 	double U[2];
 	double V[2];
 	int pD;
@@ -326,24 +318,14 @@ struct NURBSS{
 	DispStat Dstat;
 
 	NURBSS() {
-		K[0] = K[1] = 0;
-		M[0] = M[1] = 0;
-		N[0] = N[0] = 0;
+//		K[0] = K[1] = 0;
+//		M[0] = M[1] = 0;
+//		N[0] = N[0] = 0;
 		prop[0] = prop[1] = prop[2] = prop[3] = prop[4] = 0;
-		S = NULL;
-		T = NULL;
-		W = NULL;
-		cp = NULL;
 		U[0] = U[1] = 0;
 		V[0] = V[1] = 0;
 		pD = 0;
 		TrmdSurfFlag = 0;
-	}
-	~NURBSS() {
-		if ( S )	delete[]	S;
-		if ( T )	delete[]	T;
-		if ( W )	delete[]	W;
-		if ( cp )	delete[]	cp;
 	}
 };
 

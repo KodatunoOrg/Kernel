@@ -1,4 +1,6 @@
-﻿#include "KodatunoKernel.h"
+﻿#include <GL/gl.h>
+#include <GL/glu.h>
+#include "KodatunoKernel.h"
 
 // コンストラクタ
 Coord::Coord()
