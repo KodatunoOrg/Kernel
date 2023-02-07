@@ -880,9 +880,6 @@ boost::tuple<int, A3double> CalcCubicEquation(const A4double& p)
 // 解が実根の場合は2、虚根の場合はKOD_ERR  a[0]==0の場合はKOD_ERR
 boost::tuple<int, A2double> CalcQuadraticEquation(const A3double& a)
 {
-	A2double	ans;
-	double		Q,R;
-
 	if(fabs(a[0]) < APPROX_ZERO_H){
 		A2double a2 = {a[1], a[2]};
 		boost::optional<double> r = CalcLinearEquation(a2);
@@ -895,13 +892,14 @@ boost::tuple<int, A2double> CalcQuadraticEquation(const A3double& a)
 		}
 	}
 
-	Q = a[1]*a[1] - 4*a[0]*a[2];
+	double Q = a[1]*a[1] - 4*a[0]*a[2];
 
 	if(Q<0){
 		return boost::make_tuple(KOD_ERR, A2double());
 	}
 
-	R = -(a[1]+sgn(a[1])*sqrt(Q))/2;
+	A2double	ans;
+	double R = -(a[1]+sgn(a[1])*sqrt(Q))/2;
 	ans[0] = R/a[0];
 	ans[1] = a[2]/R;
 	return boost::make_tuple(2, ans);
@@ -1073,9 +1071,10 @@ int CheckMag(double val1,double val2,int flag)
 // 
 // Returns:
 // KOD_TRUE:内  KOD_FALSE:外  KOD_ONEDGE:エッジ上
-int Coord::IsPointInPolygon(const Coord* BorderPoint, int CountPoint) const
+int Coord::IsPointInPolygon(const VCoord& BorderPoint) const
 {
-	int i;
+	size_t i;
+	size_t CountPoint = BorderPoint.size();
 	int iCountCrossing = 0;			// 内外判定カウンタ
 	Coord p0;						// 多角形の一辺(ベクトル)の始点
 	Coord p1;						// 多角形の一辺(ベクトル)の終点
@@ -1150,11 +1149,12 @@ Coord Coord::CalcNormVecFrom3Pts(const Coord& p2, const Coord& p3) const
 //
 // Return:
 // 計算結果
-double CalcPolygonArea(Coord p[],int Vnum)
+double CalcPolygonArea(const VCoord& p)
 {
+	size_t Vnum = p.size();
 	double area=0;
 
-	for(int i=0;i<Vnum;i++){
+	for(size_t i=0;i<Vnum;i++){
 		area += (p[i]&&p[(i+1)%Vnum]).CalcEuclid();
 	}
 
@@ -1174,7 +1174,7 @@ double ClacPolygonArea2D(const VCoord& p)
 	size_t Vnum = p.size();
 	double area=0;
 
-	for(int i=0;i<Vnum;i++){
+	for(size_t i=0;i<Vnum;i++){
 		area += p[i].CalcOuterProduct2D(p[(i+1)%Vnum]);
 	}
 
@@ -1224,11 +1224,11 @@ int DiscriminateCW2D(const VCoord& p)
 VCoord MulMxVec(const ublasMatrix& A, const VCoord& B)
 {
 	VCoord	C;
-	int		A_row = A.size1(),
+	size_t	A_row = A.size1(),
 			A_col = A.size2();
-	for(int i=0;i<A_row;i++){
+	for(size_t i=0;i<A_row;i++){
 		Coord c;
-		for(int j=0;j<A_col;j++){
+		for(size_t j=0;j<A_col;j++){
 			c += B[j] * A(i,j);
 		}
 		C.push_back(c);
@@ -1291,11 +1291,11 @@ Coord MulMxCoord(const ublasMatrix& A, const Coord& d)
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
 ublasMatrix TranMx(const ublasMatrix& A)
 {
-	int		m = A.size1(),
+	size_t	m = A.size1(),
 			n = A.size2();
 	ublasMatrix	B(n, m);
-	for(int i=0;i<m;i++){
-		for(int j=0;j<n;j++){
+	for(size_t i=0;i<m;i++){
+		for(size_t j=0;j<n;j++){
 			B(j,i) = A(i,j);
 		}
 	}
@@ -1316,7 +1316,6 @@ VVCoord TranMx(const VVCoord& A)
 {
 	VCoord	b;
 	VVCoord	B;
-
 	for(size_t i=0;i<A.size();i++){
 		b.clear();
 		for(size_t j=0;j<A[i].size();j++){
@@ -1480,20 +1479,17 @@ Coord RotToZYZEuler(const A3Coord& rot)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(const ublasMatrix& a, const ublasVector& b, ublasVector& x)
+boost::tuple<double, ublasVector> Gauss(const ublasMatrix& a, const ublasVector& b)
 {
-	long double det;	// 行列式
-	int *ip;			// 行交換の情報
+	long double det;		// 行列式
+	std::vector<int> ip;	// 行交換の情報
+	ublasMatrix lu;
+	ublasVector x;
 
-	ip = new int[a.size1()];	// size1()==rows
+	boost::tie(det, ip, lu) = LU(a);		// LU分解
+	if(det != 0) x = LU_Solver(lu,b,ip);	// LU分解の結果を使って連立方程式を解く
 
-	det = LU(a,ip);						// LU分解
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else x = LU_Solver(a,b,ip);			// LU分解の結果を使って連立方程式を解く
-
-	delete[] ip;
-
-	return det;					// 戻り値は行列式
+	return boost::make_tuple(det, x);		// 戻り値は行列式
 }
 
 // Function: Gauss
@@ -1505,21 +1501,18 @@ double Gauss(const ublasMatrix& a, const ublasVector& b, ublasVector& x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(const ublasMatrix& a, const VCoord& b, VCoord& x)
+boost::tuple<double, VCoord> Gauss(const ublasMatrix& a, const VCoord& b)
 {
 	int n = a.size1();
-	long double det;	// 行列式
-	int *ip;			// 行交換の情報
+	long double det;		// 行列式
+	std::vector<int> ip;	// 行交換の情報
+	ublasMatrix lu;
+	VCoord x;
 
-	ip = new int[n];
+	boost::tie(det, ip, lu) = LU(a);		// LU分解
+	if(det != 0) x = LU_Solver(lu,b,ip);	// LU分解の結果を使って連立方程式を解く
 
-	det = LU(a,ip);						// LU分解
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else x = LU_Solver(a,b,ip);			// LU分解の結果を使って連立方程式を解く
-
-	delete[] ip;                   
-
-	return det;					// 戻り値は行列式
+	return boost::make_tuple(det, x);		// 戻り値は行列式
 }
 
 // Function: LU_Solver
@@ -1530,7 +1523,7 @@ double Gauss(const ublasMatrix& a, const VCoord& b, VCoord& x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺ベクトル  
 // ip - 行交換の情報
-ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, const int* ip)
+ublasVector LU_Solver(const ublasMatrix& a, const ublasVector& b, const std::vector<int>& ip)
 {
 	int n = a.size1();
 	int ii;
@@ -1563,7 +1556,7 @@ ublasVector LU_Solver(ublasMatrix& a, const ublasVector& b, const int* ip)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺Coord配列  
 // ip - 行交換の情報
-VCoord LU_Solver(const ublasMatrix& a, const VCoord& b, const int* ip)
+VCoord LU_Solver(const ublasMatrix& a, const VCoord& b, const std::vector<int>& ip)
 {
 	int n = a.size1();
 	int ii;
@@ -1604,31 +1597,28 @@ ublasMatrix MatInv(ublasMatrix& a)
 	ublasMatrix	a_inv(a.size1(),a.size2());
 	int i, j, k, ii;
 	long double t, det;
-	int *ip;		// 行交換の情報
+	std::vector<int> ip;				// 行交換の情報
+	ublasMatrix lu;
 
-	ip = new int[n];
-
-	det = LU(a,ip);		// LU分解
+	boost::tie(det, ip, lu) = LU(a);	// LU分解
 	if(det != 0){
 		for(k=0;k<n;k++){
 			for(i=0;i<n;i++){
 				ii = ip[i];
 				t = (ii==k);
 				for(j=0;j<i;j++)
-					t -= a(ii,j)*a_inv(j,k);
+					t -= lu(ii,j)*a_inv(j,k);
 				a_inv(i,k) = t;
 			}
 			for(i=n-1;i>=0;i--){
 				t = a_inv(i,k);
 				ii = ip[i];
 				for(j=i+1;j<n;j++)
-					t -= a(ii,j)*a_inv(j,k);
-				a_inv(i,k) = t/a(ii,i);
+					t -= lu(ii,j)*a_inv(j,k);
+				a_inv(i,k) = t/lu(ii,i);
 			}
 		}
 	}
-
-	delete[] ip;
 
 	return a_inv;
 }
@@ -1643,13 +1633,15 @@ ublasMatrix MatInv(ublasMatrix& a)
 //
 // Return:
 // 行列式
-double LU(ublasMatrix& a, int* ip)
+boost::tuple<long double, std::vector<int>, ublasMatrix> LU(const ublasMatrix& a)
 {
 	int n = a.size1();	// size1()==rows
 	int i, j, k, ii, ik;
 	long double t, u,
 		det = 0;				// 行列式
 	ublasVector	weight(n);		// weight[0..n-1] の記憶領域確保
+	std::vector<int> ip(n);
+	ublasMatrix ans(n,n);
 
 	for (k = 0; k < n; k++) {  /* 各行について */
 		ip[k] = k;             /* 行交換情報の初期値 */
@@ -1681,14 +1673,14 @@ double LU(ublasMatrix& a, int* ip)
 		}
 		for (i = k + 1; i < n; i++) {  /* Gauss消去法 */
 			ii = ip[i];
-			t = (a(ii,k) /= u);
+			t = (ans(ii,k) = a(ii,k) / u);
 			for (j = k + 1; j < n; j++)
-				a(ii,j) -= t * a(ik,j);
+				ans(ii,j) -= t * a(ik,j);
 		}
 	}
 
 EXIT:
-	return det;           /* 戻り値は行列式 */
+	return boost::make_tuple(det, ip, ans);           /* 戻り値は行列式 */
 }
 
 // Function: MatInv3

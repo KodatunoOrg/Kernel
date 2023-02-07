@@ -172,7 +172,7 @@ public:
 
 	// Function: IsPointInPolygon
 	// 注目点の多角形内外判別
-	int IsPointInPolygon(const Coord*, int) const;
+	int IsPointInPolygon(const VCoord&) const;
 
 	// -- 計算関数
 	// Function: AbsCoord
@@ -284,9 +284,9 @@ typedef struct{
 
 // Package: グローバルな関数の定義
 
-// Group: Functions(3次元ベクトル幾何演算)
-
-// Group: Functions(2次元ベクトル幾何演算)
+// Function: CalcPolygonArea
+// 空間上の多角形の面積を得る
+double CalcPolygonArea(const VCoord& p);
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る
@@ -295,7 +295,6 @@ double ClacPolygonArea2D(const VCoord&);
 // Function: DiscriminateCW2D
 // 2D平面上の多角形が時計回りか反時計回りかを判別する
 int DiscriminateCW2D(const VCoord&);
-
 
 // Group: Functions(同次変換行列、回転行列の演算)
 
@@ -336,23 +335,23 @@ A3Coord TranMx(const A3Coord&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める
-double Gauss(const ublasMatrix&, const ublasVector&, ublasVector&);
+boost::tuple<double, ublasVector> Gauss(const ublasMatrix&, const ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
-double Gauss(const ublasMatrix&, const VCoord&, VCoord&);
+boost::tuple<double, VCoord> Gauss(const ublasMatrix&, const VCoord&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
-ublasVector LU_Solver(const ublasMatrix&, const ublasVector&, const int*);
+ublasVector LU_Solver(const ublasMatrix&, const ublasVector&, const std::vector<int>&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
-VCoord LU_Solver(const ublasMatrix&, const VCoord&, const int*);
+VCoord LU_Solver(const ublasMatrix&, const VCoord&, const std::vector<int>&);
 
 // Function: LU
 // LU分解
-double LU(ublasMatrix&, int*);
+boost::tuple<long double, std::vector<int>, ublasMatrix> LU(const ublasMatrix&);
 
 // Function: MatInv
 // 逆行列を求める
