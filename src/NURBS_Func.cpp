@@ -245,7 +245,7 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,double T[],double W[],
 
 	return KOD_TRUE;
 }
-int NURBS_Func::GenNurbsC(NURBSC* Nurbs, int K, int M, const ublasVector& T, const ublasVector& W, Coord cp[], double V[], int prop[], int euflag)
+int NURBS_Func::GenNurbsC(NURBSC* Nurbs, int K, int M, const ublasVector& T, const ublasVector& W, const VCoord& cp, double V[], int prop[], int euflag)
 {
 	int i;
 
@@ -4364,7 +4364,7 @@ EXIT:
 //
 // Return:
 // KOD_TRUE:正常終了, KOD_FALSE:点列の始点と終点が一致していない, KOD_ERR:点列の数が1個未満
-int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
+int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs, const VCoord& P_, int PNum,int M)
 {
 	if(P_[0].DiffCoord(P_[PNum-1]) == KOD_FALSE){
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Given points P0 and Pn are not unmuched");
@@ -4383,20 +4383,21 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 
 	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
 	ublasVector T(N);				// ノットベクトル
-	Coord *P = NewCoord1(N);		// 通過点列を格納
-	Coord *Q = NewCoord1(K);		// コントロールポイント
+	VCoord P(N);					// 通過点列を格納
+	VCoord Q(K);					// コントロールポイント
 	ublasMatrix B(K,K);				// Bスプライン基底関数行列
 	ublasVector W(K);				// 重み
 
 	// 通過点列ベクトルを生成
-	for(int i=0;i<PNum;i++){
-		P[i] = P_[i];
-	}
+//	for(int i=0;i<PNum;i++){
+//		P[i] = P_[i];
+//	}
+	P = P_;			// PNum==N ?? --> K.Magara
 	P[PNum]   = 0;
-	P[PNum+1] = 0;
+	P[PNum+1] = 0;	// 添え字オーバーの保証がない --> K.Magara
 
 	// 通過点上の曲線パラメータを得る
-	T_ = GetCurveKnotParam1(P_,PNum);
+	T_ = GetCurveKnotParam1(P_);
 
 	// ノットベクトルを得る
 	for(int i=0;i<N;i++){
@@ -4427,7 +4428,8 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 	B(K-1,K-1)	= -CalcDiffBSbasisN(T_[PNum-1],T,K-1,M,2);
 
 	// コントロールポイントを得る
-	Gauss(B,P,Q);
+	double	det;
+	boost::tie(det, Q) = Gauss(B,P);
 
 	//for(int i=0;i<K;i++)
 	//	fprintf(stderr,"%lf,%lf,%lf\n",Q[i].x,Q[i].y,Q[i].z);
@@ -4443,9 +4445,6 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,Coord *P_,int PNum,int M)
 	else
 		GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);
 
-	FreeCoord1(Q);
-	FreeCoord1(P);
-	
 	return KOD_TRUE;
 }
 
@@ -6214,29 +6213,17 @@ Coord NURBS_Func::TrimNurbsSPlaneSub1(double a,double b,double x0,double y0,doub
 // *P - 通過点列   
 // PNum - 通過点列の数    
 // T_ - 曲線パラメータを格納
-void NURBS_Func::GetCurveKnotParam1(Coord *P,int PNum,Vector T_)
+ublasVector NURBS_Func::GetCurveKnotParam1(const VCoord& P)
 {
-	double d_sum=0;
-	for(int i=1;i<PNum;i++){
-		d_sum += (P[i]-P[i-1]).CalcEuclid();
-	}
-	T_[0] = 0;
-	T_[PNum-1] = 1;
-	for(int i=1;i<PNum-1;i++){
-		double d = (P[i]-P[i-1]).CalcEuclid();
-		T_[i] = T_[i-1] + d/d_sum;
-	}
-}
-ublasVector NURBS_Func::GetCurveKnotParam1(const Coord* P, int PNum)
-{
+	size_t	PNum = P.size();
 	ublasVector T_(PNum);
 	double d_sum=0;
-	for(int i=1;i<PNum;i++){
+	for(size_t i=1;i<PNum;i++){
 		d_sum += (P[i]-P[i-1]).CalcEuclid();
 	}
 	T_[0] = 0;
 	T_[PNum-1] = 1;
-	for(int i=1;i<PNum-1;i++){
+	for(size_t i=1;i<PNum-1;i++){
 		double d = (P[i]-P[i-1]).CalcEuclid();
 		T_[i] = T_[i-1] + d/d_sum;
 	}
@@ -6522,30 +6509,19 @@ ublasVector NURBS_Func::GetApproximatedKnot(const ublasVector& T_, int M, int K)
 // K - コントロールポイントの数
 // Tst - 開始ノットベクトル
 // Te - 終了ノットベクトル
-void NURBS_Func::ChangeKnotVecRange(Vector T, int N, int M, int K, double Ts, double Te)
+ublasVector NURBS_Func::ChangeKnotVecRange(const Vdouble& T, int M, int K, double Ts, double Te)
 {
-	Vector T_ = NewVector(N);
-	
-	for(int i=0;i<N;i++)
-		T_[i] = (Te-Ts)/(T[K]-T[M-1])*T[i] + (Ts*T[K]-Te*T[M-1])/(T[K]-T[M-1]);
-
-	for(int i=0;i<N;i++)
-		T[i] = T_[i];
-
-	FreeVector(T_);
-}
-ublasVector NURBS_Func::ChangeKnotVecRange2(const double* T, int N, int M, int K, double Ts, double Te)
-{
+	size_t		N = T.size();
 	ublasVector T_(N);
 	
-	for(int i=0;i<N;i++)
+	for(size_t i=0;i<N;i++)
 		T_[i] = (Te-Ts)/(T[K]-T[M-1])*T[i] + (Ts*T[K]-Te*T[M-1])/(T[K]-T[M-1]);
 
 	return T_;
 }
-ublasVector NURBS_Func::ChangeKnotVecRange2(const ublasVector& T, int M, int K, double Ts, double Te)
+ublasVector NURBS_Func::ChangeKnotVecRange(const ublasVector& T, int M, int K, double Ts, double Te)
 {
-	int		N = T.size();
+	size_t		N = T.size();
 	ublasVector T_(N);
 	
 	for(int i=0;i<N;i++)

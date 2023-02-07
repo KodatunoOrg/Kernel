@@ -63,7 +63,7 @@ public:
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
 	int GenNurbsC(NURBSC *,int,int,int,double [],double [],Coord [],double [],int[],int);	
-	int GenNurbsC(NURBSC*, int, int, const ublasVector&, const ublasVector&, Coord [], double [], int[], int);	
+	int GenNurbsC(NURBSC*, int, int, const ublasVector&, const ublasVector&, const VCoord&, double [], int[], int);	
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
@@ -319,7 +319,7 @@ public:
 
 	// Function: GenInterpolatedNurbsC2
 	// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
-	int GenInterpolatedNurbsC2(NURBSC *,Coord *,int,int);		
+	int GenInterpolatedNurbsC2(NURBSC *, const VCoord&,int,int);
 
 	// Function: GenApproximationNurbsC
 	// 与えられた点列を近似するn階のNURBS曲線を生成する
@@ -403,9 +403,8 @@ public:
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルのパラメータ定義域を変更する
-	void ChangeKnotVecRange(Vector,int,int,int,double,double);	
-	ublasVector ChangeKnotVecRange2(const double*, int, int, int, double, double);	// 2はあとで取る
-	ublasVector ChangeKnotVecRange2(const ublasVector&, int, int, double, double);
+	ublasVector ChangeKnotVecRange(const Vdouble&, int, int, double, double);
+	ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
 
 
 	int CalcExtSearchCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地探索線を得る(準備中)
@@ -579,8 +578,7 @@ private:
 
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
-	void GetCurveKnotParam1(Coord *,int,Vector);					
-	ublasVector GetCurveKnotParam1(const Coord*, int);
+	ublasVector GetCurveKnotParam1(const VCoord&);
 
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
