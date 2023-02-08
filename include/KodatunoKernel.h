@@ -95,7 +95,7 @@ typedef std::vector<VCoord>		VVCoord;
 
 // Typedef: array<Coord, 3>
 // A3Coord - Coord型の3要素固定配列をA3Coordとして定義
-typedef boost::array<Coord, COORDINDEX>	A3Coord;
+typedef boost::array<Coord, 3>	A3Coord;
 
 
 // Class: Coord 

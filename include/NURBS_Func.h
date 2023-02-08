@@ -46,19 +46,19 @@ class NURBS_Func
 public:
 	// Function: CalcNurbsCCoord
 	// 指定したtでのNURBS曲線の座標値を求める
-	Coord CalcNurbsCCoord(NURBSC *,double);
+	Coord CalcNurbsCCoord(const NURBSC*, double);
 
 	// Function: CalcNurbsCCoords
 	// 指定したt群でのNURBS曲線の座標値群を求める
-	void CalcNurbsCCoords(NURBSC *,int,double *,Coord *);		
+	VCoord CalcNurbsCCoords(const NURBSC*, const Vdouble&);
 
 	// Function: CalcNurbsSCoord
 	// 指定したu,vでのNURBS曲面の座標点を求める
-	Coord CalcNurbsSCoord(NURBSS *,double,double);				
+	Coord CalcNurbsSCoord(const NURBSS*, double, double);
 
 	// Function: CalcNurbsSCoords
 	// 指定したu,v群でのNURBS曲面の座標値群を求める
-	void CalcNurbsSCoords(NURBSS *,int,Coord *,Coord *);		
+	VCoord CalcNurbsSCoords(const NURBSS*, const VCoord&);		
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
@@ -98,43 +98,43 @@ public:
 
 	// Function: CalcDiffNurbsC
 	// NURBS曲線の1階微分係数を求める
-	Coord CalcDiffNurbsC(NURBSC *,double);						
+	Coord CalcDiffNurbsC(const NURBSC*, double);
 
 	// Function: CalcDiff2NurbsC
 	// NURBS曲線の2階微分係数を求める
-	Coord CalcDiff2NurbsC(NURBSC *,double);						
+	Coord CalcDiff2NurbsC(const NURBSC*, double);						
 
 	// Function: CalcDiffNNurbsC
 	// NURBS曲線のr階微分係数を求める
-	Coord CalcDiffNNurbsC(NURBSC *,int,double);					
+	Coord CalcDiffNNurbsC(const NURBSC*, int, double);
 
 	// Function: CalcDiffuNurbsS
 	// NURBS曲面のu方向1階微分係数を求める
-	Coord CalcDiffuNurbsS(NURBSS *,double,double);				
+	Coord CalcDiffuNurbsS(const NURBSS*, double, double);
 
 	// Function: CalcDiffvNurbsS
 	// NURBS曲面のv方向1階微分係数を求める
-	Coord CalcDiffvNurbsS(NURBSS *,double,double);				
+	Coord CalcDiffvNurbsS(const NURBSS*, double, double);
 
 	// Function: CalcDiffNNurbsS
 	// NURBS曲面の各方向を任意階微分したときの微分係数を求める
-	Coord CalcDiffNNurbsS(NURBSS *,int,int,double,double);		
+	Coord CalcDiffNNurbsS(const NURBSS*, int, int, double, double);
 
 	// Function: CalcNormVecOnNurbsS
 	// NURBS曲面上の(u,v)における法線ベクトルをもとめる
-	Coord CalcNormVecOnNurbsS(NURBSS *,double,double);			
+	Coord CalcNormVecOnNurbsS(const NURBSS*, double, double);
 
 	// Function: CalcDiffuNormVecOnNurbsS
 	// NURBS曲面上の(u,v)における法線ベクトルのu方向1階微分をもとめる
-	Coord CalcDiffuNormVecOnNurbsS(NURBSS *,double,double);		
+	Coord CalcDiffuNormVecOnNurbsS(const NURBSS*, double, double);
 
 	// Function: CalcDiffvNormVecOnNurbsS
 	// NURBS曲面上の(u,v)における法線ベクトルのv方向1階微分をもとめる
-	Coord CalcDiffvNormVecOnNurbsS(NURBSS *,double,double);		
+	Coord CalcDiffvNormVecOnNurbsS(const NURBSS*, double, double);
 
 	// Function: CalcMeanCurvature
 	// NURBS曲面上の(u,v)における平均曲率を求める
-	double CalcMeanCurvature(NURBSS *,double,double);			
+	double CalcMeanCurvature(const NURBSS*, double, double);
 
 	// Function: CalcMeanCurvature
 	// オーバーロード
@@ -420,7 +420,7 @@ public:
 
 	// Function: CalcTanVecOnNurbsC
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる
-	Coord CalcTanVecOnNurbsC(NURBSC *,double);					
+	Coord CalcTanVecOnNurbsC(const NURBSC*, double);
 
 	// Function: ConnectNurbsSU
 	// 2枚のNURBS曲面を連結する(U方向に長くなる)(S1_U1とS2_U0を連結)
@@ -557,11 +557,11 @@ private:
 
 	// Function: CalcDiffNurbsSDenom
 	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
-	double CalcDiffNurbsSDenom(NURBSS *,int,int,double,double);		
+	double CalcDiffNurbsSDenom(const NURBSS*, int, int, double, double);
 
 	// Function: CalcDiffNurbsSNumer
 	// (private)NURBS曲面分子の各方向を任意階微分したときの微分係数を求める
-	Coord CalcDiffNurbsSNumer(NURBSS *,int,int,double,double);		
+	Coord CalcDiffNurbsSNumer(const NURBSS*, int, int, double, double);
 
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)

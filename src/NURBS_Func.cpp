@@ -448,7 +448,7 @@ int NURBS_Func::DelTrimdNurbsS(TRIMD_NURBSS *TNurbs)
 //
 // Return:
 // 座標値
-Coord NURBS_Func::CalcNurbsCCoord(NURBSC *NurbsC,double t)
+Coord NURBS_Func::CalcNurbsCCoord(const NURBSC* NurbsC, double t)
 {
 	Coord p;
 	Coord bscpw;
@@ -456,8 +456,8 @@ Coord NURBS_Func::CalcNurbsCCoord(NURBSC *NurbsC,double t)
 	double bs=0;
 	int i;
 
-	for(i=0;i<NurbsC->K;i++){
-		bs = CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);	// Bスプライン基底関数を求める
+	for(i=0;i<NurbsC->W.size();i++){
+		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);	// Bスプライン基底関数を求める
 		bsw += bs*NurbsC->W[i];									// 分母
 		bscpw += NurbsC->cp[i] * (bs*NurbsC->W[i]);				// 分子
 	}
@@ -475,11 +475,13 @@ Coord NURBS_Func::CalcNurbsCCoord(NURBSC *NurbsC,double t)
 // Ptnum - 求める点群の数   
 // *T - tパラメータ群を格納した配列
 // *Pt - 実座標値を格納
-void NURBS_Func::CalcNurbsCCoords(NURBSC *NurbsC,int Ptnum,double *T,Coord *Pt)
+VCoord NURBS_Func::CalcNurbsCCoords(const NURBSC* NurbsC, const Vdouble& T)
 {
-	for(int i=0;i<Ptnum;i++){
-		Pt[i] = CalcNurbsCCoord(NurbsC,T[i]);
+	VCoord	Pt;
+	for(size_t i=0; i<T.size(); i++){
+		Pt.push_back(CalcNurbsCCoord(NurbsC, T[i]));
 	}
+	return Pt;
 }
 
 // Function: CalcNurbsSCoord
@@ -492,19 +494,20 @@ void NURBS_Func::CalcNurbsCCoords(NURBSC *NurbsC,int Ptnum,double *T,Coord *Pt)
 //
 // Return:
 // 座標値
-Coord NURBS_Func::CalcNurbsSCoord(NURBSS *NurbsS,double div_u,double div_v)
+Coord NURBS_Func::CalcNurbsSCoord(const NURBSS* NurbsS, double div_u, double div_v)
 {
-	int i,j;
+	int i,j,
+		K[] = {NurbsS->W.size1(), NurbsS->W.size2()};
 	double bs_u,bs_v;		// u,v方向Bスプライン基底関数
 	double bsw=0;			// 分母
 	Coord bscpw;			// 分子
 
-	for(i=0;i<NurbsS->K[0];i++){
-		bs_u = CalcBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);			// u方向Bスプライン基底関数を求める
-		for(j=0;j<NurbsS->K[1];j++){
-			bs_v = CalcBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);		// v方向Bスプライン基底関数を求める
-			bsw += bs_u*bs_v*NurbsS->W[i][j];
-			bscpw += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W[i][j]);
+	for(i=0;i<K[0];i++){
+		bs_u = CalcBSbasis(div_u, NurbsS->S, i, NurbsS->M[0]);			// u方向Bスプライン基底関数を求める
+		for(j=0;j<K[1];j++){
+			bs_v = CalcBSbasis(div_v, NurbsS->T, j, NurbsS->M[1]);		// v方向Bスプライン基底関数を求める
+			bsw += bs_u*bs_v*NurbsS->W(i,j);
+			bscpw += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W(i,j));
 		}
 	}
 
@@ -519,11 +522,13 @@ Coord NURBS_Func::CalcNurbsSCoord(NURBSS *NurbsS,double div_u,double div_v)
 // Ptnum - 求める点群の数   
 // *UV - u,vパラメータ群を格納したCoord型配列(UV[].xにu方向、UV[].ｙにV方向のパラメータを格納しておくこと)
 // *Pt - 実座標値を格納
-void NURBS_Func::CalcNurbsSCoords(NURBSS *NurbsS,int Ptnum,Coord *UV,Coord *Pt)
+VCoord NURBS_Func::CalcNurbsSCoords(const NURBSS* NurbsS, const VCoord& UV)
 {
-	for(int i=0;i<Ptnum;i++){
-		Pt[i] = CalcNurbsSCoord(NurbsS,UV[i].x,UV[i].y);
+	VCoord	Pt;
+	for(size_t i=0; i<UV.size(); i++){
+		Pt.push_back(CalcNurbsSCoord(NurbsS, UV[i].x, UV[i].y));
 	}
+	return Pt;
 }
 
 // Function: CalcBSbasis
@@ -637,21 +642,20 @@ double NURBS_Func::CalcDiffBSbasisN(double t, const ublasVector& knot, int I, in
 //
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffNurbsC(NURBSC *NurbsC,double t)
+Coord NURBS_Func::CalcDiffNurbsC(const NURBSC* NurbsC, double t)
 {
 	Coord Ft,diff_Ft;		// NURBS曲線の分子
 	double Gt,diff_Gt;		// NURBS曲線の分母
 	double bs,diff_bs;		// Bスプライン基底関数
-//	Coord p;
 	int i;
 
 	Gt = 0;
 	diff_Gt = 0;
 
 	// 各係数算出
-	for(i=0;i<NurbsC->K;i++){
-		bs = CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
-		diff_bs = CalcDiffBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
+	for(i=0;i<NurbsC->W.size();i++){
+		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
+		diff_bs = CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M);
 
 		Ft += NurbsC->cp[i] * (bs*NurbsC->W[i]);
 		diff_Ft += NurbsC->cp[i] * (diff_bs*NurbsC->W[i]);
@@ -662,7 +666,6 @@ Coord NURBS_Func::CalcDiffNurbsC(NURBSC *NurbsC,double t)
 	if(fabs(Gt) < APPROX_ZERO)	return(Coord());
 
 	// 1階微分を求める
-//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
 	return (diff_Ft / Gt) - ((Ft*diff_Gt)/(Gt*Gt));
 }
 
@@ -675,7 +678,7 @@ Coord NURBS_Func::CalcDiffNurbsC(NURBSC *NurbsC,double t)
 //
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
+Coord NURBS_Func::CalcDiff2NurbsC(const NURBSC* NurbsC, double t)
 {
 	double w0=0;
 	double w1=0;
@@ -687,14 +690,13 @@ Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
 	P0 = CalcNurbsCCoord(NurbsC,t);
 	P1 = CalcDiffNurbsC(NurbsC,t);
 
-	for(int i=0;i<NurbsC->K;i++){
-		w0 += CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M) * NurbsC->W[i];
-		w1 += CalcDiffBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M) * NurbsC->W[i];
-		w2 += CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,2) * NurbsC->W[i];
-		A2 += NurbsC->cp[i] * (CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,2) * NurbsC->W[i]);
+	for(int i=0;i<NurbsC->W.size();i++){
+		w0 += CalcBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
+		w1 += CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
+		w2 += CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i];
+		A2 += NurbsC->cp[i] * (CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i]);
 	}
 
-//	return DivCoord(SubCoord(A2,AddCoord(MulCoord(P1,2*w1),MulCoord(P0,2*w2))),w0);
 	return (A2-((P1*2*w1)+(P0*2*w2)))/w0;
 }
 
@@ -708,32 +710,29 @@ Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
 //
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffNNurbsC(NURBSC *NurbsC,int r,double t)
+Coord NURBS_Func::CalcDiffNNurbsC(const NURBSC* NurbsC, int r, double t)
 {
-	if(!r)
-		return CalcNurbsCCoord(NurbsC,t);
+	if(!r) return CalcNurbsCCoord(NurbsC,t);
 
 	Coord Ar;
 	double W = 0;
-	for(int i=0;i<NurbsC->K;i++){
-		double bsr = CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,r);
+	for(int i=0;i<NurbsC->W.size();i++){
+		double bsr = CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,r);
 		Ar += NurbsC->cp[i] * (bsr*NurbsC->W[i]);
-		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
+		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
 	}
 
 	Coord Br;
 	for(int i=1;i<=r;i++){
 		double Wi = 0;
-		for(int j=0;j<NurbsC->K;j++){
-			double bsi = CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,j,NurbsC->M,i);
+		for(int j=0;j<NurbsC->W.size();j++){
+			double bsi = CalcDiffBSbasisN(t,NurbsC->T,j,NurbsC->M,i);
 			Wi += bsi*NurbsC->W[j];
 		}
 		if(Wi == 0.0)  return(Coord());
-//		Br = AddCoord(Br,MulCoord(CalcDiffNNurbsC(NurbsC,r-i,t),(double)nCr(r,i)*Wi));	// 回帰
 		Br += CalcDiffNNurbsC(NurbsC,r-i,t) * ((double)nCr(r,i)*Wi);	// 回帰
 	}
 
-//	return (DivCoord(SubCoord(Ar,Br),W));
 	return (Ar-Br)/W;
 }
 
@@ -747,34 +746,33 @@ Coord NURBS_Func::CalcDiffNNurbsC(NURBSC *NurbsC,int r,double t)
 // 
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffuNurbsS(NURBSS *NurbsS,double div_u,double div_v)
+Coord NURBS_Func::CalcDiffuNurbsS(const NURBSS* NurbsS, double div_u, double div_v)
 {
-	int i,j;
+	int i,j,
+		K[] = {NurbsS->W.size1(), NurbsS->W.size2()};
 	Coord Ft,diff_Ft;
 	double Gt,diff_Gt;
 	double bs_u,bs_v;		// u,v方向Bスプライン基底関数
 	double diff_bs_u;
-//	Coord p;
 
 	Gt = 0;
 	diff_Gt = 0;
 
-	for(i=0;i<NurbsS->K[0];i++){
-		bs_u = CalcBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
-		diff_bs_u = CalcDiffBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);	// u方向Bスプライン基底関数の1階微分を求める
-		for(j=0;j<NurbsS->K[1];j++){
-			bs_v = CalcBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);			// v方向Bスプライン基底関数を求める
-			Ft += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W[i][j]);
-			diff_Ft += NurbsS->cp[i][j] * (diff_bs_u*bs_v*NurbsS->W[i][j]);
-			Gt += bs_u*bs_v*NurbsS->W[i][j];
-			diff_Gt += diff_bs_u*bs_v*NurbsS->W[i][j];
+	for(i=0;i<K[0];i++){
+		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
+		diff_bs_u = CalcDiffBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);	// u方向Bスプライン基底関数の1階微分を求める
+		for(j=0;j<K[1];j++){
+			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);			// v方向Bスプライン基底関数を求める
+			Ft += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W(i,j));
+			diff_Ft += NurbsS->cp[i][j] * (diff_bs_u*bs_v*NurbsS->W(i,j));
+			Gt += bs_u*bs_v*NurbsS->W(i,j);
+			diff_Gt += diff_bs_u*bs_v*NurbsS->W(i,j);
 		}
 	}
 
 	if(fabs(Gt) < APPROX_ZERO_H)	return(Coord());
 
 	// 1階微分を求める
-//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
 	return (diff_Ft/Gt)-((Ft*diff_Gt)/(Gt*Gt));
 }
 
@@ -788,34 +786,33 @@ Coord NURBS_Func::CalcDiffuNurbsS(NURBSS *NurbsS,double div_u,double div_v)
 // 
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffvNurbsS(NURBSS *NurbsS,double div_u,double div_v)
+Coord NURBS_Func::CalcDiffvNurbsS(const NURBSS* NurbsS, double div_u, double div_v)
 {
-	int i,j;
+	int i,j,
+		K[] = {NurbsS->W.size1(), NurbsS->W.size2()};
 	Coord Ft,diff_Ft;
 	double Gt,diff_Gt;
 	double bs_u,bs_v;		// u,v方向Bスプライン基底関数
 	double diff_bs_v;
-//	Coord p;
 
 	Gt = 0;
 	diff_Gt = 0;
 
-	for(i=0;i<NurbsS->K[0];i++){
-		bs_u = CalcBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
-		for(j=0;j<NurbsS->K[1];j++){
-			bs_v = CalcBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);				// v方向Bスプライン基底関数を求める
-			diff_bs_v = CalcDiffBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);	// v方向Bスプライン基底関数の1階微分を求める
-			Ft += NurbsS->cp[i][j]*(bs_u*bs_v*NurbsS->W[i][j]);
-			diff_Ft += NurbsS->cp[i][j]*(bs_u*diff_bs_v*NurbsS->W[i][j]);
-			Gt += bs_u*bs_v*NurbsS->W[i][j];
-			diff_Gt += bs_u*diff_bs_v*NurbsS->W[i][j];
+	for(i=0;i<K[0];i++){
+		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
+		for(j=0;j<K[1];j++){
+			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);				// v方向Bスプライン基底関数を求める
+			diff_bs_v = CalcDiffBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);	// v方向Bスプライン基底関数の1階微分を求める
+			Ft += NurbsS->cp[i][j]*(bs_u*bs_v*NurbsS->W(i,j));
+			diff_Ft += NurbsS->cp[i][j]*(bs_u*diff_bs_v*NurbsS->W(i,j));
+			Gt += bs_u*bs_v*NurbsS->W(i,j);
+			diff_Gt += bs_u*diff_bs_v*NurbsS->W(i,j);
 		}
 	}
 
 	if(fabs(Gt) < APPROX_ZERO_H)	return(Coord());
 
 	// 1階微分を求める
-//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
 	return (diff_Ft/Gt)-((Ft*diff_Gt)/(Gt*Gt));
 }
 
@@ -830,7 +827,7 @@ Coord NURBS_Func::CalcDiffvNurbsS(NURBSS *NurbsS,double div_u,double div_v)
 // 
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffNNurbsS(NURBSS *S,int k,int l,double u,double v)
+Coord NURBS_Func::CalcDiffNNurbsS(const NURBSS* S, int k, int l, double u, double v)
 {
 	double w = CalcDiffNurbsSDenom(S,0,0,u,v);
 	Coord  A = CalcDiffNurbsSNumer(S,k,l,u,v);
@@ -851,7 +848,6 @@ Coord NURBS_Func::CalcDiffNNurbsS(NURBSS *S,int k,int l,double u,double v)
 		}
 		D *= nCr(k,i);
 	}
-//	return(DivCoord(SubCoord(A,AddCoord(B,AddCoord(C,D))),w));
 	return (A-(B+C+D))/w;
 }
 
@@ -866,14 +862,15 @@ Coord NURBS_Func::CalcDiffNNurbsS(NURBSS *S,int k,int l,double u,double v)
 // 
 // Return:
 // 計算結果
-double NURBS_Func::CalcDiffNurbsSDenom(NURBSS *S,int k,int l,double u,double v)
+double NURBS_Func::CalcDiffNurbsSDenom(const NURBSS* S, int k, int l, double u, double v)
 {
 	double w=0;
-	for(int i=0;i<S->K[0];i++){
-		double Nk = CalcDiffBSbasisN(u,S->S,S->N[0],i,S->M[0],k);		// u方向のk階微分
-		for(int j=0;j<S->K[1];j++){
-			double Nl = CalcDiffBSbasisN(v,S->T,S->N[1],j,S->M[1],l);	// v方向のl階微分
-			w += Nk*Nl*S->W[i][j];
+	int	K[] = {S->W.size1(), S->W.size2()};
+	for(int i=0;i<K[0];i++){
+		double Nk = CalcDiffBSbasisN(u,S->S,i,S->M[0],k);		// u方向のk階微分
+		for(int j=0;j<K[1];j++){
+			double Nl = CalcDiffBSbasisN(v,S->T,j,S->M[1],l);	// v方向のl階微分
+			w += Nk*Nl*S->W(i,j);
 		}
 	}
 	return w;
@@ -890,14 +887,15 @@ double NURBS_Func::CalcDiffNurbsSDenom(NURBSS *S,int k,int l,double u,double v)
 // 
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffNurbsSNumer(NURBSS *S,int k,int l,double u,double v)
+Coord NURBS_Func::CalcDiffNurbsSNumer(const NURBSS* S, int k, int l, double u, double v)
 {
 	Coord A;
-	for(int i=0;i<S->K[0];i++){
-		double Nk = CalcDiffBSbasisN(u,S->S,S->N[0],i,S->M[0],k);		// u方向のk階微分
-		for(int j=0;j<S->K[1];j++){
-			double Nl = CalcDiffBSbasisN(v,S->T,S->N[1],j,S->M[1],l);	// v方向のl階微分
-			A += S->cp[i][j]*(Nk*Nl*S->W[i][j]);
+	int	K[] = {S->W.size1(), S->W.size2()};
+	for(int i=0;i<K[0];i++){
+		double Nk = CalcDiffBSbasisN(u,S->S,i,S->M[0],k);		// u方向のk階微分
+		for(int j=0;j<K[1];j++){
+			double Nl = CalcDiffBSbasisN(v,S->T,j,S->M[1],l);	// v方向のl階微分
+			A += S->cp[i][j]*(Nk*Nl*S->W(i,j));
 		}
 	}
 	return A;
@@ -913,12 +911,11 @@ Coord NURBS_Func::CalcDiffNurbsSNumer(NURBSS *S,int k,int l,double u,double v)
 //
 // Retrurn:
 // 計算結果
-Coord NURBS_Func::CalcNormVecOnNurbsS(NURBSS *nurb,double u,double v)
+Coord NURBS_Func::CalcNormVecOnNurbsS(const NURBSS* nurb, double u, double v)
 {
 	Coord a = CalcDiffuNurbsS(nurb,u,v);
 	Coord b = CalcDiffvNurbsS(nurb,u,v);
 
-//	return(NormalizeVec(CalcOuterProduct(a,b)));
 	return (a&&b).NormalizeVec();
 }
 
@@ -931,9 +928,8 @@ Coord NURBS_Func::CalcNormVecOnNurbsS(NURBSS *nurb,double u,double v)
 //
 // Retrurn:
 // 計算結果
-Coord NURBS_Func::CalcTanVecOnNurbsC(NURBSC *C,double t)
+Coord NURBS_Func::CalcTanVecOnNurbsC(const NURBSC* C, double t)
 {
-//	return NormalizeVec(CalcDiffNurbsC(C,t));
     return CalcDiffNurbsC(C,t).NormalizeVec();
 }
 
@@ -948,14 +944,13 @@ Coord NURBS_Func::CalcTanVecOnNurbsC(NURBSC *C,double t)
 //
 // Retrurn:
 // 計算結果
-Coord NURBS_Func::CalcDiffuNormVecOnNurbsS(NURBSS *nurb,double u,double v)
+Coord NURBS_Func::CalcDiffuNormVecOnNurbsS(const NURBSS* nurb, double u, double v)
 {
 	Coord Suu = CalcDiffNNurbsS(nurb,2,0,u,v);
 	Coord Suv = CalcDiffNNurbsS(nurb,1,1,u,v);
 	Coord Su = CalcDiffuNurbsS(nurb,u,v);
 	Coord Sv = CalcDiffvNurbsS(nurb,u,v);
 
-//	return (NormalizeVec(AddCoord(CalcOuterProduct(Suu,Sv),CalcOuterProduct(Su,Suv))));
 	return ((Suu&&Sv)+(Su&&Suv)).NormalizeVec();
 }
 
@@ -970,14 +965,13 @@ Coord NURBS_Func::CalcDiffuNormVecOnNurbsS(NURBSS *nurb,double u,double v)
 //
 // Retrurn:
 // 計算結果
-Coord NURBS_Func::CalcDiffvNormVecOnNurbsS(NURBSS *nurb,double u,double v)
+Coord NURBS_Func::CalcDiffvNormVecOnNurbsS(const NURBSS* nurb, double u, double v)
 {
 	Coord Suv = CalcDiffNNurbsS(nurb,1,1,u,v);
 	Coord Svv = CalcDiffNNurbsS(nurb,0,2,u,v);
 	Coord Su = CalcDiffuNurbsS(nurb,u,v);
 	Coord Sv = CalcDiffvNurbsS(nurb,u,v);
 
-//	return (NormalizeVec(AddCoord(CalcOuterProduct(Suv,Sv),CalcOuterProduct(Su,Svv))));
 	return ((Suv&&Sv)+(Su&&Svv)).NormalizeVec();
 }
 
@@ -991,7 +985,7 @@ Coord NURBS_Func::CalcDiffvNormVecOnNurbsS(NURBSS *nurb,double u,double v)
 //
 // Retrurn:
 // 計算結果
-double NURBS_Func::CalcMeanCurvature(NURBSS *nurb,double u,double v)
+double NURBS_Func::CalcMeanCurvature(const NURBSS* nurb, double u, double v)
 {
 	Coord du = CalcDiffuNurbsS(nurb,u,v);			// u方向1階微分
 	Coord dv = CalcDiffvNurbsS(nurb,u,v);			// v方向1階微分
