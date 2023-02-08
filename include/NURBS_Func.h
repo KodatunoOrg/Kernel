@@ -138,23 +138,23 @@ public:
 
 	// Function: CalcMeanCurvature
 	// オーバーロード
-	double CalcMeanCurvature(SFQuant);							
+	double CalcMeanCurvature(const SFQuant&);
 
 	// Function: CalcMeanCurvatureNormVec
 	// NURBS曲面上の(u,v)における平均曲率法線ベクトルを求める
-	Coord CalcMeanCurvatureNormVec(NURBSS *,double,double);		
+	Coord CalcMeanCurvatureNormVec(const NURBSS*, double, double);
 
 	// Function: CalcGaussCurvature
 	// NURBS曲面上の(u,v)におけるガウス曲率を求める
-	double CalcGaussCurvature(NURBSS *,double,double);			
+	double CalcGaussCurvature(const NURBSS*, double, double);
 
 	// Function: CalcGaussCurvature
 	// オーバーロード
-	double CalcGaussCurvature(SFQuant);							
+	double CalcGaussCurvature(const SFQuant&);
 
 	// Function: CalcGaussCurvatureNormVec
 	// NURBS曲面上の(u,v)におけるガウス曲率法線ベクトルを求める
-	Coord CalcGaussCurvatureNormVec(NURBSS *,double,double);	
+	Coord CalcGaussCurvatureNormVec(const NURBSS*, double, double);
 
 	// Function: CalcuIntersecPtNurbsLine
 	// NURBS曲面と直線の交点を算出
@@ -194,7 +194,7 @@ public:
 
 	// Function: CalcIntersecPtsPlaneV3
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
-	int CalcIntersecPtsPlaneV3(NURBSS *,Coord,Coord,int,Coord *,int);	
+	VCoord CalcIntersecPtsPlaneV3(const NURBSS*, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneU3
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
@@ -246,15 +246,15 @@ public:
 
 	// Function: GetBSplCoef3
 	// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
-	ublasMatrix GetBSplCoef3(int,int,int,double *);
+	ublasMatrix GetBSplCoef3(int, int, int, const ublasVector&);
 
 	// Function: GetBSplCoef2
 	// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
-	ublasMatrix GetBSplCoef2(int,int,int,double *);
+	ublasMatrix GetBSplCoef2(int, int, int, const ublasVector&);
 
 	// Function: GetBSplCoef1
 	// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
-	ublasMatrix GetBSplCoef1(int,int,int,double *);
+	ublasMatrix GetBSplCoef1(int, int, int, const ublasVector&);
 
 	// Function: ShiftNurbsS
 	// NURBS曲面のシフト
@@ -338,7 +338,7 @@ public:
 
 	// Function: DetectInterfereNurbsS
 	// NURBS曲面(トリム無)同士の干渉検出
-	int DetectInterfereNurbsS(NURBSS *,NURBSS *,int);				
+	int DetectInterfereNurbsS(const NURBSS*, const NURBSS*, int);
 
 	// Function: DetectInterfereTrmS
 	// NURBS曲面(トリム有)同士の干渉検出
@@ -432,7 +432,7 @@ public:
 
 	// Function: CalcCurvatureNurbsC
 	// NURBS曲線の曲率を求める
-	double CalcCurvatureNurbsC(NURBSC *,double);				
+	double CalcCurvatureNurbsC(const NURBSC*, double);
 
 
 //	double CalcTorsionNurbsC(NURBSC *,double);					// NURBS曲線の捩率を求める
@@ -481,15 +481,15 @@ private:
 
 	// Function: CalcEquation
 	// (private)3次方程式までを判別して解く
-	int CalcEquation(double *,double *,int);					
+	boost::tuple<int, Vdouble> CalcEquation(int, const Vdouble&);
 
 	// Function: GetNurbsSCoef
 	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める
-	void GetNurbsSCoef(int, const ublasMatrix&,double *,Coord *,int,Coord *,double *);	
+	boost::tuple<VCoord, Vdouble> GetNurbsSCoef(int, const ublasMatrix&, const Vdouble&, const VCoord&, int);
 
 	// Function: GetIntersecEquation
 	// (private)NURBS曲線と平面の交線導出用3次方程式を得る
-	void GetIntersecEquation(int,Coord *,double *,Coord,Coord,double *);		
+	Vdouble GetIntersecEquation(int, const VCoord&, const Vdouble&, const Coord&, const Coord&);
 
 	// Function: SearchIntersectPt
 	// (private)ニュートン法により交点を収束させる(NURBS曲面と平面)

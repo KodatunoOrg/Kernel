@@ -878,7 +878,7 @@ boost::tuple<int, A3double> CalcCubicEquation(const A4double& p)
 // *ans - 2つの解
 //
 // Return:
-// 解が実根の場合は2、虚根の場合はKOD_ERR  a[0]==0の場合はKOD_ERR
+// 解が実根の場合は2、虚根の場合はKOD_ERR  a[0]==0の場合はKOD_ERR -> 解の数に変更
 boost::tuple<int, A2double> CalcQuadraticEquation(const A3double& a)
 {
 	if(fabs(a[0]) < APPROX_ZERO_H){
@@ -889,14 +889,14 @@ boost::tuple<int, A2double> CalcQuadraticEquation(const A3double& a)
 			return boost::make_tuple(1, a2);
 		}
 		else {
-			return boost::make_tuple(KOD_ERR, A2double());
+			return boost::make_tuple(0, A2double());
 		}
 	}
 
 	double Q = a[1]*a[1] - 4*a[0]*a[2];
 
 	if(Q<0){
-		return boost::make_tuple(KOD_ERR, A2double());
+		return boost::make_tuple(0, A2double());
 	}
 
 	A2double	ans;

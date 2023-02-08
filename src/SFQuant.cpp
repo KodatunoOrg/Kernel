@@ -15,7 +15,7 @@ SFQuant::SFQuant()
 // Parameters:
 // *S - NURBS曲面へのポインタ
 // u,v - (u, v)パラメータ
-SFQuant::SFQuant(NURBSS *S,double u,double v)
+SFQuant::SFQuant(const NURBSS* S, double u, double v)
 {
 	NURBS_Func nf;
 	U = u;
@@ -41,7 +41,7 @@ SFQuant::SFQuant(NURBSS *S,double u,double v)
 // Parameters:
 // *S - NURBS曲面へのポインタ
 // u,v - (u, v)パラメータ
-int SFQuant::SetSFQ(NURBSS *S,double u,double v)
+int SFQuant::SetSFQ(const NURBSS* S, double u, double v)
 {	
 	NURBS_Func nf;
 	U = u;
@@ -68,7 +68,7 @@ int SFQuant::SetSFQ(NURBSS *S,double u,double v)
 // Parameters:
 // *S - NURBS曲面へのポインタ
 // u,v - (u, v)パラメータ
-int SFQuant::SetSFQ1(NURBSS *S,double u,double v)
+int SFQuant::SetSFQ1(const NURBSS* S, double u, double v)
 {
     NURBS_Func nf;
     U = u;

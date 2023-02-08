@@ -1012,7 +1012,7 @@ double NURBS_Func::CalcMeanCurvature(const NURBSS* nurb, double u, double v)
 //
 // Retrurn:
 // 計算結果
-double NURBS_Func::CalcMeanCurvature(SFQuant q)
+double NURBS_Func::CalcMeanCurvature(const SFQuant& q)
 {
 	return -(q.G*q.L+q.E*q.N-2*q.F*q.M)/(q.E*q.G-q.F*q.F)/2;		// 平均曲率
 }
@@ -1027,7 +1027,7 @@ double NURBS_Func::CalcMeanCurvature(SFQuant q)
 //
 // Retrurn:
 // 計算結果
-Coord NURBS_Func::CalcMeanCurvatureNormVec(NURBSS *nurb,double u,double v)
+Coord NURBS_Func::CalcMeanCurvatureNormVec(const NURBSS* nurb, double u, double v)
 {
 	Coord n = CalcNormVecOnNurbsS(nurb,u,v);		// 法線ベクトル
 	Coord Hn = n * CalcMeanCurvature(nurb,u,v);		// 平均曲率法線ベクトル
@@ -1045,7 +1045,7 @@ Coord NURBS_Func::CalcMeanCurvatureNormVec(NURBSS *nurb,double u,double v)
 //
 // Retrurn:
 // 計算結果
-double NURBS_Func::CalcGaussCurvature(NURBSS *nurb,double u,double v)
+double NURBS_Func::CalcGaussCurvature(const NURBSS* nurb, double u, double v)
 {
 	Coord du = CalcDiffuNurbsS(nurb,u,v);			// u方向1階微分
 	Coord dv = CalcDiffvNurbsS(nurb,u,v);			// v方向1階微分
@@ -1072,7 +1072,7 @@ double NURBS_Func::CalcGaussCurvature(NURBSS *nurb,double u,double v)
 //
 // Retrurn:
 // 計算結果
-double NURBS_Func::CalcGaussCurvature(SFQuant q)
+double NURBS_Func::CalcGaussCurvature(const SFQuant& q)
 {
 	return (q.L*q.N-q.M*q.M)/(q.E*q.G-q.F*q.F);					// ガウス曲率
 }
@@ -1087,7 +1087,7 @@ double NURBS_Func::CalcGaussCurvature(SFQuant q)
 //
 // Retrurn:
 // 計算結果
-Coord NURBS_Func::CalcGaussCurvatureNormVec(NURBSS *nurb,double u,double v)
+Coord NURBS_Func::CalcGaussCurvatureNormVec(const NURBSS* nurb, double u, double v)
 {
 	SFQuant q(nurb,u,v);
 	return q.n * CalcGaussCurvature(q);		// ガウス曲率法線ベクトル
@@ -1102,12 +1102,11 @@ Coord NURBS_Func::CalcGaussCurvatureNormVec(NURBSS *nurb,double u,double v)
 //
 // Retrurn:
 // 計算結果
-double NURBS_Func::CalcCurvatureNurbsC(NURBSC *C,double t)
+double NURBS_Func::CalcCurvatureNurbsC(const NURBSC* C, double t)
 {
 	Coord p_ = CalcDiffNurbsC(C,t);
 	Coord p__ = CalcDiff2NurbsC(C,t);
 
-//	return(CalcEuclid(CalcOuterProduct(p_,p__))/pow(CalcEuclid(p_),3));
 	return (p_&&p__).CalcEuclid()/pow(p_.CalcEuclid(),3);
 }
 
@@ -1121,7 +1120,7 @@ double NURBS_Func::CalcCurvatureNurbsC(NURBSC *C,double t)
 // 
 // Return:
 // 干渉有:KOD_TRUE, 干渉無:KOD_FALSE
-int NURBS_Func::DetectInterfereNurbsS(NURBSS *nurbR,NURBSS *nurbS,int divnum)
+int NURBS_Func::DetectInterfereNurbsS(const NURBSS* nurbR, const NURBSS* nurbS, int divnum)
 {
 	// 各曲面を指定の分割数でuv分割し、それらの点における補助平面を生成して交線上の任意の1点に収束させる
 	for(int w=0;w<divnum;w++){
@@ -1308,78 +1307,66 @@ int NURBS_Func::DetectInterfereTrmS(TRIMD_NURBSS *tNurbR,TRIMD_NURBSS *tNurbS,in
 //
 // Return:
 // 交点の個数(交点の数がans_sizeを超えた場合：KOD_ERR)
-int NURBS_Func::CalcIntersecPtsPlaneV3(NURBSS *nurb,Coord pt,Coord nvec,int v_divnum,Coord *ans,int ans_size)
+VCoord NURBS_Func::CalcIntersecPtsPlaneV3(const NURBSS* nurb, const Coord& pt, const Coord& nvec, int v_divnum)
 {
+	VCoord ans;
 	double v_const;			// 定数と置いたときのvパラメータ
-	double *N;				// Bスプライン基底関数の計算値を格納
-	double *A;
-	Coord  *B;
-	double Q[4];
-	Coord  P[4];
-	double a[4];
-	double t[3];
-	int ansnum;
-	int allansnum=0;
+	Vdouble N;				// Bスプライン基底関数の計算値を格納
+	Vdouble A;
+	VCoord  B;
+	Vdouble Q;
+	VCoord  P;
+	Vdouble a;
+	Vdouble t;
+	int	num, K[] = {nurb->W.size1(), nurb->W.size2()};
 
-	N = new double[nurb->K[1]];
-	A = new double[nurb->K[0]];
-	B = new Coord[nurb->K[0]];
 	ublasMatrix coef(nurb->M[0],nurb->M[0]);
 
 	// vパラメータを区間内で分割し、各vパラメータ上のNURBS曲線C(u)と平面(pt,nvec)との交点を求める
 	for(int v=0;v<=v_divnum;v++){
 		v_const = (nurb->V[1] - nurb->V[0])*(double)v/(double)v_divnum;		// 適当なv方向パラメータを設定
-		for(int i=0;i<nurb->K[1];i++){
-			N[i] = CalcBSbasis(v_const,nurb->T,nurb->N[0],i,nurb->M[1]);		// v_const時のBスプライン基底関数を求める
+		for(int i=0;i<K[1];i++){
+			N.push_back(CalcBSbasis(v_const,nurb->T,i,nurb->M[1]));		// v_const時のBスプライン基底関数を求める
 		}
-		for(int i=0;i<nurb->K[0];i++){
-			A[i] = 0;
-			B[i] = 0;
-			for(int j=0;j<nurb->K[1];j++){
-				A[i] += N[j]*nurb->W[i][j];			// v_const上のNURBS曲線C(u)の分母の係数
-				B[i] += nurb->cp[i][j]*(N[j]*nurb->W[i][j]);		// v_const上のNURBS曲線C(u)の分子の係数
+		for(int i=0;i<K[0];i++){
+			double AA = 0;
+			Coord  BB;
+			for(int j=0;j<K[1];j++){
+				AA += N[j]*nurb->W(i,j);						// v_const上のNURBS曲線C(u)の分母の係数
+				BB += nurb->cp[i][j]*(N[j]*nurb->W(i,j));		// v_const上のNURBS曲線C(u)の分子の係数
 			}
+			A.push_back(AA);
+			B.push_back(BB);
 		}
-		for(int i=0;i<nurb->K[0]-nurb->M[0]+1;i++){						// i番目の曲線に対して
+		for(int i=0;i<K[0]-nurb->M[0]+1;i++){					// i番目の曲線に対して
 			coef.clear();
-			for (auto& X:a) X=0;
-			for (auto& X:P) X=0;
-			for (auto& X:Q) X=0;
-			for (auto& X:t) X=0;
+			P.clear();
+			Q.clear();
+			a.clear();
+			t.clear();
 			if(nurb->M[0]-1 == 3){										// 3次
-				coef = GetBSplCoef3(nurb->M[0],nurb->K[0],i,nurb->S);	// 3次のBスプライン基底関数の係数を求める
+				coef = GetBSplCoef3(nurb->M[0],K[0],i,nurb->S);	// 3次のBスプライン基底関数の係数を求める
 			}
 			else if(nurb->M[0]-1 == 2){									// 2次
-				coef = GetBSplCoef2(nurb->M[0],nurb->K[0],i,nurb->S);	// 2次のBスプライン基底関数の係数を求める
+				coef = GetBSplCoef2(nurb->M[0],K[0],i,nurb->S);	// 2次のBスプライン基底関数の係数を求める
 			}
 			else if(nurb->M[0]-1 == 1){									// 1次
-				coef = GetBSplCoef1(nurb->M[0],nurb->K[0],i,nurb->S);	// 1次のBスプライン基底関数の係数を求める
+				coef = GetBSplCoef1(nurb->M[0],K[0],i,nurb->S);	// 1次のBスプライン基底関数の係数を求める
 			}
-			GetNurbsSCoef(nurb->M[0],coef,A,B,i,P,Q);					// 固定されたvパラメータ上のNURBS曲線C(u)の係数を求める
-			GetIntersecEquation(nurb->M[0],P,Q,pt,nvec,a);				// 方程式を導出
-			ansnum = CalcEquation(a,t,nurb->M[0]-1);					// 方程式を解く
-			int hitnum = 0;						// 条件に適合する解の数をカウントする
-			for(int j=0;j<ansnum;j++){			// 3つの解それぞれに対して
+			boost::tie(P,Q) = GetNurbsSCoef(nurb->M[0],coef,A,B,i);		// 固定されたvパラメータ上のNURBS曲線C(u)の係数を求める
+			a = GetIntersecEquation(nurb->M[0],P,Q,pt,nvec);			// 方程式を導出
+			boost::tie(num, t) = CalcEquation(nurb->M[0]-1, a);			// 方程式を解く
+			for(int j=0;j<num;j++){			// 3つの解それぞれに対して
 				if(t[j] >= nurb->S[i+nurb->M[0]-1] && t[j] <= nurb->S[i+nurb->M[0]]){	// 注目中のノットベクトルの範囲内なら
-					ans[allansnum+hitnum].SetCoord(t[j],v_const,0);		// 解として登録
-					hitnum++;
+					ans.push_back(Coord(t[j],v_const,0));		// 解として登録
 				}
-			}
-			allansnum += hitnum;				// 条件適合解の数だけ総解数をカウントアップ
-			if(allansnum >= ans_size){
-//				GuiIFB.SetMessage("NURBS KOD_ERR:Intersection points exceeded the allocated array length");
-				allansnum = KOD_ERR;
-				goto EXIT;
 			}
 		}
 	}
 
 EXIT:
-	delete[]	N;
-	delete[]	A;
-	delete[]	B;
 
-	return allansnum;
+	return ans;
 }
 
 // Function: CalcIntersecPtsPlaneU3
@@ -2963,16 +2950,21 @@ EXIT:
 // *a,*b - u/vを固定した時のNURBS曲線C(v)/C(u)の分母/分子の係数 
 // i - 曲線の番号
 // *P, *Q - 固定されたパラメータにおけるNURBS曲面の係数(P,Q) 
-void NURBS_Func::GetNurbsSCoef(int M, const ublasMatrix& coef,double *a,Coord *b,int i,Coord *P,double *Q)
+boost::tuple<VCoord, Vdouble> NURBS_Func::GetNurbsSCoef(int M, const ublasMatrix& coef, const Vdouble& a, const VCoord& b, int i)
 {
+	VCoord	P;
+	Vdouble	Q;
 	for(int k=0;k<M;k++){
-		Q[k] = 0;
-		P[k] = 0;
+		double q = 0;
+		Coord  p;
 		for(int j=0;j<M;j++){
-			Q[k] += coef(j,k)*a[i+j];
-			P[k] += b[i+j]*coef(j,k);
+			q += coef(j,k)*a[i+j];
+			p += b[i+j]*coef(j,k);
 		}
+		P.push_back(p);
+		Q.push_back(q);
 	}
+	return boost::make_tuple(P, Q);
 }
 
 // Function: CalcIntersecPtsNurbsCNurbsCParam
@@ -3378,16 +3370,30 @@ EXIT:
 //
 // Return:
 // 解の個数（解がなかった場合 or 次数が3,2,1のいずれかでない：KOD_ERR）
-int NURBS_Func::CalcEquation(double *a,double *t,int M)
+boost::tuple<int, Vdouble> NURBS_Func::CalcEquation(int M, const Vdouble& a)
 {
-	int flag;
+	int num = 0;
+	Vdouble	t;
 
-	if(M == 3)		flag = CalcCubicEquation(a,t);
-	else if(M == 2)	flag = CalcQuadraticEquation(a,t);
-	else if(M == 1) flag = CalcLinearEquation(a,t);
-	else			return KOD_ERR;
+	if(M == 3) {
+		A4double a4 = {a[0],a[1],a[2],a[3]};
+		A3double a3;
+		boost::tie(num, a3) = CalcCubicEquation(a4);
+		for (int i=0; i<num; i++) t.push_back(a3[i]);
+	}
+	else if(M == 2)	{
+		A3double a3 = {a[0],a[1],a[2]};
+		A2double a2;
+		boost::tie(num, a2) = CalcQuadraticEquation(a3);
+		for (int i=0; i<num; i++) t.push_back(a2[i]);
+	}
+	else if(M == 1) {
+		A2double a2 = {a[0],a[1]};
+		boost::optional<double> ans = CalcLinearEquation(a2);
+		if ( ans ) t.push_back( *ans );
+	}
 
-	return flag;
+	return boost::make_tuple(num, t);
 }
 
 // Function: GetIntersecEquation
@@ -3399,11 +3405,13 @@ int NURBS_Func::CalcEquation(double *a,double *t,int M)
 // pt - 平面上の一点
 // nvec - 平面の法線ベクトル 
 // *a - 結果 
-void NURBS_Func::GetIntersecEquation(int M,Coord *P,double *Q,Coord pt,Coord nvec,double *a)
+Vdouble NURBS_Func::GetIntersecEquation(int M, const VCoord& P, const Vdouble& Q, const Coord& pt, const Coord& nvec)
 {
+	Vdouble	a;
 	for(int i=0;i<M;i++){
-		a[i] = (Q[i]*pt.x-P[i].x)*nvec.x + (Q[i]*pt.y-P[i].y)*nvec.y + (Q[i]*pt.z-P[i].z)*nvec.z;
+		a.push_back( (Q[i]*pt.x-P[i].x)*nvec.x + (Q[i]*pt.y-P[i].y)*nvec.y + (Q[i]*pt.z-P[i].z)*nvec.z );
 	}
+	return a;
 }
 
 // Function: GetNurbsCCoef
@@ -3448,7 +3456,7 @@ int NURBS_Func::GetNurbsCCoef(NURBSC *nurb,const ublasMatrix& coef,int i,Coord *
 //
 // Return:
 // KOD_TRUE
-ublasMatrix NURBS_Func::GetBSplCoef3(int M,int K,int i,double *t)
+ublasMatrix NURBS_Func::GetBSplCoef3(int M, int K, int i, const ublasVector& t)
 {
 	ublasMatrix	coef(4,4);
 	double bunbo[8];
@@ -3528,7 +3536,7 @@ ublasMatrix NURBS_Func::GetBSplCoef3(int M,int K,int i,double *t)
 //
 // Return:
 // KOD_TRUE
-ublasMatrix NURBS_Func::GetBSplCoef2(int M,int K,int i,double *t)
+ublasMatrix NURBS_Func::GetBSplCoef2(int M, int K, int i, const ublasVector& t)
 {
 	ublasMatrix	coef(3,3);
 	double t20,t10,t21,t31,t32;
@@ -3591,7 +3599,7 @@ ublasMatrix NURBS_Func::GetBSplCoef2(int M,int K,int i,double *t)
 //
 // Return:
 // KOD_TRUE
-ublasMatrix NURBS_Func::GetBSplCoef1(int M,int K,int i,double *t)
+ublasMatrix NURBS_Func::GetBSplCoef1(int M, int K, int i, const ublasVector& t)
 {
 	ublasMatrix coef(2,2);
 	double bunbo[2];
