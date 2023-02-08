@@ -228,11 +228,11 @@ struct TMAT
 
 // Structure: NURBSC
 // 有理Bスプライン(NURBS)曲線を表わす構造体
-//			コンストラクタとデストラクタの追加 by K.Magara
+//
 // Variables:
-// int K -			コントロールポイントの数
+// int K -			コントロールポイントの数 -> W.size()
 // int M -			階数(=次数+1)
-// int N -			ノットベクトルの数
+// int N -			ノットベクトルの数 -> T.size()
 // int prop[4] -	各プロパティ
 //					prop[0]==0:非平面内曲線, 1:平面内曲線
 //					prop[1]==0:閉曲線でない，1:閉曲線
@@ -250,14 +250,12 @@ struct TMAT
 // void *pOriginEnt - 元のエンティティへのポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
 struct NURBSC{
-//	int K;
-//	int M;
-//	int N;
-    int prop[4];
-    Vdouble T;
-    Vdouble W;
+	int M;
+    A4int prop;
+    ublasVector T;
+    ublasVector W;
     VCoord cp;
-    double V[2];
+    A2double V;
     Coord norm;
     int BlankStat;
     int EntUseFlag;
@@ -266,27 +264,29 @@ struct NURBSC{
     void *pOriginEnt;
     DispStat Dstat;
 
-	NURBSC() {
-//		K = 0;
-//		M = 0;
-//		N = 0;
-		prop[0] = prop[1] = prop[2] = prop[3] = 0;
-		V[0] = V[1] = 0;
-		BlankStat = 0;
-		EntUseFlag = 0;
-		pD = 0;
-		OriginEnt = 0;
-		pOriginEnt = NULL;
+	NURBSC() {}
+	NURBSC(int MM, const ublasVector& TT, const ublasVector& WW, const VCoord& Vcp, const A2double& VV, const A4int& Vprop, int euflag) {
+		T = TT;
+		W = WW;
+		cp = Vcp;
+		V = VV;
+		M = MM;
+		prop = Vprop;
+		BlankStat = DISPLAY;
+		EntUseFlag = euflag;
+		Dstat.Color[0] = Dstat.Color[1] = Dstat.Color[2] = 1.0;
+		Dstat.Color[3] = 0.5;
 	}
+
 };
 
 // Structure: NURBSS
 // 有理Bスプライン(NURBS)曲面を表わす構造体
 //
 // Variables:
-// int K[2] -		コントロールポイントの数(u方向,v方向)
+// int K[2] -		コントロールポイントの数(u方向,v方向) -> W.size1(), W.size2()
 // int M[2] -		階数(=次数+1)
-// int N[2] -		ノットベクトルの数(K+M)
+// int N[2] -		ノットベクトルの数(K+M) -> S.size(), T.size()
 // int prop[5] -	パラメータ
 //					prop[0]==0:u方向で閉じている, 1:閉じていない
 //					prop[1]==0:v方向で閉じている，1:閉じていない
@@ -303,29 +303,29 @@ struct NURBSC{
 // int TrmdSurfFlag - このNURBS曲面がトリム面として呼ばれているのか、独立して存在するのかを示すフラグ(トリム面:KOD_TRUE  独立面:KOD_FALSE)
 // DispStat Dstat - 表示属性（色r,g,b,）
 struct NURBSS{
-//	int K[2];
-//	int M[2];
-//	int N[2];
-	int prop[5];
-	Vdouble S;
-	Vdouble T;
-	VVdouble W;
+	A2int M;
+	A5int prop;
+	ublasVector S;
+	ublasVector T;
+	ublasMatrix W;
 	VVCoord  cp;
-	double U[2];
-	double V[2];
+	A2double U;
+	A2double V;
 	int pD;
 	int TrmdSurfFlag;
 	DispStat Dstat;
 
-	NURBSS() {
-//		K[0] = K[1] = 0;
-//		M[0] = M[1] = 0;
-//		N[0] = N[0] = 0;
-		prop[0] = prop[1] = prop[2] = prop[3] = prop[4] = 0;
-		U[0] = U[1] = 0;
-		V[0] = V[1] = 0;
-		pD = 0;
-		TrmdSurfFlag = 0;
+	NURBSS() {}
+	NURBSS(int Mu, int Mv, const ublasVector& SS, const ublasVector& TT, const ublasMatrix& WW, const VVCoord& Vcp, double U_s, double U_e, double V_s, double V_e) {
+		S = SS;
+		T = TT;
+		W = WW;
+		cp = Vcp;
+		M[0] = Mu;		M[1] = Mv;
+		U[0] = U_s;		U[1] = U_e;
+		V[0] = V_s;		V[1] = V_e;
+		Dstat.Color[0] = Dstat.Color[1] = Dstat.Color[2] = 0.2;
+		Dstat.Color[3] = 0.5;
 	}
 };
 

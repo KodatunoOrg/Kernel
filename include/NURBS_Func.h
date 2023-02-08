@@ -60,25 +60,9 @@ public:
 	// 指定したu,v群でのNURBS曲面の座標値群を求める
 	void CalcNurbsSCoords(NURBSS *,int,Coord *,Coord *);		
 
-	// Function: GenNurbsC
-	// 1つのNURBS曲線を生成する
-	int GenNurbsC(NURBSC*, int, int, const ublasVector&, const ublasVector&, const VCoord&, double [], int[], int);
-
-	// Function: GenNurbsC
-	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-	int GenNurbsC(NURBSC *,NURBSC *);
-
-	// Function: GenNurbsS
-	// 1つのNURBS曲面を生成する
-	int GenNurbsS(NURBSS *,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const VVCoord&, double,double,double,double);
-
-	// Function: GenNurbsS
-	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
-	int GenNurbsS(NURBSS *,NURBSS);								
-
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
-	int GenRotNurbsS(NURBSS *,NURBSC, const Coord&, double);
+	NURBSS* GenRotNurbsS(const NURBSC&, const Coord&, double);
 
 	// Function: GenSweepNurbsS
 	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
@@ -86,7 +70,7 @@ public:
 
 	// Function: GenIsoparamCurveU
 	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	int GenIsoparamCurveU(NURBSS *,double,NURBSC *);			
+	NURBSC* GenIsoparamCurveU(const NURBSS*, double);
 
 	// Function: GenIsoparamCurveV
 	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
@@ -110,17 +94,14 @@ public:
 
 	// Function: CalcBSbasis
 	// Bスプライン基底関数を計算し、計算結果を返す
-	double CalcBSbasis(double,double [],int,int,int);			
 	double CalcBSbasis(double, const ublasVector&, int, int);
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
-	double CalcDiffBSbasis(double,double [],int,int,int);		
 	double CalcDiffBSbasis(double, const ublasVector&, int, int);
 
 	// Function: CalcDiffBSbasisN
 	// Bスプライン基底関数のN階微分係数を求める
-	double CalcDiffBSbasisN(double,double [],int,int,int,int);	
 	double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
 
 	// Function: CalcDiffNurbsC
@@ -408,30 +389,6 @@ public:
 	int CalcExtSearchCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地探索線を得る(準備中)
 	int CalcExtGradCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地傾斜線を得る(準備中)
 	int TrimNurbsSPlane(TRMS *,Coord,Coord);										// NURBS曲面を平面でトリムする(準備中)
-
-	// Function: New_NurbsC
-	// NURBS曲線のメモリー確保
-	int New_NurbsC(NURBSC *,int,int);			
-
-	// Function: Free_NurbsC_1DArray
-	// NURBS曲線配列のメモリー解放
-	void Free_NurbsC_1DArray(NURBSC *,int);		
-
-	// Function: Free_NurbsC
-	// NURBS曲線のメモリー解放
-	void Free_NurbsC(NURBSC *);					
-
-	// Function: New_NurbsS
-	// NURBS曲面のメモリー確保
-	int New_NurbsS(NURBSS *,int [],int []);		
-
-	// Function: Free_NurbsS_1DArray
-	// NURBS曲面配列のメモリー解放
-	void Free_NurbsS_1DArray(NURBSS *,int);		
-
-	// Function: Free_NurbsS
-	// NURBS曲面のメモリー解放
-	void Free_NurbsS(NURBSS *);					
 
 	// Function: New_TrmS
 	// トリム面のメモリー確保

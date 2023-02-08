@@ -72,11 +72,17 @@ typedef ublas::vector<double>	ublasVector;
 typedef std::vector<Vdouble>	VVdouble;
 typedef ublas::matrix<double>	ublasMatrix;
 
-// Typedef: array<double, 3>
-// A3double - double型の固定配列をA[n]doubleとして定義
+// Typedef: array<double, n>
+// A[n]double - double型の固定配列をA[n]doubleとして定義
 typedef boost::array<double, 4>	A4double;
 typedef boost::array<double, 3>	A3double;
 typedef boost::array<double, 2>	A2double;
+
+// Typedef: array<int, n>
+// A[n]int - int型の固定配列をA[n]intとして定義
+typedef boost::array<int, 5>	A5int;
+typedef boost::array<int, 4>	A4int;
+typedef boost::array<int, 2>	A2int;
 
 // Typedef: vector<Coord>
 // VCoord - Coord型の1次元配列をVCoordとして定義
@@ -462,6 +468,9 @@ VCoord CheckTheSamePoints2D(const VCoord&);
 // Function: CoordToArray2D 不要マーク
 // Coordをdouble配列に代入
 //void CoordToArray2D(const Coord&,double []);
+
+//Vdouble  CopyToVector(const ublasVector&);
+//VVdouble CopyToMatrix(const ublasMatrix&);
 
 #include "KodListFunc.h"
 #include "Quaternion.h"

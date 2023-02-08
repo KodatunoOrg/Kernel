@@ -1924,3 +1924,24 @@ void CoordToArray2D(const Coord& a,double b[2])
 	b[1] = a.y;
 }
 */
+/*
+Vdouble CopyToVector(const ublasVector& b)
+{
+	Vdouble result;
+	for (auto a : b) result.push_back(a);
+	return result;
+}
+
+VVdouble CopyToMatrix(const ublasMatrix& b)
+{
+	VVdouble	result;
+	for (size_t i=0; i<b.size1(); i++) {
+		Vdouble aa;
+		for (size_t j=0; j<b.size2(); j++) {
+			aa.push_back(b(i,j));
+		}
+		result.push_back(aa);
+	}
+	return result;
+}
+*/
