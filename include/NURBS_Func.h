@@ -66,7 +66,7 @@ public:
 
 	// Function: GenSweepNurbsS
 	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
-	int GenSweepNurbsS(NURBSS *,NURBSC, const Coord&, double);			
+	NURBSS* GenSweepNurbsS(const NURBSC&, const Coord&, double);
 
 	// Function: GenIsoparamCurveU
 	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
@@ -74,7 +74,7 @@ public:
 
 	// Function: GenIsoparamCurveV
 	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	int GenIsoparamCurveV(NURBSS *,double,NURBSC *);			
+	NURBSC* GenIsoparamCurveV(const NURBSS*, double);
 
 	// Function: GenTrimdNurbsS
 	// トリム面を生成する
@@ -83,14 +83,6 @@ public:
 	// Function: DelTrimdNurbsS
 	// トリム面を削除(メモリー解放)する
 	int DelTrimdNurbsS(TRIMD_NURBSS *);							
-
-	// Function: DelNurbsC
-	// NURBS曲線を削除する
-	void DelNurbsC(NURBSC *);									
-
-	// Function: DelNurbsS
-	// NURBS曲面を削除する
-	void DelNurbsS(NURBSS *);									
 
 	// Function: CalcBSbasis
 	// Bスプライン基底関数を計算し、計算結果を返す

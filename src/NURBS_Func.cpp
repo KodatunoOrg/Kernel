@@ -226,16 +226,18 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC& NurbsC, const Coord& Axis, double
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenSweepNurbsS(NURBSS *NurbsS,NURBSC NurbsC, const Coord& Axis,double Len)
+NURBSS* NURBS_Func::GenSweepNurbsS(const NURBSC& NurbsC, const Coord& Axis, double Len)
 {
 	Coord norm( Axis.NormalizeVec() );		// 正規化
+	int K = NurbsC.W.size();
 
 	// NurbsSを生成
-	double T[4] = {0,0,1,1};		// v方向ノットベクトル
-	ublasMatrix W(NurbsC.K,2);		// ウエイト
+	ublasVector T(4);				// v方向ノットベクトル
+	T[0]=0;	T[1]=0;	T[2]=1;	T[3]=1;
+	ublasMatrix W(K,2);				// ウエイト
 	VVCoord  Cp;					// コントロールポイント (NurbsC.K,2)
 
-	for(int i=0;i<NurbsC.K;i++){
+	for(int i=0;i<K;i++){
 		VCoord cp;
 		for(int j=0;j<2;j++){
 			W(i,j) = NurbsC.W[i];	// ウエイト計算
@@ -247,9 +249,7 @@ int NURBS_Func::GenSweepNurbsS(NURBSS *NurbsS,NURBSC NurbsC, const Coord& Axis,d
 		Cp.push_back(cp);
 	}
 
-	GenNurbsS(NurbsS,NurbsC.M,2,NurbsC.K,2,NurbsC.T,T,W,Cp,0,1,NurbsC.V[0],NurbsC.V[1]);	// NURBS曲面生成
-
-	return KOD_TRUE;
+	return new NURBSS(NurbsC.M,2,NurbsC.T,T,W,Cp,0,1,NurbsC.V[0],NurbsC.V[1]);	// NURBS曲面生成
 }
 
 // Function: GenIsoparamCurveU
@@ -270,8 +270,8 @@ NURBSC* NURBS_Func::GenIsoparamCurveU(const NURBSS* P, double u)
     A4int prop = {0,0,1,0};			// パラメータ
 
 	int K[] = {P->W.size1(), P->W.size2()};
-    VCoord  Q(K[1]);		// コントロールポイント
-    Vdouble W(K[1]);		// ウェイト
+    VCoord		Q(K[1]);			// コントロールポイント
+    ublasVector	W(K[1]);			// ウェイト
 
     for(int i=0;i<K[1];i++){
         Q[i] = 0;
@@ -284,7 +284,7 @@ NURBSC* NURBS_Func::GenIsoparamCurveU(const NURBSS* P, double u)
         Q[i] /= W[i];
     }
 
-	return new NURBSC(K[1],P->T,W,Q,V,prop,0);
+	return new NURBSC(P->M[1],P->T,W,Q,V,prop,0);
 }
 
 // Function: GenIsoparamCurveV
@@ -297,41 +297,29 @@ NURBSC* NURBS_Func::GenIsoparamCurveU(const NURBSS* P, double u)
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR（引数vが*Pのuパラメータ範囲外）
-int NURBS_Func::GenIsoparamCurveV(NURBSS *P,double v,NURBSC *C)
+NURBSC* NURBS_Func::GenIsoparamCurveV(const NURBSS* P, double v)
 {
-    if(v < P->V[0] || v > P->V[1])	return KOD_ERR;
+    if(v < P->V[0] || v > P->V[1])	return NULL;
 
-    double U[2] = {P->U[0],P->U[1]};	// ノットベクトルの範囲
-    int prop[4] = {0,0,1,0};			// パラメータ
+    A2double U = {P->U[0],P->U[1]};	// ノットベクトルの範囲
+    A4int prop = {0,0,1,0};			// パラメータ
 
-    VCoord  Q(P->K[0]);					// コントロールポイント
-    Vdouble W(P->K[0]);					// ウェイト
+	int K[] = {P->W.size1(), P->W.size2()};
+    VCoord		Q(K[0]);			// コントロールポイント
+    ublasVector	W(K[0]);			// ウェイト
 
-    for(int i=0;i<P->K[0];i++){
+    for(int i=0;i<K[0];i++){
         Q[i] = 0;
         W[i] = 0;
-        for(int j=0;j<P->K[1];j++){
-            double bs = CalcBSbasis(v,P->T,P->N[1],j,P->M[1]);
-            Q[i] = Q[i] + (P->cp[i][j] * (bs*P->W[i][j]));
-            W[i] += bs*P->W[i][j];
+        for(int j=0;j<K[1];j++){
+            double bs = CalcBSbasis(v,P->T,j,P->M[1]);
+            Q[i] = Q[i] + (P->cp[i][j] * (bs*P->W(i,j)));
+            W[i] += bs*P->W(i,j);
         }
         Q[i] /= W[i];
     }
 
-    GenNurbsC(C,P->K[0],P->M[0],P->N[0],P->S,W,Q,U,prop,0);
-
-    return KOD_TRUE;
-}
-
-// Function: DelNurbsS
-// GenNurbsS()によって生成されたNURBS曲面を削除する
-// 
-// Parameters:
-// *Nurbs - 削除するNURBS曲面へのポインタ
-void NURBS_Func::DelNurbsS(NURBSS *Nurbs)
-{
-	NURBS_Func hbody;
-	hbody.Free_NurbsS(Nurbs);
+    return new NURBSC(P->M[0],P->S,W,Q,U,prop,0);
 }
 
 // Function: GenTrimdNurbsS
