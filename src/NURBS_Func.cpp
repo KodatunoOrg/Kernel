@@ -1382,74 +1382,61 @@ EXIT:
 //
 // Return:
 // 交点の個数(交点の数がans_sizeを超えた：KOD_ERR)
-int NURBS_Func::CalcIntersecPtsPlaneU3(NURBSS *nurb,Coord pt,Coord nvec,int u_divnum,Coord *ans,int ans_size)
+VCoord NURBS_Func::CalcIntersecPtsPlaneU3(const NURBSS* nurb, const Coord& pt, const Coord& nvec, int u_divnum)
 {
+	VCoord ans;
 	double u_const;			// 定数と置いたときのvパラメータ
-	double *N;				// Bスプライン基底関数の計算値を格納
-	double *A;
-	Coord  *B;
-	double Q[4];
-	Coord  P[4];
-	double a[4];
-	double t[3];
-	int ansnum;
-	int allansnum=0;
+	Vdouble N;				// Bスプライン基底関数の計算値を格納
+	Vdouble A;
+	VCoord  B;
+	Vdouble Q;
+	VCoord  P;
+	Vdouble a;
+	Vdouble t;
+	int	num, K[] = {nurb->W.size1(), nurb->W.size2()};
 
-	N = new double[nurb->K[0]];
-	A = new double[nurb->K[1]];
-	B = new Coord[nurb->K[1]];
 	ublasMatrix coef(nurb->M[1],nurb->M[1]);
 
 	// uパラメータを区間内で分割し、各uパラメータ上のNURBS曲線C(v)と平面(pt,nvec)との交点を求める
 	for(int u=0;u<=u_divnum;u++){
 		u_const = (nurb->U[1] - nurb->U[0])*(double)u/(double)u_divnum;		// 適当なu方向パラメータを設定
-		for(int i=0;i<nurb->K[0];i++){
-			N[i] = CalcBSbasis(u_const,nurb->S,nurb->N[0],i,nurb->M[0]);		// u_const時のBスプライン基底関数を求める
+		for(int i=0;i<K[0];i++){
+			N.push_back(CalcBSbasis(u_const,nurb->S,i,nurb->M[0]));		// u_const時のBスプライン基底関数を求める
 		}
-		for(int j=0;j<nurb->K[1];j++){
-			A[j] = 0;
-			B[j] = 0;
-			for(int i=0;i<nurb->K[0];i++){
-				A[j] += N[i]*nurb->W[i][j];			// u_const上のNURBS曲線C(v)の分母の係数
-				B[j] += nurb->cp[i][j]*(N[i]*nurb->W[i][j]);			// u_const上のNURBS曲線C(v)の分子の係数
+		for(int j=0;j<K[1];j++){
+			double AA = 0;
+			Coord  BB;
+			for(int i=0;i<K[0];i++){
+				AA += N[i]*nurb->W(i,j);			// u_const上のNURBS曲線C(v)の分母の係数
+				BB += nurb->cp[i][j]*(N[i]*nurb->W(i,j));				// u_const上のNURBS曲線C(v)の分子の係数
 			}
+			A.push_back(AA);
+			B.push_back(BB);
 		}
-		for(int i=0;i<nurb->K[1]-nurb->M[1]+1;i++){						// i番目の曲線に対して
+		for(int i=0;i<K[1]-nurb->M[1]+1;i++){						// i番目の曲線に対して
 			if(nurb->M[1]-1 == 3){										// 3次
-				coef = GetBSplCoef3(nurb->M[1],nurb->K[1],i,nurb->T);	// 3次のBスプライン基底関数の係数を求める
+				coef = GetBSplCoef3(nurb->M[1],K[1],i,nurb->T);	// 3次のBスプライン基底関数の係数を求める
 			}
 			else if(nurb->M[1]-1 == 2){									// 2次
-				coef = GetBSplCoef2(nurb->M[1],nurb->K[1],i,nurb->T);	// 2次のBスプライン基底関数の係数を求める
+				coef = GetBSplCoef2(nurb->M[1],K[1],i,nurb->T);	// 2次のBスプライン基底関数の係数を求める
 			}
 			else if(nurb->M[1]-1 == 1){									// 1次
-				coef = GetBSplCoef1(nurb->M[1],nurb->K[1],i,nurb->T);	// 1次のBスプライン基底関数の係数を求める
+				coef = GetBSplCoef1(nurb->M[1],K[1],i,nurb->T);	// 1次のBスプライン基底関数の係数を求める
 			}
-			GetNurbsSCoef(nurb->M[1],coef,A,B,i,P,Q);					// 固定されたuパラメータ上のNURBS曲線C(v)の係数を求める
-			GetIntersecEquation(nurb->M[1],P,Q,pt,nvec,a);				// 方程式を導出
-			ansnum = CalcEquation(a,t,nurb->M[1]-1);					// 方程式を解く
-
-			int hitnum = 0;						// 条件に適合する解の数をカウントする
-			for(int j=0;j<ansnum;j++){			// 3つの解それぞれに対して
+			boost::tie(P,Q) = GetNurbsSCoef(nurb->M[1],coef,A,B,i);		// 固定されたuパラメータ上のNURBS曲線C(v)の係数を求める
+			a = GetIntersecEquation(nurb->M[1],P,Q,pt,nvec);			// 方程式を導出
+			boost::tie(num, t) = CalcEquation(nurb->M[1]-1, a);			// 方程式を解く
+			for(int j=0;j<num;j++){			// 3つの解それぞれに対して
 				if(t[j] >= nurb->T[i+nurb->M[1]-1] && t[j] <= nurb->T[i+nurb->M[1]]){	// 注目中のノットベクトルの範囲内なら
-					ans[allansnum+hitnum].SetCoord(u_const,t[j],0);		// 解として登録
-					hitnum++;
+					ans.push_back(Coord(u_const,t[j],0));		// 解として登録
 				}
-			}
-			allansnum += hitnum;				// 条件適合解の数だけ総解数をカウントアップ
-			if(allansnum >= ans_size){
-//				GuiIFB.SetMessage("NURBS KOD_ERR:Intersection points exceeded the allocated array length");
-				allansnum = KOD_ERR;
-				goto EXIT;
 			}
 		}
 	}
 
 EXIT:
-	delete[]	N;
-	delete[]	A;
-	delete[]	B;
 
-	return allansnum;
+	return ans;
 }
 
 // Function: CalcIntersecPtsPlaneV
@@ -1465,11 +1452,12 @@ EXIT:
 //
 // Return:
 // 交点の個数(交点の数がans_sizeを超えた：KOD_ERR)
-VCoord NURBS_Func::CalcIntersecPtsPlaneV(NURBSS *nurbss, const Coord& pt, const Coord& nvec, int v_divnum)
+VCoord NURBS_Func::CalcIntersecPtsPlaneV(const NURBSS* nurbss, const Coord& pt, const Coord& nvec, int v_divnum)
 {
+	int	K[] = {nurbss->W.size1(), nurbss->W.size2()};
 	VCoord ans;
 	double v_const;			// 定数と置いたときのvパラメータ
-	int ansbufsize = 2*(nurbss->M[0]-1)*((nurbss->K[0]>nurbss->K[1]?nurbss->K[0]:nurbss->K[1])-nurbss->M[0]+1);	// 1つのアイソパラ曲線と曲面の交点群を格納する配列の配列長
+	int ansbufsize = 2*(nurbss->M[0]-1)*((K[0]>K[1]?K[0]:K[1])-nurbss->M[0]+1);	// 1つのアイソパラ曲線と曲面の交点群を格納する配列の配列長
 	Vdouble ansbuf;			// 1つのアイソパラ曲線と曲面の交点群を格納する配列
 	NURBSC nurbsc;			// 1つのアイソパラ曲線
 
@@ -1500,11 +1488,12 @@ EXIT:
 //
 // Return:
 // 交点の個数(交点の数がans_sizeを超えた：KOD_ERR)
-VCoord NURBS_Func::CalcIntersecPtsPlaneU(NURBSS *nurbss, const Coord& pt, const Coord& nvec, int u_divnum)
+VCoord NURBS_Func::CalcIntersecPtsPlaneU(const NURBSS* nurbss, const Coord& pt, const Coord& nvec, int u_divnum)
 {
+	int	K[] = {nurbss->W.size1(), nurbss->W.size2()};
 	VCoord ans;
 	double u_const;			// 定数と置いたときのvパラメータ
-	int ansbufsize = 2*(nurbss->M[0]-1)*((nurbss->K[0]>nurbss->K[1]?nurbss->K[0]:nurbss->K[1])-nurbss->M[0]+1);	// 1つのアイソパラ曲線と曲面の交点群を格納する配列の配列長
+	int ansbufsize = 2*(nurbss->M[0]-1)*((K[0]>K[1]?K[0]:K[1])-nurbss->M[0]+1);	// 1つのアイソパラ曲線と曲面の交点群を格納する配列の配列長
 	Vdouble ansbuf;			// 1つのアイソパラ曲線と曲面の交点群を格納する配列
 	NURBSC nurbsc;			// 1つのアイソパラ曲線
 
@@ -1535,10 +1524,10 @@ EXIT:
 //
 // Return:
 // 交点の個数(交点の数がans_sizeを超えた：ERR)
-int NURBS_Func::CalcIntersecPtsPlaneGeom(NURBSS *nurb,Coord pt,Coord nf,int u_divnum,int v_divnum,Coord *ans,int ans_size)
+VCoord NURBS_Func::CalcIntersecPtsPlaneGeom(const NURBSS* nurb, const Coord& pt, const Coord& nf, int u_divnum, int v_divnum)
 {
+	VCoord ans;
 	Coord init_pt;
-	int ansnum=0;
 
 	for(int u=0;u<=u_divnum;u++){
 		for(int v=0;v<=v_divnum;v++){
@@ -1579,17 +1568,14 @@ int NURBS_Func::CalcIntersecPtsPlaneGeom(NURBSS *nurb,Coord pt,Coord nf,int u_di
 				}
 				if(deltap_dis < APPROX_ZERO_H){//CONVERG_GAP){								// Δpが収束したら
 					// fprintf(stderr,"   %d:%lf,%lf\n",ansnum,u0,v0);		// debug
-					ans[ansnum].SetCoord(u0,v0,0);							// 解として登録
-					ansnum++;												// 解をカウント
-					//if(ansnum == ans_size)								// 解の数が制限を越えた
-						//return ansnum;
+					ans.push_back(Coord(u0,v0,0));							// 解として登録
 					break;
 				}
 			}
 		}
 	}
 	
-	return ansnum;
+	return ans;
 }
 
 // Function: CalcIntersecPtsOffsetPlaneSearch
@@ -3200,7 +3186,7 @@ Vdouble NURBS_Func::CalcIntersecCurve(NURBSC *nurb, const Coord& pt, const Coord
 //
 // Return:
 // 交点の個数（KOD_ERR:交点の数がans_sizeを超えた）
-Vdouble NURBS_Func::CalcIntersecIsparaCurveU(NURBSS *nurb, double V, const Coord& pt, const Coord& nvec, int Divnum)
+Vdouble NURBS_Func::CalcIntersecIsparaCurveU(const NURBSS* nurb, double V, const Coord& pt, const Coord& nvec, int Divnum)
 {
 	Vdouble ans;
 	double d = 0;				// ニュートン法によるパラメータの更新量
@@ -3256,7 +3242,7 @@ Vdouble NURBS_Func::CalcIntersecIsparaCurveU(NURBSS *nurb, double V, const Coord
 //
 // Return:
 // 交点の個数（KOD_ERR:交点の数がans_sizeを超えた）
-Vdouble NURBS_Func::CalcIntersecIsparaCurveV(NURBSS *nurb,double U, const Coord& pt, const Coord& nvec, int Divnum)
+Vdouble NURBS_Func::CalcIntersecIsparaCurveV(const NURBSS* nurb, double U, const Coord& pt, const Coord& nvec, int Divnum)
 {
 	Vdouble ans;
 	double d = 0;				// ニュートン法によるパラメータの更新量

@@ -178,11 +178,11 @@ public:
 
 	// Function: CalcIntersecIsparaCurveU
 	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	Vdouble CalcIntersecIsparaCurveU(NURBSS *, double, const Coord&, const Coord&, int);
+	Vdouble CalcIntersecIsparaCurveU(const NURBSS*, double, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecIsparaCurveV
 	// v方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	Vdouble CalcIntersecIsparaCurveV(NURBSS *, double, const Coord& , const Coord&, int);
+	Vdouble CalcIntersecIsparaCurveV(const NURBSS*, double, const Coord& , const Coord&, int);
 
 	// Function: CalcIntersecCurve
 	// NURBS曲線と平面との交点を求める(ニュートン法)
@@ -198,15 +198,15 @@ public:
 
 	// Function: CalcIntersecPtsPlaneU3
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
-	int CalcIntersecPtsPlaneU3(NURBSS *,Coord,Coord,int,Coord *,int);	
+	VCoord CalcIntersecPtsPlaneU3(const NURBSS*, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneV
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	VCoord CalcIntersecPtsPlaneV(NURBSS *, const Coord&, const Coord&, int);
+	VCoord CalcIntersecPtsPlaneV(const NURBSS*, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneU
 	// U方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	VCoord CalcIntersecPtsPlaneU(NURBSS *, const Coord&, const Coord&, int);
+	VCoord CalcIntersecPtsPlaneU(const NURBSS*, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneSearch
 	// NURBS曲面と平面との交点群を交線追跡法で求める
@@ -346,7 +346,7 @@ public:
 
 	// Function: CalcIntersecPtsPlaneGeom
 	// NURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)
-	int CalcIntersecPtsPlaneGeom(NURBSS *,Coord,Coord,int,int,Coord *,int);			
+	VCoord CalcIntersecPtsPlaneGeom(const NURBSS*, const Coord&, const Coord&, int, int);
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の線分長を求める
