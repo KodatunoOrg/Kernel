@@ -110,7 +110,7 @@ public:
 	// コンストラクタ
 	Coord();
 	Coord(const Coord&);
-	Coord(double,double,double,double=0.0);
+	Coord(double,double,double=0.0,double=0.0);
 
 	// 代入関数
 	Coord& SetCoord(const Coord&);

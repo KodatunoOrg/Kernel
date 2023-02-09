@@ -210,7 +210,7 @@ public:
 
 	// Function: CalcIntersecPtsPlaneSearch
 	// NURBS曲面と平面との交点群を交線追跡法で求める
-	int CalcIntersecPtsPlaneSearch(NURBSS *,Coord,Coord,double,int,Coord *,int,int);	
+	VCoord CalcIntersecPtsPlaneSearch(const NURBSS*, const Coord&, const Coord&, double, int, int);
 
 	// Function: CalcIntersecPtsOffsetPlaneSearch
 	// オフセットNURBS曲面と平面との交点群を交線追跡法で求める(準備中)
@@ -416,7 +416,7 @@ public:
 
 	// Function: CalcIntersecPtsOffsetPlaneGeom
 	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
-	int CalcIntersecPtsOffsetPlaneGeom(NURBSS *,double,Coord,Coord,int,Coord *,int);	
+	VCoord CalcIntersecPtsOffsetPlaneGeom(const NURBSS* , double, const Coord&, const Coord&, int);
 
 	// Function: CalcTanVecOnNurbsC
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる

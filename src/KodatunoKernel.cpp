@@ -1843,7 +1843,7 @@ VCoord CheckTheSamePoints(const VCoord& P)
 // 変更後の点群
 Vdouble CheckTheSamePoints(const Vdouble& P)
 {
-	if(P.empty()) return Vdouble();
+	if (P.empty()) return Vdouble();
 
 	Vdouble	Q;
 	std::vector<bool>	flag(P.size(), false);
