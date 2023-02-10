@@ -2334,7 +2334,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt(const NURBSS* nurb, cons
 //
 // Return:
 // 交点の数（解の数がansのサイズを超えた場合：KOD_ERR）
-VCoord NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Divnum)
+VCoord NURBS_Func::CalcIntersecPtsNurbsSNurbsC(const NURBSS* NurbsS, const NURBSC* NurbsC, int Divnum)
 {
 	VCoord ans;
 	Coord d(100,100,100);					// NURBS曲線S(u,v)の微小変化量(du,dv)、直線N(t)の微小変化量dtを格納
@@ -2414,55 +2414,51 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int
 //
 // Return:
 // 交点の数（NURBS曲面同士が交差していない：KOD_FALSE，特異点または発散により処理を中断：KOD_ERR）
-int NURBS_Func::CalcIntersecPtsNurbsSSearch(NURBSS *nurbR,NURBSS *nurbS,int div,double ds,Coord *ansR,Coord *ansS,int ans_size)
+boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBSS* nurbR, const NURBSS* nurbS, int div, double ds)
 {
+	VCoord ansR, ansS;
 	int ans_count=0;		// 追跡点の総数
 	int loop_count=0;		// 収束計算のループ数
 	int pnow=0;
-	Coord init_pt_R[INTERSECPTNUMMAX];		// 初期点(u,vパラメータ値)
-	Coord init_pt_S[INTERSECPTNUMMAX];		// 初期点(u,vパラメータ値)
-	Coord init_pt_Coord_R[INTERSECPTNUMMAX];	// 初期点(x,y,z座標値)
-	Coord init_pt_Coord_S[INTERSECPTNUMMAX];
-	int  init_pt_flag[INTERSECPTNUMMAX];		// 各初期点を通り終えたかを判別するフラグ
-	int  init_allpt_flag=KOD_FALSE;			// 初期点を全て通り終えたかを判別するフラグ
+	VCoord init_pt_R;		// 初期点(u,vパラメータ値) [INTERSECPTNUMMAX]
+	VCoord init_pt_S;		// 初期点(u,vパラメータ値) [INTERSECPTNUMMAX]
+	VCoord init_pt_Coord_R;	// 初期点(x,y,z座標値) [INTERSECPTNUMMAX]
+	VCoord init_pt_Coord_S;
+	std::vector<int> init_pt_flag;		// 各初期点を通り終えたかを判別するフラグ [INTERSECPTNUMMAX]
+	int  init_allpt_flag=KOD_FALSE;		// 初期点を全て通り終えたかを判別するフラグ
 	int   init_pt_num = 0;				// 初期点の数
-	int  conform_flag = KOD_FALSE;			// 初期点一致フラグ
-	int  search_flag = KOD_TRUE;			// 交線追跡方向フラグ(KOD_TRUE:順方向,KOD_FALSE:逆方向)
-	int  inverse_flag = KOD_FALSE;			// 交線追跡方向逆転フラグ
-	double u,v,w,t;					// 交線追跡中のu,vパラメータ中間値
+	int  conform_flag = KOD_FALSE;		// 初期点一致フラグ
+	int  search_flag = KOD_TRUE;		// 交線追跡方向フラグ(KOD_TRUE:順方向,KOD_FALSE:逆方向)
+	int  inverse_flag = KOD_FALSE;		// 交線追跡方向逆転フラグ
+	double u,v,w,t;						// 交線追跡中のu,vパラメータ中間値
 //	FILE *fp=fopen("debug.csv","w");
 //	double color[3] = {0,1,1};
 	
-	// 初期点通過判別フラグを初期化
-//	init_pt_flag[0] = KOD_TRUE;
-	for(int i=0;i<INTERSECPTNUMMAX;i++){
-		init_pt_flag[i] = KOD_FALSE;
-	}
-	init_pt_flag[0] = KOD_TRUE;
-
 	// 交線追跡するための初期点となる点をいくつか探す
 	// ※注意:　複数の交線ループがある場合、全ての交線ループ上の初期点を見つけなければならない
 	//　　　　　そのため、あまり分割数が少ないと一部の交線ループ上に交線(交点群)が生成されなくなる場合がある
-	init_pt_num = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,div,div,init_pt_R,init_pt_S,INTERSECPTNUMMAX);
-	//if(!init_pt_num){
-	//	init_pt_num = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,5,5,init_pt_R,init_pt_S,INTERSECPTNUMMAX);
+	boost::tie(init_pt_R, init_pt_S) = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,div,div);
+	//if(init_pt_R.empty()){
+	//	boost::tie(init_pt_R, init_pt_S) = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,5,5);
 	//}
-	//if(!init_pt_num){
-	//	init_pt_num = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,7,7,init_pt_R,init_pt_S,INTERSECPTNUMMAX);
+	//if(init_pt_R.empty()){
+	//	boost::tie(init_pt_R, init_pt_S) = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,7,7);
 	//}
-	//if(!init_pt_num){
-	//	init_pt_num = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,10,10,init_pt_R,init_pt_S,INTERSECPTNUMMAX);
+	//if(init_pt_R.empty()){
+	//	boost::tie(init_pt_R, init_pt_S) = CalcIntersecPtsNurbsSGeom(nurbR,nurbS,10,10);
 	//}
-	if(!init_pt_num){		// それでも見つからない場合は、交差していないとみなす
-		return KOD_FALSE;					
+	if(init_pt_R.empty()){		// それでも見つからない場合は、交差していないとみなす
+		return boost::make_tuple(ansR, ansS);	// 空の座標配列
 	}
 	
-	for(int i=0;i<init_pt_num;i++){
-		init_pt_Coord_R[i] = CalcNurbsSCoord(nurbR,init_pt_R[i].x,init_pt_R[i].y);		// 交点のuvパラメータをxyz座標値に変換したものを保持しておく
-		init_pt_Coord_S[i] = CalcNurbsSCoord(nurbS,init_pt_S[i].x,init_pt_S[i].y);		// 交点のuvパラメータをxyz座標値に変換したものを保持しておく
+	for(size_t i=0;i<init_pt_R.size();i++){
+		init_pt_flag.push_back(KOD_FALSE);
+		init_pt_Coord_R.push_back( CalcNurbsSCoord(nurbR,init_pt_R[i].x,init_pt_R[i].y) );		// 交点のuvパラメータをxyz座標値に変換したものを保持しておく
+		init_pt_Coord_S.push_back( CalcNurbsSCoord(nurbS,init_pt_S[i].x,init_pt_S[i].y) );		// 交点のuvパラメータをxyz座標値に変換したものを保持しておく
 	//	DrawPoint(init_pt_Coord_R[i],1,5,color);
 	//	DrawPoint(init_pt_Coord_S[i],1,5,color);
 	}
+	init_pt_flag[0] = KOD_TRUE;
 	ansR[ans_count] = init_pt_R[0];
 	ansS[ans_count] = init_pt_S[0];
 	
@@ -2574,9 +2570,9 @@ int NURBS_Func::CalcIntersecPtsNurbsSSearch(NURBSS *nurbR,NURBSS *nurbS,int div,
 //
 // Return:
 // 交点の個数
-int NURBS_Func::CalcIntersecPtsNurbsSGeom(NURBSS *nurbR,NURBSS *nurbS,int u_divnum,int v_divnum,Coord *ansR,Coord *ansS,int ans_size)
+boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSGeom(const NURBSS* nurbR, const NURBSS* nurbS, int u_divnum, int v_divnum)
 {
-	int ansnum=0;
+	VCoord ansR, ansS;
 	
 	// 各曲面を指定の分割数でuv分割し、それらの点における補助平面を生成して交線上の任意の1点に収束させる
 	for(int w=0;w<u_divnum;w++){
@@ -2643,12 +2639,15 @@ int NURBS_Func::CalcIntersecPtsNurbsSGeom(NURBSS *nurbR,NURBSS *nurbS,int u_divn
 
 						// 十分収束したら解を登録する
 						if(deltapq_dis < CONVERG_GAP){								
-							if(!ansnum || (!CheckZero(ansR[ansnum-1].x-w0,MID_ACCURACY) && !CheckZero(ansR[ansnum-1].y-t0,MID_ACCURACY))){// 直前に算出した解と同一の解でなければ
-								ansR[ansnum].SetCoord(w0,t0,0);						// 解として登録
-								ansS[ansnum].SetCoord(u0,v0,0);
-								ansnum++;								// 解をカウント
-								if(ansnum == ans_size)					// 解の数が制限を越えた
-									return ansnum;
+							if(ansR.empty()){
+								ansR.push_back(Coord(w0,t0,0));						// 解として登録
+								ansS.push_back(Coord(u0,v0,0));
+							}
+							else {
+								if (!CheckZero(ansR.back().x-w0,MID_ACCURACY) && !CheckZero(ansR.back().y-t0,MID_ACCURACY)){// 直前に算出した解と同一の解でなければ
+									ansR.push_back(Coord(w0,t0,0));
+									ansS.push_back(Coord(u0,v0,0));
+								}
 							}
 							break;
 						}
@@ -2657,7 +2656,7 @@ int NURBS_Func::CalcIntersecPtsNurbsSGeom(NURBSS *nurbR,NURBSS *nurbS,int u_divn
 			}
 		}
 	}
-	return ansnum;
+	return boost::make_tuple(ansR, ansS);
 }
 
 // Function: SearchIntersectPt

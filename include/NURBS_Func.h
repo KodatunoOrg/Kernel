@@ -218,15 +218,15 @@ public:
 
 	// Function: CalcIntersecPtsNurbsSNurbsC
 	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
-	VCoord CalcIntersecPtsNurbsSNurbsC(NURBSS *,NURBSC *,int);
+	VCoord CalcIntersecPtsNurbsSNurbsC(const NURBSS*, const NURBSC*, int);
 
 	// Function: CalcIntersecPtsNurbsSGeom
 	// NURBS曲面同士の交線上の点を幾何学的にいくつか求める
-	int CalcIntersecPtsNurbsSGeom(NURBSS *,NURBSS *,int,int,Coord *,Coord *,int);		
+	boost::tuple<VCoord, VCoord> CalcIntersecPtsNurbsSGeom(const NURBSS*, const NURBSS*, int, int);
 
 	// Function: CalcIntersecPtsNurbsSSearch
 	// NURBS曲面同士の交線(交点群)を交線追跡法で求める
-	int CalcIntersecPtsNurbsSSearch(NURBSS *,NURBSS *,int,double,Coord *,Coord *,int);	
+	boost::tuple<VCoord, VCoord> CalcIntersecPtsNurbsSSearch(const NURBSS*, const NURBSS*, int, double);
 
 	// Function: CalcIntersecPtsNurbsCNurbsCParam
     // 2次元NURBS曲線同士の交点を求める
