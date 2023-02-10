@@ -493,7 +493,11 @@ private:
 
 	// Function: SearchIntersectPt
 	// (private)ニュートン法により交点を収束させる(NURBS曲面と平面)
-	int SearchIntersectPt(NURBSS *,Coord,Coord,double,double *,double *,int);	
+	boost::optional<A2double> SearchIntersectPt(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
+
+	// Function: SearchIntersectPt
+	// (private)ニュートン法により交点を収束させる(NURBS曲面同士)
+	boost::optional<A4double> SearchIntersectPt(const NURBSS*, const NURBSS*, double, double, double, double, double, int);
 
 	// Function: SearchIntersectPt_RKM
 	// (private)4次のルンゲクッタ法により交点を収束させる(NURBS曲面と平面)
@@ -510,10 +514,6 @@ private:
 	// Function: GetSIPParam1
 	// (private)NURBS曲面と平面の交点を表す微分方程式の右辺の値を得る
 	boost::optional<Coord> GetSIPParam1(const NURBSS*, double, double, const Coord&, const Coord&, int);
-
-	// Function: SearchIntersectPt
-	// (private)ニュートン法により交点を収束させる(NURBS曲面同士)
-	int SearchIntersectPt(NURBSS *,NURBSS *,double,double *,double *,double *,double *,int);		
 
 	// Function: DetermPtOnTRMSurf_sub
 	// (private)トリム境界線が複合曲線の場合のトリミング領域内外判定
@@ -577,7 +577,7 @@ private:
 
 	// Function: CheckClossedPoints
 	// (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる
-	int CheckClossedPoints(Coord,Coord,Coord);				
+	int CheckClossedPoints(const Coord&, const Coord&, const Coord&);				
 
 	// Function: GetSECParam1
 	// (private)極値探索線Sub関数1
