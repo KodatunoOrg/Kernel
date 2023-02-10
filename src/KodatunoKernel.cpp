@@ -1814,14 +1814,12 @@ VCoord CheckTheSamePoints(const VCoord& P)
 	if (P.empty()) return VCoord();
 
 	VCoord Q;
-	std::vector<bool>	flag(P.size(), false);
+	std::vector<int>	flag(P.size(), KOD_FALSE);		// bool型は副作用が強いのでint型に変更
 
 	for(size_t i=0;i<P.size();i++){
 		if(flag[i] == false){
 			for(size_t j=i+1;j<P.size();j++){
-				if(P[i].DiffCoord(P[j]) == KOD_TRUE){
-					flag[j] = KOD_TRUE;
-				}
+				flag[j] = P[i].DiffCoord(P[j]);
 			}
 		}
 	}
@@ -1846,7 +1844,7 @@ Vdouble CheckTheSamePoints(const Vdouble& P)
 	if (P.empty()) return Vdouble();
 
 	Vdouble	Q;
-	std::vector<bool>	flag(P.size(), false);
+	std::vector<int>	flag(P.size(), KOD_FALSE);		// bool型は副作用が強いのでint型に変更
 
 	for(size_t i=0;i<P.size();i++){
 		if(flag[i] == false){
@@ -1879,14 +1877,12 @@ VCoord CheckTheSamePoints2D(const VCoord& P)
 	if (P.empty()) return VCoord();
 
 	VCoord Q;
-	std::vector<bool>	flag(P.size(), false);
+	std::vector<int>	flag(P.size(), KOD_FALSE);		// bool型は副作用が強いのでint型に変更
 
 	for(size_t i=0;i<P.size();i++){
 		if(flag[i] == false){
 			for(size_t j=i+1;j<P.size();j++){
-				if(P[i].DiffCoord2D(P[j]) == KOD_TRUE){
-					flag[j] = true;
-				}
+				flag[j] = P[i].DiffCoord2D(P[j]);
 			}
 		}
 	}

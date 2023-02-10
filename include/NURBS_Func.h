@@ -214,7 +214,7 @@ public:
 
 	// Function: CalcIntersecPtsOffsetPlaneSearch
 	// オフセットNURBS曲面と平面との交点群を交線追跡法で求める(準備中)
-	int CalcIntersecPtsOffsetPlaneSearch(NURBSS *,double,Coord,Coord,double,int,Coord *,int);
+	VCoord CalcIntersecPtsOffsetPlaneSearch(const NURBSS*, double, const Coord&, const Coord&, double, int);
 
 	// Function: CalcIntersecPtsNurbsSNurbsC
 	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
@@ -497,19 +497,19 @@ private:
 
 	// Function: SearchIntersectPt_RKM
 	// (private)4次のルンゲクッタ法により交点を収束させる(NURBS曲面と平面)
-	int SearchIntersectPt_RKM(NURBSS *,Coord,Coord,double,double *,double *,int);	
+	boost::optional<A2double> SearchIntersectPt_RKM(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: SearchIntersectPt_BS
 	// (private)Bulirsch-Stoer法により交点を収束させる(NURBS曲面と平面)
-	int SearchIntersectPt_BS(NURBSS *,Coord,Coord,double,double *,double *,int);	
+	boost::optional<A2double> SearchIntersectPt_BS(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: SearchIntersectPt_OS
 	// (private)4次のルンゲクッタ法により交点を収束させる(オフセットNURBS曲面と平面)
-	int SearchIntersectPt_OS(NURBSS *,Coord,Coord,double,double *,double *,int);		
+	boost::optional<A2double> SearchIntersectPt_OS(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: GetSIPParam1
 	// (private)NURBS曲面と平面の交点を表す微分方程式の右辺の値を得る
-	int GetSIPParam1(NURBSS *,double ,double ,Coord ,Coord ,int ,Coord *);		
+	boost::optional<Coord> GetSIPParam1(const NURBSS*, double, double, const Coord&, const Coord&, int);
 
 	// Function: SearchIntersectPt
 	// (private)ニュートン法により交点を収束させる(NURBS曲面同士)
@@ -553,7 +553,7 @@ private:
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
-	boost::tuple<int, VCoord> RemoveTheSamePoints(NURBSS *, int);
+	VCoord RemoveTheSamePoints(const NURBSS*, const VCoord&);
 
 	// Function: CalcDiffNurbsSDenom
 	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
@@ -569,7 +569,7 @@ private:
 
 	// Function: CalcIntersecPtsPlaneSearch_Sub
 	// (private)面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
-	Coord CalcIntersecPtsPlaneSearch_Sub(NURBSS *, double, double, const Coord&, const Coord&);
+	Coord CalcIntersecPtsPlaneSearch_Sub(const NURBSS*, double, double, const Coord&, const Coord&);
 
 	// Function: GetMinDistance
 	// (private)最小距離を持つ座標値を返す
