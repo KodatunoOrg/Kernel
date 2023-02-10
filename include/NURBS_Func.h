@@ -493,11 +493,11 @@ private:
 
 	// Function: SearchIntersectPt
 	// (private)ニュートン法により交点を収束させる(NURBS曲面と平面)
-	boost::optional<A2double> SearchIntersectPt(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
+	boost::tuple<int, A2double> SearchIntersectPt(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: SearchIntersectPt
 	// (private)ニュートン法により交点を収束させる(NURBS曲面同士)
-	boost::optional<A4double> SearchIntersectPt(const NURBSS*, const NURBSS*, double, double, double, double, double, int);
+	boost::tuple<int, A4double> SearchIntersectPt(const NURBSS*, const NURBSS*, double, double, double, double, double, int);
 
 	// Function: SearchIntersectPt_RKM
 	// (private)4次のルンゲクッタ法により交点を収束させる(NURBS曲面と平面)

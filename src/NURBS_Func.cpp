@@ -1676,7 +1676,8 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneSearch(const NURBSS* nurb, const Coord& p
 	bool  init_allpt_flag=KOD_FALSE;		// 初期点を全て通り終えたかを判別するフラグ
 	int loopbreak_flag = KOD_FALSE;			// 初期点一致フラグ
 	double u,v;								// 交線追跡中のu,vパラメータ中間値
-	boost::optional<A2double> uv;			// 　兼 交線追跡方向フラグ(KOD_TRUE:順方向,KOD_FALSE:逆方向)
+	A2double uv;
+	int  search_flag = KOD_TRUE;			// 交線追跡方向フラグ(KOD_TRUE:順方向,KOD_FALSE:逆方向)
 	int  inverse_flag = KOD_FALSE;			// 交線追跡方向逆転フラグ
 	double color[3] = {0,1,1};
 
@@ -1725,40 +1726,52 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneSearch(const NURBSS* nurb, const Coord& p
 		while( true ) {
 			// 順方向に交線追跡
 			if(inverse_flag == KOD_FALSE){
-				if(method == RUNGE_KUTTA)	uv = SearchIntersectPt_RKM(nurb,pt,nvec,ds,u,v,FORWARD);	// 順方向の交点算出
-				else if(method == BULIRSH_STOER)	uv = SearchIntersectPt_BS(nurb,pt,nvec,ds,u,v,FORWARD);
-				else uv = SearchIntersectPt_OS(nurb,pt,nvec,ds,u,v,FORWARD);
-				if( uv ){										// 順方向追跡に失敗した場合は
-					u = (*uv)[0];
-					v = (*uv)[1];
+				if(method == RUNGE_KUTTA) {
+					boost::tie(search_flag, uv) = SearchIntersectPt_RKM(nurb,pt,nvec,ds,u,v,FORWARD);	// 順方向の交点算出
+				}
+				else if(method == BULIRSH_STOER) {
+					boost::tie(search_flag, uv) = SearchIntersectPt_BS(nurb,pt,nvec,ds,u,v,FORWARD);
 				}
 				else {
-					inverse_flag = KOD_TRUE;					// 逆方向追跡フラグをON
+					boost::tie(search_flag, uv) = SearchIntersectPt_OS(nurb,pt,nvec,ds,u,v,FORWARD);
+				}
+				if( search_flag == KOD_ERR ){	// 順方向追跡に失敗した場合は
+					inverse_flag = KOD_TRUE;	// 逆方向追跡フラグをON
 					//fprintf(stderr,"a,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug	
-					u = init_pt[pcount].x;				// 交点追跡の初期点をセットしなおす
+					u = init_pt[pcount].x;		// 交点追跡の初期点をセットしなおす
 					v = init_pt[pcount].y;
+				}
+				else {
+					u = uv[0];
+					v = uv[1];
 				}
 				//fprintf(stderr,"e,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 			}
 			// 逆方向追跡フラグがONなら
 			if(inverse_flag == KOD_TRUE){
-				if(method == RUNGE_KUTTA)	uv = SearchIntersectPt_RKM(nurb,pt,nvec,ds,u,v,INVERSE);	// 逆方向の交点算出
-				else if(method == BULIRSH_STOER)	uv = SearchIntersectPt_BS(nurb,pt,nvec,ds,u,v,INVERSE);
-				else uv = SearchIntersectPt_OS(nurb,pt,nvec,ds,u,v,INVERSE);
-				if( uv ){										// 特異点検出により処理を継続できない場合
-					u = (*uv)[0];
-					v = (*uv)[1];
+				if(method == RUNGE_KUTTA) {
+					boost::tie(search_flag, uv) = SearchIntersectPt_RKM(nurb,pt,nvec,ds,u,v,INVERSE);	// 逆方向の交点算出
+				}
+				else if(method == BULIRSH_STOER) {
+					boost::tie(search_flag, uv) = SearchIntersectPt_BS(nurb,pt,nvec,ds,u,v,INVERSE);
 				}
 				else {
+					boost::tie(search_flag, uv) = SearchIntersectPt_OS(nurb,pt,nvec,ds,u,v,INVERSE);
+				}
+				if( search_flag == KOD_ERR ){	// 特異点検出により処理を継続できない場合
 					//fprintf(stderr,"b,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 //					GuiIFB.SetMessage("NURBS_FUNC CAUTION: Singler point was ditected.");
 					break;
+				}
+				else {
+					u = uv[0];
+					v = uv[1];
 				}
 				//fprintf(stderr,"f,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 			}
 
 			// パラメータ範囲外の場合
-			if( !uv ){
+			if(search_flag == KOD_FALSE){
 				newp = CalcIntersecPtsPlaneSearch_Sub(nurb,u,v,pt,nvec);		// 面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
 				//fprintf(stderr,"c,%d,%d,%.12lf,%.12lf\n",search_flag,inverse_flag,newp.x,newp.y);	// for debug
 				ans.push_back(newp);				// 得られたu,vを交線(交点群)として登録
@@ -1793,12 +1806,12 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneSearch(const NURBSS* nurb, const Coord& p
 			for(size_t i=0;i<init_pt.size();i++){
 				// 新たに算出された交点と1つ前の交点を対角とする立方体の中に初期点が含まれていたら
 				if(int asdf = CheckClossedPoints(oldp,newp,init_pt[i]) == KOD_TRUE){
-					if(loop_count>0 && i==pcount && inverse_flag == KOD_FALSE){	// 閉ループに対して一周して戻ってきた場合はループを抜ける
+					if(loop_count>0 && i==pcount && inverse_flag == KOD_FALSE){		// 閉ループに対して一周して戻ってきた場合はループを抜ける
 						loopbreak_flag = KOD_TRUE;	
 						//fprintf(fp,"%d loop break OK\n",i);		// debug
                         //break;
 					}
-					if(init_pt_flag[i] == KOD_FALSE){				// まだ通過していない初期点で交点もu,v範囲内だったら -> 旧search_flagはtrueしかこない
+					if(init_pt_flag[i] == KOD_FALSE && search_flag == KOD_TRUE){	// まだ通過していない初期点で交点もu,v範囲内だったら
 						init_pt_flag[i] = KOD_TRUE;					// 通過したこととして登録
 						//fprintf(fp,"%d OK\n",i);				// debug
 					}
@@ -2248,7 +2261,7 @@ boost::tuple<int, A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, co
 //
 // Return:
 // 成功：KOD_TURE, パラメータ範囲外：KOD_FALSE, 失敗(特異点につきゼロ割)：KOD_ERR
-boost::optional<A2double> NURBS_Func::SearchIntersectPt(const NURBSS* nurb, const Coord& pt, const Coord& nvec, double ds, double u, double v, int direction)
+boost::tuple<int, A2double> NURBS_Func::SearchIntersectPt(const NURBSS* nurb, const Coord& pt, const Coord& nvec, double ds, double u, double v, int direction)
 {
 	double d = pt & nvec;	// 原点から平面までの距離 CalcInnerProduct()
 
@@ -2265,7 +2278,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt(const NURBSS* nurb, cons
 	//fprintf(stderr,"%lf , %lf\n",phi_u,phi_v);
 	if(CheckZero(phi_u,MID_ACCURACY) == KOD_TRUE && CheckZero(phi_v,MID_ACCURACY) == KOD_TRUE){			// 特異点
         //GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
-		return boost::optional<A2double>();	// 無効値
+		return boost::make_tuple(KOD_ERR, A2double());
 	}
 
 	// 交線追跡順方向の場合
@@ -2291,13 +2304,13 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt(const NURBSS* nurb, cons
 			u += du;
 			if(!CheckRange(nurb->U[0],nurb->U[1],u,0) || k > LOOPCOUNTMAX){
                 //GuiIFB.SetMessage("NURBS KOD_ERROR:fail to calculate convergence");
-				return boost::optional<A2double>();	// 無効値
+				return boost::make_tuple(KOD_FALSE, A2double());
 			}
 			k++;
 		}
 		v += dv;
 		if(!CheckRange(nurb->V[0],nurb->V[1],v,0)){
-			return boost::optional<A2double>();	// 無効値
+			return boost::make_tuple(KOD_FALSE, A2double());
 		}
 	}
 	else{									// dv<duの場合はduを定数として固定する
@@ -2309,16 +2322,16 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt(const NURBSS* nurb, cons
 			v += dv;
 			if(!CheckRange(nurb->V[0],nurb->V[1],v,0) || k>LOOPCOUNTMAX){
                 //GuiIFB.SetMessage("NURBS KOD_ERROR:fail to calculate convergence");
-				return boost::optional<A2double>();	// 無効値
+				return boost::make_tuple(KOD_FALSE, A2double());
 			}
 			k++;
 		}
 		u += du;
 		if(!CheckRange(nurb->U[0],nurb->U[1],u,0))
-			return boost::optional<A2double>();	// 無効値
+			return boost::make_tuple(KOD_FALSE, A2double());
 	}
 	A2double uv = {u,v};
-	return uv;
+	return make_tuple(KOD_TRUE, uv);
 }
 
 // Function: CalcIntersecPtsNurbsSNurbsC
@@ -2429,6 +2442,7 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 	int  search_flag = KOD_TRUE;		// 交線追跡方向フラグ(KOD_TRUE:順方向,KOD_FALSE:逆方向)
 	int  inverse_flag = KOD_FALSE;		// 交線追跡方向逆転フラグ
 	double u,v,w,t;						// 交線追跡中のu,vパラメータ中間値
+	A4double wtuv;
 //	FILE *fp=fopen("debug.csv","w");
 //	double color[3] = {0,1,1};
 	
@@ -2457,7 +2471,7 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 	//	DrawPoint(init_pt_Coord_S[i],1,5,color);
 	}
 	init_pt_flag[0] = KOD_TRUE;
-	ansR[ans_count] = init_pt_R[0];
+	ansR[ans_count] = init_pt_R[0];	//////////////////////////////
 	ansS[ans_count] = init_pt_S[0];
 	
 	// 初期点を全て通過するまで交線追跡法を繰り返す
@@ -2478,13 +2492,14 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 		while(1){
 			// 追跡方向が順方向の場合
 			if(search_flag == KOD_TRUE){
-				search_flag = SearchIntersectPt(nurbR,nurbS,ds,&w,&t,&u,&v,FORWARD);	// 順方向に交線追跡
+				boost::tie(search_flag, wtuv) = SearchIntersectPt(nurbR,nurbS,ds,w,t,u,v,FORWARD);	// 順方向に交線追跡
 				if(search_flag != KOD_TRUE)						// uvパラメータ外に出たら
- 					inverse_flag = KOD_TRUE;						// 追跡方向(順から逆)フラグを立てる
+ 					inverse_flag = KOD_TRUE;					// 追跡方向(順から逆)フラグを立てる
 			}
 			// 追跡方向が逆方向の場合
 			else if(search_flag == KOD_FALSE){
-				int flag = SearchIntersectPt(nurbR,nurbS,ds,&w,&t,&u,&v,INVERSE);
+				int flag;
+				boost::tie(flag, wtuv) = SearchIntersectPt(nurbR,nurbS,ds,w,t,u,v,INVERSE);
 				if(flag == KOD_FALSE)	// uvパラメータ外に出たら
 					search_flag = KOD_TRUE;						// 追跡方向フラグを順方向に
  			}
@@ -2669,7 +2684,7 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSGeom(const NURBSS*
 //
 // Return:
 // 収束した：KOD_TRUE, パラメータ範囲外：KOD_FALSE, 特異点検出：KOD_ERR
-boost::optional<A4double> NURBS_Func::SearchIntersectPt(const NURBSS* nurbR, const NURBSS* nurbS, double ds, double w, double t, double u, double v, int direction)
+boost::tuple<int, A4double> NURBS_Func::SearchIntersectPt(const NURBSS* nurbR, const NURBSS* nurbS, double ds, double w, double t, double u, double v, int direction)
 {
 	ublasMatrix	J(3,3);
 	ublasVector	D(3);
@@ -2700,7 +2715,7 @@ boost::optional<A4double> NURBS_Func::SearchIntersectPt(const NURBSS* nurbR, con
 	double phi2 = sqrt(E2*f2*f2 - 2*F2*f2*g2 + G2*g2*g2);
 	if(!phi1 && !phi2){			// 特異点
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
-		return boost::optional<A4double>();		// 無効値
+		return boost::make_tuple(KOD_ERR, A4double());
 	}
 	
 	// 交線追跡順方向の場合
@@ -2902,11 +2917,8 @@ boost::optional<A4double> NURBS_Func::SearchIntersectPt(const NURBSS* nurbR, con
 	}
 
 EXIT:
-	if ( flag==KOD_TRUE ) {
-		A4double wtuv = {w,t,u,v};
-		return wtuv;
-	}
-	return boost::optional<A4double>();
+	A4double wtuv = {w,t,u,v};
+	return boost::make_tuple(flag, wtuv);
 }
 
 
