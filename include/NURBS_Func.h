@@ -501,15 +501,15 @@ private:
 
 	// Function: SearchIntersectPt_RKM
 	// (private)4次のルンゲクッタ法により交点を収束させる(NURBS曲面と平面)
-	boost::optional<A2double> SearchIntersectPt_RKM(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
+	boost::tuple<int, A2double> SearchIntersectPt_RKM(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: SearchIntersectPt_BS
 	// (private)Bulirsch-Stoer法により交点を収束させる(NURBS曲面と平面)
-	boost::optional<A2double> SearchIntersectPt_BS(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
+	boost::tuple<int, A2double> SearchIntersectPt_BS(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: SearchIntersectPt_OS
 	// (private)4次のルンゲクッタ法により交点を収束させる(オフセットNURBS曲面と平面)
-	boost::optional<A2double> SearchIntersectPt_OS(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
+	boost::tuple<int, A2double> SearchIntersectPt_OS(const NURBSS*, const Coord&, const Coord&, double, double, double, int);
 
 	// Function: GetSIPParam1
 	// (private)NURBS曲面と平面の交点を表す微分方程式の右辺の値を得る

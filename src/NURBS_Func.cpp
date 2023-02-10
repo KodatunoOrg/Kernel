@@ -1956,12 +1956,12 @@ Coord NURBS_Func::CalcIntersecPtsPlaneSearch_Sub(const NURBSS* nurb, double u, d
 // 
 // Return:
 // 収束した：KOD_TRUE, パラメータ範囲外：KOD_FALSE，失敗：KOD_ERR
-boost::optional<A2double> NURBS_Func::SearchIntersectPt_BS(const NURBSS* S, const Coord& pt, const Coord& nvec, double H, double u0, double v0, int direction)
+boost::tuple<int, A2double> NURBS_Func::SearchIntersectPt_BS(const NURBSS* S, const Coord& pt, const Coord& nvec, double H, double u0, double v0, int direction)
 {
 	// 引数指定ミス
 	if(direction != FORWARD && direction != INVERSE){
 //		GuiIFB.SetMessage("NURBS ERROR: selected wrong direction");
-		return boost::optional<A2double>();	// 無効値
+		return boost::make_tuple(KOD_ERR, A2double());
 	}
 
 	int    n[BS_DIV] = {2,4,6,8,12,16,24,32,48,64,96};	// B-S法の分割数群を指定
@@ -2024,7 +2024,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_BS(const NURBSS* S, cons
 			}
 			if(fabs(wek.x-wek_.x) < APPROX_ZERO_L && fabs(wek.y-wek_.y) < APPROX_ZERO_L){
 				A2double ans = {wek.x, wek.y};
-				return ans;
+				return boost::make_tuple(KOD_TRUE, ans);
 			}
 
 			wek_ = wek;
@@ -2041,13 +2041,11 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_BS(const NURBSS* S, cons
 
 	// ここまで来た場合，最後に算出された(*u0,*v0)が範囲外ならKOD_FALSEをリターン
 	if(u0 < S->U[0] || u0 > S->U[1] || v0 < S->V[0] || v0 > S->V[1]){
-		return boost::optional<A2double>();	// 無効値
+		return boost::make_tuple(KOD_FALSE, A2double());
 	}
 
-	// それ以外は特異点として値の無効値をリターン
-//	A2double ans = {HUGE_VAL, HUGE_VAL};
-//	return ans;
-	return boost::optional<A2double>();	// 一旦無効値に修正
+	// それ以外は特異点としてKOD_ERRをリターン
+	return boost::make_tuple(KOD_ERR, A2double());
 }
 
 // Function: GetSIPParam1
@@ -2103,7 +2101,7 @@ boost::optional<Coord> NURBS_Func::GetSIPParam1(const NURBSS* S, double u, doubl
 // 
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-boost::optional<A2double> NURBS_Func::SearchIntersectPt_RKM(const NURBSS* S, const Coord& pt, const Coord& n, double delta, double u, double v, int direction)
+boost::tuple<int, A2double> NURBS_Func::SearchIntersectPt_RKM(const NURBSS* S, const Coord& pt, const Coord& n, double delta, double u, double v, int direction)
 {
 	double u0 = u;
 	double v0 = v;
@@ -2120,7 +2118,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_RKM(const NURBSS* S, con
 			v = v0 + q[i-1];
 		}
 		if(u < S->U[0] || u > S->U[1] || v < S->V[0] || v > S->V[1])	// パラメータ範囲外
-			return boost::optional<A2double>();	// 無効値
+			return boost::make_tuple(KOD_FALSE, A2double());
 
 		Coord Su = CalcDiffuNurbsS(S,u,v);
 		Coord Sv = CalcDiffvNurbsS(S,u,v);
@@ -2131,13 +2129,13 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_RKM(const NURBSS* S, con
 		double fvv = fv*fv;
 		if(CheckZero(fu,LOW_ACCURACY) == KOD_TRUE && CheckZero(fv,LOW_ACCURACY) == KOD_TRUE){			// 特異点
             //GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
-			return boost::optional<A2double>();	// 無効値
+			return boost::make_tuple(KOD_ERR, A2double());
 		}
 		double E = Su & Su;		// 1次規格量
 		double F = Su & Sv;		// 1次規格量
 		double G = Sv & Sv;		// 1次規格量
 		double denom = sqrt(E*fvv - 2*F*fuv + G*fuu);
-		if(CheckZero(denom,LOW_ACCURACY) == KOD_TRUE) return boost::optional<A2double>();		// 特異点
+		if(CheckZero(denom,LOW_ACCURACY) == KOD_TRUE) return boost::make_tuple(KOD_ERR, A2double());	// 特異点
 		double f_ = 1/denom;
 		p[i] = -delta*fv*f_*(double)direction;
 		q[i] = delta*fu*f_*(double)direction;
@@ -2146,10 +2144,10 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_RKM(const NURBSS* S, con
 	v = v0+(q[0]+2*q[1]+2*q[2]+q[3])/6;
 
 	if(u < S->U[0] || u > S->U[1] || v < S->V[0] || v > S->V[1])	// パラメータ範囲外
-		return boost::optional<A2double>();	// 無効値
+		return boost::make_tuple(KOD_FALSE, A2double());
 
 	A2double ans = {u,v};
-	return ans;
+	return boost::make_tuple(KOD_TRUE, ans);
 }
 
 // Function: SearchIntersectPt_OS
@@ -2172,7 +2170,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_RKM(const NURBSS* S, con
 // 
 // Return:
 // 成功：KOD_TRUE, パラメータ範囲外：KOD_FALSE, 失敗：KOD_ERR
-boost::optional<A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, const Coord& pt, const Coord& n, double delta, double u, double v, int direction)
+boost::tuple<int, A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, const Coord& pt, const Coord& n, double delta, double u, double v, int direction)
 {
 	double u0 = u;
 	double v0 = v;
@@ -2197,7 +2195,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, cons
 		double H = sfq.E*sfq.G-sfq.F*sfq.F;
 		if(CheckZero(H,HIGH_ACCURACY) == KOD_TRUE){			// 特異点
 			//GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
-			return boost::optional<A2double>();				// 無効値
+			return boost::make_tuple(KOD_ERR, A2double());
 		}
 		Coord nu = Su*(sfq.N*sfq.F-sfq.M*sfq.G)/(H*H);
 		Coord nv = Sv*(sfq.L*sfq.F-sfq.M*sfq.E)/(H*H);
@@ -2210,7 +2208,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, cons
 		double fvvt = fvt*fvt;
 		if(CheckZero(fut,HIGH_ACCURACY) == KOD_TRUE && CheckZero(fvt,HIGH_ACCURACY) == KOD_TRUE){			// 特異点
 			//GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
-			return boost::optional<A2double>();				// 無効値
+			return boost::make_tuple(KOD_ERR, A2double());
 		}
 		double Kg = CalcGaussCurvature(sfq);
 		double Km = CalcMeanCurvature(sfq);
@@ -2222,7 +2220,7 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, cons
 		double Gt = sfq.G-2*sfq.N*d+nvnv*d*d;		// 1次規格量
 		double denom = Et*fvvt - 2*Ft*fuvt + Gt*fuut;
 		if(denom <= 0)
-			return boost::optional<A2double>();				// 無効値
+			return boost::make_tuple(KOD_ERR, A2double());
 		double gt_ = 1/sqrt(denom);
 		p[i] = -delta*fvt*gt_*(double)direction;
 		q[i] = delta*fut*gt_*(double)direction;
@@ -2231,10 +2229,10 @@ boost::optional<A2double> NURBS_Func::SearchIntersectPt_OS(const NURBSS* S, cons
 	v = v0+(q[0]+2*q[1]+2*q[2]+q[3])/6;
 	
 	if(u < S->U[0] || u > S->U[1] || v < S->V[0] || v > S->V[1])	// パラメータ範囲外
-		return boost::optional<A2double>();				// 無効値
+		return boost::make_tuple(KOD_FALSE, A2double());
 
 	A2double ans = {u,v};
-	return ans;
+	return boost::make_tuple(KOD_TRUE, ans);
 }
 
 // Function: SearchIntersectPt
