@@ -3923,18 +3923,18 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const VCoord& P_, int M)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs, const VCoord& P, int M)
+NURBSC* NURBS_Func::GenApproximationNurbsC(const VCoord& P, int M)
 {
 	size_t PNum = P.size();
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 
 	int K = SetApproximationCPnum(PNum);		// 与えられた点列からコントロールポイントの数を決める(コントロールポイントの数で近似される曲線が変わる)
 	int Nnum = M+K;					// ノットベクトルの数
-	int prop[4] = {0,0,1,0};		// パラメータ
-	double V[2] = {0,1};			// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};			// パラメータ
+	A2double V = {0,1};				// ノットベクトルの開始値,終了値
 
 	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
 	ublasVector T(Nnum);			// ノットベクトル
@@ -3951,9 +3951,7 @@ int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs, const VCoord& P, int M)
 		W[i] = 1;
 	}
 
-	GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);	// NURBS曲線生成
-
-	return KOD_TRUE;
+	return new NURBSC(M,T,W,Q,V,prop,0);	// NURBS曲線生成
 }
 
 // Function: GenNurbsCfromCP
@@ -3969,16 +3967,17 @@ int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs, const VCoord& P, int M)
 // PNum - 点列の数   
 // M - 階数
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,Coord *P,int PNum,int M)
+NURBSC* NURBS_Func::GenNurbsCfromCP(const VCoord& P, int M)
 {
+	int PNum = P.size();
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 
 	int Nnum = M+PNum;				// ノットベクトルの数
-	int prop[4] = {0,0,1,0};		// パラメータ
-	double V[2] = {0,1};			// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};			// パラメータ
+	A2double V = {0,1};				// ノットベクトルの開始値,終了値
 	ublasVector T(Nnum);			// ノットベクトル
 	ublasVector W(PNum);			// 重み
 
@@ -3988,9 +3987,7 @@ int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,Coord *P,int PNum,int M)
 		W[i] = 1;
 	}
 
-	GenNurbsC(Nurbs,PNum,M,T,W,P,V,prop,0);	// NURBS曲線生成
-
-	return KOD_TRUE;
+	return new NURBSC(M,T,W,P,V,prop,0);	// NURBS曲線生成
 }
 
 // Function: GenPolygonalLine
@@ -4003,18 +4000,19 @@ int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,Coord *P,int PNum,int M)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,Coord *P,int PNum)
+NURBSC* NURBS_Func::GenPolygonalLine(const VCoord& P)
 {
+	int PNum = P.size();
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 
 	int M=2;					// 階数2
 	int K=PNum;					// コントロールポイントの数
 	int N=PNum+2;				// ノットベクトルの数
-	int prop[4] = {0,0,1,0};	// パラメータ
-	double V[2] = {0,1};		// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};		// パラメータ
+	A2double V = {0,1};			// ノットベクトルの開始値,終了値
 	ublasVector T(N);			// ノットベクトル
 	ublasVector W(K);			// 重み
 
@@ -4035,9 +4033,7 @@ int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,Coord *P,int PNum)
 	}
 
 	// NURBS曲線を生成する
-	GenNurbsC(Nurbs,K,M,T,W,P,V,prop,0);
-
-	return KOD_TRUE;
+	return new NURBSC(M,T,W,P,V,prop,0);
 }
 
 // Function: GenInterpolatedNurbsS1

@@ -294,15 +294,15 @@ public:
 
 	// Function: GenApproximationNurbsC
 	// 与えられた点列を近似するn階のNURBS曲線を生成する
-	int GenApproximationNurbsC(NURBSC *, const VCoord&, int);
+	NURBSC* GenApproximationNurbsC(const VCoord&, int);
 
 	// Function: GenNurbsCfromCP
 	// コントロールポイントからNURBS曲線を生成する
-	int GenNurbsCfromCP(NURBSC *,Coord *,int,int);				
+	NURBSC* GenNurbsCfromCP(const VCoord&, int);
 
 	// Function: GenPolygonalLine
 	// 折れ線を生成する
-	int GenPolygonalLine(NURBSC *,Coord *,int);					
+	NURBSC* GenPolygonalLine(const VCoord&, int);
 
 	// Function: GenInterpolatedNurbsS1
 	// 与えられた点列を補間するn階NURBS曲面を生成する
