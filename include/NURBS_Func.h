@@ -186,11 +186,11 @@ public:
 
 	// Function: CalcIntersecCurve
 	// NURBS曲線と平面との交点を求める(ニュートン法)
-	Vdouble CalcIntersecCurve(NURBSC *, const Coord&, const Coord&, int, int);	
+	Vdouble CalcIntersecCurve(const NURBSC*, const Coord&, const Coord&, int, int);
 
 	// Function: CalcIntersecCurve3
 	// 3次以下のNURBS曲線と平面との交点を求める
-	int CalcIntersecCurve3(NURBSC *,Coord,Coord,double *,int);	
+	Vdouble CalcIntersecCurve3(const NURBSC*, const Coord&, const Coord&);
 
 	// Function: CalcIntersecPtsPlaneV3
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
@@ -477,11 +477,11 @@ private:
 
 	// Function: GetNurbsCCoef
 	// (private)NURBS曲線の係数を求める(最高3次)
-	int GetNurbsCCoef(NURBSC *,const ublasMatrix&,int,Coord *,double *);	
+	boost::tuple<VCoord, Vdouble> GetNurbsCCoef(const NURBSC*, const ublasMatrix&, int);
 
 	// Function: CalcEquation
 	// (private)3次方程式までを判別して解く
-	boost::tuple<int, Vdouble> CalcEquation(int, const Vdouble&);
+	Vdouble CalcEquation(int, const Vdouble&);
 
 	// Function: GetNurbsSCoef
 	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める

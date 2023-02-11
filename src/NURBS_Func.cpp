@@ -1318,7 +1318,7 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneV3(const NURBSS* nurb, const Coord& pt, c
 	VCoord  P;
 	Vdouble a;
 	Vdouble t;
-	int	num, K[] = {nurb->W.size1(), nurb->W.size2()};
+	int	K[] = {nurb->W.size1(), nurb->W.size2()};
 
 	ublasMatrix coef(nurb->M[0],nurb->M[0]);
 
@@ -1355,8 +1355,8 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneV3(const NURBSS* nurb, const Coord& pt, c
 			}
 			boost::tie(P,Q) = GetNurbsSCoef(nurb->M[0],coef,A,B,i);		// 固定されたvパラメータ上のNURBS曲線C(u)の係数を求める
 			a = GetIntersecEquation(nurb->M[0],P,Q,pt,nvec);			// 方程式を導出
-			boost::tie(num, t) = CalcEquation(nurb->M[0]-1, a);			// 方程式を解く
-			for(int j=0;j<num;j++){			// 3つの解それぞれに対して
+			t = CalcEquation(nurb->M[0]-1, a);							// 方程式を解く
+			for(size_t j=0;j<t.size();j++){								// 3つの解それぞれに対して
 				if(t[j] >= nurb->S[i+nurb->M[0]-1] && t[j] <= nurb->S[i+nurb->M[0]]){	// 注目中のノットベクトルの範囲内なら
 					ans.push_back(Coord(t[j],v_const,0));		// 解として登録
 				}
@@ -1393,7 +1393,7 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneU3(const NURBSS* nurb, const Coord& pt, c
 	VCoord  P;
 	Vdouble a;
 	Vdouble t;
-	int	num, K[] = {nurb->W.size1(), nurb->W.size2()};
+	int	K[] = {nurb->W.size1(), nurb->W.size2()};
 
 	ublasMatrix coef(nurb->M[1],nurb->M[1]);
 
@@ -1425,8 +1425,8 @@ VCoord NURBS_Func::CalcIntersecPtsPlaneU3(const NURBSS* nurb, const Coord& pt, c
 			}
 			boost::tie(P,Q) = GetNurbsSCoef(nurb->M[1],coef,A,B,i);		// 固定されたuパラメータ上のNURBS曲線C(v)の係数を求める
 			a = GetIntersecEquation(nurb->M[1],P,Q,pt,nvec);			// 方程式を導出
-			boost::tie(num, t) = CalcEquation(nurb->M[1]-1, a);			// 方程式を解く
-			for(int j=0;j<num;j++){			// 3つの解それぞれに対して
+			t = CalcEquation(nurb->M[1]-1, a);							// 方程式を解く
+			for(size_t j=0;j<t.size();j++){			// 3つの解それぞれに対して
 				if(t[j] >= nurb->T[i+nurb->M[1]-1] && t[j] <= nurb->T[i+nurb->M[1]]){	// 注目中のノットベクトルの範囲内なら
 					ans.push_back(Coord(u_const,t[j],0));		// 解として登録
 				}
@@ -3107,7 +3107,7 @@ boost::optional<A2double> NURBS_Func::ClacIntersecPtsNurbsCLineSeg(const NURBSC*
 //
 // Return:
 // 交点の個数（KOD_ERR：交点の数がans_sizeを超えた）
-Vdouble NURBS_Func::CalcIntersecCurve(NURBSC *nurb, const Coord& pt, const Coord& nvec, int Divnum, int LoD)
+Vdouble NURBS_Func::CalcIntersecCurve(const NURBSC* nurb, const Coord& pt, const Coord& nvec, int Divnum, int LoD)
 {
 	Vdouble ans;
 	double t = nurb->V[0];		// 現在のNURBS曲線のパラメータ値
@@ -3279,27 +3279,28 @@ Vdouble NURBS_Func::CalcIntersecIsparaCurveV(const NURBSS* nurb, double U, const
 //
 // Return:
 // 交点の個数（曲線次数が3次以上：KOD_ERR）
-int NURBS_Func::CalcIntersecCurve3(NURBSC *nurb,Coord pt,Coord nvec,double *ans,int ans_size)
+Vdouble NURBS_Func::CalcIntersecCurve3(const NURBSC* nurb, const Coord& pt, const Coord& nvec)
 {
-	double Q[4];	// NURBS曲線の分母の係数
-	Coord  P[4];	// NURBS曲線の分子の係数
-	double a[4];
-	double t[3];
-	int ansnum;
-	int k=0;
+	Vdouble ans;
+	VCoord  P;	// NURBS曲線の分子の係数
+	Vdouble Q;	// NURBS曲線の分母の係数
+	Vdouble a;
+	Vdouble t;
+	int num;
+	int K=nurb->W.size();
 
 	ublasMatrix coef(nurb->M,nurb->M);
 
 	// 1本のNURBS曲線はK-M+1本の曲線から構成される。それぞれの構成曲線に対して方程式を導出し、解を得る。
-	for(int i=0;i<nurb->K-nurb->M+1;i++){
+	for(int i=0;i<K-nurb->M+1;i++){
 		if(nurb->M-1 == 3){			// 3次			
-			coef = GetBSplCoef3(nurb->M,nurb->K,i,nurb->T);	// 各コントロールポイントにおける3次Bスプライン基底関数の係数(coef)を求める
+			coef = GetBSplCoef3(nurb->M,K,i,nurb->T);	// 各コントロールポイントにおける3次Bスプライン基底関数の係数(coef)を求める
 		}
 		else if(nurb->M-1 == 2){	// 2次
-			coef = GetBSplCoef2(nurb->M,nurb->K,i,nurb->T);	// 各コントロールポイントにおける2次Bスプライン基底関数の係数を求める
+			coef = GetBSplCoef2(nurb->M,K,i,nurb->T);	// 各コントロールポイントにおける2次Bスプライン基底関数の係数を求める
 		}
 		else if(nurb->M-1 == 1){	// 1次	
-			coef = GetBSplCoef1(nurb->M,nurb->K,i,nurb->T);	// 各コントロールポイントにおける1次Bスプライン基底関数の係数を求める
+			coef = GetBSplCoef1(nurb->M,K,i,nurb->T);	// 各コントロールポイントにおける1次Bスプライン基底関数の係数を求める
 		}
 		else{
 //			char mes[256];
@@ -3307,26 +3308,21 @@ int NURBS_Func::CalcIntersecCurve3(NURBSC *nurb,Coord pt,Coord nvec,double *ans,
 //			GuiIFB.SetMessage(mes);
 			goto EXIT;
 		}
-		GetNurbsCCoef(nurb,coef,i,P,Q);						// NURBS曲線の係数(P,Q)を求める
-		GetIntersecEquation(nurb->M,P,Q,pt,nvec,a);			// NURBS曲線と平面の交線導出用方程式を得る
-		ansnum = CalcEquation(a,t,nurb->M-1);					// 方程式を解き、交点のパラメータ値を得る
+		boost::tie(P,Q) = GetNurbsCCoef(nurb,coef,i);	// NURBS曲線の係数(P,Q)を求める
+		a = GetIntersecEquation(nurb->M,P,Q,pt,nvec);	// NURBS曲線と平面の交線導出用方程式を得る
+		t = CalcEquation(nurb->M-1, a);					// 方程式を解き、交点のパラメータ値を得る
 
-		for(int j=0;j<ansnum;j++){
+		for(size_t j=0;j<t.size();j++){
 			if(t[j] >= nurb->T[i+nurb->M-1] && t[j] <= nurb->T[i+nurb->M]){	// ノットベクトルの値と適合するもののみ解として抽出
-				if(k == ans_size){
-//					GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
-					goto EXIT;
-				}
-				ans[k] = t[j];		// 解を取得
-				k++;				// 解の数をインクリメント
+				ans.push_back(t[j]);		// 解を取得
 			}
 		}
 	}
 
-	return k;
+	return ans;
 
 EXIT:
-	return KOD_ERR;
+	return Vdouble();	// 空を返す
 }
 
 // Function: CalcEquation
@@ -3339,9 +3335,9 @@ EXIT:
 //
 // Return:
 // 解の個数（解がなかった場合 or 次数が3,2,1のいずれかでない：KOD_ERR）
-boost::tuple<int, Vdouble> NURBS_Func::CalcEquation(int M, const Vdouble& a)
+Vdouble NURBS_Func::CalcEquation(int M, const Vdouble& a)
 {
-	int num = 0;
+	int num;
 	Vdouble	t;
 
 	if(M == 3) {
@@ -3362,7 +3358,7 @@ boost::tuple<int, Vdouble> NURBS_Func::CalcEquation(int M, const Vdouble& a)
 		if ( ans ) t.push_back( *ans );
 	}
 
-	return boost::make_tuple(num, t);
+	return t;
 }
 
 // Function: GetIntersecEquation
@@ -3394,21 +3390,22 @@ Vdouble NURBS_Func::GetIntersecEquation(int M, const VCoord& P, const Vdouble& Q
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GetNurbsCCoef(NURBSC *nurb,const ublasMatrix& coef,int i,Coord *P,double *Q)
+boost::tuple<VCoord, Vdouble> NURBS_Func::GetNurbsCCoef(const NURBSC* nurb, const ublasMatrix& coef, int i)
 {
+	VCoord  P;
+	Vdouble Q;
 	for(int j=0;j<nurb->M;j++){
-		P[j] = 0;
-		Q[j] = 0;
-	}
-
-	for(int j=0;j<nurb->M;j++){
+		double q = 0;
+		Coord  p;
 		for(int k=0;k<nurb->M;k++){
-			Q[j] += coef(k,j)*nurb->W[i+k];
-			P[j] += nurb->cp[i+k] * (coef(k,j)*nurb->W[i+k]);
+			q += coef(k,j)*nurb->W[i+k];
+			p += nurb->cp[i+k] * (coef(k,j)*nurb->W[i+k]);
 		}
+		Q.push_back(q);
+		P.push_back(p);
 	}
 	
-	return KOD_TRUE;
+	return boost::make_tuple(P,Q);
 }
 
 // Function: GetBSplCoef3
