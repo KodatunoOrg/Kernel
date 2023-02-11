@@ -1693,12 +1693,12 @@ EXIT:
 //
 // Return:
 // 行列式
-ublasMatrix MatInv3(const ublasMatrix& A)
+boost::optional<ublasMatrix> MatInv3(const ublasMatrix& A)
 {
 	ublasMatrix	A_inv(A.size1(), A.size2());
 	double det = A(0,0)*A(1,1)*A(2,2) + A(1,0)*A(2,1)*A(0,2) + A(2,0)*A(0,1)*A(1,2)
 					- A(0,0)*A(2,1)*A(1,2) - A(2,0)*A(1,1)*A(0,2) - A(1,0)*A(0,1)*A(2,2);
-	if(det == 0) return A_inv;		// 行列式が0(空の行列)
+	if(det == 0) return boost::optional<ublasMatrix>();	// 行列式が0（無効値）
 
 	A_inv(0,0) = (A(1,1)*A(2,2)-A(1,2)*A(2,1))/det;
 	A_inv(0,1) = (A(0,2)*A(2,1)-A(0,1)*A(2,2))/det;
@@ -1722,11 +1722,11 @@ ublasMatrix MatInv3(const ublasMatrix& A)
 //
 // Return:
 // 行列式
-ublasMatrix MatInv2(const ublasMatrix& A)
+boost::optional<ublasMatrix> MatInv2(const ublasMatrix& A)
 {
 	ublasMatrix	A_inv(A.size1(), A.size2(), 0);
 	double det = A(0,0)*A(1,1) - A(0,1)*A(1,0);
-	if(det == 0) return A_inv;		// 行列式が0(空の行列)
+	if(det == 0) return boost::optional<ublasMatrix>();	// 行列式が0（無効値）
 
 	A_inv(0,0) = A(1,1)/det;
 	A_inv(0,1) = -A(0,1)/det;

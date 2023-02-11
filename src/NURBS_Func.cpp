@@ -2355,6 +2355,7 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsSNurbsC(const NURBSS* NurbsS, const NURBS
 	double t = NurbsC->V[0];				// NURBS曲線C(t)のtパラメータ
 	ublasMatrix A(3,3);						// Fu,Fv,Ftを構成する3x3行列
 	ublasMatrix A_(3,3);					// Aの逆行列を格納
+	boost::optional<ublasMatrix> reA;
 	bool flag = false;						// 収束フラグ
 	double dt = (NurbsC->V[1] - NurbsC->V[0])/(double)Divnum;	// 収束演算用のtパラメータのインターバル値
 	int loopcount = 0;						// 収束計算回数
@@ -2381,8 +2382,9 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsSNurbsC(const NURBSS* NurbsS, const NURBS
 			A(2,0) = Fu.z;
 			A(2,1) = Fv.z;
 			A(2,2) = Ft.z;	
-//			if(MatInv3(A,A_) == KOD_FALSE)	break;		// 逆行列を求める
-			A_ = MatInv3(A);
+			reA = MatInv3(A);
+			if ( reA ) A_ = *reA;
+			else break;
 			d = MulMxCoord(A_,F)*(-1);					// dを算出
 
 			if(fabs(d.x) <= APPROX_ZERO && fabs(d.y) <= APPROX_ZERO && fabs(d.z) <= APPROX_ZERO){	// 真値に収束したらloopを抜ける
@@ -2967,7 +2969,7 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(const NURBSC* NurbA, const N
 	bool flag = false;			// 収束フラグ
 	ublasMatrix A(2,2);			// Ft,Fuを成分ごとに格納した行列
 	ublasMatrix A_(2,2);		// Aの逆行列を格納
-	
+	boost::optional<ublasMatrix> reA;
 
 	for(int i=0;i<Divnum;i++){
 		flag = false;
@@ -2982,7 +2984,8 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(const NURBSC* NurbA, const N
             A(0,1) = -Fu.x;
 			A(1,0) = Ft.y;
             A(1,1) = -Fu.y;
-			A_ = MatInv2(A);
+			reA = MatInv2(A);
+			if ( reA ) A_ = *reA;	// オリジナルでチェックせず
 			dt = -(A_(0,0)*F.x + A_(0,1)*F.y);
 			du = -(A_(1,0)*F.x + A_(1,1)*F.y);
 
@@ -3022,6 +3025,7 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
 {
     ublasMatrix A(2,2);
     ublasMatrix A_(2,2);
+	boost::optional<ublasMatrix> reA;
     bool conv_flag = false;
 
     *t1 = (C->V[0]+C->V[1])/2;
@@ -3035,9 +3039,9 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
         A(1,0) = Ct.y;
         A(0,1) = -Lt.x;
         A(1,1) = -Lt.y;
-//		double det = MatInv2(A,A_);
-//		if(det == 0) break;
-		A_ = MatInv2(A);
+		reA = MatInv2(A);
+		if ( reA ) A_ = *reA;
+		else break;	// 行列式がゼロ
         double dt1 = A_(0,0)*B.x + A_(0,1)*B.y;
         double dt2 = A_(1,0)*B.x + A_(1,1)*B.y;
         //fprintf(stderr,"    %lf,%lf,%lf,%lf,%lf\n",*t1,*t2,dt1,dt2,det);		// fro debug
@@ -4587,6 +4591,7 @@ VCoord NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb, const Coord& r, const 
 	double t = 0;							// 直線N(t)のtパラメータ
 	ublasMatrix A(3,3);						// Fu,Fv,Ftを構成する3x3行列
 	ublasMatrix A_(3,3);					// Aの逆行列を格納
+	boost::optional<ublasMatrix> reA;
 	int flag = KOD_FALSE;					// 収束フラグ
 	double dv = (Nurb->V[1] - Nurb->V[0])/(double)Divnum;	// 収束演算用のvパラメータのインターバル値
 	double du = (Nurb->U[1] - Nurb->U[0])/(double)Divnum;	// 収束演算用のuパラメータのインターバル値
@@ -4617,12 +4622,13 @@ VCoord NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb, const Coord& r, const 
 				A(2,1) = Fv.z;
 				A(2,2) = Ft.z;	
 				//fprintf(stderr,"   %lf,%lf,%lf,%lf,%lf\n",u,v,Fu.x,Fu.y,Fu.z);
-//				if(MatInv3(A,A_) == KOD_FALSE){		// 逆行列を求める
-//					flag = KOD_ERR;
-//					break;
-//				}
-				A_ = MatInv3(A);
-				d = MulMxCoord(A_,F)*(-1);			// dを算出
+				reA = MatInv3(A);			// 逆行列を求める
+				if ( reA ) A_ = *reA;
+				else {
+					flag = KOD_ERR;
+					break;
+				}
+				d = MulMxCoord(A_,F)*(-1);	// dを算出
 				
 				if(fabs(d.x) <= APPROX_ZERO && fabs(d.y) <= APPROX_ZERO && fabs(d.z) <= APPROX_ZERO){	// 真値に収束したらloopを抜ける
 					flag = KOD_TRUE;		// 収束フラグtrue
@@ -4681,6 +4687,7 @@ boost::optional<Coord> NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S, const Coord&
 {
 	ublasMatrix dF(3,3);			// Fu,Fv,Ftを構成する3x3行列
 	ublasMatrix dF_(3,3);			// dFの逆行列を格納
+	boost::optional<ublasMatrix> reDF;
 	Coord F,Fu,Fv,Ft;				// F(u,v,t) = S(u,v) - P - t・N(u,v)	ニュートン法にかける関数
 	Coord N,Nu,Nv;					// N(u,v):S(u,v)上の法線ベクトル
 	Coord d;						// ニュートン法によって更新されるステップサイズパラメータ
@@ -4719,13 +4726,13 @@ boost::optional<Coord> NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S, const Coord&
 				dF(2,1) = Fv.z;
 				dF(2,2) = Ft.z;
 
-//				if((flag = MatInv3(dF,dF_)) == KOD_FALSE){		// 逆行列算出 detが0なら次の初期値へ
+				reDF = MatInv3(dF);			// 逆行列算出 detが0なら次の初期値へ
+				if ( reDF ) dF_ = *reDF;
+				else {
 					//fprintf(stderr,"%d:det = 0\n",loopcount);	// debug
-//					break;
-//				}
-				dF_ = MatInv3(dF);
-
-				d = MulMxCoord(dF_,F)*(-1);		// ステップサイズパラメータの更新値を算出
+					break;
+				}
+				d = MulMxCoord(dF_,F)*(-1);	// ステップサイズパラメータの更新値を算出
 
 				if(fabs(d.x) <= APPROX_ZERO_L && fabs(d.y) <= APPROX_ZERO_L && fabs(d.z) <= APPROX_ZERO_L){	// 真値に収束したらloopを抜ける
 					flag = KOD_TRUE;		// 収束フラグtrue
@@ -5372,6 +5379,7 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 	// パラメトリック領域内で直線近似(最小2乗法で近似直線の係数2つを求める)
 	ublasMatrix A(2,2,0);
 	ublasMatrix A_(2,2);
+	boost::optional<ublasMatrix> reA;
 	ublasVector B(2,0);
 	ublasVector B_(2);
 	for(int i=0;i<num;i++){
@@ -5382,7 +5390,8 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 	}
 	A(1,0) = A(0,1);
 	A(1,1) = (double)num;
-	A_ = MatInv2(A);
+	reA = MatInv2(A);
+	if ( reA ) A_ = *reA;		// オリジナルでチェックせず
 	B_ = MulMxVec(A_,B);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
 
 	// 端点抽出

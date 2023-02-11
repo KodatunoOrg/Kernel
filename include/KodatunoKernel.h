@@ -363,11 +363,11 @@ ublasMatrix MatInv(ublasMatrix&);
 
 // Function: MatInv3
 // 3x3の逆行列
-ublasMatrix MatInv3(const ublasMatrix&);
+boost::optional<ublasMatrix> MatInv3(const ublasMatrix&);
 
 // Function: MatInv2
 // 2x2の逆行列
-ublasMatrix MatInv2(const ublasMatrix&);
+boost::optional<ublasMatrix> MatInv2(const ublasMatrix&);
 
 // Group: Functions(数値計算)
 
