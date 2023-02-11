@@ -258,27 +258,27 @@ public:
 
 	// Function: ShiftNurbsS
 	// NURBS曲面のシフト
-	void ShiftNurbsS(NURBSS *,Coord);							
+	void ShiftNurbsS(NURBSS*, const Coord&);
 
 	// Function: ShiftNurbsC
 	// NURBS曲線のシフト
-	void ShiftNurbsC(NURBSC *,Coord);							
+	void ShiftNurbsC(NURBSC*, const Coord&);
 
 	// Function: ChRatioNurbsS
 	// NURBS曲面の倍率を変更する
-	void ChRatioNurbsS(NURBSS *,Coord);							
+	void ChRatioNurbsS(NURBSS*, const Coord&);
 
 	// Function: ChRatioNurbsC
 	// NURBS曲線の倍率を変更する
-	void ChRatioNurbsC(NURBSC *,Coord);							
+	void ChRatioNurbsC(NURBSC*, const Coord&);
 
 	// Function: RotNurbsS
 	// NURBS曲面を回転
-	void RotNurbsS(NURBSS *,Coord,double);						
+	void RotNurbsS(NURBSS*, const Coord&, double);
 
 	// Function: RotNurbsC
 	// NURBS曲線を回転
-	void RotNurbsC(NURBSC *,Coord,double);						
+	void RotNurbsC(NURBSC*, const Coord&, double);
 
 	// Function: SetCPNurbsS
 	// コントロールポイントを代入する

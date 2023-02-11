@@ -98,7 +98,7 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC& NurbsC, const Coord& Axis, double
 {
 	NURBSS* NurbsS = NULL;
 	Coord norm( Axis.NormalizeVec() );		// 正規化
-	int K = NurbsC.W.size();
+	int K = NurbsC.cp.size();
 
     // 回転角度によって，いくつのセグメントで円弧を生成するか判断する
     // 回転角度が180度未満の場合，1セグメントで円弧を表現する
@@ -229,7 +229,7 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC& NurbsC, const Coord& Axis, double
 NURBSS* NURBS_Func::GenSweepNurbsS(const NURBSC& NurbsC, const Coord& Axis, double Len)
 {
 	Coord norm( Axis.NormalizeVec() );		// 正規化
-	int K = NurbsC.W.size();
+	int K = NurbsC.cp.size();
 
 	// NurbsSを生成
 	ublasVector T(4);				// v方向ノットベクトル
@@ -454,9 +454,8 @@ Coord NURBS_Func::CalcNurbsCCoord(const NURBSC* NurbsC, double t)
 	Coord bscpw;
 	double bsw=0;
 	double bs=0;
-	int i;
 
-	for(i=0;i<NurbsC->W.size();i++){
+	for(size_t i=0;i<NurbsC->cp.size();i++){
 		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);	// Bスプライン基底関数を求める
 		bsw += bs*NurbsC->W[i];									// 分母
 		bscpw += NurbsC->cp[i] * (bs*NurbsC->W[i]);				// 分子
@@ -647,13 +646,12 @@ Coord NURBS_Func::CalcDiffNurbsC(const NURBSC* NurbsC, double t)
 	Coord Ft,diff_Ft;		// NURBS曲線の分子
 	double Gt,diff_Gt;		// NURBS曲線の分母
 	double bs,diff_bs;		// Bスプライン基底関数
-	int i;
 
 	Gt = 0;
 	diff_Gt = 0;
 
 	// 各係数算出
-	for(i=0;i<NurbsC->W.size();i++){
+	for(size_t i=0;i<NurbsC->cp.size();i++){
 		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
 		diff_bs = CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M);
 
@@ -690,7 +688,7 @@ Coord NURBS_Func::CalcDiff2NurbsC(const NURBSC* NurbsC, double t)
 	P0 = CalcNurbsCCoord(NurbsC,t);
 	P1 = CalcDiffNurbsC(NurbsC,t);
 
-	for(int i=0;i<NurbsC->W.size();i++){
+	for(size_t i=0;i<NurbsC->cp.size();i++){
 		w0 += CalcBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
 		w1 += CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
 		w2 += CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i];
@@ -714,9 +712,11 @@ Coord NURBS_Func::CalcDiffNNurbsC(const NURBSC* NurbsC, int r, double t)
 {
 	if(!r) return CalcNurbsCCoord(NurbsC,t);
 
+	int K=NurbsC->cp.size();
 	Coord Ar;
 	double W = 0;
-	for(int i=0;i<NurbsC->W.size();i++){
+
+	for(int i=0;i<K;i++){
 		double bsr = CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,r);
 		Ar += NurbsC->cp[i] * (bsr*NurbsC->W[i]);
 		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
@@ -725,7 +725,7 @@ Coord NURBS_Func::CalcDiffNNurbsC(const NURBSC* NurbsC, int r, double t)
 	Coord Br;
 	for(int i=1;i<=r;i++){
 		double Wi = 0;
-		for(int j=0;j<NurbsC->W.size();j++){
+		for(int j=0;j<K;j++){
 			double bsi = CalcDiffBSbasisN(t,NurbsC->T,j,NurbsC->M,i);
 			Wi += bsi*NurbsC->W[j];
 		}
@@ -3287,7 +3287,7 @@ Vdouble NURBS_Func::CalcIntersecCurve3(const NURBSC* nurb, const Coord& pt, cons
 	Vdouble a;
 	Vdouble t;
 	int num;
-	int K=nurb->W.size();
+	int K=nurb->cp.size();
 
 	ublasMatrix coef(nurb->M,nurb->M);
 
@@ -3608,10 +3608,11 @@ ublasMatrix NURBS_Func::GetBSplCoef1(int M, int K, int i, const ublasVector& t)
 // Parameters:
 // *nurbs - 変更されるNURBS曲面  
 // shift - シフト量
-void NURBS_Func::ShiftNurbsS(NURBSS *nurbs,Coord shift)
+void NURBS_Func::ShiftNurbsS(NURBSS* nurbs,const Coord& shift)
 {
-	for(int i=0;i<nurbs->K[0];i++){
-		for(int j=0;j<nurbs->K[1];j++){
+	size_t K[] = {nurbs->W.size1(), nurbs->W.size2()};
+	for(size_t i=0;i<K[0];i++){
+		for(size_t j=0;j<K[1];j++){
 			nurbs->cp[i][j] = nurbs->cp[i][j] + shift;
 		}
 	}
@@ -3623,9 +3624,9 @@ void NURBS_Func::ShiftNurbsS(NURBSS *nurbs,Coord shift)
 // Parameters:
 // *nurbs - 変更されるNURBS曲線  
 // shift - シフト量
-void NURBS_Func::ShiftNurbsC(NURBSC *nurbs,Coord shift)
+void NURBS_Func::ShiftNurbsC(NURBSC* nurbs, const Coord& shift)
 {
-	for(int i=0;i<nurbs->K;i++){
+	for(size_t i=0;i<nurbs->cp.size();i++){
 		nurbs->cp[i] = nurbs->cp[i] + shift;
 	}
 }
@@ -3637,8 +3638,9 @@ void NURBS_Func::ShiftNurbsC(NURBSC *nurbs,Coord shift)
 // *nurbs - 変更されるNURBS曲面　
 // axis - 回転軸の単位ベクトル　
 // deg - 角度(degree)
-void NURBS_Func::RotNurbsS(NURBSS *nurbs,Coord axis,double deg)
+void NURBS_Func::RotNurbsS(NURBSS* nurbs, const Coord& axis, double deg)
 {
+	size_t K[] = {nurbs->W.size1(), nurbs->W.size2()};
 	double rad;			// ラジアン格納用
 	QUATERNION QFunc;	// クォータニオン関連の関数を集めたクラスのオブジェクトを生成
 	Quat StartQ;		// 回転前の座標を格納するクォータニオン
@@ -3646,8 +3648,8 @@ void NURBS_Func::RotNurbsS(NURBSS *nurbs,Coord axis,double deg)
 	Quat ConjuQ;		// 共役クォータニオン
 	Quat TargetQ;		// 回転後の座標を格納するクォータニオン
 	
-	for(int i=0;i<nurbs->K[0];i++){			// u方向のコントロールポイント分ループ
-		for(int j=0;j<nurbs->K[1];j++){		// v方向のコントロールポイント分ループ
+	for(size_t i=0;i<K[0];i++){			// u方向のコントロールポイント分ループ
+		for(size_t j=0;j<K[1];j++){		// v方向のコントロールポイント分ループ
 			StartQ = QFunc.QInit(1,nurbs->cp[i][j].x,nurbs->cp[i][j].y,nurbs->cp[i][j].z);		// NURBS曲面を構成するcpの座標を登録
 			rad = DegToRad(deg);										// degreeからradianに変換
 			RotQ = QFunc.QGenRot(rad,axis.x,axis.y,axis.z);				// 回転クォータニオンに回転量を登録(ここの数字をいじれば任意に回転できる)
@@ -3665,7 +3667,7 @@ void NURBS_Func::RotNurbsS(NURBSS *nurbs,Coord axis,double deg)
 // *nurbs - 変更されるNURBS曲線　
 // axis - 回転軸の単位ベクトル　
 // deg - 角度(degree)
-void NURBS_Func::RotNurbsC(NURBSC *nurbs,Coord axis,double deg)
+void NURBS_Func::RotNurbsC(NURBSC* nurbs, const Coord& axis, double deg)
 {
 	double rad;			// ラジアン格納用
 	QUATERNION QFunc;	// クォータニオン関連の関数を集めたクラスのオブジェクトを生成
@@ -3674,7 +3676,7 @@ void NURBS_Func::RotNurbsC(NURBSC *nurbs,Coord axis,double deg)
 	Quat ConjuQ;		// 共役クォータニオン
 	Quat TargetQ;		// 回転後の座標を格納するクォータニオン
 	
-	for(int i=0;i<nurbs->K;i++){		// コントロールポイント分ループ
+	for(size_t i=0;i<nurbs->cp.size();i++){		// コントロールポイント分ループ
 		StartQ = QFunc.QInit(1,nurbs->cp[i].x,nurbs->cp[i].y,nurbs->cp[i].z);		// NURBS曲面を構成するcpの座標を登録
 		rad = DegToRad(deg);									// degreeからradianに変換
 		RotQ = QFunc.QGenRot(rad,axis.x,axis.y,axis.z);			// 回転クォータニオンに回転量を登録(ここの数字をいじれば任意に回転できる)
@@ -3690,10 +3692,11 @@ void NURBS_Func::RotNurbsC(NURBSC *nurbs,Coord axis,double deg)
 // Parameters:
 // *nurbs - 変更されるNURBS曲面  
 // ratio - 倍率
-void NURBS_Func::ChRatioNurbsS(NURBSS *nurbs,Coord ratio)
+void NURBS_Func::ChRatioNurbsS(NURBSS* nurbs, const Coord& ratio)
 {
-	for(int i=0;i<nurbs->K[0];i++){
-		for(int j=0;j<nurbs->K[1];j++){
+	size_t K[] = {nurbs->W.size1(), nurbs->W.size2()};
+	for(size_t i=0;i<K[0];i++){
+		for(size_t j=0;j<K[1];j++){
 			nurbs->cp[i][j] = nurbs->cp[i][j] * ratio;
 		}
 	}
@@ -3705,9 +3708,9 @@ void NURBS_Func::ChRatioNurbsS(NURBSS *nurbs,Coord ratio)
 // Parameters:
 // *nurbs - 変更されるNURBS曲線  
 // ratio - 倍率
-void NURBS_Func::ChRatioNurbsC(NURBSC *nurbs,Coord ratio)
+void NURBS_Func::ChRatioNurbsC(NURBSC* nurbs, const Coord& ratio)
 {
-	for(int i=0;i<nurbs->K;i++){
+	for(size_t i=0;i<nurbs->cp.size();i++){
 		nurbs->cp[i] = nurbs->cp[i] * ratio;
 	}
 }

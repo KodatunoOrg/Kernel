@@ -230,7 +230,7 @@ struct TMAT
 // 有理Bスプライン(NURBS)曲線を表わす構造体
 //
 // Variables:
-// int K -			コントロールポイントの数 -> W.size()
+// int K -			コントロールポイントの数 -> cp.size()
 // int M -			階数(=次数+1)
 // int N -			ノットベクトルの数 -> T.size()
 // int prop[4] -	各プロパティ
