@@ -230,7 +230,7 @@ public:
 
 	// Function: CalcIntersecPtsNurbsCNurbsCParam
     // 2次元NURBS曲線同士の交点を求める
-	int CalcIntersecPtsNurbsCNurbsCParam(NURBSC *,NURBSC *,int,Coord *,int);	
+	VCoord CalcIntersecPtsNurbsCNurbsCParam(const NURBSC*, const NURBSC*, int);
 
     // Function: CalcIntersecPtsNurbsCLine
     // 2次元NURBS曲線と直線との交点を求める

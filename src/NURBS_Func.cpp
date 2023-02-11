@@ -2952,8 +2952,9 @@ boost::tuple<VCoord, Vdouble> NURBS_Func::GetNurbsSCoef(int M, const ublasMatrix
 // 
 // Return:
 // 解の個数（ans_sizeを超えたら，KOD_ERR）
-int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int Divnum,Coord *ans,int ans_size)
+VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(const NURBSC* NurbA, const NURBSC* NurbB, int Divnum)
 {
+	VCoord ans;
 	double t = NurbA->V[0];		// 現在のNurbAのパラメータ値
 	double u = 0;				// 現在のNurbBのパラメータ値
 	double dt = 0;				// ニュートン法によるtパラメータの更新量
@@ -2964,7 +2965,6 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 	double d = (NurbA->V[1] - NurbA->V[0])/(double)Divnum;	// 初期点の増分値
 	int loopcount = 0;			// ループ回数
 	bool flag = false;			// 収束フラグ
-	int anscount = 0;			// 交点の数をカウント
 	ublasMatrix A(2,2);			// Ft,Fuを成分ごとに格納した行列
 	ublasMatrix A_(2,2);		// Aの逆行列を格納
 	
@@ -2999,19 +2999,11 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 			loopcount++;
 		}// end of wihle
 		if(flag == true){
-			ans[anscount].x = t;		// 解として登録
-			ans[anscount].y = u;
-			anscount++;
-			if(anscount == ans_size){	// 解の個数がans_sizeを超えたら、ERRをリターン
-//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
-				return KOD_ERR;
-			}
+			ans.push_back(Coord(t,u));		// 解として登録
 		}
 	}// end of i loop
 
-	anscount = CheckTheSamePoints2D(ans,anscount);		// 同一点は除去する
-
-	return anscount;
+	return CheckTheSamePoints2D(ans);		// 同一点は除去する
 }
 
 // Function: ClacIntersecPtsNurbsCLine
