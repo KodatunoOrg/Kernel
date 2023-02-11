@@ -4336,43 +4336,36 @@ NURBSS* NURBS_Func::GenPolygonalSurface(const VVCoord& P, int PNum_u, int PNum_v
 //
 // Return:
 // 成功：KOD_TRUE,  失敗：KOD_FALSE
-int NURBS_Func::ConnectNurbsSU(NURBSS *S1,NURBSS *S2,NURBSS *S_)			
+NURBSS* NURBS_Func::ConnectNurbsSU(const NURBSS* S1, const NURBSS* S2)
 {
+	int S1K[] = {S1->W.size1(), S1->W.size2()},
+		S2K[] = {S2->W.size1(), S2->W.size2()};
+
 	// 連結されるエッジのV方向コントロールポイントの数が全て等しいこと
-	if(S1->K[1] != S2->K[1]){
+	if(S1K[1] != S2K[1]){
 		fprintf(stderr,"ERROR: Number of control point on V direction is not equal.");
-		return KOD_ERR;
+		return NULL;
 	}
 	// 連結されるエッジのV方向コントロールポイントが全て等しいこと
-	for(int i=0;i<S1->K[1];i++){
-		if(S1->cp[S1->K[0]-1][i].DiffCoord(S2->cp[0][i]) == KOD_FALSE){
+	for(int i=0;i<S1K[1];i++){
+		if(S1->cp[S1K[0]-1][i].DiffCoord(S2->cp[0][i]) == KOD_FALSE){
 			fprintf(stderr,"ERROR: Knot value on V direction is not equal.");
-			return KOD_ERR;
+			return NULL;
 		}
 	}
 	// 両曲面の階数がU,V共に等しいこと
 	if(S1->M[0] != S2->M[0] || S1->M[1] != S2->M[1]){
 		fprintf(stderr,"ERROR: Rank is not equal.");
-		return KOD_ERR;
+		return NULL;
 	}
 
-	int K[2],N[2];
-
-	K[0] = S1->K[0] + S2->K[0] - 1;				// S_のU方向コントロールポイントの数
-	K[1] = S1->K[1];							// S_のV方向コントロールポイントの数
-	N[0] = S1->N[0] + S2->N[0] - S2->M[0] - 1;	// S_のU方向ノットベクトルの数
-	N[1] = S1->N[1];							// S_のV方向ノットベクトルの数
-
-	New_NurbsS(S_,K,N);							// S_内のメモリー確保
-
-	SetKnotVecSU_ConnectS(S1,S2,S_);			// S_のu方向ノット定義域を指定
-
-	SetCPSU_ConnectS(S1,S2,S_);					// S_のu方向コントロールポイントとウェイトを指定
-
-	S_->M[0] = S1->M[0];						// S_の階数を指定
+	NURBSS* S_ = new NURBSS;	// 空のNURBS曲面
+	SetKnotVecSU_ConnectS(S_, S1, S2);		// S_のu方向ノット定義域を指定
+	SetCPSU_ConnectS(S_, S1, S2);			// S_のu方向コントロールポイントとウェイトを指定
+	S_->M[0] = S1->M[0];					// S_の階数を指定
 	S_->M[1] = S1->M[1];
 
-	return KOD_TRUE;
+	return S_;
 }
 
 // Function: ConnectNurbsSV
@@ -4385,43 +4378,36 @@ int NURBS_Func::ConnectNurbsSU(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 //
 // Return:
 // 成功：KOD_TRUE,  失敗：KOD_FALSE
-int NURBS_Func::ConnectNurbsSV(NURBSS *S1,NURBSS *S2,NURBSS *S_)			
+NURBSS* NURBS_Func::ConnectNurbsSV(const NURBSS* S1, const NURBSS* S2)
 {
+	int S1K[] = {S1->W.size1(), S1->W.size2()},
+		S2K[] = {S2->W.size1(), S2->W.size2()};
+
 	// 連結されるエッジのU方向コントロールポイントの数が全て等しいこと
-	if(S1->K[0] != S2->K[0]){
+	if(S1K[0] != S2K[0]){
 		fprintf(stderr,"ERROR: Number of control point on U direction is not equal.");
-		return KOD_ERR;
+		return NULL;
 	}
 	// 連結されるエッジのU方向コントロールポイントが全て等しいこと
-	for(int i=0;i<S1->K[0];i++){
-		if(S1->cp[i][S1->K[0]-1].DiffCoord(S2->cp[i][0]) == KOD_FALSE){
+	for(int i=0;i<S1K[0];i++){
+		if(S1->cp[i][S1K[0]-1].DiffCoord(S2->cp[i][0]) == KOD_FALSE){
 			fprintf(stderr,"ERROR: Knot value on U direction is not equal.");
-			return KOD_ERR;
+			return NULL;
 		}
 	}
 	// 両曲面の階数がU,V共に等しいこと
 	if(S1->M[0] != S2->M[0] || S1->M[1] != S2->M[1]){
 		fprintf(stderr,"ERROR: Rank is not equal.");
-		return KOD_ERR;
+		return NULL;
 	}
 
-	int K[2],N[2];
-
-	K[0] = S1->K[0];							// S_のU方向コントロールポイントの数
-	K[1] = S1->K[1] + S2->K[1] - 1;				// S_のV方向コントロールポイントの数
-	N[0] = S1->N[0];							// S_のU方向ノットベクトルの数
-	N[1] = S1->N[1] + S2->N[1] - S2->M[1] - 1;	// S_のV方向ノットベクトルの数
-
-	New_NurbsS(S_,K,N);							// S_内のメモリー確保
-
-	SetKnotVecSV_ConnectS(S1,S2,S_);			// S_のv方向ノット定義域を指定
-
-	SetCPSV_ConnectS(S1,S2,S_);					// S_のv方向コントロールポイントとウェイトを指定
-
-	S_->M[0] = S1->M[0];						// S_の階数を指定
+	NURBSS* S_ = new NURBSS;	// 空のNURBS曲面
+	SetKnotVecSV_ConnectS(S_, S1, S2);		// S_のv方向ノット定義域を指定
+	SetCPSV_ConnectS(S_, S1, S2);			// S_のv方向コントロールポイントとウェイトを指定
+	S_->M[0] = S1->M[0];					// S_の階数を指定
 	S_->M[1] = S1->M[1];
 
-	return KOD_TRUE;
+	return S_;
 }
 
 // Function: SetCPSU_ConnectS
@@ -4431,22 +4417,29 @@ int NURBS_Func::ConnectNurbsSV(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetCPSU_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
+void NURBS_Func::SetCPSU_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
 {
-	S_->K[0] = S1->K[0] + S2->K[0] - 1;
-	S_->K[1] = S1->K[1];
+	int S1K[] = {S1->W.size1(), S1->W.size2()},
+		S2K[] = {S2->W.size1(), S2->W.size2()};
 
-	for(int i=0;i<S1->K[0];i++){
-		for(int j=0;j<S_->K[1];j++){
-			S_->cp[i][j] = S1->cp[i][j];
-			S_->W[i][j] = S1->W[i][j];
+	S_->W.resize(S1K[0]+S2K[0]-1, S1K[1]);
+	S_->cp.clear();
+
+	for(int i=0;i<S1K[0];i++){
+		VCoord cp;
+		for(int j=0;j<S1K[1];j++){
+			cp.push_back(S1->cp[i][j]);
+			S_->W(i,j) = S1->W(i,j);
 		}
+		S_->cp.push_back(cp);
 	}
-	for(int i=1;i<S2->K[0];i++){
-		for(int j=0;j<S_->K[1];j++){
-			S_->cp[S1->K[0]+i-1][j] = S2->cp[i][j];
-			S_->W[S1->K[0]+i-1][j]  = S2->W[i][j];
+	for(int i=1;i<S2K[0];i++){
+		VCoord cp;
+		for(int j=0;j<S2K[1];j++){
+			cp.push_back(S2->cp[i][j]);
+			S_->W(S1K[0]+i-1,j)  = S2->W(i,j);
 		}
+		S_->cp.push_back(cp);
 	}
 }
 
@@ -4457,36 +4450,36 @@ void NURBS_Func::SetCPSU_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
+void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
 {
 	// V方向
-	S_->N[1] = S1->N[1];				// S_のV方向ノットベクトルの数
-	CopyVector(S1->T,S1->N[1],S_->T);	// S_のV方向ノットベクトル(V方向はS1のをそのまま流用)
-	S_->V[0] = S1->V[0];				// S_のV方向ノットベクトルの範囲
+	S_->T = S1->T;				// S_のV方向ノットベクトル(V方向はS1のをそのまま流用)
+	S_->V[0] = S1->V[0];		// S_のV方向ノットベクトルの範囲
 	S_->V[1] = S1->V[1];
 
 	// U方向
 	// コード長を調べる
 	double us=0,ue=NORM_KNOT_VAL,uc=0;		// U方向開始，終了，連結部ノットベクトル
 	double l1=0,l2=0;						// 各曲面のU方向ノットベクトルのコード長
-	for(int i=0;i<S1->N[0]-1;i++)
+	for(size_t i=0;i<S1->S.size()-1;i++)
 		l1 += CalcNurbsSCoord(S1,S1->S[i+1],S1->T[0]).CalcDistance(CalcNurbsSCoord(S1,S1->S[i],S1->T[0]));	// S1のコード長
-	for(int i=0;i<S2->N[0]-1;i++)
+	for(size_t i=0;i<S2->S.size()-1;i++)
 		l2 += CalcNurbsSCoord(S2,S2->S[i+1],S2->T[0]).CalcDistance(CalcNurbsSCoord(S2,S2->S[i],S2->T[0]));	// S2のコード長
 	uc = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// S_のノットベクトル範囲を得る
-	ublasVector U1 = ChangeKnotVecRange2(S1->S,S1->N[0],S1->M[0],S1->K[0],us,uc);	// S1のノットベクトルの範囲を変更
-	ublasVector U2 = ChangeKnotVecRange2(S2->S,S2->N[0],S2->M[0],S2->K[0],uc,ue);	// S2のノットベクトルの範囲を変更
+	ublasVector U1 = ChangeKnotVecRange(S1->S,S1->M[0],S1->W.size1(),us,uc);	// S1のノットベクトルの範囲を変更
+	ublasVector U2 = ChangeKnotVecRange(S2->S,S2->M[0],S2->W.size1(),uc,ue);	// S2のノットベクトルの範囲を変更
 	S_->U[0] = us;						// S_のU方向ノットベクトルの範囲
 	S_->U[1] = ue;
-	S_->N[0] = S1->N[0] + S2->N[0] - S2->M[0] - 1;	// S_のノットベクトル数
 
 	// S_のノットベクトルを得る
-	for(int i=0;i<S1->K[0];i++)
+	int KN[] = {S1->W.size1(), S2->S.size()};
+	S_->S.resize(KN[0]+KN[1]-1);
+	for(int i=0;i<KN[0];i++)
 		S_->S[i] = U1[i];
-	for(int i=1;i<S2->N[0];i++)
-		S_->S[S1->K[0]+i-1] = U2[i];
+	for(int i=1;i<KN[1];i++)
+		S_->S[KN[0]+i-1] = U2[i];
 }
 
 // Function: SetCPSV_ConnectS
@@ -4496,22 +4489,29 @@ void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetCPSV_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
+void NURBS_Func::SetCPSV_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
 {
-	S_->K[0] = S1->K[0];
-	S_->K[1] = S1->K[1] + S2->K[1] - 1;
+	int S1K[] = {S1->W.size1(), S1->W.size2()},
+		S2K[] = {S2->W.size1(), S2->W.size2()};
 
-	for(int i=0;i<S_->K[0];i++){
-		for(int j=0;j<S1->K[1];j++){
-			S_->cp[i][j] = S1->cp[i][j];
-			S_->W[i][j]  = S1->W[i][j];
+	S_->W.resize(S1K[0], S1K[1]+S2K[1]-1);
+	S_->cp.clear();
+
+	for(int i=0;i<S1K[0];i++){
+		VCoord cp;
+		for(int j=0;j<S1K[1];j++){
+			cp.push_back(S1->cp[i][j]);
+			S_->W(i,j)  = S1->W(i,j);
 		}
+		S_->cp.push_back(cp);
 	}
-	for(int i=0;i<S_->K[0];i++){
-		for(int j=1;j<S2->K[1];j++){
-			S_->cp[i][S1->K[1]+j-1] = S2->cp[i][j];
-			S_->W[i][S1->K[1]+j-1]  = S2->W[i][j];
+	for(int i=0;i<S2K[0];i++){
+		VCoord cp;
+		for(int j=1;j<S2K[1];j++){
+			cp.push_back(S2->cp[i][j]);
+			S_->W(i,S1K[1]+j-1)  = S2->W(i,j);
 		}
+		S_->cp.push_back(cp);
 	}
 }
 
@@ -4522,36 +4522,36 @@ void NURBS_Func::SetCPSV_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetKnotVecSV_ConnectS(NURBSS *S1,NURBSS *S2,NURBSS *S_)
+void NURBS_Func::SetKnotVecSV_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
 {
 	// U方向
-	S_->N[0] = S1->N[0];				// S_のU方向ノットベクトルの数
-	CopyVector(S1->S,S1->N[0],S_->S);	// S_のU方向ノットベクトル(U方向はS1のをそのまま流用)
-	S_->U[0] = S1->U[0];				// S_のU方向ノットベクトルの範囲
+	S_->S = S1->S;				// S_のU方向ノットベクトル(U方向はS1のをそのまま流用)
+	S_->U[0] = S1->U[0];		// S_のU方向ノットベクトルの範囲
 	S_->U[1] = S1->U[1];
 
 	// V方向
 	// コード長を調べる
 	double vs=0,ve=NORM_KNOT_VAL,vc=0;		// U方向開始，終了，連結部ノットベクトル
 	double l1=0,l2=0;						// 各曲面のU方向ノットベクトルのコード長
-	for(int i=0;i<S1->N[1]-1;i++)
+	for(size_t i=0;i<S1->T.size()-1;i++)
 		l1 += CalcNurbsSCoord(S1,S1->S[0],S1->T[i+1]).CalcDistance(CalcNurbsSCoord(S1,S1->S[0],S1->T[i]));	// S1のコード長
-	for(int i=0;i<S2->N[1]-1;i++)
+	for(size_t i=0;i<S2->T.size()-1;i++)
 		l2 += CalcNurbsSCoord(S2,S2->S[0],S2->T[i+1]).CalcDistance(CalcNurbsSCoord(S2,S2->S[0],S2->T[i]));	// S2のコード長
 	vc = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// S_のノットベクトル範囲を得る
-	ublasVector V1 = ChangeKnotVecRange2(S1->T,S1->N[1],S1->M[1],S1->K[1],vs,vc);	// S1のノットベクトルの範囲を変更
-	ublasVector V2 = ChangeKnotVecRange2(S2->T,S2->N[1],S2->M[1],S2->K[1],vc,ve);	// S2のノットベクトルの範囲を変更
+	ublasVector V1 = ChangeKnotVecRange(S1->T,S1->M[1],S1->W.size2(),vs,vc);	// S1のノットベクトルの範囲を変更
+	ublasVector V2 = ChangeKnotVecRange(S2->T,S2->M[1],S2->W.size2(),vc,ve);	// S2のノットベクトルの範囲を変更
 	S_->V[0] = vs;						// S_のV方向ノットベクトルの範囲
 	S_->V[1] = ve;
-	S_->N[1] = S1->N[1] + S2->N[1] - S2->M[1] - 1;	// S_のノットベクトル数
 
 	// S_のノットベクトルを得る
-	for(int i=0;i<S1->K[1];i++)
+	int KN[] = {S1->W.size2(), S2->T.size()};
+	S_->T.resize(KN[0]+KN[1]-1);
+	for(int i=0;i<KN[0];i++)
 		S_->T[i] = V1[i];
-	for(int i=1;i<S2->N[1];i++)
-		S_->T[S1->K[1]+i-1] = V2[i];
+	for(int i=1;i<KN[1];i++)
+		S_->T[KN[0]+i-1] = V2[i];
 }
 
 // Function: CalcuIntersecPtNurbsLine

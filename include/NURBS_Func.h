@@ -424,11 +424,11 @@ public:
 
 	// Function: ConnectNurbsSU
 	// 2枚のNURBS曲面を連結する(U方向に長くなる)(S1_U1とS2_U0を連結)
-	int ConnectNurbsSU(NURBSS *,NURBSS *,NURBSS *);				
+	NURBSS* ConnectNurbsSU(const NURBSS*, const NURBSS*);
 
 	// Function: ConnectNurbsSV
 	// 2枚のNURBS曲面を連結する(V方向に長くなる)(S1_V1とS2_V0を連結)
-	int ConnectNurbsSV(NURBSS *,NURBSS *,NURBSS *);				
+	NURBSS* ConnectNurbsSV(const NURBSS*, const NURBSS*);
 
 	// Function: CalcCurvatureNurbsC
 	// NURBS曲線の曲率を求める
@@ -589,19 +589,19 @@ private:
 
 	// Function: SetKnotVecSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
-	void SetKnotVecSU_ConnectS(NURBSS *,NURBSS *,NURBSS *);			
+	void SetKnotVecSU_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
 
 	// Function: SetKnotVecSV_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向ノット定義域を設定する)
-	void SetKnotVecSV_ConnectS(NURBSS *,NURBSS *,NURBSS *);			
+	void SetKnotVecSV_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
 
 	// Function: SetCPSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向コントロールポイントとウェイトを設定する)
-	void SetCPSU_ConnectS(NURBSS *,NURBSS *,NURBSS *);				
+	void SetCPSU_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
 
 	// Function: SetCPSV_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向コントロールポイントとウェイトを設定する)
-	void SetCPSV_ConnectS(NURBSS *,NURBSS *,NURBSS *);				
+	void SetCPSV_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
 
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する
