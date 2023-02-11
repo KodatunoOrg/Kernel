@@ -3021,20 +3021,21 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(const NURBSC* NurbA, const N
 //
 // return:
 // 交点の有無（KOD_TRUE：交点あり， KOD_FALSE：交点なし）
-int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t1,double *t2)
+boost::optional<A2double> NURBS_Func::ClacIntersecPtsNurbsCLine(const NURBSC* C, const Coord& P, const Coord& r)
 {
+	A2double	t;
     ublasMatrix A(2,2);
     ublasMatrix A_(2,2);
 	boost::optional<ublasMatrix> reA;
     bool conv_flag = false;
 
-    *t1 = (C->V[0]+C->V[1])/2;
-    *t2 = 0;
+    t[0] = (C->V[0]+C->V[1])/2;
+    t[1] = 0;
 
     while(1){
-        Coord Ct = CalcDiffNurbsC(C,*t1);
+        Coord Ct = CalcDiffNurbsC(C,t[0]);
         Coord Lt = r;
-        Coord B = (P+(r*(*t2))) - CalcNurbsCCoord(C,*t1);
+        Coord B = (P+(r*(t[1]))) - CalcNurbsCCoord(C,t[0]);
         A(0,0) = Ct.x;
         A(1,0) = Ct.y;
         A(0,1) = -Lt.x;
@@ -3050,17 +3051,17 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
             break;
         }
         else{
-            *t1 += dt1/3;
-            *t2 += dt2/3;
+            t[0] += dt1/3;
+            t[1] += dt2/3;
         }
-        if(*t1 < C->V[0] || *t1 > C->V[1])	// 現在注目中のエッジの範囲を超えたらbreak
+        if(t[0] < C->V[0] || t[0] > C->V[1])	// 現在注目中のエッジの範囲を超えたらbreak
             break;
     }
 
     if(conv_flag == true)
-        return KOD_TRUE;
+        return t;
     else
-        return KOD_ERR;
+        return boost::optional<A2double>();
 }
 
 // Function: ClacIntersecPtsNurbsCLineSeg
@@ -3077,18 +3078,16 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
 //
 // return:
 // 交点の有無（KOD_TRUE：交点あり， KOD_FALSE：交点なし）
-int NURBS_Func::ClacIntersecPtsNurbsCLineSeg(NURBSC *C, Coord P, Coord r, double ts, double te, double *t1,double *t2)
+boost::optional<A2double> NURBS_Func::ClacIntersecPtsNurbsCLineSeg(const NURBSC* C, const Coord& P, const Coord& r, double ts, double te)
 {
-    if(ClacIntersecPtsNurbsCLine(C,P,r,t1,t2) == KOD_TRUE){
-        if(*t2 >= ts && *t2 <= te){
-            return KOD_TRUE;
-        }
-        else{
-            return KOD_FALSE;
+	boost::optional<A2double> t = ClacIntersecPtsNurbsCLine(C,P,r);
+    if(t){
+        if((*t)[1] >= ts && (*t)[1] <= te){
+            return t;
         }
     }
 
-    return KOD_FALSE;
+    return boost::optional<A2double>();
 }
 
 // Function: CalcIntersecCurve

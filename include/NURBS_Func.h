@@ -234,11 +234,11 @@ public:
 
     // Function: CalcIntersecPtsNurbsCLine
     // 2次元NURBS曲線と直線との交点を求める
-    int ClacIntersecPtsNurbsCLine(NURBSC *, Coord, Coord, double *, double *);
+    boost::optional<A2double> ClacIntersecPtsNurbsCLine(const NURBSC*, const Coord&, const Coord&);
 
     // Function: CalcIntersecPtsNurbsCLineSeg
     // 2次元NURBS曲線と線分との交点を求める
-    int ClacIntersecPtsNurbsCLineSeg(NURBSC *, Coord, Coord, double, double, double *, double *);
+    boost::optional<A2double> ClacIntersecPtsNurbsCLineSeg(const NURBSC*, const Coord&, const Coord&, double, double);
 
 	// Function: SearchExtremum_BS
 	// Bulirsch-Stoer法により極地探索を行う
