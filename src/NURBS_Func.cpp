@@ -4048,11 +4048,11 @@ NURBSC* NURBS_Func::GenPolygonalLine(const VCoord& P)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs, const VVCoord& P, int PNum_u,int PNum_v,int Mu,int Mv)
+NURBSS* NURBS_Func::GenInterpolatedNurbsS1(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
 	if(PNum_v == 2 || PNum_v == 3)	Mv = PNum_v;	// v方向に与えられた点が2個か3個の場合は、v方向の階数を強制的に2か3にする
@@ -4125,12 +4125,13 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs, const VVCoord& P, int PNum
 	}
 
 	// NURBS曲面を生成する
+	NURBSS* Nurbs;
 	if(Mu == 2 && Mv == 2)
-		GenNurbsS(Nurbs,Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);
 	else
-		GenNurbsS(Nurbs,Mu,Mv,S,T,W,Q,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,S,T,W,Q,U[0],U[1],V[0],V[1]);
 
-	return KOD_TRUE;
+	return Nurbs;
 }
 
 // Function: GenApproximationNurbsS
@@ -4144,11 +4145,11 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs, const VVCoord& P, int PNum
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs, const VVCoord& P, int PNum_u,int PNum_v,int Mu,int Mv)
+NURBSS* NURBS_Func::GenApproximationNurbsS(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
 	if(PNum_v == 2 || PNum_v == 3)	Mv = PNum_v;	// v方向に与えられた点が2個か3個の場合は、v方向の階数を強制的に2か3にする
@@ -4200,12 +4201,13 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs, const VVCoord& P, int PNum
 	}
 
 	// NURBS曲面を生成する
+	NURBSS* Nurbs;
 	if(Mu == 2 && Mv == 2)
-		GenNurbsS(Nurbs,Mu,Mv,S,T,W,P, U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,S,T,W,P, U[0],U[1],V[0],V[1]);
 	else
-		GenNurbsS(Nurbs,Mu,Mv,S,T,W,Q4,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,S,T,W,Q4,U[0],U[1],V[0],V[1]);
 
-	return KOD_TRUE;
+	return Nurbs;
 }
 
 // Function: GenNurbsSfromCP
@@ -4223,11 +4225,11 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs, const VVCoord& P, int PNum
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,int Mu,int Mv)
+NURBSS* NURBS_Func::GenNurbsSfromCP(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
 	if(PNum_v == 2 || PNum_v == 3)	Mv = PNum_v;	// v方向に与えられた点が2個か3個の場合は、v方向の階数を強制的に2か3にする
@@ -4251,9 +4253,7 @@ int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,in
 		}
 	}
 
-	GenNurbsS(Nurbs,Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
-
-	return KOD_TRUE;
+	return new NURBSS(Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
 }
 
 // Function: 
@@ -4266,7 +4266,7 @@ int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v,in
 //
 // Return:
 // KOD_TRUE
-int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_v)
+NURBSS* NURBS_Func::GenPolygonalSurface(const VVCoord& P, int PNum_u, int PNum_v)
 {
 	int Mu=2;						// 階数2
 	int Mv=2;
@@ -4323,9 +4323,7 @@ int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,Coord **P,int PNum_u,int PNum_
 	}
 
 	// NURBS曲面を生成する
-	GenNurbsS(Nurbs,Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);
-
-	return KOD_TRUE;
+	return new NURBSS(Mu,Mv,S,T,W,P,U[0],U[1],V[0],V[1]);
 }
 
 // Function: ConnectNurbsSU

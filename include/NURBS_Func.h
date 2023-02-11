@@ -302,23 +302,23 @@ public:
 
 	// Function: GenPolygonalLine
 	// 折れ線を生成する
-	NURBSC* GenPolygonalLine(const VCoord&, int);
+	NURBSC* GenPolygonalLine(const VCoord&);
 
 	// Function: GenInterpolatedNurbsS1
 	// 与えられた点列を補間するn階NURBS曲面を生成する
-	int GenInterpolatedNurbsS1(NURBSS *, const VVCoord&, int,int,int,int);
+	NURBSS* GenInterpolatedNurbsS1(const VVCoord&, int, int, int, int);
 
 	// Function: GenPolygonalSurface
 	// 折れ面を生成する
-	int GenPolygonalSurface(NURBSS *,Coord **,int,int);				
+	NURBSS* GenPolygonalSurface(const VVCoord&, int, int);
 
 	// Function: GenApproximationNurbsS
 	// 与えられた点列を近似するn階のNURBS曲面を生成する
-	int GenApproximationNurbsS(NURBSS *, const VVCoord&, int,int,int,int);
+	NURBSS* GenApproximationNurbsS(const VVCoord&, int, int, int, int);
 
 	// Function: GenNurbsSfromCP
 	// 与えられたコントロールポイントからn階のNURBS曲面を生成する
-	int GenNurbsSfromCP(NURBSS *,Coord **,int,int,int,int);			
+	NURBSS* GenNurbsSfromCP(const VVCoord&, int, int, int, int);
 
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
