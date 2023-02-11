@@ -2437,7 +2437,6 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 	VCoord init_pt_Coord_S;
 	std::vector<int> init_pt_flag;		// 各初期点を通り終えたかを判別するフラグ [INTERSECPTNUMMAX]
 	int  init_allpt_flag=KOD_FALSE;		// 初期点を全て通り終えたかを判別するフラグ
-	int   init_pt_num = 0;				// 初期点の数
 	int  conform_flag = KOD_FALSE;		// 初期点一致フラグ
 	int  search_flag = KOD_TRUE;		// 交線追跡方向フラグ(KOD_TRUE:順方向,KOD_FALSE:逆方向)
 	int  inverse_flag = KOD_FALSE;		// 交線追跡方向逆転フラグ
@@ -2471,18 +2470,17 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 	//	DrawPoint(init_pt_Coord_S[i],1,5,color);
 	}
 	init_pt_flag[0] = KOD_TRUE;
-	ansR[ans_count] = init_pt_R[0];	//////////////////////////////
-	ansS[ans_count] = init_pt_S[0];
+	ansR.push_back(init_pt_R[0]);
+	ansS.push_back(init_pt_S[0]);
 	
 	// 初期点を全て通過するまで交線追跡法を繰り返す
 	while(init_allpt_flag == KOD_FALSE){
 		// 交線追跡のための始点R(w,t),S(u,v)をセット
-		w = ansR[ans_count].x = init_pt_R[pnow].x;
-		t = ansR[ans_count].y = init_pt_R[pnow].y;
-		u = ansS[ans_count].x = init_pt_S[pnow].x;
-		v = ansS[ans_count].y = init_pt_S[pnow].y;
+		w = init_pt_R[pnow].x;
+		t = init_pt_R[pnow].y;
+		u = init_pt_S[pnow].x;
+		v = init_pt_S[pnow].y;
  		if(inverse_flag == KOD_FALSE){		// 追跡方向が順方向から逆方向に変わるとき以外
-			ans_count++;			// 解をカウント
 			init_pt_flag[pnow] = KOD_TRUE;	// 初期点通過フラグを立てる
 		}
 		else if(inverse_flag == KOD_TRUE)		// 追跡方向が順方向から逆方向に変わるとき
@@ -2505,22 +2503,17 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
  			}
 			// 特異点検出などにより処理を継続できない場合
 			else if(search_flag == KOD_ERR){
-				return KOD_ERR;
+				return boost::make_tuple(ansR, ansS);
 			}
-
+			w = wtuv[0];	t = wtuv[1];
+			u = wtuv[2];	v = wtuv[3];
 			Coord pr = CalcNurbsSCoord(nurbR,w,t);			// 得られたu,vをxyz座標値に変換
 			Coord ps = CalcNurbsSCoord(nurbS,u,v);			// 得られたu,vをxyz座標値に変換
 			double distr = init_pt_Coord_R[pnow].CalcDistance(pr);	// 得られたxyz座標値と初期点との距離を算出
 			double dists = init_pt_Coord_S[pnow].CalcDistance(ps);	// 得られたxyz座標値と初期点との距離を算出
-			
-			// 交点の個数がリミットを越えたら
-			if(ans_count >= ans_size-1){
-//				GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
-				return ans_count;
-			}
 
 			// 最初に求めた初期点が交線追跡法によって全て通過したか調べる
-			for(int i=0;i<init_pt_num;i++){
+			for(size_t i=0;i<init_pt_Coord_R.size();i++){
 				if(init_pt_Coord_R[i].CalcDistance(pr) < ds){
 					if(init_pt_flag[i] == KOD_TRUE && i < pnow){
 						conform_flag = KOD_TRUE;
@@ -2540,9 +2533,8 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 			}
 			
 			// 得られたu,vを交線(交点群)として登録
-			ansR[ans_count].SetCoord(w,t,0);
-			ansS[ans_count].SetCoord(u,v,0);
-			ans_count++;
+			ansR.push_back(Coord(w,t,0));
+			ansS.push_back(Coord(u,v,0));
 
 			if(conform_flag == KOD_TRUE){
 				conform_flag = KOD_FALSE;
@@ -2556,7 +2548,7 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 		// 残った点があれば、別の交線があるので、その点を始点として再度交線追跡を行う
 		if(search_flag == KOD_TRUE){
 			init_allpt_flag = KOD_TRUE;
-			for(int i=0;i<init_pt_num;i++){
+			for(size_t i=0;i<init_pt_flag.size();i++){
 				if(init_pt_flag[i] == KOD_FALSE){
 					init_allpt_flag = KOD_FALSE;
 					pnow = i;
@@ -2567,7 +2559,7 @@ boost::tuple<VCoord, VCoord> NURBS_Func::CalcIntersecPtsNurbsSSearch(const NURBS
 	}
 	
 	//fclose(fp);
-	return ans_count;
+	return boost::make_tuple(ansR, ansS);
 }
 
 // Function: CalcIntersecPtsNurbsSGeom
