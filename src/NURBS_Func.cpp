@@ -4573,7 +4573,7 @@ void NURBS_Func::SetKnotVecSV_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBS
 //
 // Return:
 // 交点の数,   KOD_ERR:交点の数が指定した配列長を超えた
-VCoord NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb, const Coord& r, const Coord& p, int Divnum, int LoD)
+VCoord NURBS_Func::CalcuIntersecPtNurbsLine(const NURBSS* Nurb, const Coord& r, const Coord& p, int Divnum, int LoD)
 {
 	VCoord ans;
 	Coord d(100,100,100);					// NURBS曲線S(u,v)の微小変化量(du,dv)、直線N(t)の微小変化量dtを格納
@@ -4675,7 +4675,7 @@ VCoord NURBS_Func::CalcuIntersecPtNurbsLine(NURBSS *Nurb, const Coord& r, const 
 //
 // Return:
 // KOD_TRUE：収束した    KOD_FALSE:収束しなかった
-boost::optional<Coord> NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S, const Coord& P, int Divnum, int LoD)
+boost::optional<Coord> NURBS_Func::CalcIntersecPtNurbsPt(const NURBSS* S, const Coord& P, int Divnum, int LoD)
 {
 	ublasMatrix dF(3,3);			// Fu,Fv,Ftを構成する3x3行列
 	ublasMatrix dF_(3,3);			// dFの逆行列を格納
@@ -4766,7 +4766,7 @@ boost::optional<Coord> NURBS_Func::CalcIntersecPtNurbsPt(NURBSS *S, const Coord&
 // 
 // Return:
 // KOD_TRUE：収束した    KOD_FALSE:収束しなかった
-int NURBS_Func::CalcIntersecPtNurbsPt(NURBSC *C,Coord P,int Divnum,int LoD,double *Q)
+boost::optional<double> NURBS_Func::CalcIntersecPtNurbsPt(const NURBSC* C, const Coord& P, int Divnum, int LoD)
 {
 	Vdouble t_buf(Divnum);					// 収束解格納用バッファ
 	Vdouble dist_buf(Divnum);				// 各tでの距離格納用バッファ
@@ -4798,16 +4798,16 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSC *C,Coord P,int Divnum,int LoD,doubl
 
 	// 得られた解から，PQ間の距離が最も短いものを選択
 	bool flag = false;
-	double min = 1E+308;
+	double Q, min = 1E+308;
 	for(int i=0;i<Divnum;i++){
 		if(dist_buf[i] > 0 && dist_buf[i] < min){
 			min = dist_buf[i];
-			*Q = t_buf[i];
+			Q = t_buf[i];
 			flag = true;
 		}
 	}
 	
-	return flag == true ? KOD_TRUE : KOD_FALSE;
+	return flag == true ? Q : boost::optional<double>();
 }
 
 // Function: GetMinDist
@@ -4822,7 +4822,7 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSC *C,Coord P,int Divnum,int LoD,doubl
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-boost::optional<Coord> NURBS_Func::GetMinDist(NURBSS *S, const Coord& P, const VCoord& Q)
+boost::optional<Coord> NURBS_Func::GetMinDist(const NURBSS* S, const Coord& P, const VCoord& Q)
 {
 	Coord Ans;
 	double min = 1.0E+12;

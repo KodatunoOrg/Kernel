@@ -158,15 +158,15 @@ public:
 
 	// Function: CalcuIntersecPtNurbsLine
 	// NURBS曲面と直線の交点を算出
-	VCoord CalcuIntersecPtNurbsLine(NURBSS *, const Coord&, const Coord&, int, int);
+	VCoord CalcuIntersecPtNurbsLine(const NURBSS*, const Coord&, const Coord&, int, int);
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲面上の最近傍点を求める(ニュートン法)
-	boost::optional<Coord> CalcIntersecPtNurbsPt(NURBSS *, const Coord&, int, int);
+	boost::optional<Coord> CalcIntersecPtNurbsPt(const NURBSS*, const Coord&, int, int);
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲線上の最近傍点を求める(ニュートン法)(オーバーロード)
-	int CalcIntersecPtNurbsPt(NURBSC *,Coord,int,int,double *);			
+	boost::optional<double> CalcIntersecPtNurbsPt(const NURBSC*, const Coord&, int, int);
 
     // Function: CalcIntersecPtNurbsPtDescrete
     // 空間上の1点からNURBS曲面上の最近傍点を求める(離散的)
@@ -585,7 +585,7 @@ private:
 
 	// Function: GetMinDist
 	// (private)最小距離を調べる
-	boost::optional<Coord> GetMinDist(NURBSS *, const Coord&, const VCoord&);
+	boost::optional<Coord> GetMinDist(const NURBSS*, const Coord&, const VCoord&);
 
 	// Function: SetKnotVecSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
