@@ -282,15 +282,15 @@ public:
 
 	// Function: SetCPNurbsS
 	// コントロールポイントを代入する
-	int SetCPNurbsS(NURBSS *,NURBSS);							
+	int SetCPNurbsS(NURBSS*, const NURBSS&);
 
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
-	int GenInterpolatedNurbsC1(NURBSC *,const VCoord&, int);
+	NURBSC* GenInterpolatedNurbsC1(const VCoord&, int);
 
 	// Function: GenInterpolatedNurbsC2
 	// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
-	int GenInterpolatedNurbsC2(NURBSC *, const VCoord&, int);
+	NURBSC* GenInterpolatedNurbsC2(const VCoord&, int);
 
 	// Function: GenApproximationNurbsC
 	// 与えられた点列を近似するn階のNURBS曲線を生成する

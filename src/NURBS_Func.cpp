@@ -3724,15 +3724,16 @@ void NURBS_Func::ChRatioNurbsC(NURBSC* nurbs, const Coord& ratio)
 //
 // Return:
 // 正常終了：KOD_TRUE, 両曲面のコントロールポイント数が一致していない：KOD_ERR
-int NURBS_Func::SetCPNurbsS(NURBSS *nurbs,NURBSS Nurbs)
+int NURBS_Func::SetCPNurbsS(NURBSS* nurbs, const NURBSS& Nurbs)
 {
-	if(nurbs->K[0] != Nurbs.K[0] || nurbs->K[1] != Nurbs.K[1]){
+	int K[] = {Nurbs.W.size1(), Nurbs.W.size2()};
+	if(nurbs->W.size1() != K[0] || nurbs->W.size2() != K[1]){
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Control point count is different");
 		return KOD_ERR;
 	}
 
-	for(int i=0;i<Nurbs.K[0];i++){
-		for(int j=0;j<Nurbs.K[1];j++){
+	for(int i=0;i<K[0];i++){
+		for(int j=0;j<K[1];j++){
 			nurbs->cp[i][j] = Nurbs.cp[i][j];
 		}
 	}
@@ -3752,21 +3753,20 @@ int NURBS_Func::SetCPNurbsS(NURBSS *nurbs,NURBSS Nurbs)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点列が1個未満：KOD_ERR, 計算過程でゼロ割が発生：KOD_ERR
-int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs, const VCoord& P,int M)
+NURBSC* NURBS_Func::GenInterpolatedNurbsC1(const VCoord& P, int M)
 {
-	int retflag = KOD_TRUE;
 	size_t PNum = P.size();
 
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum == 2 || PNum == 3)	M = PNum;	// 与えられた点が2個か3個の場合は、階数を強制的に2か3にする
 
 	int K = PNum;			// コントロールポイントの数
 	int N = M+K;			// ノットベクトルの数
-	int prop[4] = {0,0,1,0};// パラメータ
-	double V[2] = {0,1};	// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};	// パラメータ
+	A2double V = {0,1};		// ノットベクトルの開始値,終了値
 
 	ublasVector	T_(K);		// 通過点上の曲線パラメータ
 	ublasVector	T(N);		// ノットベクトル
@@ -3795,8 +3795,7 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs, const VCoord& P,int M)
 	boost::tie(det, Q) = Gauss(B,P);
 	if(det == 0){
 //		GuiIFB.SetMessage("NURBS ERROR:Determinant is 0");
-		retflag = KOD_ERR;
-		goto EXIT;
+		return NULL;
 	}
 
 	// コントロールポイントと重みを得る
@@ -3806,14 +3805,13 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs, const VCoord& P,int M)
 	}
 
 	// NURBS曲線を生成する
+	NURBSC* Nurbs;
 	if(M == 2)
-		GenNurbsC(Nurbs,K,M,T,W,P,V,prop,0);
+		Nurbs = new NURBSC(M,T,W,P,V,prop,0);
 	else
-		GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);
+		Nurbs = new NURBSC(M,T,W,Q,V,prop,0);
 
-EXIT:
-
-	return retflag;
+	return Nurbs;
 }
 
 // Function: GenInterpolatedNurbsC2
@@ -3828,23 +3826,23 @@ EXIT:
 //
 // Return:
 // KOD_TRUE:正常終了, KOD_FALSE:点列の始点と終点が一致していない, KOD_ERR:点列の数が1個未満
-int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs, const VCoord& P_, int M)
+NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const VCoord& P_, int M)
 {
 	size_t PNum = P_.size();
 	if(P_[0].DiffCoord(P_[PNum-1]) == KOD_FALSE){
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Given points P0 and Pn are not unmuched");
-		return KOD_FALSE;
+		return NULL;
 	}
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum == 2 || PNum == 3)	M = PNum;	// 与えられた点が2個か3個の場合は、階数を強制的に2か3にする
 
-	int K = PNum+2;				// コントロールポイントの数
-	int N = M+K;				// ノットベクトルの数
-	int prop[4] = {0,0,1,0};	// パラメータ
-	double V[2] = {0,1};		// ノットベクトルの開始値,終了値
+	int K = PNum+2;					// コントロールポイントの数
+	int N = M+K;					// ノットベクトルの数
+	A4int prop = {0,0,1,0};			// パラメータ
+	A2double V = {0,1};				// ノットベクトルの開始値,終了値
 
 	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
 	ublasVector T(N);				// ノットベクトル
@@ -3905,12 +3903,13 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs, const VCoord& P_, int M)
 	}
 
 	// NURBS曲線を生成する
+	NURBSC* Nurbs;
 	if(M == 2)
-		GenNurbsC(Nurbs,K,M,T,W,P,V,prop,0);
+		Nurbs = new NURBSC(M,T,W,P,V,prop,0);
 	else
-		GenNurbsC(Nurbs,K,M,T,W,Q,V,prop,0);
+		Nurbs = new NURBSC(M,T,W,Q,V,prop,0);
 
-	return KOD_TRUE;
+	return Nurbs;
 }
 
 // Function: GenApproximationNurbsC

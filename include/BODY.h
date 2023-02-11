@@ -277,7 +277,6 @@ struct NURBSC{
 		Dstat.Color[0] = Dstat.Color[1] = Dstat.Color[2] = 1.0;
 		Dstat.Color[3] = 0.5;
 	}
-
 };
 
 // Structure: NURBSS
