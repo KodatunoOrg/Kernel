@@ -5124,15 +5124,16 @@ VCoord NURBS_Func::ApproxTrimBorder(COMPC *CompC)
 //
 // Return:
 // 点数
-int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,int D,Coord *Pts)
+VCoord NURBS_Func::CalcDeltaPtsOnNurbsC(const NURBSC* Nurb, int D)
 {
 	double T = (Nurb->V[1] - Nurb->V[0])/D;	// パラメトリック空間内での線分長を得る
 
+	VCoord Pts;
 	for(int i=0;i<=D;i++){
-		Pts[i] = CalcNurbsCCoord(Nurb, Nurb->V[0] + T*(double)i);
+		Pts.push_back(CalcNurbsCCoord(Nurb, Nurb->V[0] + T*(double)i));
 	}
 
-    return D+1;
+    return Pts;
 }
 
 // Function: CalcDeltaPtsOnNurbsC
@@ -5145,11 +5146,11 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,int D,Coord *Pts)
 //
 // Return:
 // 点数（Dが0，あるいは指定したNURBS曲線の全長より長かった場合は，KOD_ERR）
-int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,double D,Coord *Pts)
+VCoord NURBS_Func::CalcDeltaPtsOnNurbsC(const NURBSC* Nurb, double D)
 {
 	if(D == 0){
 //		GuiIFB.SetMessage("NURBS_Func ERROR: Set Correct Interval Value");
-		return KOD_ERR;
+		return VCoord();
 	}
 
 	double L = CalcNurbsCLength(Nurb);		// NURBS曲線の線分長を得る
@@ -5161,15 +5162,15 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,double D,Coord *Pts)
 
 	int k=1;			// 分割カウンタ
 	double t = (Nurb->V[1] - Nurb->V[0])/(L/D);	// tの初期値をセット
-
+	VCoord Pts;
 	while(t <= Nurb->V[1]){
 		t = CalcParamLengthOnNurbsC(Nurb,(double)k*D,t);	// 解を探索
-		Pts[k-1] = CalcNurbsCCoord(Nurb,t);		// 解を登録
+		Pts.push_back(CalcNurbsCCoord(Nurb,t));			// 解を登録
 		k++;
 		t = k*(Nurb->V[1] - Nurb->V[0])/(L/D);	// 次のtの初期値をセット
 	}
 
-	return k-1;
+	return Pts;
 }
 
 // Function: CalcParamLengthOnNurbsC
@@ -5182,7 +5183,7 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,double D,Coord *Pts)
 //
 // Return:
 // 指定距離におけるパラメータ値
-double NURBS_Func::CalcParamLengthOnNurbsC(NURBSC *C,double L,double Init_t)
+double NURBS_Func::CalcParamLengthOnNurbsC(const NURBSC* C, double L, double Init_t)
 {
 	double dt = 1E+12;			// ステップサイズパラメータの初期値
 	double t = Init_t;
@@ -5211,21 +5212,22 @@ double NURBS_Func::CalcParamLengthOnNurbsC(NURBSC *C,double L,double Init_t)
 //
 // Return:
 // 点数
-int NURBS_Func::CalcDeltaPtsOnNurbsS(NURBSS *S,int Du,int Dv,Coord **Pts)
+VVCoord NURBS_Func::CalcDeltaPtsOnNurbsS(const NURBSS* S, int Du, int Dv)
 {
 	double u_val = (S->U[1] - S->U[0])/Du;		// パラメトリック空間内でのu方向線分長を得る
 	double v_val = (S->V[1] - S->V[0])/Dv;		// パラメトリック空間内でのv方向線分長を得る
 
 	// u方向，v方向の各分割点における座標値を求める
-	int num=0;
+	VVCoord Pts;
 	for(int i=0;i<=Du;i++){
+		VCoord pts;
 		for(int j=0;j<=Dv;j++){
-			Pts[i][j] = CalcNurbsSCoord(S,S->U[0]+u_val*i,S->V[0]+v_val*j);	// 指定した(u,v)の座標値を求める
-			num++;
+			pts.push_back(CalcNurbsSCoord(S,S->U[0]+u_val*i,S->V[0]+v_val*j));	// 指定した(u,v)の座標値を求める
 		}
+		Pts.push_back(pts);
 	}
 	
-	return num;
+	return Pts;
 }
 
 // Funciton: RemoveTheSamePoints
@@ -5974,7 +5976,7 @@ void NURBS_Func::DebugForNurbsS(NURBSS *nurbs)
 //
 // Return:
 // 線分長
-double NURBS_Func::CalcNurbsCLength(NURBSC *Nurb,double a,double b)
+double NURBS_Func::CalcNurbsCLength(const NURBSC* Nurb, double a, double b)
 {
     if(a == b) return 0;
 
@@ -6164,7 +6166,7 @@ double NURBS_Func::CalcNurbsCLength(NURBSC *Nurb,double a,double b)
 //
 // Return:
 // 線分長
-double NURBS_Func::CalcNurbsCLength(NURBSC *Nurb)
+double NURBS_Func::CalcNurbsCLength(const NURBSC* Nurb)
 {
 	double g[80] = {-0.9995538226516306298800804990945671849917
 		,-0.997649864398237688899494208183122985331

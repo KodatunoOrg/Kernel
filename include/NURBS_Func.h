@@ -350,19 +350,23 @@ public:
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の線分長を求める
-	double CalcNurbsCLength(NURBSC *);							
+	double CalcNurbsCLength(const NURBSC*);
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の指定区間の線分長を求める
-	double CalcNurbsCLength(NURBSC *,double,double);			
+	double CalcNurbsCLength(const NURBSC*, double, double);
 
 	// Function: CalcDeltaPtsOnNurbsC
 	// 指定した分割数でNURBS曲線上の座標値を求める
-	int CalcDeltaPtsOnNurbsC(NURBSC *,int,Coord *);				
+	VCoord CalcDeltaPtsOnNurbsC(const NURBSC*, int);
+
+	// Function: CalcDeltaPtsOnNurbsC
+	// 指定した間隔でNURBS曲線上の座標値を求める
+	VCoord CalcDeltaPtsOnNurbsC(const NURBSC*, double);
 
 	// Function: CalcDeltaPtsOnNurbsS
 	// 指定した分割数でNURBS曲面上の座標値を求める
-	int CalcDeltaPtsOnNurbsS(NURBSS *,int,int,Coord **);		
+	VVCoord CalcDeltaPtsOnNurbsS(const NURBSS*, int, int);
 
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
@@ -455,14 +459,10 @@ public:
 
 	// Function: CalcParamLengthOnNurbsC
 	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
-	double CalcParamLengthOnNurbsC(NURBSC *,double,double);		
+	double CalcParamLengthOnNurbsC(const NURBSC*, double, double);
 
 
 	//int CalcDeltaParamsOnNurbsC(NURBSC *,double,Coord *);		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する
-
-	// Function: CalcDeltaPtsOnNurbsC
-	// 指定した間隔でNURBS曲線上の座標値を求める
-	int CalcDeltaPtsOnNurbsC(NURBSC *,double,Coord *);			
 
     // Function: CalcConstScallop
     // 等スキャロップ点を算出
