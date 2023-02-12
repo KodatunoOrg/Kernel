@@ -447,7 +447,7 @@ public:
 
 	// Function: DivNurbsC
 	// NURBS曲線を指定した位置（端からの距離）で分割する
-	int DivNurbsC(NURBSC *, NURBSC *, NURBSC *, double);		
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsC(const NURBSC*, double);
 
 	// Function: ConnectNurbsC
 	// NURBS曲線の連結

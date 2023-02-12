@@ -6392,16 +6392,17 @@ Coord NURBS_Func::GetMinDistance(const Coord& a, const VCoord& b)
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_FALSE 
-int NURBS_Func::DivNurbsC(NURBSC *C0, NURBSC *C1, NURBSC *C2, double L)
+boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsC(const NURBSC* C0, double L)
 {
 	double dLEN = CalcNurbsCLength(C0);					// NURBS曲線の線分長を得る
 	double t_init = (C0->V[1] - C0->V[0])*L/dLEN;		// tの初期値をセット
 	double t = CalcParamLengthOnNurbsC(C0,L,t_init);	// 分割点パラメータ値取得
 
-	int iKOD = DivNurbsCParam(C0,C1,C2,t);		// 分割
+	NURBSC*	C1;
+	NURBSC*	C2;
+	boost::tie(C1,C2) = DivNurbsCParam(C0,t);		// 分割
 
-	return iKOD;
-
+	return boost::make_tuple(C1,C2);
 }
 
 // Function: DivNurbsCParam
