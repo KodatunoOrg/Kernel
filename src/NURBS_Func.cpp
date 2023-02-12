@@ -4856,12 +4856,12 @@ boost::optional<Coord> NURBS_Func::GetMinDist(const NURBSS* S, const Coord& P, c
 // Vs - v方向パラメータの探索開始値
 // Ve - v方向パラメータの探索終了値
 // *Q - 解（S上の点をu,vパラメータでCoord構造体に格納）
-void NURBS_Func::CalcIntersecPtNurbsPtDescrete(NURBSS *S,Coord P,int Divnum,int LoD,double Us,double Ue,double Vs,double Ve, Coord *Q)
+boost::optional<Coord> NURBS_Func::CalcIntersecPtNurbsPtDescrete(const NURBSS* S, const Coord& P, int Divnum, int LoD, double Us, double Ue, double Vs, double Ve)
 {
-    if(!LoD)    return;
+    if(!LoD)    return boost::optional<Coord>();
 
     double mind = 1E+38;
-    Coord minp;
+    Coord minp, Q;
     double du = (Ue-Us)/(double)Divnum;
     double dv = (Ve-Vs)/(double)Divnum;
 
@@ -4875,13 +4875,14 @@ void NURBS_Func::CalcIntersecPtNurbsPtDescrete(NURBSS *S,Coord P,int Divnum,int 
             double d = p.CalcDistance(P);
             if(d < mind){
                 mind = d;
-                Q->SetCoord(u,v,0);
+                Q.SetCoord(u,v);
             }
         }
     }
 
-    CalcIntersecPtNurbsPtDescrete(S,P,Divnum,LoD-1,Q->x-du,Q->x+du,Q->y-dv,Q->y+dv,Q);
-
+	boost::optional<Coord> ans = CalcIntersecPtNurbsPtDescrete(S,P,Divnum,LoD-1,Q.x-du,Q.x+du,Q.y-dv,Q.y+dv);
+	
+	return ans ? ans : Q;
 }
 
 // Function: CalcIntersecPtNurbsPtDescrete
@@ -4895,11 +4896,11 @@ void NURBS_Func::CalcIntersecPtNurbsPtDescrete(NURBSS *S,Coord P,int Divnum,int 
 // Ts - t方向パラメータの探索開始値
 // Te - t方向パラメータの探索終了値
 // *Q - 解（C上の点をtパラメータで格納）
-void NURBS_Func::CalcIntersecPtNurbsPtDescrete(NURBSC *C,Coord P,int Divnum,int LoD,double Ts,double Te, double *Q)
+boost::optional<double> NURBS_Func::CalcIntersecPtNurbsPtDescrete(const NURBSC* C, const Coord& P, int Divnum, int LoD, double Ts, double Te)
 {
-    if(!LoD)    return;
+    if(!LoD)    return boost::optional<double>();
 
-    double mind = 1E+38;
+    double mind = 1E+38, Q;
     Coord minp;
     double dt = (Te-Ts)/(double)Divnum;
 
@@ -4910,11 +4911,13 @@ void NURBS_Func::CalcIntersecPtNurbsPtDescrete(NURBSC *C,Coord P,int Divnum,int 
         double d = p.CalcDistance(P);
         if(d < mind){
             mind = d;
-            *Q = t;
+            Q = t;
         }
     }
 
-    CalcIntersecPtNurbsPtDescrete(C,P,Divnum,LoD-1,*Q-dt,*Q+dt,Q);
+    boost::optional<double> ans = CalcIntersecPtNurbsPtDescrete(C,P,Divnum,LoD-1,Q-dt,Q+dt);
+
+	return ans ? ans : Q;
 }
 
 

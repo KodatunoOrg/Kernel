@@ -170,11 +170,11 @@ public:
 
     // Function: CalcIntersecPtNurbsPtDescrete
     // 空間上の1点からNURBS曲面上の最近傍点を求める(離散的)
-    void CalcIntersecPtNurbsPtDescrete(NURBSS *,Coord ,int ,int ,double ,double ,double ,double , Coord *);
+    boost::optional<Coord> CalcIntersecPtNurbsPtDescrete(const NURBSS*, const Coord&, int, int, double, double, double, double);
 
     // Function: CalcIntersecPtNurbsPtDescrete
     // 空間上の1点からNURBS曲線上の最近傍点を求める(離散的)
-    void CalcIntersecPtNurbsPtDescrete(NURBSC *,Coord ,int ,int ,double ,double ,double *);
+    boost::optional<double> CalcIntersecPtNurbsPtDescrete(const NURBSC*, const Coord&, int, int, double, double);
 
 	// Function: CalcIntersecIsparaCurveU
 	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
