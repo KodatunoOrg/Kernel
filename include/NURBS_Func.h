@@ -443,7 +443,7 @@ public:
 
 	// Function: DivNurbsCParam
 	// NURBS曲線を指定したパラメータ値で分割する
-	int DivNurbsCParam(NURBSC *, NURBSC *, NURBSC *, double);	
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsCParam(const NURBSC*, double);
 
 	// Function: DivNurbsC
 	// NURBS曲線を指定した位置（端からの距離）で分割する
@@ -605,7 +605,7 @@ private:
 
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する
-	int InsertNewKnotOnNurbsC(NURBSC *,NURBSC *,double,int);		
+	NURBSC InsertNewKnotOnNurbsC(const NURBSC*, double, int);
 
 	// Function: SetKnotVecC_ConnectC
 	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)

@@ -6415,35 +6415,35 @@ int NURBS_Func::DivNurbsC(NURBSC *C0, NURBSC *C1, NURBSC *C2, double L)
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_FALSE 
-int NURBS_Func::DivNurbsCParam(NURBSC *C0, NURBSC *C1, NURBSC *C2, double t)
+boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, double t)
 {
+	NURBSC*	C1 = NULL;
+	NURBSC*	C2 = NULL;
+	int C0N = C0->T.size();
+
 	// tパラメータが適正範囲か
-	if(t <= C0->T[0] || t >= C0->T[C0->N-1]){
+	if(t <= C0->T[0] || t >= C0->T[C0N-1]){
 //		GuiIFB.SetMessage("NURBS_Func ERROR: Wrong Curve Parameter is set.");
-		return KOD_ERR;
+		return boost::make_tuple(C1, C2);
 	}
 
 	int deg = C0->M - 1;		// 多重度
 
-	// 分割の下準備
-	// 分割用曲線C0_を準備する
-	NURBSC C0_;
-	C0_.K = C0->K + deg;
-	C0_.N = C0->M + C0_.K;
-	New_NurbsC(&C0_,C0_.K,C0_.N);
-
 	// C0のノットベクトルにtと同じ値がある場合は，多重度を1つ落とす
-	for(int i=0;i<C0->N;i++){
+	for(int i=0;i<C0N;i++){
 		if(t == C0->T[i])	deg--;
 	}
 
+	// 分割の下準備
+	// 分割用曲線C0_を準備する
 	// 分割位置パラメータtをC0_に挿入する
-	int k = InsertNewKnotOnNurbsC(C0,&C0_,t,deg);
+	NURBSC C0_ = InsertNewKnotOnNurbsC(C0,t,deg);
 
 	// 2本の分割曲線を生成
+	int k  = C0_.cp.size();
 	int N1 = k+1;
 	int K1 = N1 - C0->M;
-	int N2 = C0_.N - k + deg+1;
+	int N2 = C0_.T.size() - k + deg+1;
 	int K2 = N2 - C0->M;
 
 	ublasVector T1(N1);
@@ -6486,14 +6486,14 @@ int NURBS_Func::DivNurbsCParam(NURBSC *C0, NURBSC *C1, NURBSC *C2, double t)
 	//	fprintf(stderr,"%d:%lf\n",i+1,T2[i]);
 
 	// ノットの範囲を0-1に変更
-	T1 = ChangeKnotVecRange2(T1,C0->M,K1,0,1);
-	T2 = ChangeKnotVecRange2(T2,C0->M,K2,0,1);
+	T1 = ChangeKnotVecRange(T1,C0->M,K1,0,1);
+	T2 = ChangeKnotVecRange(T2,C0->M,K2,0,1);
 
 	// C1,C2生成
-	GenNurbsC(C1,K1,C0->M,T1,W1,cp1,C0->V,C0->prop,0);
-	GenNurbsC(C2,K2,C0->M,T2,W2,cp2,C0->V,C0->prop,0);
+	C1 = new NURBSC(C0->M,T1,W1,cp1,C0->V,C0->prop,0);
+	C2 = new NURBSC(C0->M,T2,W2,cp2,C0->V,C0->prop,0);
 
-	return KOD_TRUE;
+	return boost::make_tuple(C1, C2);
 }
 
 // Function: ConnectNurbsC
@@ -6639,33 +6639,37 @@ void NURBS_Func::SetCPC_ConnectC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
 //
 // Return:
 // 新たなノットベクトル列におけるtの挿入位置
-int NURBS_Func::InsertNewKnotOnNurbsC(NURBSC *C,NURBSC *C_,double t,int deg)
+NURBSC NURBS_Func::InsertNewKnotOnNurbsC(const NURBSC* C, double t, int deg)
 {
+	NURBSC C_;
+	int CK = C->cp.size();
 	int k=0;					// tの挿入位置
 	int m = C->M;				// 階数
-	int n = C->K;				// コントロールポイントの数
+	int n = CK;					// コントロールポイントの数
 
-	Vdouble T_buf(C->K+C->M+deg);	// ノットベクトル一時格納用バッファ
-	VCoord cp_buf(C->K+deg);		// コントロールポイント一時格納用バッファ
-	Vdouble W_buf(C->K+deg);		// ウェイト一時格納用バッファ
+	Vdouble T_buf(CK+C->M+deg);	// ノットベクトル一時格納用バッファ
+	VCoord cp_buf(CK+deg);		// コントロールポイント一時格納用バッファ
+	Vdouble W_buf(CK+deg);		// ウェイト一時格納用バッファ
 
 	// C_に元のNURBS曲線のT,cp,Wを初期値として代入
+	C_.T.resize(m+n);
 	for(int i=0;i<m+n;i++)
-		C_->T[i] = C->T[i];
+		C_.T[i] = C->T[i];
 	for(int i=0;i<n;i++)
-		C_->cp[i] = C->cp[i];
+		C_.cp.push_back(C->cp[i]);
+	C_.W.resize(n);
 	for(int i=0;i<n;i++)
-		C_->W[i] = C->W[i];
+		C_.W[i] = C->W[i];
 
 	// 多重度分，tの挿入を繰り返す
 	for(int count=0;count<deg;count++){
 		// 各bufにC_のT,cp,Wを代入
 		for(int i=0;i<n+m;i++)
-			T_buf[i] = C_->T[i];
+			T_buf[i] = C_.T[i];
 		for(int i=0;i<n;i++)
-			cp_buf[i] = C_->cp[i];
+			cp_buf[i] = C_.cp[i];
 		for(int i=0;i<n;i++)
-			W_buf[i] = C_->W[i];
+			W_buf[i] = C_.W[i];
 
 		// tの挿入位置kを調べる
 		k=0;
@@ -6678,30 +6682,30 @@ int NURBS_Func::InsertNewKnotOnNurbsC(NURBSC *C,NURBSC *C_,double t,int deg)
 
 		// C_のノットベクトルを更新
 		for(int i=0;i<=k;i++)
-			C_->T[i] = T_buf[i];
-		C_->T[k+1] = t;
+			C_.T[i] = T_buf[i];
+		C_.T[k+1] = t;
 		for(int i=k+2;i<=n+m;i++)
-			C_->T[i] = T_buf[i-1];
+			C_.T[i] = T_buf[i-1];
 
 		// コントロールポイントとウェイトの更新
 		for(int i=0;i<=k-m+1;i++){
-			C_->cp[i] = cp_buf[i];
-			C_->W[i] = W_buf[i];
+			C_.cp[i] = cp_buf[i];
+			C_.W[i]  = W_buf[i];
 		}
 		for(int i=k-m+2;i<=k;i++){
 			double a = (t-T_buf[i])/(T_buf[i+m-1]-T_buf[i]);
-			C_->cp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
-			C_->W[i] = (1-a)*W_buf[i-1] + a*W_buf[i];
+			C_.cp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
+			C_.W[i]  = (1-a)*W_buf[i-1] + a*W_buf[i];
 		}
 		for(int i=k+1;i<=n;i++){
-			C_->cp[i] = cp_buf[i-1];
-			C_->W[i] = W_buf[i-1];
+			C_.cp[i] = cp_buf[i-1];
+			C_.W[i]  = W_buf[i-1];
 		}
 
 		n++;
 	}
 
-	return k+2;
+	return C_;
 }
 
 // Function: CalcConstScallop
