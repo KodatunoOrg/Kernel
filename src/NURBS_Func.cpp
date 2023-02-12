@@ -5894,30 +5894,31 @@ int NURBS_Func::SetApproximationCPnum(int PNum)
 //
 // Parameters:
 // *nurbs - デバッグするNURBS曲線
-void NURBS_Func::DebugForNurbsC(NURBSC *nurbs)
+void NURBS_Func::DebugForNurbsC(const NURBSC* nurbs)
 {
-	fprintf(stderr,"Cp num: %d\n",nurbs->K);
+	int K = nurbs->cp.size();
+	fprintf(stderr,"Cp num: %d\n",K);
 	fprintf(stderr,"Rank: %d\n",nurbs->M);
-	fprintf(stderr,"Knot num: %d\n",nurbs->N);
+	fprintf(stderr,"Knot num: %d\n",nurbs->T.size());
 	fprintf(stderr,"Knot range: %lf - %lf\n",nurbs->V[0], nurbs->V[1]);
 
 	// コントロールポイント
 	fprintf(stderr,"Control Point\n");
-	for(int i=0;i<nurbs->K;i++){
+	for(int i=0;i<K;i++){
 		fprintf(stderr,"#%d: (%lf,%lf,%lf)\t",i+1,nurbs->cp[i].x,nurbs->cp[i].y,nurbs->cp[i].z);
 	}
 	fprintf(stderr,"\n");
 
 	// ノットシーケンス
 	fprintf(stderr,"Knot Vector\t");
-	for(int i=0;i<nurbs->K+nurbs->M;i++){
+	for(int i=0;i<K+nurbs->M;i++){
 		fprintf(stderr,"#%d: %lf\t",i+1,nurbs->T[i]);
 	}
 	fprintf(stderr,"\n");
 
 	// ウェイト
 	fprintf(stderr,"Weight\n");
-	for(int i=0;i<nurbs->K;i++){
+	for(int i=0;i<K;i++){
 		fprintf(stderr,"#%d: %lf\t",i+1,nurbs->W[i]);
 	}
 }
@@ -5927,17 +5928,19 @@ void NURBS_Func::DebugForNurbsC(NURBSC *nurbs)
 //
 // Parameters:
 // *nurbs - デバッグするNURBS曲面
-void NURBS_Func::DebugForNurbsS(NURBSS *nurbs)
+void NURBS_Func::DebugForNurbsS(const NURBSS* nurbs)
 {
-	fprintf(stderr,"Cp num: %d-%d\n",nurbs->K[0],nurbs->K[1]);
+	int K[] = {nurbs->W.size1(), nurbs->W.size2()},
+		N[] = {nurbs->S.size(),  nurbs->T.size()};
+	fprintf(stderr,"Cp num: %d-%d\n",K[0],K[1]);
 	fprintf(stderr,"Rank: %d-%d\n",nurbs->M[0],nurbs->M[1]);
-	fprintf(stderr,"Knot num: %d-%d\n",nurbs->N[0],nurbs->N[1]);
+	fprintf(stderr,"Knot num: %d-%d\n",N[0],N[1]);
 	fprintf(stderr,"Knot range: (%lf - %lf),(%lf - %lf)\n",nurbs->U[0],nurbs->U[1],nurbs->V[0],nurbs->V[1]);
 
 	// コントロールポイント
 	fprintf(stderr,"Control Point\n");
-	for(int i=0;i<nurbs->K[0];i++){
-		for(int j=0;j<nurbs->K[1];j++){
+	for(int i=0;i<K[0];i++){
+		for(int j=0;j<K[1];j++){
 			fprintf(stderr,"#(%d-%d): (%lf,%lf,%lf)\t",i+1,j+1,nurbs->cp[i][j].x,nurbs->cp[i][j].y,nurbs->cp[i][j].z);
 		}
 	}
@@ -5945,14 +5948,14 @@ void NURBS_Func::DebugForNurbsS(NURBSS *nurbs)
 
 	// U方向ノットシーケンス
 	fprintf(stderr,"U Knot Vector\t");
-	for(int i=0;i<nurbs->K[0]+nurbs->M[0];i++){
+	for(int i=0;i<K[0]+nurbs->M[0];i++){
 		fprintf(stderr,"#%d: %lf\t",i+1,nurbs->S[i]);
 	}
 	fprintf(stderr,"\n");
 
 	// V方向ノットシーケンス
 	fprintf(stderr,"V Knot Vector\t");
-	for(int i=0;i<nurbs->K[1]+nurbs->M[1];i++){
+	for(int i=0;i<K[1]+nurbs->M[1];i++){
 		fprintf(stderr,"#%d: %lf\t",i+1,nurbs->T[i]);
 	}
 	fprintf(stderr,"\n");

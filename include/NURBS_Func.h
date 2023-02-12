@@ -412,11 +412,11 @@ public:
 
 	// Function: DebugForNurbsC
 	// NURBS曲線情報をデバッグプリント
-	void DebugForNurbsC(NURBSC *);				
+	void DebugForNurbsC(const NURBSC*);
 
 	// Function: DebugForNurbsS
 	// NURBS曲面情報をデバッグプリント
-	void DebugForNurbsS(NURBSS *);				
+	void DebugForNurbsS(const NURBSS*);
 
 	// Function: CalcIntersecPtsOffsetPlaneGeom
 	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
