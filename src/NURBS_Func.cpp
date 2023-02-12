@@ -5097,10 +5097,10 @@ VCoord NURBS_Func::ApproxTrimBorder(COMPC *CompC)
 		// トリム境界線がNURBS曲線で構成されている
 		if(CompC->DEType[i] == NURBS_CURVE){
 			NurbsC = CompC->pDE[i].NurbsC;	// 注目中のNurbs曲線のポインタを取得
-			if(NurbsC->K == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
+			if(NurbsC->cp.size() == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
 			else divnum = TRM_BORDERDIVNUM;
 			for(int j=0;j<divnum-1;j++){
-				ent_dev = NurbsC->T[NurbsC->M-1]+(NurbsC->T[NurbsC->K]-NurbsC->T[NurbsC->M-1])*(double)j/((double)divnum-1);	// 分割点tを求める
+				ent_dev = NurbsC->T[NurbsC->M-1]+(NurbsC->T[NurbsC->cp.size()]-NurbsC->T[NurbsC->M-1])*(double)j/((double)divnum-1);	// 分割点tを求める
 				P.push_back(CalcNurbsCCoord(NurbsC,ent_dev));	// NURBS曲面のパラメータ空間内のNURBS曲線の分割点tの座標値(u,v)を得る
 			}
 		}
@@ -5278,7 +5278,7 @@ VCoord NURBS_Func::RemoveTheSamePoints(const NURBSS* S, const VCoord& Q)	// 修�
 //
 // Return:
 // 得られた極値パラメータの数（KOD_FALSE:得られなかった, KOD_ERR:極値パラメータの数がptnumを超えた）
-Vdouble NURBS_Func::CalcExtremumNurbsC(NURBSC *C, const Coord& nf)
+Vdouble NURBS_Func::CalcExtremumNurbsC(const NURBSC* C, const Coord& nf)
 {
 	Vdouble pt;
 
@@ -5328,10 +5328,12 @@ Vdouble NURBS_Func::CalcExtremumNurbsC(NURBSC *C, const Coord& nf)
 //
 // Return:
 // KOD_TRUE
-int NURBS_Func::CalcExtSearchCurve(NURBSS *S,Coord n,Coord pt,double ds,NURBSC *C1,NURBSC *C2)
+boost::tuple<NURBSC*, NURBSC*> NURBS_Func::CalcExtSearchCurve(const NURBSS* S, const Coord& n, const Coord& pt, double ds)
 {
+	NURBSC*	C1 = NULL;
+	NURBSC* C2 = NULL;
 	// 工事中
-	return KOD_TRUE;
+	return boost::make_tuple(C1,C2);
 }
 
 // Function: CalcExtGradCurve
@@ -5347,10 +5349,12 @@ int NURBS_Func::CalcExtSearchCurve(NURBSS *S,Coord n,Coord pt,double ds,NURBSC *
 //
 // Return:
 // KOD_TRUE
-int NURBS_Func::CalcExtGradCurve(NURBSS *S,Coord n,Coord pt,double ds,NURBSC *C1,NURBSC *C2)
+boost::tuple<NURBSC*, NURBSC*> NURBS_Func::CalcExtGradCurve(const NURBSS* S, const Coord& n, const Coord& pt, double ds)
 {
+	NURBSC*	C1 = NULL;
+	NURBSC* C2 = NULL;
 	// 工事中
-	return KOD_TRUE;
+	return boost::make_tuple(C1,C2);
 }
 
 // Funciton: TrimNurbsSPlane
@@ -5363,33 +5367,30 @@ int NURBS_Func::CalcExtGradCurve(NURBSS *S,Coord n,Coord pt,double ds,NURBSC *C1
 //
 // Return:
 // KOD_TRUE
-int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
+int NURBS_Func::TrimNurbsSPlane(const TRMS* Trm, const Coord& pt, const Coord& nvec)
 {
-	Coord t[2000];					// 解
-	int   num;						// 解の数
 	double pcolor[3] = {0,1,0};		// 表示の色
 	double tcolor[3] = {1,0,0};
 
-
-	num = CalcIntersecPtsPlaneSearch(Trm->pts,pt,nvec,0.5,5,t,2000,RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
+	VCoord t = CalcIntersecPtsPlaneSearch(Trm->pts, pt, nvec, 0.5, 5, RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
 	
 	// パラメトリック領域内で直線近似(最小2乗法で近似直線の係数2つを求める)
 	ublasMatrix A(2,2,0);
 	ublasMatrix A_(2,2);
 	boost::optional<ublasMatrix> reA;
 	ublasVector B(2,0);
-	ublasVector B_(2);
-	for(int i=0;i<num;i++){
+	ublasVector B_;
+	for(size_t i=0;i<t.size();i++){
 		A(0,0) += t[i].x*t[i].x;
 		A(0,1) += t[i].x;
 		B[0] += t[i].x*t[i].y;
 		B[1] += t[i].y;
 	}
 	A(1,0) = A(0,1);
-	A(1,1) = (double)num;
+	A(1,1) = t.size();
 	reA = MatInv2(A);
 	if ( reA ) A_ = *reA;		// オリジナルでチェックせず
-	B_ = MulMxVec(A_,B);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
+	B_ = ublas::prod(A_, B);	// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
 
 	// 端点抽出
 	// パラメトリック領域内のU-Vの範囲を決める4点から得られる4本の直線と、さっき求めた近似直線との交点4つを求める
@@ -5419,7 +5420,7 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 	
 
 	FILE *fp = fopen("Debug.csv","w");
-	for(int i=0;i<num;i++){
+	for(size_t i=0;i<t.size();i++){
 		Coord p = CalcNurbsSCoord(Trm->pts,t[i].x,t[i].y);			// 交点をパラメータ値から座標値へ変換
 		DrawPoint(p,1,3,pcolor);			// 交点を描画
 		fprintf(fp,"%lf,%lf\n",t[i].x,t[i].y);
@@ -5443,17 +5444,18 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 //
 // Return:
 // KOD_TRUE:正常終了,  KOD_FALSE:特異点により処理を中断,  KOD_ERR:パラメータの指定ミスにより処理を中断
-int NURBS_Func::SearchExtremum_BS(NURBSS *S,Coord nf,double u0,double v0,double H,int param,int direction,Coord *ans)
+boost::tuple<int, Coord> NURBS_Func::SearchExtremum_BS(const NURBSS* S, const Coord& nf, double u0, double v0, double H, int param, int direction)
 {
+	Coord ans;
 	// 引数指定ミス
 	if(direction != FORWARD && direction != INVERSE){
 //		GuiIFB.SetMessage("NURBS ERROR: selected wrong direction");
-		return KOD_ERR;
+		return boost::make_tuple(KOD_ERR, ans);
 	}
 
 	int    n[11] = {2,4,6,8,12,16,24,32,48,64,96};		// B-S法の分割数群を指定
 	Coord  z[97];							// 修正中点法の中間値を格納(z.x = u, z.y = v)
-	Coord  f;								// f.x = fu(u,v), f.y = fv(u,v)
+	boost::optional<Coord>  f;				// f.x = fu(u,v), f.y = fv(u,v)
 	Coord  D[10][10],C[10][10],P[11];		// B-S法の中間パラメータ
 	double h[11];							// B-S法の刻み幅
 	Coord  R;								// h=0の外挿値
@@ -5468,18 +5470,18 @@ int NURBS_Func::SearchExtremum_BS(NURBSS *S,Coord nf,double u0,double v0,double 
 
 		// まず、u(s+H)の値を修正中点法により計算する
 		z[0].SetCoord(u0,v0,0);											// z0とz1の算出は別処理
-		if(GetSECParam1(S,u0,v0,nf,param,direction,&f) == KOD_FALSE)	// z0での微分方程式の右辺を計算
-			return KOD_FALSE;
+		f = GetSECParam1(S,u0,v0,nf,param,direction);					// z0での微分方程式の右辺を計算
+		if( !f ) return boost::make_tuple(KOD_FALSE, ans);
 			//fprintf(stderr,"f%d=(%lf,%lf)\n",i,f.x,f.y);
-		z[1] = z[0]+(f*h[i]);											// z0とz1の算出は別処理
+		z[1] = z[0]+((*f)*h[i]);										// z0とz1の算出は別処理
 		for(int j=1;j<n[i];j++){
-			if(GetSECParam1(S,z[j].x,z[j].y,nf,param,direction,&f) == KOD_FALSE)	// zjでの微分方程式の右辺を計算
-				return KOD_FALSE;
-			z[j+1] = z[j-1]+(f*(2*h[i]));								// z2～znまでを算出
+			f = GetSECParam1(S,z[j].x,z[j].y,nf,param,direction);		// zjでの微分方程式の右辺を計算
+			if( !f ) return boost::make_tuple(KOD_FALSE, ans);
+			z[j+1] = z[j-1]+((*f)*(2*h[i]));							// z2～znまでを算出
 		}
-		if(GetSECParam1(S,z[n[i]].x,z[n[i]].y,nf,param,direction,&f) == KOD_FALSE)	// znでの微分方程式の右辺を計算
-			return KOD_FALSE;
-		P[i] = (z[n[i]]+z[n[i]-1]+(f*h[i]))/2;		// u(s+H)
+		f = GetSECParam1(S,z[n[i]].x,z[n[i]].y,nf,param,direction);		// znでの微分方程式の右辺を計算
+		if( !f ) return boost::make_tuple(KOD_FALSE, ans);
+		P[i] = (z[n[i]]+z[n[i]-1]+((*f)*h[i]))/2;						// u(s+H)
 			//fprintf(stderr,"P%d=(%lf,%lf)\n",i,P[i].x,P[i].y);
 
 		// B-S法の差分表を順次求めていく
@@ -5504,14 +5506,14 @@ int NURBS_Func::SearchExtremum_BS(NURBSS *S,Coord nf,double u0,double v0,double 
 		// D[0][i-1]が所定の閾値よりも小さくなったら、そのときの外挿値を解として演算処理を終了する
 		double	xx = D[0][i-1].x, yy = D[0][i-1].y;
 		if(i > 0 && sqrt(xx*xx+yy*yy) < APPROX_ZERO_L){
-			ans->x = R.x;
-			ans->y = R.y;
+			ans.x = R.x;
+			ans.y = R.y;
 			conv_flag = KOD_TRUE;
 			break;
 		}
 	}
 
-	return conv_flag;
+	return boost::make_tuple(conv_flag, ans);
 }
 
 // Function: GetSECParam1
@@ -5527,8 +5529,9 @@ int NURBS_Func::SearchExtremum_BS(NURBSS *S,Coord nf,double u0,double v0,double 
 // 
 // Return:
 // 成功：KOD_TURE, 特異点につき処理を中断した：KOD_FALSE
-int NURBS_Func::GetSECParam1(NURBSS *S,double u,double v,Coord nf,int param,int direction,Coord *f)
+boost::optional<Coord> NURBS_Func::GetSECParam1(const NURBSS* S, double u, double v, const Coord& nf, int param, int direction)
 {
+	Coord f;
 	double fuu = nf & CalcDiffNNurbsS(S,2,0,u,v);	// nf・Suu
 	double fuv = nf & CalcDiffNNurbsS(S,1,1,u,v);	// nf・Suv
 	double fvv = nf & CalcDiffNNurbsS(S,0,2,u,v);	// nf・Svv
@@ -5541,22 +5544,22 @@ int NURBS_Func::GetSECParam1(NURBSS *S,double u,double v,Coord nf,int param,int 
 		double f__ = E*fvv*fvv - 2*F*fuv*fvv + G*fuv*fuv;
 		if(f__==0.0){
 //			GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detecting singular point.");
-			return KOD_FALSE;				
+			return boost::optional<Coord>();				
 		}
 		double f_ = 1/sqrt(f__);
-		f->SetCoord(-f_*fvv*(double)direction,f_*fuv*(double)direction,0);
+		f.SetCoord(-f_*fvv*(double)direction,f_*fuv*(double)direction);
 	}
 	else if(param == PARAM_V){
 		double f__ = E*fuv*fuv - 2*F*fuv*fuu + G*fuu*fuu; 
 		if(f__==0.0){
 //			GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detecting singular point.");
-			return KOD_FALSE;				
+			return boost::optional<Coord>();				
 		}
 		double f_ = 1/sqrt(f__);
-		f->SetCoord(-f_*fuv*(double)direction,f_*fuu*(double)direction,0);
+		f.SetCoord(-f_*fuv*(double)direction,f_*fuu*(double)direction);
 	}
 
-	return KOD_TRUE;
+	return f;
 }
 
 // Function: TrimNurbsSPlaneSub1

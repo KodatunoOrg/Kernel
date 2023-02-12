@@ -242,7 +242,7 @@ public:
 
 	// Function: SearchExtremum_BS
 	// Bulirsch-Stoer法により極地探索を行う
-	int SearchExtremum_BS(NURBSS *,Coord,double,double,double,int,int,Coord *);	
+	boost::tuple<int, Coord> SearchExtremum_BS(const NURBSS*, const Coord&, double, double, double, int, int);
 
 	// Function: GetBSplCoef3
 	// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
@@ -370,7 +370,7 @@ public:
 
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
-	Vdouble CalcExtremumNurbsC(NURBSC *, const Coord&);
+	Vdouble CalcExtremumNurbsC(const NURBSC*, const Coord&);
 
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
@@ -382,9 +382,9 @@ public:
 	ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
 
 
-	int CalcExtSearchCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地探索線を得る(準備中)
-	int CalcExtGradCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地傾斜線を得る(準備中)
-	int TrimNurbsSPlane(TRMS *,Coord,Coord);										// NURBS曲面を平面でトリムする(準備中)
+	boost::tuple<NURBSC*, NURBSC*> CalcExtSearchCurve(const NURBSS*, const Coord&, const Coord&, double);	// 極地探索線を得る(準備中)
+	boost::tuple<NURBSC*, NURBSC*>CalcExtGradCurve(const NURBSS*, const Coord&, const Coord&, double);		// 極地傾斜線を得る(準備中)
+	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);											// NURBS曲面を平面でトリムする(準備中)
 
 	// Function: New_TrmS
 	// トリム面のメモリー確保
@@ -581,7 +581,7 @@ private:
 
 	// Function: GetSECParam1
 	// (private)極値探索線Sub関数1
-	int GetSECParam1(NURBSS *,double,double,Coord,int,int,Coord *);	
+	boost::optional<Coord> GetSECParam1(const NURBSS*, double, double, const Coord&, int, int);
 
 	// Function: GetMinDist
 	// (private)最小距離を調べる
