@@ -451,11 +451,11 @@ public:
 
 	// Function: ConnectNurbsC
 	// NURBS曲線の連結
-	int ConnectNurbsC(NURBSC *, NURBSC *, NURBSC *);			
+	NURBSC* ConnectNurbsC(const NURBSC*, const NURBSC*);
 
 	// Function: ReverseNurbsC
 	// NURBS曲線のノットベクトル向きを反転する
-	void ReverseNurbsC(NURBSC *);								
+	void ReverseNurbsC(NURBSC*);
 
 	// Function: CalcParamLengthOnNurbsC
 	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
@@ -609,11 +609,11 @@ private:
 
 	// Function: SetKnotVecC_ConnectC
 	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)
-	void SetKnotVecC_ConnectC(NURBSC *,NURBSC *,NURBSC *);			
+	void SetKnotVecC_ConnectC(const NURBSC*, const NURBSC*, NURBSC*);
 
 	// Function: SetCPC_ConnectC
 	// (private)NURBS曲線連結用SUB関数(連結後の曲線のコントロールポイントとウェイトを設定する)
-	void SetCPC_ConnectC(NURBSC *,NURBSC *,NURBSC *);				
+	void SetCPC_ConnectC(const NURBSC*, const NURBSC*, NURBSC*);
 
 };
 
