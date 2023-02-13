@@ -381,7 +381,6 @@ public:
 	ublasVector ChangeKnotVecRange(const Vdouble&, int, int, double, double);
 	ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
 
-
 	boost::tuple<NURBSC*, NURBSC*> CalcExtSearchCurve(const NURBSS*, const Coord&, const Coord&, double);	// 極地探索線を得る(準備中)
 	boost::tuple<NURBSC*, NURBSC*>CalcExtGradCurve(const NURBSS*, const Coord&, const Coord&, double);		// 極地傾斜線を得る(準備中)
 	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);											// NURBS曲面を平面でトリムする(準備中)
@@ -466,11 +465,11 @@ public:
 
     // Function: CalcConstScallop
     // 等スキャロップ点を算出
-    int CalcConstScallop(NURBSS *, NURBSC *, double, double, double *, double *, int);
+    boost::optional<A2double> CalcConstScallop(const NURBSS*, const NURBSC*, double, double, int);
 
     // Function: CalcConstPitch
     // 等ピッチ点を算出
-    int CalcConstPitch(NURBSS *,NURBSC *, double, double, double *, int);
+    boost::optional<double> CalcConstPitch(const NURBSS*, const NURBSC*, double, double, int);
 
 private:
 

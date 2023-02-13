@@ -6489,7 +6489,7 @@ boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, doub
 	//	fprintf(stderr,"%d:%lf\n",i+1,T2[i]);
 
 	delete	C0_;
-	
+
 	// ノットの範囲を0-1に変更
 	T1 = ChangeKnotVecRange(T1,C0->M,K1,0,1);
 	T2 = ChangeKnotVecRange(T2,C0->M,K2,0,1);
@@ -6522,7 +6522,7 @@ NURBSC* NURBS_Func::ConnectNurbsC(const NURBSC* C1, const NURBSC* C2)
 		ReverseNurbsC(&C1_);			// C1の向きを反転する
 	}
 	else if(C1->cp.front().DiffCoord(C2->cp.back()) == KOD_TRUE){
-		std::swap(C1_, C2_)
+		std::swap(C1_, C2_);
 	}
 	else if(C1->cp.back().DiffCoord(C2->cp.front()) == KOD_TRUE){
 		// このケースはOK．特に調整必要なし
@@ -6720,7 +6720,7 @@ void NURBS_Func::InsertNewKnotOnNurbsC(const NURBSC* C, double t, int deg, NURBS
 //
 // Retrun:
 // 成功：KOD_TRUE,  境界外：KOD_FALSE
-int NURBS_Func::CalcConstScallop(NURBSS *S, NURBSC *C, double t, double g, double *u, double *v, int direct)
+boost::optional<A2double> NURBS_Func::CalcConstScallop(const NURBSS* S, const NURBSC* C, double t, double g, int direct)
 {
     double p[4] = {0,0,0,0};
     double q[4] = {0,0,0,0};
@@ -6730,24 +6730,25 @@ int NURBS_Func::CalcConstScallop(NURBSS *S, NURBSC *C, double t, double g, doubl
     Coord C_ = CalcNurbsCCoord(C,t);
     Coord Ct = CalcDiffNurbsC(C,t);
 
-    double u0 = *u = C_.x;
-    double v0 = *v = C_.y;
+	A2double uv;
+    double u0 = uv[0] = C_.x;
+    double v0 = uv[1] = C_.y;
 
 
     // ルンゲクッタ法
     for(int i=0;i<4;i++){
         if(i==1 || i==2){
-            *u = u0 + p[i-1]/2;
-            *v = v0 + q[i-1]/2;
+            uv[0] = u0 + p[i-1]/2;
+            uv[1] = v0 + q[i-1]/2;
         }
         else if(i==3){
-            *u = u0 + p[i-1];
-            *v = v0 + q[i-1];
+            uv[0] = u0 + p[i-1];
+            uv[1] = v0 + q[i-1];
         }
-        if(*u < S->U[0] || *u > S->U[1] || *v < S->V[0] || *v > S->V[1]){	// (u,v)境界を越えたら抜ける
-            return KOD_FALSE;
+        if(uv[0] < S->U[0] || uv[0] > S->U[1] || uv[1] < S->V[0] || uv[1] > S->V[1]){	// (u,v)境界を越えたら抜ける
+            return boost::optional<A2double>();
         }
-        SFQuant sfq(S,*u,*v);
+        SFQuant sfq(S,uv[0],uv[1]);
         double f = sqrt(sfq.E*sfq.G-sfq.F*sfq.F)*sqrt(sfq.E*Ct.x*Ct.x+2*sfq.F*Ct.x*Ct.y+sfq.G*Ct.y*Ct.y);
 
         p[i] = g_*(sfq.F*Ct.x+sfq.G*Ct.y)/f;
@@ -6755,10 +6756,10 @@ int NURBS_Func::CalcConstScallop(NURBSS *S, NURBSC *C, double t, double g, doubl
 
     }
 
-    *u = u0+(p[0]+2*p[1]+2*p[2]+p[3])/6;
-    *v = v0+(q[0]+2*q[1]+2*q[2]+q[3])/6;
+	uv[0] = u0+(p[0]+2*p[1]+2*p[2]+p[3])/6;
+	uv[1] = v0+(q[0]+2*q[1]+2*q[2]+q[3])/6;
 
-    return KOD_TRUE;
+    return uv;
 }
 
 // Function: CalcConstPitch
@@ -6773,34 +6774,34 @@ int NURBS_Func::CalcConstScallop(NURBSS *S, NURBSC *C, double t, double g, doubl
 // direct - 解の追跡方向（KOD_TRUE or KDO_FALSEで指示）
 // Retrun:
 // 成功：KOD_TRUE,  境界外：KOD_FALSE
-int NURBS_Func::CalcConstPitch(NURBSS *S,NURBSC *C, double t0, double ds, double *t,int direct)
+boost::optional<double> NURBS_Func::CalcConstPitch(const NURBSS* S, const NURBSC* C, double t0, double ds, int direct)
 {
     double o[4] = {0,0,0,0};			// ルンゲクッタ法パラメータ
 
     double ds_ = (direct > KOD_FALSE) ? ds : -ds;
 
-    *t = t0;
+    double t = t0;
 
     // ルンゲクッタ法
     for(int i=0;i<4;i++){
         if(i==1 || i==2)
-            *t = t0 + o[i-1]/2;
+            t = t0 + o[i-1]/2;
         else if(i==3)
-            *t = t0 + o[i-1];
-        if(*t > C->V[1]){
-            return KOD_FALSE;
+            t = t0 + o[i-1];
+        if(t > C->V[1]){
+            return boost::optional<double>();
         }
-        Coord P = CalcNurbsCCoord(C,*t);
+        Coord P = CalcNurbsCCoord(C,t);
         Coord Su = CalcDiffuNurbsS(S,P.x,P.y);
         Coord Sv = CalcDiffvNurbsS(S,P.x,P.y);
-        Coord Ct = CalcDiffNurbsC(C,*t);
+        Coord Ct = CalcDiffNurbsC(C,t);
         double denom = ((Sv*Ct.y)+(Su*Ct.x)).CalcEuclid();
         double g = Ct.x/denom;
         double h = Ct.y/denom;
         o[i] = ds_*sqrt(g*g+h*h)/Ct.CalcEuclid();
     }
 
-    *t = t0 + (o[0]+2*o[1]+2*o[2]+o[3])/6;
+    t = t0 + (o[0]+2*o[1]+2*o[2]+o[3])/6;
 
-    return KOD_TRUE;
+    return t;
 }
