@@ -45,22 +45,6 @@ class NURBS_Func
 {
 public:
 
-	// Function: GenRotNurbsS
-	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
-	NURBSS* GenRotNurbsS(const NURBSC&, const Coord&, double);
-
-	// Function: GenSweepNurbsS
-	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
-	NURBSS* GenSweepNurbsS(const NURBSC&, const Coord&, double);
-
-	// Function: GenIsoparamCurveU
-	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	NURBSC* GenIsoparamCurveU(const NURBSS*, double);
-
-	// Function: GenIsoparamCurveV
-	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	NURBSC* GenIsoparamCurveV(const NURBSS*, double);
-
 	// Function: GenTrimdNurbsS
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
@@ -68,38 +52,6 @@ public:
 	// Function: DelTrimdNurbsS
 	// トリム面を削除(メモリー解放)する
 	int DelTrimdNurbsS(TRIMD_NURBSS *);							
-
-	// Function: CalcDiffBSbasis
-	// Bスプライン基底関数の1階微分係数を求める
-	double CalcDiffBSbasis(double, const ublasVector&, int, int);
-
-	// Function: CalcDiffBSbasisN
-	// Bスプライン基底関数のN階微分係数を求める
-	double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
-
-	// Function: CalcDiffNurbsC
-	// NURBS曲線の1階微分係数を求める
-	Coord CalcDiffNurbsC(const NURBSC*, double);
-
-	// Function: CalcDiff2NurbsC
-	// NURBS曲線の2階微分係数を求める
-	Coord CalcDiff2NurbsC(const NURBSC*, double);						
-
-	// Function: CalcDiffNNurbsC
-	// NURBS曲線のr階微分係数を求める
-	Coord CalcDiffNNurbsC(const NURBSC*, int, double);
-
-	// Function: CalcDiffuNurbsS
-	// NURBS曲面のu方向1階微分係数を求める
-	Coord CalcDiffuNurbsS(const NURBSS*, double, double);
-
-	// Function: CalcDiffvNurbsS
-	// NURBS曲面のv方向1階微分係数を求める
-	Coord CalcDiffvNurbsS(const NURBSS*, double, double);
-
-	// Function: CalcDiffNNurbsS
-	// NURBS曲面の各方向を任意階微分したときの微分係数を求める
-	Coord CalcDiffNNurbsS(const NURBSS*, int, int, double, double);
 
 	// Function: CalcNormVecOnNurbsS
 	// NURBS曲面上の(u,v)における法線ベクトルをもとめる
@@ -390,14 +342,6 @@ public:
 	// 複合曲線のメモリー解放
 	void Free_CompC(COMPC *);					
 
-	// Function: DebugForNurbsC
-	// NURBS曲線情報をデバッグプリント
-	void DebugForNurbsC(const NURBSC*);
-
-	// Function: DebugForNurbsS
-	// NURBS曲面情報をデバッグプリント
-	void DebugForNurbsS(const NURBSS*);
-
 	// Function: CalcIntersecPtsOffsetPlaneGeom
 	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
 	VCoord CalcIntersecPtsOffsetPlaneGeom(const NURBSS* , double, const Coord&, const Coord&, int);
@@ -534,14 +478,6 @@ private:
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
 	VCoord RemoveTheSamePoints(const NURBSS*, const VCoord&);
-
-	// Function: CalcDiffNurbsSDenom
-	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
-	double CalcDiffNurbsSDenom(const NURBSS*, int, int, double, double);
-
-	// Function: CalcDiffNurbsSNumer
-	// (private)NURBS曲面分子の各方向を任意階微分したときの微分係数を求める
-	Coord CalcDiffNurbsSNumer(const NURBSS*, int, int, double, double);
 
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)

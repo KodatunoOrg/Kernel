@@ -67,6 +67,30 @@ public:
 	// 指定したt群でのNURBS曲線の座標値群を求める
 	VCoord CalcNurbsCCoords(const Vdouble&) const;
 
+	// Function: GenRotNurbsS
+	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
+	NURBSS* GenRotNurbsS(const Coord&, double) const;
+
+	// Function: GenSweepNurbsS
+	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
+	NURBSS* GenSweepNurbsS(const Coord&, double) const;
+
+	// Function: CalcDiffNurbsC
+	// NURBS曲線の1階微分係数を求める
+	Coord CalcDiffNurbsC(double) const;
+
+	// Function: CalcDiff2NurbsC
+	// NURBS曲線の2階微分係数を求める
+	Coord CalcDiff2NurbsC(double) const;
+
+	// Function: CalcDiffNNurbsC
+	// NURBS曲線のr階微分係数を求める
+	Coord CalcDiffNNurbsC(int, double) const;
+
+	// Function: DebugForNurbsC
+	// NURBS曲線情報をデバッグプリント
+	void DebugForNurbsC(void) const;
+
 };
 
 #endif

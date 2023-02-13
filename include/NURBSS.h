@@ -62,6 +62,41 @@ public:
 	// Function: CalcNurbsSCoords
 	// 指定したu,v群でのNURBS曲面の座標値群を求める
 	VCoord CalcNurbsSCoords(const VCoord&) const;
+
+	// Function: GenIsoparamCurveU
+	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
+	NURBSC* GenIsoparamCurveU(double) const;
+
+	// Function: GenIsoparamCurveV
+	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
+	NURBSC* GenIsoparamCurveV(double) const;
+
+	// Function: CalcDiffuNurbsS
+	// NURBS曲面のu方向1階微分係数を求める
+	Coord CalcDiffuNurbsS(double, double) const;
+
+	// Function: CalcDiffvNurbsS
+	// NURBS曲面のv方向1階微分係数を求める
+	Coord CalcDiffvNurbsS(double, double) const;
+
+	// Function: CalcDiffNNurbsS
+	// NURBS曲面の各方向を任意階微分したときの微分係数を求める
+	Coord CalcDiffNNurbsS(int, int, double, double) const;
+
+	// Function: DebugForNurbsS
+	// NURBS曲面情報をデバッグプリント
+	void DebugForNurbsS(void) const;
+
+private:
+
+	// Function: CalcDiffNurbsSDenom
+	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
+	double CalcDiffNurbsSDenom(int, int, double, double) const;
+
+	// Function: CalcDiffNurbsSNumer
+	// (private)NURBS曲面分子の各方向を任意階微分したときの微分係数を求める
+	Coord CalcDiffNurbsSNumer(int, int, double, double) const;
+
 };
 
 #endif
