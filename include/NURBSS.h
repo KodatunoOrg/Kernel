@@ -83,9 +83,33 @@ public:
 	// NURBS曲面の各方向を任意階微分したときの微分係数を求める
 	Coord CalcDiffNNurbsS(int, int, double, double) const;
 
-	// Function: DebugForNurbsS
-	// NURBS曲面情報をデバッグプリント
-	void DebugForNurbsS(void) const;
+	// Function: CalcNormVecOnNurbsS
+	// NURBS曲面上の(u,v)における法線ベクトルをもとめる
+	Coord CalcNormVecOnNurbsS(double, double) const;
+
+	// Function: CalcDiffuNormVecOnNurbsS
+	// NURBS曲面上の(u,v)における法線ベクトルのu方向1階微分をもとめる
+	Coord CalcDiffuNormVecOnNurbsS(double, double) const;
+
+	// Function: CalcDiffvNormVecOnNurbsS
+	// NURBS曲面上の(u,v)における法線ベクトルのv方向1階微分をもとめる
+	Coord CalcDiffvNormVecOnNurbsS(double, double) const;
+
+	// Function: CalcMeanCurvature
+	// NURBS曲面上の(u,v)における平均曲率を求める
+	double CalcMeanCurvature(double, double) const;
+
+	// Function: CalcMeanCurvatureNormVec
+	// NURBS曲面上の(u,v)における平均曲率法線ベクトルを求める
+	Coord CalcMeanCurvatureNormVec(double, double) const;
+
+	// Function: CalcGaussCurvature
+	// NURBS曲面上の(u,v)におけるガウス曲率を求める
+	double CalcGaussCurvature(double, double) const;
+
+	// Function: CalcGaussCurvatureNormVec
+	// NURBS曲面上の(u,v)におけるガウス曲率法線ベクトルを求める
+	Coord CalcGaussCurvatureNormVec(double, double) const;
 
 private:
 
@@ -97,6 +121,10 @@ private:
 	// (private)NURBS曲面分子の各方向を任意階微分したときの微分係数を求める
 	Coord CalcDiffNurbsSNumer(int, int, double, double) const;
 
+public:
+	// Function: DebugForNurbsS
+	// NURBS曲面情報をデバッグプリント
+	void DebugForNurbsS(void) const;
 };
 
 #endif

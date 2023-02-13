@@ -53,42 +53,6 @@ public:
 	// トリム面を削除(メモリー解放)する
 	int DelTrimdNurbsS(TRIMD_NURBSS *);							
 
-	// Function: CalcNormVecOnNurbsS
-	// NURBS曲面上の(u,v)における法線ベクトルをもとめる
-	Coord CalcNormVecOnNurbsS(const NURBSS*, double, double);
-
-	// Function: CalcDiffuNormVecOnNurbsS
-	// NURBS曲面上の(u,v)における法線ベクトルのu方向1階微分をもとめる
-	Coord CalcDiffuNormVecOnNurbsS(const NURBSS*, double, double);
-
-	// Function: CalcDiffvNormVecOnNurbsS
-	// NURBS曲面上の(u,v)における法線ベクトルのv方向1階微分をもとめる
-	Coord CalcDiffvNormVecOnNurbsS(const NURBSS*, double, double);
-
-	// Function: CalcMeanCurvature
-	// NURBS曲面上の(u,v)における平均曲率を求める
-	double CalcMeanCurvature(const NURBSS*, double, double);
-
-	// Function: CalcMeanCurvature
-	// オーバーロード
-	double CalcMeanCurvature(const SFQuant&);
-
-	// Function: CalcMeanCurvatureNormVec
-	// NURBS曲面上の(u,v)における平均曲率法線ベクトルを求める
-	Coord CalcMeanCurvatureNormVec(const NURBSS*, double, double);
-
-	// Function: CalcGaussCurvature
-	// NURBS曲面上の(u,v)におけるガウス曲率を求める
-	double CalcGaussCurvature(const NURBSS*, double, double);
-
-	// Function: CalcGaussCurvature
-	// オーバーロード
-	double CalcGaussCurvature(const SFQuant&);
-
-	// Function: CalcGaussCurvatureNormVec
-	// NURBS曲面上の(u,v)におけるガウス曲率法線ベクトルを求める
-	Coord CalcGaussCurvatureNormVec(const NURBSS*, double, double);
-
 	// Function: CalcuIntersecPtNurbsLine
 	// NURBS曲面と直線の交点を算出
 	VCoord CalcuIntersecPtNurbsLine(const NURBSS*, const Coord&, const Coord&, int, int);

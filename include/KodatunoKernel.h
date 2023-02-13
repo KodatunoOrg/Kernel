@@ -475,6 +475,14 @@ double CalcDiffBSbasis(double, const ublasVector&, int, int);
 // Bスプライン基底関数のN階微分係数を求める
 double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
 
+// Function: CalcMeanCurvature
+// NURBS曲面上の(u,v)における平均曲率を求める
+double CalcMeanCurvature(const SFQuant&);
+
+// Function: CalcGaussCurvature
+// NURBS曲面上の(u,v)におけるガウス曲率を求める
+double CalcGaussCurvature(const SFQuant&);
+
 #include "KodListFunc.h"
 #include "Quaternion.h"
 #include "MESH.h"

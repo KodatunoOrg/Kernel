@@ -1,6 +1,7 @@
 #include "KodatunoKernel.h"
 #include "NURBSC.h"
 #include "NURBSS.h"
+#include "SFQuant.h"
 #include <algorithm>
 
 // Function: CalcNurbsSCoord
@@ -233,6 +234,158 @@ Coord NURBSS::CalcDiffNNurbsS(int k, int l, double u, double v) const
 		D *= nCr(k,i);
 	}
 	return (A-(B+C+D))/w;
+}
+
+// Function: CalcNormVecOnNurbsS
+// NURBS曲面上の(u,v)における法線ベクトルをもとめる
+// 
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+Coord NURBSS::CalcNormVecOnNurbsS(double u, double v) const
+{
+	Coord a = CalcDiffuNurbsS(u,v);
+	Coord b = CalcDiffvNurbsS(u,v);
+
+	return (a&&b).NormalizeVec();
+}
+
+// Function: CalcDiffuNormVecOnNurbsS
+// NURBS曲面上の(u,v)における法線ベクトルのu方向1階微分をもとめる
+// Nu = Suu×Sv + Su×Suv
+//
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+Coord NURBSS::CalcDiffuNormVecOnNurbsS(double u, double v) const
+{
+	Coord Suu = CalcDiffNNurbsS(2,0,u,v);
+	Coord Suv = CalcDiffNNurbsS(1,1,u,v);
+	Coord Su = CalcDiffuNurbsS(u,v);
+	Coord Sv = CalcDiffvNurbsS(u,v);
+
+	return ((Suu&&Sv)+(Su&&Suv)).NormalizeVec();
+}
+
+// Function: CalcDiffvNormVecOnNurbsS
+// NURBS曲面上の(u,v)における法線ベクトルのv方向1階微分をもとめる
+// Nv = Suv×Sv + Su×Svv
+// 
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+Coord NURBSS::CalcDiffvNormVecOnNurbsS(double u, double v) const
+{
+	Coord Suv = CalcDiffNNurbsS(1,1,u,v);
+	Coord Svv = CalcDiffNNurbsS(0,2,u,v);
+	Coord Su = CalcDiffuNurbsS(u,v);
+	Coord Sv = CalcDiffvNurbsS(u,v);
+
+	return ((Suv&&Sv)+(Su&&Svv)).NormalizeVec();
+}
+
+// Function: CalcMeanCurvature
+// NURBS曲面上の(u,v)における平均曲率を求める
+// 
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+double NURBSS::CalcMeanCurvature(double u, double v) const
+{
+	Coord du = CalcDiffuNurbsS(u,v);	    	// u方向1階微分
+	Coord dv = CalcDiffvNurbsS(u,v);    		// v方向1階微分
+	double E = du & du;		    				// 第1基本量
+	double F = du & dv;	    					// 第1基本量
+	double G = dv & dv; 						// 第1基本量
+	Coord duu = CalcDiffNNurbsS(2,0,u,v);	    // u方向2階微分
+	Coord dvv = CalcDiffNNurbsS(0,2,u,v);   	// v方向2階微分
+	Coord duv = CalcDiffNNurbsS(1,1,u,v);   	// u,v方向各1階微分
+	Coord n = CalcNormVecOnNurbsS(u,v);		    // 法線ベクトル
+	double L = duu & n;					    	// 第2基本量
+	double M = duv & n;				    		// 第2基本量
+	double N = dvv & n;			    			// 第2基本量
+	double H = -(G*L+E*N-2*F*M)/(E*G-F*F)/2;    // 平均曲率
+
+	return H;
+}
+
+// Function: CalcMeanCurvatureNormVec
+// NURBS曲面上の(u,v)における平均曲率法線ベクトルをもとめる
+//
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+Coord NURBSS::CalcMeanCurvatureNormVec(double u, double v) const
+{
+	Coord n = CalcNormVecOnNurbsS(u,v);		// 法線ベクトル
+	Coord Hn = n * CalcMeanCurvature(u,v);		// 平均曲率法線ベクトル
+
+	return Hn;
+}
+
+// Function: CalcGaussCurvature
+// NURBS曲面上の(u,v)におけるガウス曲率を求める
+//
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+double NURBSS::CalcGaussCurvature(double u, double v) const
+{
+	Coord du = CalcDiffuNurbsS(u,v);		// u方向1階微分
+	Coord dv = CalcDiffvNurbsS(u,v);		// v方向1階微分
+	double E = du & du;						// 第1基本量
+	double F = du & dv;						// 第1基本量
+	double G = dv & dv;						// 第1基本量
+	Coord duu = CalcDiffNNurbsS(2,0,u,v);	// u方向2階微分
+	Coord dvv = CalcDiffNNurbsS(0,2,u,v);	// v方向2階微分
+	Coord duv = CalcDiffNNurbsS(1,1,u,v);	// u,v方向各1階微分
+	Coord n = CalcNormVecOnNurbsS(u,v);		// 法線ベクトル
+	double L = duu & n;						// 第2基本量
+	double M = duv & n;						// 第2基本量
+	double N = dvv & n;						// 第2基本量
+	double K = (L*N-M*M)/(E*G-F*F);			// ガウス曲率
+
+	return K;
+}
+
+// Function: CalcGaussCurvatureNormVec
+// NURBS曲面上の(u,v)におけるガウス曲率法線ベクトルをもとめる
+//
+// Parameters:
+// *nurb - NURBS曲面へのポインタ
+// u - u方向ノット値
+// v - v方向ノット値
+//
+// Retrurn:
+// 計算結果
+Coord NURBSS::CalcGaussCurvatureNormVec(double u, double v) const
+{
+	SFQuant q(this,u,v);
+	return q.n * CalcGaussCurvature(q);		// ガウス曲率法線ベクトル
 }
 
 /////////////////////////////////////////////////
