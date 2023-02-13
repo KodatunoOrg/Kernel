@@ -250,32 +250,32 @@ struct TMAT
 // void *pOriginEnt - 元のエンティティへのポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
 struct NURBSC{
-	int M;
-    A4int prop;
-    ublasVector T;
-    ublasVector W;
-    VCoord cp;
-    A2double V;
-    Coord norm;
-    int BlankStat;
-    int EntUseFlag;
-    int pD;
-    int OriginEnt;
-    void *pOriginEnt;
-    DispStat Dstat;
+	int m_M;
+    A4int m_prop;
+    ublasVector m_T;
+    ublasVector m_W;
+    VCoord m_cp;
+    A2double m_V;
+    Coord m_norm;
+    int m_BlankStat;
+    int m_EntUseFlag;
+    int m_pD;
+    int m_OriginEnt;
+    void *m_pOriginEnt;
+    DispStat m_Dstat;
 
 	NURBSC() {}
-	NURBSC(int MM, const ublasVector& TT, const ublasVector& WW, const VCoord& Vcp, const A2double& VV, const A4int& Vprop, int euflag) {
-		T = TT;
-		W = WW;
-		cp = Vcp;
-		V = VV;
-		M = MM;
-		prop = Vprop;
-		BlankStat = DISPLAY;
-		EntUseFlag = euflag;
-		Dstat.Color[0] = Dstat.Color[1] = Dstat.Color[2] = 1.0;
-		Dstat.Color[3] = 0.5;
+	NURBSC(int M, const ublasVector& T, const ublasVector& W, const VCoord& cp, const A2double& V, const A4int& prop, int euflag) {
+		m_T = T;
+		m_W = W;
+		m_cp = cp;
+		m_V = V;
+		m_M = M;
+		m_prop = prop;
+		m_BlankStat = DISPLAY;
+		m_EntUseFlag = euflag;
+		m_Dstat.Color[0] = m_Dstat.Color[1] = m_Dstat.Color[2] = 1.0;
+		m_Dstat.Color[3] = 0.5;
 	}
 };
 
@@ -302,29 +302,29 @@ struct NURBSC{
 // int TrmdSurfFlag - このNURBS曲面がトリム面として呼ばれているのか、独立して存在するのかを示すフラグ(トリム面:KOD_TRUE  独立面:KOD_FALSE)
 // DispStat Dstat - 表示属性（色r,g,b,）
 struct NURBSS{
-	A2int M;
-	A5int prop;
-	ublasVector S;
-	ublasVector T;
-	ublasMatrix W;
-	VVCoord  cp;
-	A2double U;
-	A2double V;
-	int pD;
-	int TrmdSurfFlag;
-	DispStat Dstat;
+	A2int m_M;
+	A5int m_prop;
+	ublasVector m_S;
+	ublasVector m_T;
+	ublasMatrix m_W;
+	VVCoord  m_cp;
+	A2double m_U;
+	A2double m_V;
+	int m_pD;
+	int m_TrmdSurfFlag;
+	DispStat m_Dstat;
 
 	NURBSS() {}
-	NURBSS(int Mu, int Mv, const ublasVector& SS, const ublasVector& TT, const ublasMatrix& WW, const VVCoord& Vcp, double U_s, double U_e, double V_s, double V_e) {
-		S = SS;
-		T = TT;
-		W = WW;
-		cp = Vcp;
-		M[0] = Mu;		M[1] = Mv;
-		U[0] = U_s;		U[1] = U_e;
-		V[0] = V_s;		V[1] = V_e;
-		Dstat.Color[0] = Dstat.Color[1] = Dstat.Color[2] = 0.2;
-		Dstat.Color[3] = 0.5;
+	NURBSS(int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, const VVCoord& cp, double U_s, double U_e, double V_s, double V_e) {
+		m_S = S;
+		m_T = T;
+		m_W = W;
+		m_cp = cp;
+		m_M[0] = Mu;	m_M[1] = Mv;
+		m_U[0] = U_s;	m_U[1] = U_e;
+		m_V[0] = V_s;	m_V[1] = V_e;
+		m_Dstat.Color[0] = m_Dstat.Color[1] = m_Dstat.Color[2] = 0.2;
+		m_Dstat.Color[3] = 0.5;
 	}
 };
 
