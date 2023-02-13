@@ -589,23 +589,23 @@ private:
 
 	// Function: SetKnotVecSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
-	void SetKnotVecSU_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
+	void SetKnotVecSU_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
 
 	// Function: SetKnotVecSV_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向ノット定義域を設定する)
-	void SetKnotVecSV_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
+	void SetKnotVecSV_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
 
 	// Function: SetCPSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向コントロールポイントとウェイトを設定する)
-	void SetCPSU_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
+	void SetCPSU_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
 
 	// Function: SetCPSV_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向コントロールポイントとウェイトを設定する)
-	void SetCPSV_ConnectS(NURBSS*, const NURBSS*, const NURBSS*);
+	void SetCPSV_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
 
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する
-	NURBSC InsertNewKnotOnNurbsC(const NURBSC*, double, int);
+	void InsertNewKnotOnNurbsC(const NURBSC*, double, int, NURBSC*);
 
 	// Function: SetKnotVecC_ConnectC
 	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)

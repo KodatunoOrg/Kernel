@@ -4361,8 +4361,8 @@ NURBSS* NURBS_Func::ConnectNurbsSU(const NURBSS* S1, const NURBSS* S2)
 	}
 
 	NURBSS* S_ = new NURBSS;	// 空のNURBS曲面
-	SetKnotVecSU_ConnectS(S_, S1, S2);		// S_のu方向ノット定義域を指定
-	SetCPSU_ConnectS(S_, S1, S2);			// S_のu方向コントロールポイントとウェイトを指定
+	SetKnotVecSU_ConnectS(S1, S2, S_);		// S_のu方向ノット定義域を指定
+	SetCPSU_ConnectS(S1, S2, S_);			// S_のu方向コントロールポイントとウェイトを指定
 	S_->M[0] = S1->M[0];					// S_の階数を指定
 	S_->M[1] = S1->M[1];
 
@@ -4403,8 +4403,8 @@ NURBSS* NURBS_Func::ConnectNurbsSV(const NURBSS* S1, const NURBSS* S2)
 	}
 
 	NURBSS* S_ = new NURBSS;	// 空のNURBS曲面
-	SetKnotVecSV_ConnectS(S_, S1, S2);		// S_のv方向ノット定義域を指定
-	SetCPSV_ConnectS(S_, S1, S2);			// S_のv方向コントロールポイントとウェイトを指定
+	SetKnotVecSV_ConnectS(S1, S2, S_);		// S_のv方向ノット定義域を指定
+	SetCPSV_ConnectS(S1, S2, S_);			// S_のv方向コントロールポイントとウェイトを指定
 	S_->M[0] = S1->M[0];					// S_の階数を指定
 	S_->M[1] = S1->M[1];
 
@@ -4418,7 +4418,7 @@ NURBSS* NURBS_Func::ConnectNurbsSV(const NURBSS* S1, const NURBSS* S2)
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetCPSU_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
+void NURBS_Func::SetCPSU_ConnectS(const NURBSS* S1, const NURBSS* S2, NURBSS* S_)
 {
 	int S1K[] = {S1->W.size1(), S1->W.size2()},
 		S2K[] = {S2->W.size1(), S2->W.size2()};
@@ -4451,7 +4451,7 @@ void NURBS_Func::SetCPSU_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
+void NURBS_Func::SetKnotVecSU_ConnectS(const NURBSS* S1, const NURBSS* S2, NURBSS* S_)
 {
 	// V方向
 	S_->T = S1->T;				// S_のV方向ノットベクトル(V方向はS1のをそのまま流用)
@@ -4490,7 +4490,7 @@ void NURBS_Func::SetKnotVecSU_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBS
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetCPSV_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
+void NURBS_Func::SetCPSV_ConnectS(const NURBSS* S1, const NURBSS* S2, NURBSS* S_)
 {
 	int S1K[] = {S1->W.size1(), S1->W.size2()},
 		S2K[] = {S2->W.size1(), S2->W.size2()};
@@ -4523,7 +4523,7 @@ void NURBS_Func::SetCPSV_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2
 // *S1 - 面1
 // *S2 - 面2
 // *S_ - 連結後の面を格納
-void NURBS_Func::SetKnotVecSV_ConnectS(NURBSS* S_, const NURBSS* S1, const NURBSS* S2)
+void NURBS_Func::SetKnotVecSV_ConnectS(const NURBSS* S1, const NURBSS* S2, NURBSS* S_)
 {
 	// U方向
 	S_->S = S1->S;				// S_のU方向ノットベクトル(U方向はS1のをそのまま流用)
@@ -6439,13 +6439,14 @@ boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, doub
 	// 分割の下準備
 	// 分割用曲線C0_を準備する
 	// 分割位置パラメータtをC0_に挿入する
-	NURBSC C0_ = InsertNewKnotOnNurbsC(C0,t,deg);
+	NURBSC* C0_ = new NURBSC;
+	InsertNewKnotOnNurbsC(C0, t, deg, C0_);
 
 	// 2本の分割曲線を生成
-	int k  = C0_.cp.size();
+	int k  = C0_->cp.size();
 	int N1 = k+1;
 	int K1 = N1 - C0->M;
-	int N2 = C0_.T.size() - k + deg+1;
+	int N2 = C0_->T.size() - k + deg+1;
 	int K2 = N2 - C0->M;
 
 	ublasVector T1(N1);
@@ -6457,19 +6458,19 @@ boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, doub
 
 	// ノットベクトル，コントロールポイント，ウェイトをC1,C2に分配
 	for(int i=0;i<N1-1;i++)
-		T1[i] = C0_.T[i];
+		T1[i] = C0_->T[i];
 	T1[N1-1] = t;
 	for(int i=0;i<K1;i++){
-		cp1.push_back(C0_.cp[i]);
-		W1[i] = C0_.W[i];
+		cp1.push_back(C0_->cp[i]);
+		W1[i] = C0_->W[i];
 	}
 	for(int i=0;i<C0->M;i++)
 		T2[i] = t;
 	for(int i=C0->M;i<N2;i++)
-		T2[i] = C0_.T[k+i-C0->M];
+		T2[i] = C0_->T[k+i-C0->M];
 	for(int i=0;i<K2;i++){
-		cp2.push_back(C0_.cp[i+K1-1]);
-		W2[i] = C0_.W[i+K1-1];
+		cp2.push_back(C0_->cp[i+K1-1]);
+		W2[i] = C0_->W[i+K1-1];
 	}
 
 	// debug
@@ -6487,6 +6488,8 @@ boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, doub
 	//for(int i=0;i<N2;i++)
 	//	fprintf(stderr,"%d:%lf\n",i+1,T2[i]);
 
+	delete	C0_;
+	
 	// ノットの範囲を0-1に変更
 	T1 = ChangeKnotVecRange(T1,C0->M,K1,0,1);
 	T2 = ChangeKnotVecRange(T2,C0->M,K2,0,1);
@@ -6637,9 +6640,8 @@ void NURBS_Func::SetCPC_ConnectC(const NURBSC* C1, const NURBSC* C2, NURBSC* C_)
 //
 // Return:
 // 新たなノットベクトル列におけるtの挿入位置
-NURBSC NURBS_Func::InsertNewKnotOnNurbsC(const NURBSC* C, double t, int deg)
+void NURBS_Func::InsertNewKnotOnNurbsC(const NURBSC* C, double t, int deg, NURBSC* C_)
 {
-	NURBSC C_;
 	int CK = C->cp.size();
 	int k=0;					// tの挿入位置
 	int m = C->M;				// 階数
@@ -6650,24 +6652,24 @@ NURBSC NURBS_Func::InsertNewKnotOnNurbsC(const NURBSC* C, double t, int deg)
 	Vdouble W_buf(CK+deg);		// ウェイト一時格納用バッファ
 
 	// C_に元のNURBS曲線のT,cp,Wを初期値として代入
-	C_.T.resize(m+n);
+	C_->T.resize(m+n);
 	for(int i=0;i<m+n;i++)
-		C_.T[i] = C->T[i];
+		C_->T[i] = C->T[i];
 	for(int i=0;i<n;i++)
-		C_.cp.push_back(C->cp[i]);
-	C_.W.resize(n);
+		C_->cp.push_back(C->cp[i]);
+	C_->W.resize(n);
 	for(int i=0;i<n;i++)
-		C_.W[i] = C->W[i];
+		C_->W[i] = C->W[i];
 
 	// 多重度分，tの挿入を繰り返す
 	for(int count=0;count<deg;count++){
 		// 各bufにC_のT,cp,Wを代入
 		for(int i=0;i<n+m;i++)
-			T_buf[i] = C_.T[i];
+			T_buf[i] = C_->T[i];
 		for(int i=0;i<n;i++)
-			cp_buf[i] = C_.cp[i];
+			cp_buf[i] = C_->cp[i];
 		for(int i=0;i<n;i++)
-			W_buf[i] = C_.W[i];
+			W_buf[i] = C_->W[i];
 
 		// tの挿入位置kを調べる
 		k=0;
@@ -6680,30 +6682,28 @@ NURBSC NURBS_Func::InsertNewKnotOnNurbsC(const NURBSC* C, double t, int deg)
 
 		// C_のノットベクトルを更新
 		for(int i=0;i<=k;i++)
-			C_.T[i] = T_buf[i];
-		C_.T[k+1] = t;
+			C_->T[i] = T_buf[i];
+		C_->T[k+1] = t;
 		for(int i=k+2;i<=n+m;i++)
-			C_.T[i] = T_buf[i-1];
+			C_->T[i] = T_buf[i-1];
 
 		// コントロールポイントとウェイトの更新
 		for(int i=0;i<=k-m+1;i++){
-			C_.cp[i] = cp_buf[i];
-			C_.W[i]  = W_buf[i];
+			C_->cp[i] = cp_buf[i];
+			C_->W[i]  = W_buf[i];
 		}
 		for(int i=k-m+2;i<=k;i++){
 			double a = (t-T_buf[i])/(T_buf[i+m-1]-T_buf[i]);
-			C_.cp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
-			C_.W[i]  = (1-a)*W_buf[i-1] + a*W_buf[i];
+			C_->cp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
+			C_->W[i]  = (1-a)*W_buf[i-1] + a*W_buf[i];
 		}
 		for(int i=k+1;i<=n;i++){
-			C_.cp[i] = cp_buf[i-1];
-			C_.W[i]  = W_buf[i-1];
+			C_->cp[i] = cp_buf[i-1];
+			C_->W[i]  = W_buf[i-1];
 		}
 
 		n++;
 	}
-
-	return C_;
 }
 
 // Function: CalcConstScallop
