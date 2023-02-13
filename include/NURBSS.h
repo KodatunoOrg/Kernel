@@ -111,6 +111,76 @@ public:
 	// NURBS曲面上の(u,v)におけるガウス曲率法線ベクトルを求める
 	Coord CalcGaussCurvatureNormVec(double, double) const;
 
+	// Function: CalcuIntersecPtNurbsLine
+	// NURBS曲面と直線の交点を算出
+	VCoord CalcuIntersecPtNurbsLine(const Coord&, const Coord&, int, int) const;
+
+	// Function: CalcIntersecPtNurbsPt
+	// 空間上の1点からNURBS曲面上の最近傍点を求める(ニュートン法)
+	boost::optional<Coord> CalcIntersecPtNurbsPt(const Coord&, int, int) const;
+
+    // Function: CalcIntersecPtNurbsPtDescrete
+    // 空間上の1点からNURBS曲面上の最近傍点を求める(離散的)
+    boost::optional<Coord> CalcIntersecPtNurbsPtDescrete(const Coord&, int, int, double, double, double, double) const;
+
+	// Function: CalcIntersecIsparaCurveU
+	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
+	Vdouble CalcIntersecIsparaCurveU(double, const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecIsparaCurveV
+	// v方向アイソパラ曲線と平面との交点を求める(ニュートン法)
+	Vdouble CalcIntersecIsparaCurveV(double, const Coord& , const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneV3
+	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
+	VCoord CalcIntersecPtsPlaneV3(const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneU3
+	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
+	VCoord CalcIntersecPtsPlaneU3(const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneV
+	// V方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
+	VCoord CalcIntersecPtsPlaneV(const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneU
+	// U方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
+	VCoord CalcIntersecPtsPlaneU(const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneSearch
+	// NURBS曲面と平面との交点群を交線追跡法で求める
+	VCoord CalcIntersecPtsPlaneSearch(const Coord&, const Coord&, double, int, int) const;
+
+	// Function: CalcIntersecPtsOffsetPlaneGeom
+	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
+	VCoord CalcIntersecPtsOffsetPlaneGeom(double, const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneGeom
+	// NURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)
+	VCoord CalcIntersecPtsPlaneGeom(const Coord&, const Coord&, int, int) const;
+
+	// Function: CalcIntersecPtsOffsetPlaneSearch
+	// オフセットNURBS曲面と平面との交点群を交線追跡法で求める(準備中)
+	VCoord CalcIntersecPtsOffsetPlaneSearch(double, const Coord&, const Coord&, double, int) const;
+
+	// Function: CalcIntersecPtsNurbsSNurbsC
+	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
+	VCoord CalcIntersecPtsNurbsSNurbsC(const NURBSC*, int) const;
+
+	// Function: CalcIntersecPtsNurbsSGeom
+	// NURBS曲面同士の交線上の点を幾何学的にいくつか求める
+	boost::tuple<VCoord, VCoord> CalcIntersecPtsNurbsSGeom(const NURBSS*, int, int) const;
+
+	// Function: CalcIntersecPtsNurbsSSearch
+	// NURBS曲面同士の交線(交点群)を交線追跡法で求める
+	boost::tuple<VCoord, VCoord> CalcIntersecPtsNurbsSSearch(const NURBSS*, int, double) const;
+
+	// Function: SearchExtremum_BS
+	// Bulirsch-Stoer法により極地探索を行う
+	boost::tuple<int, Coord> SearchExtremum_BS(const Coord&, double, double, double, int, int) const;
+
+    // --- 
+
 private:
 
 	// Function: CalcDiffNurbsSDenom
@@ -120,6 +190,58 @@ private:
 	// Function: CalcDiffNurbsSNumer
 	// (private)NURBS曲面分子の各方向を任意階微分したときの微分係数を求める
 	Coord CalcDiffNurbsSNumer(int, int, double, double) const;
+
+	// Function: GetMinDist
+	// (private)最小距離を調べる
+	boost::optional<Coord> GetMinDist(const Coord&, const VCoord&) const;
+
+	// Function: GetMinDistance
+	// (private)最小距離を持つ座標値を返す
+	Coord GetMinDistance(const Coord&, const VCoord&) const;
+
+	// Function: GetNurbsSCoef
+	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める
+	boost::tuple<VCoord, Vdouble> GetNurbsSCoef(int, const ublasMatrix&, const Vdouble&, const VCoord&, int) const;
+
+	// Function: SearchIntersectPt_RKM
+	// (private)4次のルンゲクッタ法により交点を収束させる(NURBS曲面と平面)
+	boost::tuple<int, A2double> SearchIntersectPt_RKM(const Coord&, const Coord&, double, double, double, int) const;
+
+	// Function: SearchIntersectPt_BS
+	// (private)Bulirsch-Stoer法により交点を収束させる(NURBS曲面と平面)
+	boost::tuple<int, A2double> SearchIntersectPt_BS(const Coord&, const Coord&, double, double, double, int) const;
+
+	// Function: SearchIntersectPt_OS
+	// (private)4次のルンゲクッタ法により交点を収束させる(オフセットNURBS曲面と平面)
+	boost::tuple<int, A2double> SearchIntersectPt_OS(const Coord&, const Coord&, double, double, double, int) const;
+
+	// Function: GetSIPParam1
+	// (private)NURBS曲面と平面の交点を表す微分方程式の右辺の値を得る
+	boost::optional<Coord> GetSIPParam1(double, double, const Coord&, const Coord&, int) const;
+
+	// Function: CalcIntersecPtsPlaneSearch_Sub
+	// (private)面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
+	Coord CalcIntersecPtsPlaneSearch_Sub(double, double, const Coord&, const Coord&) const;
+
+	// Function: CheckClossedPoints
+	// (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる
+	int CheckClossedPoints(const Coord&, const Coord&, const Coord&) const;
+
+	// Function: RemoveTheSamePoints
+	// (private)NURBS曲面上の同一点を除去する
+	VCoord RemoveTheSamePoints(const VCoord&) const;
+
+	// Function: SearchIntersectPt
+	// (private)ニュートン法により交点を収束させる(NURBS曲面と平面)
+	boost::tuple<int, A2double> SearchIntersectPt(const Coord&, const Coord&, double, double, double, int) const;
+
+	// Function: SearchIntersectPt
+	// (private)ニュートン法により交点を収束させる(NURBS曲面同士)
+	boost::tuple<int, A4double> SearchIntersectPt(const NURBSS*, double, double, double, double, double, int) const;
+
+	// Function: GetSECParam1
+	// (private)極値探索線Sub関数1
+	boost::optional<Coord> GetSECParam1(double, double, const Coord&, int, int) const;
 
 public:
 	// Function: DebugForNurbsS

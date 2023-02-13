@@ -483,6 +483,26 @@ double CalcMeanCurvature(const SFQuant&);
 // NURBS曲面上の(u,v)におけるガウス曲率を求める
 double CalcGaussCurvature(const SFQuant&);
 
+// Function: GetBSplCoef3
+// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
+ublasMatrix GetBSplCoef3(int, int, int, const ublasVector&);
+
+// Function: GetBSplCoef2
+// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
+ublasMatrix GetBSplCoef2(int, int, int, const ublasVector&);
+
+// Function: GetBSplCoef1
+// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
+ublasMatrix GetBSplCoef1(int, int, int, const ublasVector&);
+
+// Function: GetIntersecEquation
+// (private)NURBS曲線と平面の交線導出用3次方程式を得る
+Vdouble GetIntersecEquation(int, const VCoord&, const Vdouble&, const Coord&, const Coord&);
+
+// Function: CalcEquation
+// (private)3次方程式までを判別して解く
+Vdouble CalcEquation(int, const Vdouble&);
+
 #include "KodListFunc.h"
 #include "Quaternion.h"
 #include "MESH.h"

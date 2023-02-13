@@ -2024,3 +2024,251 @@ double CalcGaussCurvature(const SFQuant& q)
 {
 	return (q.L*q.N-q.M*q.M)/(q.E*q.G-q.F*q.F);					// ガウス曲率
 }
+
+// Function: GetBSplCoef3
+// 3次のBスプライン曲線の各係数を求める.
+//
+// coef[j][0]t^3 + coef[j][1]t^2 + coef[j][2]t + coef[j][3]   (Nj,4)
+// 
+// Parameters:
+// M - 階数  
+// K - コントロールポイントの数  
+// i - 注目中のコントロールポイント 
+// *t - ノットベクトル列  
+// *coef - 算出される係数を格納
+//
+// Return:
+// KOD_TRUE
+ublasMatrix GetBSplCoef3(int M, int K, int i, const ublasVector& t)
+{
+	ublasMatrix	coef(4,4);
+	double bunbo[8];
+	double t10,t20,t21,t30,t31,t32,t41,t42,t43;
+
+	for(int j=0;j<4;j++){
+
+		t10 = t[i+j+1] - t[i+j];
+		t20 = t[i+j+2] - t[i+j];
+		t21 = t[i+j+2] - t[i+j+1];
+		t30 = t[i+j+3] - t[i+j];
+		t31 = t[i+j+3] - t[i+j+1];
+		t32 = t[i+j+3] - t[i+j+2];
+		t41 = t[i+j+4] - t[i+j+1];
+		t42 = t[i+j+4] - t[i+j+2];
+		t43 = t[i+j+4] - t[i+j+3];
+
+		bunbo[0] = t30*t20*t10;
+		bunbo[1] = t30*t20*t21;
+		bunbo[2] = t30*t31*t21;
+		bunbo[3] = t30*t31*t32;
+		bunbo[4] = t41*t31*t21;
+		bunbo[5] = t41*t31*t32;
+		bunbo[6] = t41*t42*t32;
+		bunbo[7] = t41*t42*t43;
+
+		double coef_sub[8][4] = 
+		{{1,-3*t[i+j],3*t[i+j]*t[i+j],-t[i+j]*t[i+j]*t[i+j]},
+		{-1,t[i+j+2]+2*t[i+j],-2*t[i+j]*t[i+j+2]-t[i+j]*t[i+j],t[i+j]*t[i+j]*t[i+j+2]},
+		{-1,t[i+j+3]+t[i+j+1]+t[i+j],-(t[i+j+1]+t[i+j])*t[i+j+3]-t[i+j]*t[i+j+1],t[i+j]*t[i+j+1]*t[i+j+3]},
+		{1,-2*t[i+j+3]-t[i+j],t[i+j+3]*t[i+j+3]+2*t[i+j]*t[i+j+3],-t[i+j]*t[i+j+3]*t[i+j+3]},
+		{-1,t[i+j+4]+2*t[i+j+1],-2*t[i+j+1]*t[i+j+4]-t[i+j+1]*t[i+j+1],t[i+j+1]*t[i+j+1]*t[i+j+4]},
+		{1,-t[i+j+4]-t[i+j+3]-t[i+j+1],(t[i+j+3]+t[i+j+1])*t[i+j+4]+t[i+j+1]*t[i+j+3],-t[i+j+1]*t[i+j+3]*t[i+j+4]},
+		{1,-2*t[i+j+4]-t[i+j+2],t[i+j+4]*t[i+j+4]+2*t[i+j+2]*t[i+j+4],-t[i+j+2]*t[i+j+4]*t[i+j+4]},
+		{-1,3*t[i+j+4],-3*t[i+j+4]*t[i+j+4],t[i+j+4]*t[i+j+4]*t[i+j+4]}};
+
+		for(int p=0;p<8;p++){
+			if(bunbo[p] != 0){
+				for(int q=0;q<4;q++){
+					coef_sub[p][q] /= bunbo[p];
+				}
+			}
+			else{
+				for(int q=0;q<4;q++){
+					coef_sub[p][q] = 0;
+				}
+			}
+		}
+
+		for(int k=0;k<4;k++) coef(j,k)=0;
+		for(int k=0;k<4;k++){
+			if(j==0)
+				coef(0,k) += coef_sub[7][k];
+			else if(j==1)
+				coef(1,k) += coef_sub[3][k] + coef_sub[5][k] + coef_sub[6][k];
+			else if(j==2)
+				coef(2,k) += coef_sub[1][k] + coef_sub[2][k] + coef_sub[4][k];
+			else
+				coef(3,k) += coef_sub[0][k];
+		}
+	}
+
+	return coef;
+}
+
+// Function: GetBSplCoef2
+// 2次のBスプライン曲線の各係数を求める
+//
+// coef[j][0]t^2 + coef[j][1]t + coef[j][2]
+//
+// Parameters:
+// M - 階数  
+// K - コントロールポイントの数  
+// i - 注目中のコントロールポイント 
+// *t - ノットベクトル列  
+// *coef - 算出される係数を格納
+//
+// Return:
+// KOD_TRUE
+ublasMatrix GetBSplCoef2(int M, int K, int i, const ublasVector& t)
+{
+	ublasMatrix	coef(3,3);
+	double t20,t10,t21,t31,t32;
+	double bunbo[4];
+
+	for(int j=0;j<3;j++){
+
+		t20 = t[i+j+2] - t[i+j];
+		t10 = t[i+j+1] - t[i+j];
+		t21 = t[i+j+2] - t[i+j+1];
+		t31 = t[i+j+3] - t[i+j+1];
+		t32 = t[i+j+3] - t[i+j+2];
+
+		bunbo[0] = t20*t10;
+		bunbo[1] = t20*t21;
+		bunbo[2] = t31*t21;
+		bunbo[3] = t31*t32;
+
+		double coef_sub[4][3] = {{1,-2*t[i+j],t[i+j]*t[i+j]},{-1,t[i+j]+t[i+j+2],-t[i+j]*t[i+j+2]},
+		{-1,t[i+j+1]+t[i+j+3],-t[i+j+1]*t[i+j+3]},{1,-2*t[i+j+3],t[i+j+3]*t[i+j+3]}};
+
+		for(int p=0;p<4;p++){
+			if(bunbo[p] != 0){
+				for(int q=0;q<3;q++){
+					coef_sub[p][q] /= bunbo[p];
+				}
+			}
+			else{
+				for(int q=0;q<3;q++){
+					coef_sub[p][q] = 0;
+				}
+			}
+		}
+
+		for(int k=0;k<3;k++) coef(j,k)=0;
+		for(int k=0;k<3;k++){
+			if(j==0)
+				coef(0,k) += coef_sub[3][k];
+			else if(j==1)
+				coef(1,k) += coef_sub[1][k] + coef_sub[2][k];
+			else
+				coef(2,k) += coef_sub[0][k];
+		}
+	}
+
+	return coef;
+}
+
+// Function: GetBSplCoef1
+// 1次のBスプライン曲線の各係数を求める
+//
+// coef[j][0]t + coef[j][1]
+//
+// Parameters:
+// M - 階数  
+// K - コントロールポイントの数  
+// i - 注目中のコントロールポイント 
+// *t - ノットベクトル列  
+// *coef - 算出される係数を格納
+//
+// Return:
+// KOD_TRUE
+ublasMatrix GetBSplCoef1(int M, int K, int i, const ublasVector& t)
+{
+	ublasMatrix coef(2,2);
+	double bunbo[2];
+
+	for(int j=0;j<2;j++){
+
+		bunbo[0] = t[i+j+1] - t[i+j];
+		bunbo[1] = t[i+j+2] - t[i+j+1];
+
+		double coef_sub[2][2] = {{1,-t[i+j]},{-1,t[i+j+2]}};
+
+		for(int p=0;p<2;p++){
+			if(bunbo[p] != 0){
+				for(int q=0;q<2;q++){
+					coef_sub[p][q] /= bunbo[p];
+				}
+			}
+			else{
+				for(int q=0;q<2;q++){
+					coef_sub[p][q] = 0;
+				}
+			}
+		}
+
+		for(int k=0;k<2;k++) coef(j,k)=0;
+		for(int k=0;k<2;k++){
+			if(j==0)
+				coef(0,k) += coef_sub[1][k];
+			else
+				coef(1,k) += coef_sub[0][k];
+		}
+	}
+
+	return coef;
+}
+
+// Function: GetIntersecEquation
+// (private)CalcIntersecCurve3(), CalcIntersecPtsPlaneU/V3()のサブ関数．NURBS曲線と平面の交線導出用方程式を得る
+// 
+// Parameters:
+// M - 階数 
+// *P, *Q - NURBS曲線の係数（P,Q)
+// pt - 平面上の一点
+// nvec - 平面の法線ベクトル 
+// *a - 結果 
+Vdouble GetIntersecEquation(int M, const VCoord& P, const Vdouble& Q, const Coord& pt, const Coord& nvec)
+{
+	Vdouble	a;
+	for(int i=0;i<M;i++){
+		a.push_back( (Q[i]*pt.x-P[i].x)*nvec.x + (Q[i]*pt.y-P[i].y)*nvec.y + (Q[i]*pt.z-P[i].z)*nvec.z );
+	}
+	return a;
+}
+
+// Function: CalcEquation
+// (private)CalcIntersecCurve3(), CalcIntersecPtsPlaneU/V3()のサブ関数．3次方程式までを解く
+// 
+// Parameters:
+// *a - 係数行列
+// *t - 解
+// M - 次数
+//
+// Return:
+// 解の個数（解がなかった場合 or 次数が3,2,1のいずれかでない：KOD_ERR）
+Vdouble CalcEquation(int M, const Vdouble& a)
+{
+	int num;
+	Vdouble	t;
+
+	if(M == 3) {
+		A4double a4 = {a[0],a[1],a[2],a[3]};
+		A3double a3;
+		boost::tie(num, a3) = CalcCubicEquation(a4);
+		for (int i=0; i<num; i++) t.push_back(a3[i]);
+	}
+	else if(M == 2)	{
+		A3double a3 = {a[0],a[1],a[2]};
+		A2double a2;
+		boost::tie(num, a2) = CalcQuadraticEquation(a3);
+		for (int i=0; i<num; i++) t.push_back(a2[i]);
+	}
+	else if(M == 1) {
+		A2double a2 = {a[0],a[1]};
+		boost::optional<double> ans = CalcLinearEquation(a2);
+		if ( ans ) t.push_back( *ans );
+	}
+
+	return t;
+}

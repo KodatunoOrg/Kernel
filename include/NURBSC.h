@@ -87,6 +87,29 @@ public:
 	// NURBS曲線のr階微分係数を求める
 	Coord CalcDiffNNurbsC(int, double) const;
 
+	// Function: CalcIntersecPtNurbsPt
+	// 空間上の1点からNURBS曲線上の最近傍点を求める(ニュートン法)(オーバーロード)
+	boost::optional<double> CalcIntersecPtNurbsPt(const Coord&, int, int) const;
+
+    // Function: CalcIntersecPtNurbsPtDescrete
+    // 空間上の1点からNURBS曲線上の最近傍点を求める(離散的)
+    boost::optional<double> CalcIntersecPtNurbsPtDescrete(const Coord&, int, int, double, double) const;
+
+	// Function: CalcIntersecCurve
+	// NURBS曲線と平面との交点を求める(ニュートン法)
+	Vdouble CalcIntersecCurve(const Coord&, const Coord&, int, int) const;
+
+	// Function: CalcIntersecCurve3
+	// 3次以下のNURBS曲線と平面との交点を求める
+	Vdouble CalcIntersecCurve3(const Coord&, const Coord&) const;
+
+private:
+
+	// Function: GetNurbsCCoef
+	// (private)NURBS曲線の係数を求める(最高3次)
+	boost::tuple<VCoord, Vdouble> GetNurbsCCoef(const ublasMatrix&, int) const;
+
+public:
 	// Function: DebugForNurbsC
 	// NURBS曲線情報をデバッグプリント
 	void DebugForNurbsC(void) const;
