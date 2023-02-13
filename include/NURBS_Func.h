@@ -44,21 +44,6 @@
 class NURBS_Func
 {
 public:
-	// Function: CalcNurbsCCoord
-	// 指定したtでのNURBS曲線の座標値を求める
-	Coord CalcNurbsCCoord(const NURBSC*, double);
-
-	// Function: CalcNurbsCCoords
-	// 指定したt群でのNURBS曲線の座標値群を求める
-	VCoord CalcNurbsCCoords(const NURBSC*, const Vdouble&);
-
-	// Function: CalcNurbsSCoord
-	// 指定したu,vでのNURBS曲面の座標点を求める
-	Coord CalcNurbsSCoord(const NURBSS*, double, double);
-
-	// Function: CalcNurbsSCoords
-	// 指定したu,v群でのNURBS曲面の座標値群を求める
-	VCoord CalcNurbsSCoords(const NURBSS*, const VCoord&);		
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
@@ -83,10 +68,6 @@ public:
 	// Function: DelTrimdNurbsS
 	// トリム面を削除(メモリー解放)する
 	int DelTrimdNurbsS(TRIMD_NURBSS *);							
-
-	// Function: CalcBSbasis
-	// Bスプライン基底関数を計算し、計算結果を返す
-	double CalcBSbasis(double, const ublasVector&, int, int);
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める

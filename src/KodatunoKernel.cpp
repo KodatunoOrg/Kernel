@@ -1894,50 +1894,53 @@ VCoord CheckTheSamePoints2D(const VCoord& P)
 
 	return Q;
 }
-/*
-// Function: CoordToArray
-// Coordをdouble配列に代入
+
+// --- NURBS_Funcから移動
+
+// Function: CalcBSbasis
+// Bスプライン基底関数を計算し、計算結果を返す
 //
 // Parameters:
-// a - Coord値
-// b[3] - double配列
-void CoordToArray(const Coord& a,double b[3])
-{
-	b[0] = a.x;
-	b[1] = a.y;
-	b[2] = a.z;
-}
-
-// Function: CoordToArray2D
-// Coordをdouble配列に代入(2D Ver.)
+// t - ノット　
+// knot[] - ノットベクトル  
+// N - ノットベクトルの数  
+// I - Bspl基底関数下添字の1つ目(0～)  
+// M - 階数(Bspl基底関数下添字の2つ目)  
 //
-// Parameters:
-// a - Coord値
-// b[2] - double配列
-void CoordToArray2D(const Coord& a,double b[2])
+// Return:
+// 計算結果
+double CalcBSbasis(double t, const ublasVector& knot, int I, int M)
 {
-	b[0] = a.x;
-	b[1] = a.y;
-}
-*/
-/*
-Vdouble CopyToVector(const ublasVector& b)
-{
-	Vdouble result;
-	for (auto a : b) result.push_back(a);
-	return result;
-}
-
-VVdouble CopyToMatrix(const ublasMatrix& b)
-{
-	VVdouble	result;
-	for (size_t i=0; i<b.size1(); i++) {
-		Vdouble aa;
-		for (size_t j=0; j<b.size2(); j++) {
-			aa.push_back(b(i,j));
+	// 階数(order)が1の時
+	if(M == 1){
+		// 注目中のノットの値がノットベクトルの終端値と同じ場合、基底関数が1を取りうる範囲をknot[I+1]も含むようにする
+		// こうしないと、このときだけ全ての基底関数値が0になってしまう。
+		if(t==knot[knot.max_size()-1]){
+			if(knot[I] <= t && t <= knot[I+1])	return 1.0;
+			else		return 0.0;
 		}
-		result.push_back(aa);
+		else{
+			if(knot[I] <= t && t < knot[I+1])	return 1.0;
+			else	return 0.0;
+		}
 	}
-	return result;
+
+	// それ以外の時
+	else{
+		double n1=0.0;
+		double n2=0.0;
+		double denom;
+
+		denom = knot[I+M-1] - knot[I];	// 分母
+		if(denom > 0.0){
+			n1 = (t-knot[I])/denom * CalcBSbasis(t,knot,I,M-1);		// 1項目
+		}
+
+		denom = knot[I+M] - knot[I+1];
+		if(denom > 0.0){
+			n2 = (knot[I+M]-t)/denom * CalcBSbasis(t,knot,I+1,M-1);	// 2項目
+		}
+
+		return(n1+n2);
+	}
 }
-*/

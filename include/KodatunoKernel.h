@@ -461,16 +461,11 @@ Vdouble CheckTheSamePoints(const Vdouble&);
 // 2D平面内の同一点を除去する
 VCoord CheckTheSamePoints2D(const VCoord&);
 
-// Function: CoordToArray 不要マーク
-// Coordをdouble配列に代入
-//void CoordToArray(const Coord&,double []);
+// --- NURBS_Funcから移動
 
-// Function: CoordToArray2D 不要マーク
-// Coordをdouble配列に代入
-//void CoordToArray2D(const Coord&,double []);
-
-//Vdouble  CopyToVector(const ublasVector&);
-//VVdouble CopyToMatrix(const ublasMatrix&);
+// Function: CalcBSbasis
+// Bスプライン基底関数を計算し、計算結果を返す
+double CalcBSbasis(double, const ublasVector&, int, int);
 
 #include "KodListFunc.h"
 #include "Quaternion.h"

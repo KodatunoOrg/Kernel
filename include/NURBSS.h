@@ -1,6 +1,10 @@
 #ifndef _NURBSS_H_
 #define _NURBSS_H_
 
+// prototype
+class NURBSC;
+class NURBSS;
+
 // class: NURBSS
 // 有理Bスプライン(NURBS)曲面を表わす構造体
 //
@@ -50,6 +54,14 @@ public:
 		m_Dstat.Color[0] = m_Dstat.Color[1] = m_Dstat.Color[2] = 0.2;
 		m_Dstat.Color[3] = 0.5;
 	}
+
+	// Function: CalcNurbsSCoord
+	// 指定したu,vでのNURBS曲面の座標点を求める
+	Coord CalcNurbsSCoord(double, double) const;
+
+	// Function: CalcNurbsSCoords
+	// 指定したu,v群でのNURBS曲面の座標値群を求める
+	VCoord CalcNurbsSCoords(const VCoord&) const;
 };
 
 #endif
