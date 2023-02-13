@@ -179,7 +179,50 @@ public:
 	// Bulirsch-Stoer法により極地探索を行う
 	boost::tuple<int, Coord> SearchExtremum_BS(const Coord&, double, double, double, int, int) const;
 
+	// Function: DetectInterfereNurbsS
+	// NURBS曲面(トリム無)同士の干渉検出
+	int DetectInterfereNurbsS(const NURBSS*, int) const;
+
+	// Function: CalcDeltaPtsOnNurbsS
+	// 指定した分割数でNURBS曲面上の座標値を求める
+	VVCoord CalcDeltaPtsOnNurbsS(int, int) const;
+
+	// Function: ConnectNurbsSU
+	// 2枚のNURBS曲面を連結する(U方向に長くなる)(S1_U1とS2_U0を連結)
+	NURBSS* ConnectNurbsSU(const NURBSS*) const;
+
+	// Function: ConnectNurbsSV
+	// 2枚のNURBS曲面を連結する(V方向に長くなる)(S1_V1とS2_V0を連結)
+	NURBSS* ConnectNurbsSV(const NURBSS*) const;
+
+    // Function: CalcConstScallop
+    // 等スキャロップ点を算出
+    boost::optional<A2double> CalcConstScallop(const NURBSC*, double, double, int) const;
+
+    // Function: CalcConstPitch
+    // 等ピッチ点を算出
+    boost::optional<double> CalcConstPitch(const NURBSC*, double, double, int) const;
+
+	boost::tuple<NURBSC*, NURBSC*> CalcExtSearchCurve(const Coord&, const Coord&, double) const;	// 極地探索線を得る(準備中)
+	boost::tuple<NURBSC*, NURBSC*> CalcExtGradCurve(const Coord&, const Coord&, double) const;		// 極地傾斜線を得る(準備中)
+
     // --- 
+
+	// Function: ShiftNurbsS
+	// NURBS曲面のシフト
+	void ShiftNurbsS(const Coord&);
+
+	// Function: ChRatioNurbsS
+	// NURBS曲面の倍率を変更する
+	void ChRatioNurbsS(const Coord&);
+
+	// Function: RotNurbsS
+	// NURBS曲面を回転
+	void RotNurbsS(const Coord&, double);
+
+	// Function: SetCPNurbsS
+	// コントロールポイントを代入する
+	int SetCPNurbsS(const NURBSS&);
 
 private:
 
@@ -242,6 +285,22 @@ private:
 	// Function: GetSECParam1
 	// (private)極値探索線Sub関数1
 	boost::optional<Coord> GetSECParam1(double, double, const Coord&, int, int) const;
+
+	// Function: SetKnotVecSU_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
+	void SetKnotVecSU_ConnectS(const NURBSS*, NURBSS*) const;
+
+	// Function: SetKnotVecSV_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向ノット定義域を設定する)
+	void SetKnotVecSV_ConnectS(const NURBSS*, NURBSS*) const;
+
+	// Function: SetCPSU_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向コントロールポイントとウェイトを設定する)
+	void SetCPSU_ConnectS(const NURBSS*, NURBSS*) const;
+
+	// Function: SetCPSV_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向コントロールポイントとウェイトを設定する)
+	void SetCPSV_ConnectS(const NURBSS*, NURBSS*) const;
 
 public:
 	// Function: DebugForNurbsS

@@ -503,6 +503,11 @@ Vdouble GetIntersecEquation(int, const VCoord&, const Vdouble&, const Coord&, co
 // (private)3次方程式までを判別して解く
 Vdouble CalcEquation(int, const Vdouble&);
 
+// Function: ChangeKnotVecRange
+// ノットベクトルのパラメータ定義域を変更する
+ublasVector ChangeKnotVecRange(const Vdouble&, int, int, double, double);
+ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
+
 #include "KodListFunc.h"
 #include "Quaternion.h"
 #include "MESH.h"

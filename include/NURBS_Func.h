@@ -65,33 +65,17 @@ public:
     // 2次元NURBS曲線と線分との交点を求める
     boost::optional<A2double> ClacIntersecPtsNurbsCLineSeg(const NURBSC*, const Coord&, const Coord&, double, double);
 
-	// Function: ShiftNurbsS
-	// NURBS曲面のシフト
-	void ShiftNurbsS(NURBSS*, const Coord&);
-
 	// Function: ShiftNurbsC
 	// NURBS曲線のシフト
 	void ShiftNurbsC(NURBSC*, const Coord&);
-
-	// Function: ChRatioNurbsS
-	// NURBS曲面の倍率を変更する
-	void ChRatioNurbsS(NURBSS*, const Coord&);
 
 	// Function: ChRatioNurbsC
 	// NURBS曲線の倍率を変更する
 	void ChRatioNurbsC(NURBSC*, const Coord&);
 
-	// Function: RotNurbsS
-	// NURBS曲面を回転
-	void RotNurbsS(NURBSS*, const Coord&, double);
-
 	// Function: RotNurbsC
 	// NURBS曲線を回転
 	void RotNurbsC(NURBSC*, const Coord&, double);
-
-	// Function: SetCPNurbsS
-	// コントロールポイントを代入する
-	int SetCPNurbsS(NURBSS*, const NURBSS&);
 
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
@@ -145,10 +129,6 @@ public:
 	// 内外周トリム面内の点のみ残す
 	VCoord GetPtsOnInnerOuterTRMSurf(TRMS *,const VCoord&);
 
-	// Function: DetectInterfereNurbsS
-	// NURBS曲面(トリム無)同士の干渉検出
-	int DetectInterfereNurbsS(const NURBSS*, const NURBSS*, int);
-
 	// Function: DetectInterfereTrmS
 	// NURBS曲面(トリム有)同士の干渉検出
 	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);		
@@ -169,10 +149,6 @@ public:
 	// 指定した間隔でNURBS曲線上の座標値を求める
 	VCoord CalcDeltaPtsOnNurbsC(const NURBSC*, double);
 
-	// Function: CalcDeltaPtsOnNurbsS
-	// 指定した分割数でNURBS曲面上の座標値を求める
-	VVCoord CalcDeltaPtsOnNurbsS(const NURBSS*, int, int);
-
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
 	Vdouble CalcExtremumNurbsC(const NURBSC*, const Coord&);
@@ -181,13 +157,6 @@ public:
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
 	ublasVector	GetEqIntervalKont(int,int);
 
-	// Function: ChangeKnotVecRange
-	// ノットベクトルのパラメータ定義域を変更する
-	ublasVector ChangeKnotVecRange(const Vdouble&, int, int, double, double);
-	ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
-
-	boost::tuple<NURBSC*, NURBSC*> CalcExtSearchCurve(const NURBSS*, const Coord&, const Coord&, double);	// 極地探索線を得る(準備中)
-	boost::tuple<NURBSC*, NURBSC*>CalcExtGradCurve(const NURBSS*, const Coord&, const Coord&, double);		// 極地傾斜線を得る(準備中)
 	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);											// NURBS曲面を平面でトリムする(準備中)
 
 	// Function: New_TrmS
@@ -218,14 +187,6 @@ public:
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる
 	Coord CalcTanVecOnNurbsC(const NURBSC*, double);
 
-	// Function: ConnectNurbsSU
-	// 2枚のNURBS曲面を連結する(U方向に長くなる)(S1_U1とS2_U0を連結)
-	NURBSS* ConnectNurbsSU(const NURBSS*, const NURBSS*);
-
-	// Function: ConnectNurbsSV
-	// 2枚のNURBS曲面を連結する(V方向に長くなる)(S1_V1とS2_V0を連結)
-	NURBSS* ConnectNurbsSV(const NURBSS*, const NURBSS*);
-
 	// Function: CalcCurvatureNurbsC
 	// NURBS曲線の曲率を求める
 	double CalcCurvatureNurbsC(const NURBSC*, double);
@@ -255,14 +216,6 @@ public:
 
 
 	//int CalcDeltaParamsOnNurbsC(NURBSC *,double,Coord *);		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する
-
-    // Function: CalcConstScallop
-    // 等スキャロップ点を算出
-    boost::optional<A2double> CalcConstScallop(const NURBSS*, const NURBSC*, double, double, int);
-
-    // Function: CalcConstPitch
-    // 等ピッチ点を算出
-    boost::optional<double> CalcConstPitch(const NURBSS*, const NURBSC*, double, double, int);
 
 private:
 
@@ -306,22 +259,6 @@ private:
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
 	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double); 
-
-	// Function: SetKnotVecSU_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
-	void SetKnotVecSU_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
-
-	// Function: SetKnotVecSV_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向ノット定義域を設定する)
-	void SetKnotVecSV_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
-
-	// Function: SetCPSU_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向コントロールポイントとウェイトを設定する)
-	void SetCPSU_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
-
-	// Function: SetCPSV_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向コントロールポイントとウェイトを設定する)
-	void SetCPSV_ConnectS(const NURBSS*, const NURBSS*, NURBSS*);
 
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する

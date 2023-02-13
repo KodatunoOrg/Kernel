@@ -2272,3 +2272,34 @@ Vdouble CalcEquation(int M, const Vdouble& a)
 
 	return t;
 }
+
+// Function: ChangeKnotVecRange
+// (private)曲線/曲面パラメータの定義域を変更する
+// 
+// Parameters:
+// T - 変更したいノットベクトル列
+// N - Tの配列長
+// M - 階数
+// K - コントロールポイントの数
+// Tst - 開始ノットベクトル
+// Te - 終了ノットベクトル
+ublasVector ChangeKnotVecRange(const Vdouble& T, int M, int K, double Ts, double Te)
+{
+	size_t		N = T.size();
+	ublasVector T_(N);
+	
+	for(size_t i=0;i<N;i++)
+		T_[i] = (Te-Ts)/(T[K]-T[M-1])*T[i] + (Ts*T[K]-Te*T[M-1])/(T[K]-T[M-1]);
+
+	return T_;
+}
+ublasVector ChangeKnotVecRange(const ublasVector& T, int M, int K, double Ts, double Te)
+{
+	size_t		N = T.size();
+	ublasVector T_(N);
+	
+	for(int i=0;i<N;i++)
+		T_[i] = (Te-Ts)/(T[K]-T[M-1])*T[i] + (Ts*T[K]-Te*T[M-1])/(T[K]-T[M-1]);
+
+	return T_;
+}
