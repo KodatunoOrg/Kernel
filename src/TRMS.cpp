@@ -119,12 +119,12 @@ int TRMS::DetermPtOnTRMSurf(double u,double v) const
 //
 // Return:
 // 残った点の数　(外周トリムが存在しない：KOD_FALSE)
-VCoord TRMS::GetPtsOnOuterTRMSurf(TRMS *Trm, const VCoord& Pt) const
+VCoord TRMS::GetPtsOnOuterTRMSurf(const VCoord& Pt) const
 {
 	// 外周トリムが存在しない場合は0をリターン
-	if(!Trm->n1) return VCoord();
+	if(!m_n1) return VCoord();
 
-	COMPC *CompC = Trm->pTO->pB.CompC;	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
+	COMPC *CompC = m_pTO.pB.CompC;	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
 	VCoord P = ApproxTrimBorder(CompC);	// トリム境界線上に生成した点(多角形近似用の点)を格納
 
 	VCoord ans;							// 残す点の格納先
@@ -137,7 +137,6 @@ VCoord TRMS::GetPtsOnOuterTRMSurf(TRMS *Trm, const VCoord& Pt) const
 			ans.push_back(Pt[i]);
 		}
 	}
-//	for (int i=0;i<n;i++) ans[i] = Pt[i];		// CopyCoord(ans,n,Pt); 修正ミスってるよ！ K.Magara
 
 	return ans;
 }
@@ -152,19 +151,19 @@ VCoord TRMS::GetPtsOnOuterTRMSurf(TRMS *Trm, const VCoord& Pt) const
 //
 // Retrun:
 // 残った点の数　(内周トリムが存在しない：KOD_FALSE)
-VCoord TRMS::GetPtsOnInnerTRMSurf(TRMS *Trm, const VCoord& Pt) const
+VCoord TRMS::GetPtsOnInnerTRMSurf(const VCoord& Pt) const
 {
 	// 内周トリムが存在しない場合は0をリターン
-	if(!Trm->n2) return VCoord();
+	if(!m_n2) return VCoord();
 
 	COMPC *CompC;				// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
 	VCoord ans;					// 残す点の格納先
 	int trm_flag = KOD_FALSE;	// トリミング領域内外判定用フラグ
 
 	// 内周トリムの数だけループ
-	for(int k=0;k<Trm->n2;k++){
+	for(int k=0;k<m_n2;k++){
 
-		CompC = Trm->pTI[k]->pB.CompC;	
+		CompC = m_pTI[k].pB.CompC;	
 
 		// メモリ確保
 		VCoord P = ApproxTrimBorder(CompC);	// トリム境界線上に生成した点(多角形近似用の点)を格納
@@ -191,11 +190,11 @@ VCoord TRMS::GetPtsOnInnerTRMSurf(TRMS *Trm, const VCoord& Pt) const
 //
 // Return:
 // 残った点の数　(内周トリムが存在しない：KOD_FALSE)
-VCoord TRMS::GetPtsOnInnerOuterTRMSurf(TRMS *Trm, const VCoord& Pt) const
+VCoord TRMS::GetPtsOnInnerOuterTRMSurf(const VCoord& Pt) const
 {
-	VCoord inPt = GetPtsOnInnerTRMSurf(Trm,Pt);		// 内周トリム
+	VCoord inPt = GetPtsOnInnerTRMSurf(Pt);		// 内周トリム
 	
-	return GetPtsOnOuterTRMSurf(Trm, inPt);			// 外周トリム
+	return GetPtsOnOuterTRMSurf(inPt);			// 外周トリム
 }
 
 // Function: DetectInterfereTrmS
@@ -208,7 +207,7 @@ VCoord TRMS::GetPtsOnInnerOuterTRMSurf(TRMS *Trm, const VCoord& Pt) const
 //
 // Return:
 // 干渉有:KOD_TRUE, 干渉無:KOD_FALSE
-int TRMS::DetectInterfereTrmS(TRIMD_NURBSS *tNurbR,TRIMD_NURBSS *tNurbS,int divnum)
+int TRMS::DetectInterfereTrmS(const TRIMD_NURBSS* tNurbS, int divnum) const
 {
 	int count=0;
 
@@ -218,21 +217,21 @@ int TRMS::DetectInterfereTrmS(TRIMD_NURBSS *tNurbR,TRIMD_NURBSS *tNurbS,int divn
 			for(int u=0;u<divnum;u++){
 				for(int v=0;v<divnum;v++){
 					// 各曲面に分割点を生成する
-					double w0 = tNurbR->pts->m_U[0] + (tNurbR->pts->m_U[1] - tNurbR->pts->m_U[0])*(double)w/(double)divnum;
-					double t0 = tNurbR->pts->m_V[0] + (tNurbR->pts->m_V[1] - tNurbR->pts->m_V[0])*(double)t/(double)divnum;
-					double u0 = tNurbS->pts->m_U[0] + (tNurbS->pts->m_U[1] - tNurbS->pts->m_U[0])*(double)u/(double)divnum;
-					double v0 = tNurbS->pts->m_V[0] + (tNurbS->pts->m_V[1] - tNurbS->pts->m_V[0])*(double)v/(double)divnum;
+					double w0 =         m_pts->m_U[0] + (        m_pts->m_U[1] -         m_pts->m_U[0])*(double)w/(double)divnum;
+					double t0 =         m_pts->m_V[0] + (        m_pts->m_V[1] -         m_pts->m_V[0])*(double)t/(double)divnum;
+					double u0 = tNurbS->m_pts->m_U[0] + (tNurbS->m_pts->m_U[1] - tNurbS->m_pts->m_U[0])*(double)u/(double)divnum;
+					double v0 = tNurbS->m_pts->m_V[0] + (tNurbS->m_pts->m_V[1] - tNurbS->m_pts->m_V[0])*(double)v/(double)divnum;
 					for(int i=0;i<10;i++){
 						// 各種パラメータを算出する
-						Coord p0 = CalcNurbsSCoord(tNurbR->pts,w0,t0);					// R(w0,t0)となる点(初期点)の座標
-						Coord q0 = CalcNurbsSCoord(tNurbS->pts,u0,v0);					// S(u0,v0)となる点(初期点)の座標
-						Coord rw = CalcDiffuNurbsS(tNurbR->pts,w0,t0);					// 点R(w0,t0)のu偏微分(基本ベクトル)
-						Coord rt = CalcDiffvNurbsS(tNurbR->pts,w0,t0);					// 点R(w0,t0)のv偏微分(基本ベクトル)
+						Coord p0 =         m_pts->CalcNurbsSCoord(w0,t0);					// R(w0,t0)となる点(初期点)の座標
+						Coord q0 = tNurbS->m_pts->CalcNurbsSCoord(u0,v0);					// S(u0,v0)となる点(初期点)の座標
+						Coord rw =         m_pts->CalcDiffuNurbsS(w0,t0);					// 点R(w0,t0)のu偏微分(基本ベクトル)
+						Coord rt =         m_pts->CalcDiffvNurbsS(w0,t0);					// 点R(w0,t0)のv偏微分(基本ベクトル)
 						double rwt = (rw&&rt).CalcEuclid();
 						if(rwt==0.0) break;
 						Coord np = (rw&&rt)/rwt;										// 点R(w0,t0)の単位法線ベクトル
-						Coord su = CalcDiffuNurbsS(tNurbS->pts,u0,v0);					// 点S(u0,v0)のu偏微分(基本ベクトル)
-						Coord sv = CalcDiffvNurbsS(tNurbS->pts,u0,v0);					// 点S(u0,v0)のv偏微分(基本ベクトル)
+						Coord su = tNurbS->m_pts->CalcDiffuNurbsS(u0,v0);					// 点S(u0,v0)のu偏微分(基本ベクトル)
+						Coord sv = tNurbS->m_pts->CalcDiffvNurbsS(u0,v0);					// 点S(u0,v0)のv偏微分(基本ベクトル)
 						double suv = (su&&sv).CalcEuclid();
 						if(suv==0.0) break;
 						Coord nq = (su&&sv)/suv;										// 点S(u0,v0)の単位法線ベクトル
@@ -265,10 +264,10 @@ int TRMS::DetectInterfereTrmS(TRIMD_NURBSS *tNurbR,TRIMD_NURBSS *tNurbS,int divn
 						v0 += dv;														// 新しい点のvパラメータを得る
 						
 						// 曲面の範囲外に出てしまったらループを抜ける
-						if(!CheckRange(tNurbR->pts->m_U[0],tNurbR->pts->m_U[1],w0,1) || !CheckRange(tNurbR->pts->m_V[0],tNurbR->pts->m_V[1],t0,1)){
+						if(!CheckRange(        m_pts->m_U[0],        m_pts->m_U[1],w0,1) || !CheckRange(        m_pts->m_V[0],        m_pts->m_V[1],t0,1)){
 							break;
 						}
-						if(!CheckRange(tNurbS->pts->m_U[0],tNurbS->pts->m_U[1],u0,1) || !CheckRange(tNurbS->pts->m_V[0],tNurbS->pts->m_V[1],v0,1)){
+						if(!CheckRange(tNurbS->m_pts->m_U[0],tNurbS->m_pts->m_U[1],u0,1) || !CheckRange(tNurbS->m_pts->m_V[0],tNurbS->m_pts->m_V[1],v0,1)){
 							break;
 						}
 						
@@ -277,7 +276,7 @@ int TRMS::DetectInterfereTrmS(TRIMD_NURBSS *tNurbR,TRIMD_NURBSS *tNurbS,int divn
 										
 						// 十分収束したら交点が存在するため干渉有
 						if(deltapq_dis < CONVERG_GAP){
-							if(DetermPtOnTRMSurf(tNurbR,w0,t0) >= KOD_TRUE && DetermPtOnTRMSurf(tNurbS,u0,v0) >= KOD_TRUE){	// トリムされなければ
+							if(DetermPtOnTRMSurf(w0,t0) >= KOD_TRUE && tNurbS->DetermPtOnTRMSurf(u0,v0) >= KOD_TRUE){	// トリムされなければ
                                 //GuiIFB.SetMessage("Interference with the trimmed NURBS surface was detected");
 								return KOD_TRUE;
 							}
@@ -302,12 +301,12 @@ int TRMS::DetectInterfereTrmS(TRIMD_NURBSS *tNurbR,TRIMD_NURBSS *tNurbS,int divn
 //
 // Return:
 // KOD_TRUE
-int TRMS::TrimNurbsSPlane(const TRMS* Trm, const Coord& pt, const Coord& nvec)
+int TRMS::TrimNurbsSPlane(const Coord& pt, const Coord& nvec)
 {
 	double pcolor[3] = {0,1,0};		// 表示の色
 	double tcolor[3] = {1,0,0};
 
-	VCoord t = CalcIntersecPtsPlaneSearch(Trm->pts, pt, nvec, 0.5, 5, RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
+	VCoord t = m_pts->CalcIntersecPtsPlaneSearch(pt, nvec, 0.5, 5, RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
 	
 	// パラメトリック領域内で直線近似(最小2乗法で近似直線の係数2つを求める)
 	ublasMatrix A(2,2,0);
@@ -330,15 +329,15 @@ int TRMS::TrimNurbsSPlane(const TRMS* Trm, const Coord& pt, const Coord& nvec)
 	// 端点抽出
 	// パラメトリック領域内のU-Vの範囲を決める4点から得られる4本の直線と、さっき求めた近似直線との交点4つを求める
 	Coord P[4];
-	P[0] = TrimNurbsSPlaneSub1(B_[0],B_[1],Trm->pts->m_U[0],Trm->pts->m_V[0],Trm->pts->m_U[1],Trm->pts->m_V[0]);
-	P[1] = TrimNurbsSPlaneSub1(B_[0],B_[1],Trm->pts->m_U[1],Trm->pts->m_V[0],Trm->pts->m_U[1],Trm->pts->m_V[1]);
-	P[2] = TrimNurbsSPlaneSub1(B_[0],B_[1],Trm->pts->m_U[1],Trm->pts->m_V[1],Trm->pts->m_U[0],Trm->pts->m_V[1]);
-	P[3] = TrimNurbsSPlaneSub1(B_[0],B_[1],Trm->pts->m_U[0],Trm->pts->m_V[1],Trm->pts->m_U[0],Trm->pts->m_V[0]);
+	P[0] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[0],m_pts->m_V[0],m_pts->m_U[1],m_pts->m_V[0]);
+	P[1] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[1],m_pts->m_V[0],m_pts->m_U[1],m_pts->m_V[1]);
+	P[2] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[1],m_pts->m_V[1],m_pts->m_U[0],m_pts->m_V[1]);
+	P[3] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[0],m_pts->m_V[1],m_pts->m_U[0],m_pts->m_V[0]);
 	// 得られた4つの交点Pから、U-V範囲内にある2点を抽出
 	Coord Q[2];
 	int j=0;
 	for(int i=0;i<4;i++){
-		if(P[i].x >= Trm->pts->m_U[0] && P[i].x <= Trm->pts->m_U[1] && P[i].y >= Trm->pts->m_V[0] && P[i].y <= Trm->pts->m_V[1]){
+		if(P[i].x >= m_pts->m_U[0] && P[i].x <= m_pts->m_U[1] && P[i].y >= m_pts->m_V[0] && P[i].y <= m_pts->m_V[1]){
 			Q[j] = P[i];
 			j++;
 		}
@@ -356,7 +355,7 @@ int TRMS::TrimNurbsSPlane(const TRMS* Trm, const Coord& pt, const Coord& nvec)
 
 	FILE *fp = fopen("Debug.csv","w");
 	for(size_t i=0;i<t.size();i++){
-		Coord p = CalcNurbsSCoord(Trm->pts,t[i].x,t[i].y);			// 交点をパラメータ値から座標値へ変換
+		Coord p = m_pts->CalcNurbsSCoord(t[i].x,t[i].y);			// 交点をパラメータ値から座標値へ変換
 		DrawPoint(p,1,3,pcolor);			// 交点を描画
 		fprintf(fp,"%lf,%lf\n",t[i].x,t[i].y);
 	}
@@ -432,4 +431,31 @@ VCoord TRMS::ApproxTrimBorder(const COMPC* CompC) const
 	}
 
 	return P;
+}
+
+// Function: TrimNurbsSPlaneSub1
+// (private)TrimNurbsSPlaneのサブ関数(2D上の2直線の交点をもとめる)
+//
+// Parameters:
+// a,b - 1つ目の直線の係数
+// x0, y0, x1, y1 - 2つ目の直線が通る2点
+//
+// Return:
+// 交点の2D座標値
+Coord TRMS::TrimNurbsSPlaneSub1(double a,double b,double x0,double y0,double x1,double y1) const
+{
+	Coord c;
+
+	if(x1-x0 == 0.0){
+		c.x = x0;
+		c.y = a*x0+b;
+		return c;
+	}
+
+	double p = (y1-y0)/(x1-x0);
+	double q = (x1*y0-x0*y1)/(x1-x0);
+	c.x = (q-b)/(a-p);
+	c.y = (p*b-q*a)/(p-a);
+
+	return c;
 }

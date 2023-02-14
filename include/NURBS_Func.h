@@ -145,10 +145,6 @@ private:
 	// (private)最小2乗法で近似コントロールポイントを求める
 	VCoord CalcApproximationCP_LSM(const VCoord&, const ublasVector&, const ublasVector&, int, int);
 
-	// Function: TrimNurbsSPlaneSub1
-	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
-	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double); 
-
 };
 
 #endif

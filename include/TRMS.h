@@ -80,10 +80,10 @@ public:
 
 	// Function: DetectInterfereTrmS
 	// NURBS曲面(トリム有)同士の干渉検出
-	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);
+	int DetectInterfereTrmS(const TRIMD_NURBSS*, int) const;
 
     // NURBS曲面を平面でトリムする(準備中)
-	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);
+	int TrimNurbsSPlane(const Coord&, const Coord&);
 
 private:
 
@@ -94,6 +94,10 @@ private:
 	// Function: ApproxTrimBorder
 	// (private)トリム境界線を点群で近似する
 	VCoord ApproxTrimBorder(const COMPC *) const;
+
+	// Function: TrimNurbsSPlaneSub1
+	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
+	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double) const;
 };
 
 #endif

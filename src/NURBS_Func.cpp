@@ -672,33 +672,6 @@ NURBSS* NURBS_Func::GenPolygonalSurface(const VVCoord& P, int PNum_u, int PNum_v
 
 
 
-// Function: TrimNurbsSPlaneSub1
-// (private)TrimNurbsSPlaneのサブ関数(2D上の2直線の交点をもとめる)
-//
-// Parameters:
-// a,b - 1つ目の直線の係数
-// x0, y0, x1, y1 - 2つ目の直線が通る2点
-//
-// Return:
-// 交点の2D座標値
-Coord NURBS_Func::TrimNurbsSPlaneSub1(double a,double b,double x0,double y0,double x1,double y1)
-{
-	Coord c;
-
-	if(x1-x0 == 0.0){
-		c.x = x0;
-		c.y = a*x0+b;
-		return c;
-	}
-
-	double p = (y1-y0)/(x1-x0);
-	double q = (x1*y0-x0*y1)/(x1-x0);
-	c.x = (q-b)/(a-p);
-	c.y = (p*b-q*a)/(p-a);
-
-	return c;
-}
-
 // Function: GetCurveKnotParam1
 // (private)各通過点の曲線パラメータを算出(コード長の比から算出)
 //
