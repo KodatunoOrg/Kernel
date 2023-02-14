@@ -18,6 +18,7 @@ INCLUDEPATH += include/ \
 SOURCES += \
     src/NURBSC.cpp \
     src/NURBSS.cpp \
+    src/TRMS.cpp \
     src/BODY.cpp \
     src/DXF_Parser.cpp \
     src/Describe_BODY.cpp \
@@ -34,6 +35,7 @@ SOURCES += \
 HEADERS += \
     include/NURBSC.h \
     include/NURBSS.h \
+    include/TRMS.h \
     include/BODY.h \
     include/DXF_Parser.h \
     include/Describe_BODY.h \
