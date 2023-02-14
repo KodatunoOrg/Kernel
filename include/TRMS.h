@@ -67,6 +67,39 @@ public:
     // Funciton: GetNurbsS
     // トリム面を構成するNURBS曲面へのポインタを得る
     NURBSS *GetNurbsS();
+
+    // ---
+
+	// Function: GenTrimdNurbsS
+	// トリム面を生成する
+	TRIMD_NURBSS* GenTrimdNurbsS(const TRIMD_NURBSS&) const;
+
+	// Function: DelTrimdNurbsS
+	// トリム面を削除(メモリー解放)する
+	int DelTrimdNurbsS(void);
+
+	// Function: DetermPtOnTRMSurf
+	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
+	int DetermPtOnTRMSurf(double,double) const;
+
+	// Function: GetPtsOnOuterTRMSurf
+	// 外周トリム面内の点のみ残す
+	VCoord GetPtsOnOuterTRMSurf(const VCoord&) const;
+
+	// Function: GetPtsOnInnerTRMSurf
+	// 内周トリム面外の点のみ残す
+	VCoord GetPtsOnInnerTRMSurf(const VCoord&) const;
+
+	// Function: GetPtsOnInnerOuterTRMSurf
+	// 内外周トリム面内の点のみ残す
+	VCoord GetPtsOnInnerOuterTRMSurf(const VCoord&) const;
+
+	// Function: DetectInterfereTrmS
+	// NURBS曲面(トリム有)同士の干渉検出
+	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);
+
+    // NURBS曲面を平面でトリムする(準備中)
+	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);
 };
 
 #endif

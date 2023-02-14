@@ -45,14 +45,6 @@ class NURBS_Func
 {
 public:
 
-	// Function: GenTrimdNurbsS
-	// トリム面を生成する
-	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
-
-	// Function: DelTrimdNurbsS
-	// トリム面を削除(メモリー解放)する
-	int DelTrimdNurbsS(TRIMD_NURBSS *);							
-
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
 	NURBSC* GenInterpolatedNurbsC1(const VCoord&, int);
@@ -89,31 +81,10 @@ public:
 	// 与えられたコントロールポイントからn階のNURBS曲面を生成する
 	NURBSS* GenNurbsSfromCP(const VVCoord&, int, int, int, int);
 
-	// Function: DetermPtOnTRMSurf
-	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
-	int DetermPtOnTRMSurf(TRMS *,double,double);					
-
-	// Function: GetPtsOnOuterTRMSurf
-	// 外周トリム面内の点のみ残す
-	VCoord GetPtsOnOuterTRMSurf(TRMS *, const VCoord&);
-
-	// Function: GetPtsOnInnerTRMSurf
-	// 内周トリム面外の点のみ残す
-	VCoord GetPtsOnInnerTRMSurf(TRMS *, const VCoord&);
-
-	// Function: GetPtsOnInnerOuterTRMSurf
-	// 内外周トリム面内の点のみ残す
-	VCoord GetPtsOnInnerOuterTRMSurf(TRMS *,const VCoord&);
-
-	// Function: DetectInterfereTrmS
-	// NURBS曲面(トリム有)同士の干渉検出
-	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);		
-
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
 	ublasVector	GetEqIntervalKont(int,int);
 
-	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);											// NURBS曲面を平面でトリムする(準備中)
 
 	// Function: New_TrmS
 	// トリム面のメモリー確保
