@@ -16,6 +16,7 @@ INCLUDEPATH += include/ \
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/NURBS.cpp \
     src/NURBSC.cpp \
     src/NURBSS.cpp \
     src/TRMS.cpp \
@@ -25,7 +26,6 @@ SOURCES += \
     src/IGES_Parser.cpp \
     src/KodListFunc.cpp \
     src/MESH.cpp \
-    src/NURBS_Func.cpp \
     src/Quaternion.cpp \
     src/SFQuant.cpp \
     src/STL_Parser.cpp \
@@ -33,6 +33,7 @@ SOURCES += \
     src/KodatunoKernel.cpp
 
 HEADERS += \
+    include/NURBS.h \
     include/NURBSC.h \
     include/NURBSS.h \
     include/TRMS.h \
@@ -42,7 +43,6 @@ HEADERS += \
     include/IGES_Parser.h \
     include/KodListFunc.h \
     include/MESH.h \
-    include/NURBS_Func.h \
     include/Quaternion.h \
     include/SFQuant.h \
     include/STL_Parser.h \

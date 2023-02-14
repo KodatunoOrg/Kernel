@@ -1,10 +1,6 @@
 #ifndef _NURBSC_H_
 #define _NURBSC_H_
 
-// prototype
-class NURBSC;
-class NURBSS;
-
 // class: NURBSC
 // 有理Bスプライン(NURBS)曲線を表わす構造体
 //

@@ -1,6 +1,5 @@
 #include "KodatunoKernel.h"
-#include "NURBSC.h"
-#include "NURBSS.h"
+#include "NURBS.h"
 #include "SFQuant.h"
 #include <algorithm>
 
@@ -2564,8 +2563,6 @@ boost::tuple<int, A2double> NURBSS::SearchIntersectPt_OS(const Coord& pt, const 
 // 成功：KOD_TRUE, 失敗：KOD_ERR
 boost::optional<Coord> NURBSS::GetSIPParam1(double u, double v, const Coord& pt, const Coord& nvec, int direction) const
 {
-	NURBS_Func NFunc;
-
 	Coord Su = CalcDiffuNurbsS(u,v);
 	Coord Sv = CalcDiffvNurbsS(u,v);
 	double fu = nvec & Su;	// nf・Su

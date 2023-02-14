@@ -4,8 +4,7 @@
 #define _BODY_H_
 
 #include <string>		// std::string
-#include "NURBSC.h"
-#include "NURBSS.h"
+#include "NURBS.h"
 #include "TRMS.h"
 
 // Constants: General Defines

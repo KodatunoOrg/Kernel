@@ -1,89 +1,5 @@
 ﻿#include "KodatunoKernel.h"
-
-// Function: New_TrmS
-// トリム面のメモリー確保
-//
-// Parameters: 
-// *trms - メモリー確保するトリム面へのポインタ
-// num - メモリー確保するトリム面の数
-//
-// return:
-// 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::New_TrmS(TRMS *trms,int num)
-{
-	trms->pTI = new CONPS*[num];
-
-	return KOD_TRUE;
-}
-
-// Function: Free_TrmS_1DArray
-// トリム面配列のメモリー解放
-//
-// Parameters: 
-// *a - メモリーを解放するトリム面配列へのポインタ
-// num - メモリーを解放するトリム面の数
-void NURBS_Func::Free_TrmS_1DArray(TRMS *a,int num)
-{
-	for(int i=0;i<num;i++)
-		Free_TrmS(&a[i]);
-}
-
-// Function: Free_TrmS
-// トリム面のメモリー解放
-//
-// Parameters: 
-// *a - メモリーを解放するトリム面へのポインタ
-void NURBS_Func::Free_TrmS(TRMS *a)
-{
-	delete[] a->pTI;
-}
-
-// Function: New_CompC
-// 複合曲線のメモリー確保
-//
-// Parameters: 
-// *compc - メモリー確保する複合曲線へのポインタ
-// num - メモリー確保する複合曲線の数
-//
-// return:
-// 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::New_CompC(COMPC *compc,int num)
-{
-try {	
-	compc->DEType = new int[num];
-	compc->pDE = new COMPELEM[num];
-}
-catch (std::bad_alloc&) {
-		return KOD_ERR;
-}
-	compc->N = num;
-	return KOD_TRUE;
-}
-
-// Function: Free_CompC_1DArray
-// 複合曲線配列のメモリー解放
-//
-// Parameters:
-// *a - メモリーを解放する複合曲線配列へのポインタ
-// num - メモリーを解放する複合曲線の数
-void NURBS_Func::Free_CompC_1DArray(COMPC *a,int num)
-{
-	for(int i=0;i<num;i++)
-		Free_CompC(&a[i]);
-}
-
-// Function: Free_CompC
-// 複合曲線のメモリー解放
-//
-// Parameters:
-// *a - メモリーを解放する複合曲線へのポインタ
-void NURBS_Func::Free_CompC(COMPC *a)
-{
-	delete[] a->DEType;
-	delete[] a->pDE;
-}
-
-
+#include "NURBS.h"
 
 // Function: GenInterpolatedNurbsC1
 // 与えられた点列を補間するn階のNURBS曲線を生成する.
@@ -97,7 +13,7 @@ void NURBS_Func::Free_CompC(COMPC *a)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点列が1個未満：KOD_ERR, 計算過程でゼロ割が発生：KOD_ERR
-NURBSC* NURBS_Func::GenInterpolatedNurbsC1(const VCoord& P, int M)
+NURBSC* GenInterpolatedNurbsC1(const VCoord& P, int M)
 {
 	size_t PNum = P.size();
 
@@ -170,7 +86,7 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC1(const VCoord& P, int M)
 //
 // Return:
 // KOD_TRUE:正常終了, KOD_FALSE:点列の始点と終点が一致していない, KOD_ERR:点列の数が1個未満
-NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const VCoord& P_, int M)
+NURBSC* GenInterpolatedNurbsC2(const VCoord& P_, int M)
 {
 	size_t PNum = P_.size();
 	if(P_[0].DiffCoord(P_[PNum-1]) == KOD_FALSE){
@@ -267,7 +183,7 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const VCoord& P_, int M)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSC* NURBS_Func::GenApproximationNurbsC(const VCoord& P, int M)
+NURBSC* GenApproximationNurbsC(const VCoord& P, int M)
 {
 	size_t PNum = P.size();
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
@@ -311,7 +227,7 @@ NURBSC* NURBS_Func::GenApproximationNurbsC(const VCoord& P, int M)
 // PNum - 点列の数   
 // M - 階数
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSC* NURBS_Func::GenNurbsCfromCP(const VCoord& P, int M)
+NURBSC* GenNurbsCfromCP(const VCoord& P, int M)
 {
 	int PNum = P.size();
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
@@ -344,7 +260,7 @@ NURBSC* NURBS_Func::GenNurbsCfromCP(const VCoord& P, int M)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSC* NURBS_Func::GenPolygonalLine(const VCoord& P)
+NURBSC* GenPolygonalLine(const VCoord& P)
 {
 	int PNum = P.size();
 	if(PNum <= 1){			// 与えられた点が1個未満の場合は、NURBS曲線を生成できない
@@ -392,7 +308,7 @@ NURBSC* NURBS_Func::GenPolygonalLine(const VCoord& P)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSS* NURBS_Func::GenInterpolatedNurbsS1(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
+NURBSS* GenInterpolatedNurbsS1(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
@@ -489,7 +405,7 @@ NURBSS* NURBS_Func::GenInterpolatedNurbsS1(const VVCoord& P, int PNum_u, int PNu
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSS* NURBS_Func::GenApproximationNurbsS(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
+NURBSS* GenApproximationNurbsS(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
@@ -569,7 +485,7 @@ NURBSS* NURBS_Func::GenApproximationNurbsS(const VVCoord& P, int PNum_u, int PNu
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSS* NURBS_Func::GenNurbsSfromCP(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
+NURBSS* GenNurbsSfromCP(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
@@ -610,7 +526,7 @@ NURBSS* NURBS_Func::GenNurbsSfromCP(const VVCoord& P, int PNum_u, int PNum_v, in
 //
 // Return:
 // KOD_TRUE
-NURBSS* NURBS_Func::GenPolygonalSurface(const VVCoord& P, int PNum_u, int PNum_v)
+NURBSS* GenPolygonalSurface(const VVCoord& P, int PNum_u, int PNum_v)
 {
 	int Mu=2;						// 階数2
 	int Mv=2;
@@ -679,7 +595,7 @@ NURBSS* NURBS_Func::GenPolygonalSurface(const VVCoord& P, int PNum_u, int PNum_v
 // *P - 通過点列   
 // PNum - 通過点列の数    
 // T_ - 曲線パラメータを格納
-ublasVector NURBS_Func::GetCurveKnotParam1(const VCoord& P)
+ublasVector GetCurveKnotParam1(const VCoord& P)
 {
 	size_t	PNum = P.size();
 	ublasVector T_(PNum);
@@ -703,7 +619,7 @@ ublasVector NURBS_Func::GetCurveKnotParam1(const VCoord& P)
 // *P - 通過点列   
 // PNum - 通過点列の数    
 // T_ - 曲線パラメータを格納
-ublasVector NURBS_Func::GetCurveKnotParam2(const VCoord& P)
+ublasVector GetCurveKnotParam2(const VCoord& P)
 {
 	size_t PNum = P.size();
 	ublasVector	T_(PNum);
@@ -728,7 +644,7 @@ ublasVector NURBS_Func::GetCurveKnotParam2(const VCoord& P)
 // T - v方向曲線パラメータ 
 // **P - 与えられた点列
 // uNum, vNum - u方向，v方向の点列数
-boost::tuple<ublasVector, ublasVector> NURBS_Func::GetSurfaceKnotParam(const VVCoord& P, int uNum, int vNum)
+boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const VVCoord& P, int uNum, int vNum)
 {
 	double d;
 	ublasVector	S(uNum), T(vNum);
@@ -791,7 +707,7 @@ boost::tuple<ublasVector, ublasVector> NURBS_Func::GetSurfaceKnotParam(const VVC
 // K - コントロールポイントの数  
 // M - 階数   
 // T - 格納するノットベクトル列
-ublasVector NURBS_Func::GetEqIntervalKont(int K, int M)
+ublasVector GetEqIntervalKont(int K, int M)
 {
 	ublasVector	T(K+M);
 
@@ -814,7 +730,7 @@ ublasVector NURBS_Func::GetEqIntervalKont(int K, int M)
 // K - コントロールポイントの数  
 // M - 階数   
 // T - 格納するノットベクトル列
-ublasVector NURBS_Func::GetInterpolatedKnot(const ublasVector& T_, int K, int M)
+ublasVector GetInterpolatedKnot(const ublasVector& T_, int K, int M)
 {
 	int			N = T_.size();
 	ublasVector	T(N);
@@ -849,7 +765,7 @@ ublasVector NURBS_Func::GetInterpolatedKnot(const ublasVector& T_, int K, int M)
 // M - 階数  
 // K - コントロールポイントの数  
 // T - 格納するノットベクトル列
-ublasVector NURBS_Func::GetApproximatedKnot(const ublasVector& T_, int M, int K)
+ublasVector GetApproximatedKnot(const ublasVector& T_, int M, int K)
 {
 	int			N(T_.size());
 	ublasVector	T(N);
@@ -879,7 +795,7 @@ ublasVector NURBS_Func::GetApproximatedKnot(const ublasVector& T_, int M, int K)
 // M - 階数  
 // K - コントロールポイントの数   
 // *Q - 算出されたコントロールポイント列
-VCoord NURBS_Func::CalcApproximationCP_LSM(const VCoord& P, const ublasVector& T_, const ublasVector& T, int M, int K)
+VCoord CalcApproximationCP_LSM(const VCoord& P, const ublasVector& T_, const ublasVector& T, int M, int K)
 {
 	int	Pnum = T_.size(),
 		Nnum = T.size();
@@ -931,7 +847,7 @@ VCoord NURBS_Func::CalcApproximationCP_LSM(const VCoord& P, const ublasVector& T
 //
 // Return:
 // コントロールポイントの数
-int NURBS_Func::SetApproximationCPnum(int PNum)
+int SetApproximationCPnum(int PNum)
 {
 	if(PNum < 5)		// 勘
 		return PNum;

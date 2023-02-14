@@ -1,6 +1,5 @@
 #include "KodatunoKernel.h"
-#include "NURBSC.h"
-#include "NURBSS.h"
+#include "NURBS.h"
 #include <algorithm>
 
 // Function: CalcNurbsCCoord
