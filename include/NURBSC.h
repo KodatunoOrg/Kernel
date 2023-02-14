@@ -103,11 +103,100 @@ public:
 	// 3次以下のNURBS曲線と平面との交点を求める
 	Vdouble CalcIntersecCurve3(const Coord&, const Coord&) const;
 
+	// Function: CalcIntersecPtsNurbsCNurbsCParam
+    // 2次元NURBS曲線同士の交点を求める
+	VCoord CalcIntersecPtsNurbsCNurbsCParam(const NURBSC*, int) const;
+
+    // Function: CalcIntersecPtsNurbsCLine
+    // 2次元NURBS曲線と直線との交点を求める
+    boost::optional<A2double> ClacIntersecPtsNurbsCLine(const Coord&, const Coord&) const;
+
+    // Function: CalcIntersecPtsNurbsCLineSeg
+    // 2次元NURBS曲線と線分との交点を求める
+    boost::optional<A2double> ClacIntersecPtsNurbsCLineSeg(const Coord&, const Coord&, double, double) const;
+
+	// Function: CalcNurbsCLength
+	// NURBS曲線の線分長を求める
+	double CalcNurbsCLength(void) const;
+
+	// Function: CalcNurbsCLength
+	// NURBS曲線の指定区間の線分長を求める
+	double CalcNurbsCLength(double, double) const;
+
+	// Function: CalcDeltaPtsOnNurbsC
+	// 指定した分割数でNURBS曲線上の座標値を求める
+	VCoord CalcDeltaPtsOnNurbsC(int) const;
+
+	// Function: CalcDeltaPtsOnNurbsC
+	// 指定した間隔でNURBS曲線上の座標値を求める
+	VCoord CalcDeltaPtsOnNurbsC(double) const;
+
+	// Function: CalcParamLengthOnNurbsC
+	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
+	double CalcParamLengthOnNurbsC(double, double) const;
+
+	// Function: CalcExtremumNurbsC
+	// NURBS曲線の指定した方向における極値の座標値を得る
+	Vdouble CalcExtremumNurbsC(const Coord&) const;
+
+	// Function: CalcTanVecOnNurbsC
+	// NURBS曲線上のtにおける単位接ベクトルをもとめる
+	Coord CalcTanVecOnNurbsC(double) const;
+
+	// Function: CalcCurvatureNurbsC
+	// NURBS曲線の曲率を求める
+	double CalcCurvatureNurbsC(double) const;
+
+	// Function: DivNurbsCParam
+	// NURBS曲線を指定したパラメータ値で分割する
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsCParam(double) const;
+
+	// Function: DivNurbsC
+	// NURBS曲線を指定した位置（端からの距離）で分割する
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsC(double) const;
+
+	// Function: ConnectNurbsC
+	// NURBS曲線の連結
+	NURBSC* ConnectNurbsC(const NURBSC*) const;
+
+//	double CalcTorsionNurbsC(double);					// NURBS曲線の捩率を求める
+//	int CalcDeltaParamsOnNurbsC(double,Coord *);		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する
+
+    // --- 
+
+	// Function: ShiftNurbsC
+	// NURBS曲線のシフト
+	void ShiftNurbsC(const Coord&);
+
+	// Function: ChRatioNurbsC
+	// NURBS曲線の倍率を変更する
+	void ChRatioNurbsC(const Coord&);
+
+	// Function: RotNurbsC
+	// NURBS曲線を回転
+	void RotNurbsC(const Coord&, double);
+
+	// Function: ReverseNurbsC
+	// NURBS曲線のノットベクトル向きを反転する
+	void ReverseNurbsC(void);
+
 private:
 
 	// Function: GetNurbsCCoef
 	// (private)NURBS曲線の係数を求める(最高3次)
 	boost::tuple<VCoord, Vdouble> GetNurbsCCoef(const ublasMatrix&, int) const;
+
+	// Function: InsertNewKnotOnNurbsC
+	// (private)NURBS曲線に新たなノットを挿入する
+	void InsertNewKnotOnNurbsC(double, int, NURBSC*) const;
+
+	// Function: SetKnotVecC_ConnectC
+	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)
+	void SetKnotVecC_ConnectC(const NURBSC*, NURBSC*) const;
+
+	// Function: SetCPC_ConnectC
+	// (private)NURBS曲線連結用SUB関数(連結後の曲線のコントロールポイントとウェイトを設定する)
+	void SetCPC_ConnectC(const NURBSC*, NURBSC*) const;
 
 public:
 	// Function: DebugForNurbsC

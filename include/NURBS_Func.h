@@ -53,30 +53,6 @@ public:
 	// トリム面を削除(メモリー解放)する
 	int DelTrimdNurbsS(TRIMD_NURBSS *);							
 
-	// Function: CalcIntersecPtsNurbsCNurbsCParam
-    // 2次元NURBS曲線同士の交点を求める
-	VCoord CalcIntersecPtsNurbsCNurbsCParam(const NURBSC*, const NURBSC*, int);
-
-    // Function: CalcIntersecPtsNurbsCLine
-    // 2次元NURBS曲線と直線との交点を求める
-    boost::optional<A2double> ClacIntersecPtsNurbsCLine(const NURBSC*, const Coord&, const Coord&);
-
-    // Function: CalcIntersecPtsNurbsCLineSeg
-    // 2次元NURBS曲線と線分との交点を求める
-    boost::optional<A2double> ClacIntersecPtsNurbsCLineSeg(const NURBSC*, const Coord&, const Coord&, double, double);
-
-	// Function: ShiftNurbsC
-	// NURBS曲線のシフト
-	void ShiftNurbsC(NURBSC*, const Coord&);
-
-	// Function: ChRatioNurbsC
-	// NURBS曲線の倍率を変更する
-	void ChRatioNurbsC(NURBSC*, const Coord&);
-
-	// Function: RotNurbsC
-	// NURBS曲線を回転
-	void RotNurbsC(NURBSC*, const Coord&, double);
-
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
 	NURBSC* GenInterpolatedNurbsC1(const VCoord&, int);
@@ -133,26 +109,6 @@ public:
 	// NURBS曲面(トリム有)同士の干渉検出
 	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);		
 
-	// Function: CalcNurbsCLength
-	// NURBS曲線の線分長を求める
-	double CalcNurbsCLength(const NURBSC*);
-
-	// Function: CalcNurbsCLength
-	// NURBS曲線の指定区間の線分長を求める
-	double CalcNurbsCLength(const NURBSC*, double, double);
-
-	// Function: CalcDeltaPtsOnNurbsC
-	// 指定した分割数でNURBS曲線上の座標値を求める
-	VCoord CalcDeltaPtsOnNurbsC(const NURBSC*, int);
-
-	// Function: CalcDeltaPtsOnNurbsC
-	// 指定した間隔でNURBS曲線上の座標値を求める
-	VCoord CalcDeltaPtsOnNurbsC(const NURBSC*, double);
-
-	// Function: CalcExtremumNurbsC
-	// NURBS曲線の指定した方向における極値の座標値を得る
-	Vdouble CalcExtremumNurbsC(const NURBSC*, const Coord&);
-
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
 	ublasVector	GetEqIntervalKont(int,int);
@@ -183,39 +139,9 @@ public:
 	// 複合曲線のメモリー解放
 	void Free_CompC(COMPC *);					
 
-	// Function: CalcTanVecOnNurbsC
-	// NURBS曲線上のtにおける単位接ベクトルをもとめる
-	Coord CalcTanVecOnNurbsC(const NURBSC*, double);
-
-	// Function: CalcCurvatureNurbsC
-	// NURBS曲線の曲率を求める
-	double CalcCurvatureNurbsC(const NURBSC*, double);
 
 
-//	double CalcTorsionNurbsC(NURBSC *,double);					// NURBS曲線の捩率を求める
 
-	// Function: DivNurbsCParam
-	// NURBS曲線を指定したパラメータ値で分割する
-	boost::tuple<NURBSC*, NURBSC*> DivNurbsCParam(const NURBSC*, double);
-
-	// Function: DivNurbsC
-	// NURBS曲線を指定した位置（端からの距離）で分割する
-	boost::tuple<NURBSC*, NURBSC*> DivNurbsC(const NURBSC*, double);
-
-	// Function: ConnectNurbsC
-	// NURBS曲線の連結
-	NURBSC* ConnectNurbsC(const NURBSC*, const NURBSC*);
-
-	// Function: ReverseNurbsC
-	// NURBS曲線のノットベクトル向きを反転する
-	void ReverseNurbsC(NURBSC*);
-
-	// Function: CalcParamLengthOnNurbsC
-	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
-	double CalcParamLengthOnNurbsC(const NURBSC*, double, double);
-
-
-	//int CalcDeltaParamsOnNurbsC(NURBSC *,double,Coord *);		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する
 
 private:
 
@@ -259,18 +185,6 @@ private:
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
 	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double); 
-
-	// Function: InsertNewKnotOnNurbsC
-	// (private)NURBS曲線に新たなノットを挿入する
-	void InsertNewKnotOnNurbsC(const NURBSC*, double, int, NURBSC*);
-
-	// Function: SetKnotVecC_ConnectC
-	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)
-	void SetKnotVecC_ConnectC(const NURBSC*, const NURBSC*, NURBSC*);
-
-	// Function: SetCPC_ConnectC
-	// (private)NURBS曲線連結用SUB関数(連結後の曲線のコントロールポイントとウェイトを設定する)
-	void SetCPC_ConnectC(const NURBSC*, const NURBSC*, NURBSC*);
 
 };
 
