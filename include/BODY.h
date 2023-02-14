@@ -4,6 +4,8 @@
 #define _BODY_H_
 
 #include <string>		// std::string
+#include "boost/variant.hpp"
+
 #include "NURBS.h"
 #include "TRMS.h"
 
@@ -235,13 +237,14 @@ struct TMAT
 // CONA ConA -		円錐曲線
 // LINE_ Line -		直線
 // NURBSC NurbsC -	NURBS曲線
-union COMPELEM{
+/*union COMPELEM{
 	void*	substitution;	// ここに代入
 	CIRA*	CirA;
 	CONA*	ConA;
 	LINE_*	Line;
 	NURBSC*	NurbsC;
-};
+};*/
+typedef boost::variant<CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;
 
 // Structure: COMPC
 // 複合曲線
@@ -256,22 +259,17 @@ union COMPELEM{
 class COMPC{
 public:	
 	int N;
-	int *DEType;
-	COMPELEM*	pDE;	// COMPELEM定義変更に伴う修正 by K.Magara
+//	int *DEType;
+//	COMPELEM*	pDE;
+	std::vector<COMPELEM> pDE;
 	int DegeFlag;
 	NURBSC DegeNurbs;
 	int pD;
 
 	COMPC() {
 		N = 0;
-		DEType = NULL;
-		pDE = NULL;
 		DegeFlag = 0;
 		pD = 0;
-	}
-	~COMPC() {
-		if ( DEType )	delete[]	DEType;
-		if ( pDE )		delete[]	pDE;
 	}
 };
 
@@ -283,13 +281,14 @@ public:
 // COMPC CompC -	複合曲線
 // CONA  ConA -		円錐曲線
 // NURBSC NurbsC -	NURBS曲線
-union CURVE{
+/*union CURVE{
 	void*	substitution;	// ここに代入
 	CIRA*	CirA;
 	COMPC*	CompC;
 	CONA*	ConA;
 	NURBSC*	NurbsC;
-};
+};*/
+typedef boost::variant<CIRA*, COMPC*, CONA*, NURBSC*> CURVE;
 
 // Structure: CONPS
 // 面上線
@@ -311,7 +310,7 @@ struct CONPS
 	int BType;
 	int CType;
 	NURBSS *pS;
-	CURVE pB;			// CURVE定義変更に伴う修正 by K.Magara
+	CURVE pB;
 	CURVE pC;
 	int pref;
 	int pD;
@@ -322,8 +321,6 @@ struct CONPS
 		BType = 0;
 		CType = 0;
 		pS = NULL;
-		pB.substitution = NULL;
-		pC.substitution = NULL;
 		pref = 0;
 		pD = 0;
 	}
