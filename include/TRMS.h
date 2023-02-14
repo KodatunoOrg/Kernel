@@ -22,61 +22,42 @@ typedef TRMS TRIMD_NURBSS;	// トリム面に対してNurbs曲面を想起させ
 // pD -         ディレクトリ部への逆ポインタ
 class TRMS
 {
-    NURBSS *pts;
-    int n1;
-    int n2;
-    CONPS *pTO;
-    CONPS **pTI;
-    int pD;
+public:
+    NURBSS* m_pts;  // ポインタを持たせるか実体か，もう少し全体を見てから決定
+    int m_n1;
+    int m_n2;
+    CONPS   m_pTO;
+    VCONPS  m_pTI;
+    int m_pD;
 
 public:
-	TRMS() {
-		pts = NULL;
-		n1 = 0;
-		n2 = 0;
-		pTO = NULL;
-		pTI = NULL;
-		pD = 0;
-	}
-	~TRMS() {
-		if ( pts )		delete[]	pts;
-		if ( pTO )		delete[]	pTO;
-		if ( pTI )		delete[]	pTI;
-	}
+	TRMS() {}
 
     // Function: GetOuterEdgeNum
     // トリム面を構成する外側エッジの数を取得する
-    int GetOuterEdgeNum();
+    int GetOuterEdgeNum() const;
 
     // Function: GetInnerTrmNum
     // トリム面を構成する内側トリムの数を取得する
-    int GetInnerTrmNum();
+    int GetInnerTrmNum() const;
 
     // Function: GetInnerEdgeNum
     // トリム面を構成する内側トリムを構成するエッジの数を取得する
-    int GetInnerEdgeNum(int);
+    int GetInnerEdgeNum(int) const;
 
     // Function: GetOuterCompC
     // トリム面を構成する外側トリム曲線(複合曲線)へのポインタを取得する
-    COMPC *GetOuterCompC();
+    COMPC* GetOuterCompC() const;
 
     // Function: GetInnerCompC
     // トリム面を構成する内側トリム曲線(複合曲線)へのポインタを取得する
-    COMPC *GetInnerCompC(int);
+    COMPC* GetInnerCompC(int) const;
 
     // Funciton: GetNurbsS
     // トリム面を構成するNURBS曲面へのポインタを得る
-    NURBSS *GetNurbsS();
+    NURBSS* GetNurbsS() const;
 
     // ---
-
-	// Function: GenTrimdNurbsS
-	// トリム面を生成する
-	TRIMD_NURBSS* GenTrimdNurbsS(const TRIMD_NURBSS&) const;
-
-	// Function: DelTrimdNurbsS
-	// トリム面を削除(メモリー解放)する
-	int DelTrimdNurbsS(void);
 
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する

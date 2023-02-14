@@ -329,6 +329,7 @@ struct CONPS
 		pD = 0;
 	}
 };
+typedef std::vector<CONPS>	VCONPS;
 
 // Structure: OBJECT
 // ピックされたオブジェクトを示す構造体

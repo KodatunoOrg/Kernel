@@ -6,9 +6,9 @@
 //
 // Return:
 // トリム面を構成する外側エッジの数
-int TRMS::GetOuterEdgeNum()
+int TRMS::GetOuterEdgeNum() const
 {
-    COMPC *CompC = pTO->pB.CompC;
+    COMPC* CompC = m_pTO.pB.CompC;
     return CompC->N;
 }
 
@@ -17,9 +17,9 @@ int TRMS::GetOuterEdgeNum()
 //
 // Return:
 // トリム面を構成する内側トリムの数
-int TRMS::GetInnerTrmNum()
+int TRMS::GetInnerTrmNum() const
 {
-    return n2;
+    return m_n2;
 }
 
 // Function: GetInnerEdgeNum
@@ -30,9 +30,9 @@ int TRMS::GetInnerTrmNum()
 //
 // Return:
 // トリム面を構成する内側エッジの数
-int TRMS::GetInnerEdgeNum(int N)
+int TRMS::GetInnerEdgeNum(int N) const
 {
-    COMPC *CompC = pTI[N]->pB.CompC;
+    COMPC* CompC = m_pTI[N].pB.CompC;
     return CompC->N;
 }
 
@@ -41,9 +41,9 @@ int TRMS::GetInnerEdgeNum(int N)
 //
 // Return:
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
-COMPC *TRMS::GetOuterCompC()
+COMPC* TRMS::GetOuterCompC() const
 {
-    return pTO->pB.CompC;
+    return m_pTO.pB.CompC;
 }
 
 // Function: GetInnerCompC
@@ -54,9 +54,9 @@ COMPC *TRMS::GetOuterCompC()
 //
 // Return:
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
-COMPC *TRMS::GetInnerCompC(int N)
+COMPC* TRMS::GetInnerCompC(int N) const
 {
-    return pTI[N]->pB.CompC;
+    return m_pTI[N].pB.CompC;
 }
 
 // Funciton: GetNurbsS
@@ -64,130 +64,12 @@ COMPC *TRMS::GetInnerCompC(int N)
 //
 // Return:
 // トリム面を構成するNURBS曲面へのポインタ
-NURBSS *TRMS::GetNurbsS()
+NURBSS* TRMS::GetNurbsS() const
 {
-    return pts;
+    return m_pts;
 }
 
 /////////////////////////////////////////////////
-
-// Function: GenTrimdNurbsS
-// トリム面を有するNURBS曲面をコピーする
-//
-// Parameters:
-// *TNurbs - 生成されるトリム面へのポインタ
-// tnurb - コピー元のトリム面
-//
-// Return:
-// KOD_TRUE
-TRIMD_NURBSS* TRMS::GenTrimdNurbsS(TRIMD_NURBSS  tnurb) const
-{
-    TRIMD_NURBSS* TNurbs = NULL;
-	NURBSS *nurbsS;
-	NURBSC *nurbsC;
-	CONPS *conps_o,*conps_i;
-	COMPC *compc_o,*compc_i;
-	int curve_num=0;
-
-	nurbsS = new NURBSS;		// NURBS曲面のメモリー確保
-	conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
-	compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
-
-	// トリム面を構成するNURBS曲線の総数をカウント
-	for(int i=0;i<tnurb.n2;i++){
-		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
-			curve_num++;
-		}
-	}
-	curve_num += tnurb.pTO->pB.CompC->N;
-
-	nurbsC = new NURBSC[curve_num];	// トリム面を構成するNURBS曲線の数だけNURBS曲線のメモリーを確保
-
-	GenNurbsS(nurbsS,*tnurb.pts);							// 新たなNURBS曲面を1つ得る
-	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
-
-	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
-
-	conps_i = new CONPS[tnurb.n2];		// 内側を構成する面上線のメモリー確保
-	compc_i = new COMPC[tnurb.n2];		// 内側を構成する複合曲線のメモリー確保
-
-	// NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
-	// 外周トリム
-	TNurbs->pTO = conps_o;
-	New_CompC(compc_o,tnurb.pTO->pB.CompC->N);
-	for(int i=0;i<tnurb.pTO->pB.CompC->N;i++){
-		GenNurbsC(&nurbsC[i],tnurb.pTO->pB.CompC->pDE[i].NurbsC);
-		compc_o->pDE[i].NurbsC = &nurbsC[i];
-		compc_o->DEType[i] = tnurb.pTO->pB.CompC->DEType[i];
-	}
-	TNurbs->pTO->pB.substitution = compc_o;
-	TNurbs->pTO->BType = tnurb.pTO->BType;
-	TNurbs->pTO->pB.CompC->DegeFlag = tnurb.pTO->pB.CompC->DegeFlag;
-	TNurbs->pTO->pB.CompC->DegeNurbs = tnurb.pTO->pB.CompC->DegeNurbs;
-
-	// 内周トリム
-	curve_num = 0;
-	for(int i=0;i<tnurb.n2;i++){
-		TNurbs->pTI[i] = &(conps_i[i]);
-		New_CompC(&compc_i[i],tnurb.pTI[i]->pB.CompC->N);
-		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
-			GenNurbsC(&nurbsC[tnurb.pTO->pB.CompC->N+curve_num],tnurb.pTI[i]->pB.CompC->pDE[j].NurbsC);
-			compc_i[i].pDE[j].NurbsC = &nurbsC[tnurb.pTO->pB.CompC->N+curve_num];
-			compc_i[i].DEType[j] = tnurb.pTI[i]->pB.CompC->DEType[j];
-			curve_num++;
-		}
-		TNurbs->pTI[i]->pB.CompC = &(compc_i[i]);
-		TNurbs->pTI[i]->BType = tnurb.pTI[i]->BType;
-		TNurbs->pTI[i]->pB.CompC->DegeFlag = tnurb.pTI[i]->pB.CompC->DegeFlag;
-		TNurbs->pTI[i]->pB.CompC->DegeNurbs = tnurb.pTI[i]->pB.CompC->DegeNurbs;
-	}
-
-	TNurbs->n1 = tnurb.n1;
-	TNurbs->n2 = tnurb.n2;
-
-	return KOD_TRUE;
-}
-
-// Function: DelTrimdNurbsS
-// GenTrimdNurbsS()によって生成されたトリム面を削除する
-//
-// Parameters:
-// *TNurbs - 削除するトリム面へのポインタ
-//
-// Return:
-// KOD_TRUE
-int TRMS::DelTrimdNurbsS(void)
-{
-	NURBS_Func hbody;
-	int curve_num = 0;
-
-	// トリム面を構成する全てのNURBS曲線の本数を調べる
-	for(int i=0;i<TNurbs->n2;i++){
-		for(int j=0;j<TNurbs->pTI[i]->pB.CompC->N;j++){
-			curve_num++;
-		}
-	}
-	curve_num += TNurbs->pTO->pB.CompC->N;
-
-	hbody.Free_NurbsC_1DArray(TNurbs->pTO->pB.CompC->pDE[0].NurbsC,curve_num);		// トリム面を構成する全てのNURBS曲線パラメータのメモリー解放
-
-	hbody.Free_NurbsS(TNurbs->pts);						// トリム面を構成するNURBS曲面パラメータのメモリー解放
-	free(TNurbs->pts);								// トリム面を構成するNURBS曲面のメモリー解放
-
-	hbody.Free_NurbsC(&TNurbs->pTO->pB.CompC->DegeNurbs);	// トリム面外周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
-	hbody.Free_CompC(TNurbs->pTO->pB.CompC);			// トリム面外周を構成する複合曲線を構成するNURBS曲線のメモリー解放
-	free(TNurbs->pTO->pB.CompC);							// トリム面外周を構成する複合曲線のメモリー解放
-	free(TNurbs->pTO);								// トリム面外周を構成する面上線のメモリー解放
-
-	for(int i=0;i<TNurbs->n2;i++){
-		hbody.Free_NurbsC(&TNurbs->pTI[i]->pB.CompC->DegeNurbs);	// トリム面内周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
-		hbody.Free_CompC(TNurbs->pTI[i]->pB.CompC);	// トリム面内周を構成する複合曲線を構成するNURBS曲線のメモリー解放
-		free(TNurbs->pTI[i]->pB.CompC);					// トリム面内周を構成する複合曲線のメモリー解放
-	}
-	hbody.Free_TrmS(TNurbs);								// トリム面パラメータのメモリー解放
-
-	return KOD_TRUE;
-}
 
 // Function: DetermPtOnTRMSurf
 // 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
