@@ -117,14 +117,6 @@ public:
 private:
 
 
-	// Function: DetermPtOnTRMSurf_sub
-	// (private)トリム境界線が複合曲線の場合のトリミング領域内外判定
-	int DetermPtOnTRMSurf_sub(CONPS *,double,double);				
-
-	// Function: ApproxTrimBorder
-	// (private)トリム境界線を点群で近似する
-	VCoord ApproxTrimBorder(COMPC *);
-
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
 	ublasVector GetCurveKnotParam1(const VCoord&);

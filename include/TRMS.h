@@ -31,7 +31,10 @@ public:
     int m_pD;
 
 public:
-	TRMS() {}
+	TRMS() {
+        m_n1 = m_n2 = 0;
+        m_pD = 0;
+    }
 
     // Function: GetOuterEdgeNum
     // トリム面を構成する外側エッジの数を取得する
@@ -81,6 +84,16 @@ public:
 
     // NURBS曲面を平面でトリムする(準備中)
 	int TrimNurbsSPlane(const TRMS*, const Coord&, const Coord&);
+
+private:
+
+	// Function: DetermPtOnTRMSurf_sub
+	// (private)トリム境界線が複合曲線の場合のトリミング領域内外判定
+	int DetermPtOnTRMSurf_sub(const CONPS *,double,double) const;
+
+	// Function: ApproxTrimBorder
+	// (private)トリム境界線を点群で近似する
+	VCoord ApproxTrimBorder(const COMPC *) const;
 };
 
 #endif

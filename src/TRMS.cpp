@@ -80,13 +80,13 @@ NURBSS* TRMS::GetNurbsS() const
 //
 // Return:
 // KOD_TRUE:面上  KOD_ONEDGE:エッジ上  KOD_FALSE:面外   KOD_ERR:エラー
-int TRMS::DetermPtOnTRMSurf(TRMS *Trim,double u,double v) const
+int TRMS::DetermPtOnTRMSurf(double u,double v) const
 {
 	int flag;
 
 	// 外周トリム
-	if(Trim->n1){
-		flag = DetermPtOnTRMSurf_sub(Trim->pTO,u,v);
+	if(m_n1){
+		flag = DetermPtOnTRMSurf_sub(&m_pTO,u,v);
 		if(flag == KOD_ERR)
 			return KOD_ERR;
 		else if(flag == KOD_FALSE)		// 外
@@ -96,15 +96,15 @@ int TRMS::DetermPtOnTRMSurf(TRMS *Trim,double u,double v) const
 	}
 
 	// 内周トリム
-	if(Trim->n2){
-		for(int i=0;i<Trim->n2;i++){		// 内周のトリミング領域全てに対して
-			flag = DetermPtOnTRMSurf_sub(Trim->pTI[i],u,v);
+//	if(m_n2){
+		for(int i=0;i<m_n2;i++){		// 内周のトリミング領域全てに対して
+			flag = DetermPtOnTRMSurf_sub(&m_pTI[i],u,v);
 			if(flag == KOD_ERR)
 				return KOD_ERR;
 			else if(flag == KOD_TRUE)	// 内
 				return KOD_FALSE;
 		}
-	}
+//	}
 
 	return KOD_TRUE;
 }
@@ -363,4 +363,73 @@ int TRMS::TrimNurbsSPlane(const TRMS* Trm, const Coord& pt, const Coord& nvec)
 	fclose(fp);
 
 	return KOD_TRUE;
+}
+
+/////////////////////////////////////////////////
+// --- Private関数
+
+// Function: DetermPtOnTRMSurf_sub
+// (private)DetermPtOnTRMSurf()のサブ関数．面上線のタイプが複合曲線の場合のトリミング領域内外判定
+//
+// Parameter:
+// *Conps - 複合曲線
+// u,v - トリム曲面上の1点(u, v)
+// 
+// Return:
+// KOD_TRUE:面上  KOD_ONEDGE:エッジ上  KOD_FALSE:面外   KOD_ERR:エラー
+int TRMS::DetermPtOnTRMSurf_sub(const CONPS* Conps, double u, double v) const
+{
+	// 面上線が複合曲線になっていること
+	if(Conps->BType != COMPOSITE_CURVE){
+//		GuiIFB.SetMessage("NURBS_Func ERROR:TRIM未実装!");
+		return KOD_ERR;
+	}
+
+	COMPC *CompC= Conps->pB.CompC;		// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
+	VCoord P = ApproxTrimBorder(CompC);	// トリム境界線上に生成した点(多角形近似用の点)を格納
+	
+	int trm_flag = KOD_FALSE;							// トリミング領域内外判定用フラグ
+	Coord TargetPoint(u,v,0);							// ターゲットとなる面上の点(u,v)をCoordに格納
+	trm_flag = TargetPoint.IsPointInPolygon(P);			// 内外判定
+
+	return trm_flag;
+}
+
+// Function: ApproxTrimBorder
+// (private)トリム境界線を点群で近似する
+//
+// Parameters:
+// *CompC - トリム境界線を構成する複合曲線へのポインタ
+// *P - 近似された点群を格納するためのCoord配列
+//
+// Return:
+// 近似した点群の数（トリム境界線がNURBS曲線以外で構成されていた場合は，KOD_ERR）
+VCoord TRMS::ApproxTrimBorder(const COMPC* CompC) const
+{
+	VCoord P;
+	double ent_dev=0;				// 分割点パラメータ
+	NURBSC *NurbsC;					// トリム境界線(NURBS曲線)のポインタを作業用に格納
+	int trm_flag = KOD_FALSE;		// トリミング領域内外判定用フラグ
+	int divnum = TRM_BORDERDIVNUM;	// 各境界線の分割数
+
+	// トリム境界線上に点を生成（トリム境界線を多角形近似）
+	for(int i=0;i<CompC->N;i++){
+		// トリム境界線がNURBS曲線で構成されている
+		if(CompC->DEType[i] == NURBS_CURVE){
+			NurbsC = CompC->pDE[i].NurbsC;	// 注目中のNurbs曲線のポインタを取得
+			if(NurbsC->m_cp.size() == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
+			else divnum = TRM_BORDERDIVNUM;
+			for(int j=0;j<divnum-1;j++){
+				ent_dev = NurbsC->m_T[NurbsC->m_M-1]+(NurbsC->m_T[NurbsC->m_cp.size()]-NurbsC->m_T[NurbsC->m_M-1])*(double)j/((double)divnum-1);	// 分割点tを求める
+				P.push_back(NurbsC->CalcNurbsCCoord(ent_dev));	// NURBS曲面のパラメータ空間内のNURBS曲線の分割点tの座標値(u,v)を得る
+			}
+		}
+		// それ以外
+		else{
+//			GuiIFB.SetMessage("NURBS_Func ERROR:トリム境界線がNURBS曲線以外で構成されています.未実装!");
+			return VCoord();
+		}
+	}
+
+	return P;
 }
