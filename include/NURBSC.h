@@ -53,7 +53,7 @@ public:
 		m_V = V;
 		m_M = M;
 		m_prop = prop;
-		m_BlankStat = DISPLAY;
+		m_BlankStat = 0;	// DISPLAY
 		m_EntUseFlag = euflag;
 		m_Dstat.Color[0] = m_Dstat.Color[1] = m_Dstat.Color[2] = 1.0;
 		m_Dstat.Color[3] = 0.5;

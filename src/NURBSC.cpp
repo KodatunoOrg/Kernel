@@ -1390,9 +1390,9 @@ NURBSC* NURBSC::ConnectNurbsC(const NURBSC* C2) const
 	}
 
 	NURBSC* C_ = new NURBSC;
-
-	SetKnotVecC_ConnectC(C2, C_);		// C_のノット定義域を指定
-	SetCPC_ConnectC(C2, C_);			// C_のコントロールポイントとウェイトを指定
+	// !!! 上記で調整したオブジェクトをベースに構築 !!!
+	C1_.SetKnotVecC_ConnectC(&C2_, C_);		// C_のノット定義域を指定
+	C1_.SetCPC_ConnectC(&C2_, C_);			// C_のコントロールポイントとウェイトを指定
 
 	//for(int i=0;i<C_->N;i++)
 	//	fprintf(stderr,"%d,%lf\n",i+1,C_->T[i]);
