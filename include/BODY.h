@@ -232,7 +232,7 @@ struct TMAT
 
 // Structure: COMPELEM
 // 複合曲線を構成できる曲線群を共用体で宣言
-//		実体ではなくポインタ変数の共用体に変更 by K.Magara
+//
 // Variables:
 // CONA ConA -		円錐曲線
 // LINE_ Line -		直線
@@ -244,7 +244,7 @@ struct TMAT
 	LINE_*	Line;
 	NURBSC*	NurbsC;
 };*/
-typedef boost::variant<CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;
+typedef boost::variant<CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタか実体か？
 
 // Structure: COMPC
 // 複合曲線
@@ -275,7 +275,7 @@ public:
 
 // Structure: CURVE
 // 面上線を構成できる曲線群を共用体で宣言
-//		実体ではなくポインタ変数の共用体に変更 by K.Magara
+//
 // Variables:
 // CIRA  CirA -		円・円弧
 // COMPC CompC -	複合曲線
@@ -288,7 +288,7 @@ public:
 	CONA*	ConA;
 	NURBSC*	NurbsC;
 };*/
-typedef boost::variant<CIRA*, COMPC*, CONA*, NURBSC*> CURVE;
+typedef boost::variant<CIRA*, COMPC*, CONA*, NURBSC*> CURVE;	// ポインタか実体か？
 
 // Structure: CONPS
 // 面上線
@@ -353,54 +353,6 @@ public:
 	// BODYクラスのコンストラクタ．各種初期化
 	BODY();
 
-	// Function: NewBodyElem
-	// BODYを構成する全要素のメモリー確保
-	void NewBodyElem();				
-
-	// Function: DelBodyElem
-	// BODYを構成する全要素のメモリー解放
-	void DelBodyElem();				
-
-	// Function: DelBodyElem
-	// 指定したTypeNum[]分のメモリーを解放
-	void DelBodyElem(int []);		
-
-	// Function: NewCirA
-	// CIRAを指定した数だけメモリー確保し，初期化する
-	CIRA *NewCirA(int);	
-
-	// Function: NewCompC
-	// COMPCを指定した数だけメモリー確保し，初期化する
-	COMPC *NewCompC(int);
-
-	// Function: NewConA
-	// CONAを指定した数だけメモリー確保し，初期化する
-	CONA *NewConA(int);	
-
-	// Function: NewLine
-	// LINE_を指定した数だけメモリー確保し，初期化する
-	LINE_ *NewLine(int);
-
-	// Function: NewTMat
-	// TMATを指定した数だけメモリー確保し，初期化する
-	TMAT *NewTMat(int);		
-
-	// Function: NewNurbsC
-	// NURBSCを指定した数だけメモリー確保し，初期化する
-	NURBSC *NewNurbsC(int);			
-
-	// Function: NewNurbsS
-	// NURBSSを指定した数だけメモリー確保し，初期化する
-	NURBSS *NewNurbsS(int);			
-	
-	// Function: NewConpS
-	// CONPSを指定した数だけメモリー確保し，初期化する
-	CONPS *NewConpS(int);			
-
-	// Function: NewTrmS
-	// TRMSを指定した数だけメモリー確保し，初期化する
-	TRMS *NewTrmS(int);				
-
     // Funciton: CopyBody
     // Bodyのコピー
     void CopyBody(BODY *);
@@ -423,7 +375,7 @@ public:
 
 	// Function: DeleteBody
 	// 自分自身を消去する
-	void DeleteBody(BODYList *);	
+//	void DeleteBody(BODYList *);	-> 実体なし？
 
 	// Function: RegistNurbsCtoBody
 	// 1つのNURBS曲線を新たなBODYとして登録する
@@ -486,43 +438,43 @@ private:
 public:
 	// Variable: *CirA
 	// 円・円弧
-	CIRA  *CirA;		
+	std::vector<CIRA>	CirA;
 
 	// Variable: *CompC
 	// 複合曲線
-	COMPC *CompC;
+	std::vector<COMPC>	CompC;
 
 	// Variable: *ConA
 	// 円錐曲線
-	CONA  *ConA;
+	std::vector<CONA>	ConA;
 
 	// Variable: *Line
 	// 線分
-	LINE_ *Line;	
+	std::vector<LINE_>	Line;
 
 	// Variable: *TMat
 	// 変換行列
-	TMAT  *TMat;	
+	std::vector<TMAT>	TMat;
 
 	// Variable: *NurbsC
 	// NURBS曲線
-	NURBSC *NurbsC;		
+	std::vector<NURBSC>	NurbsC;
 
 	// Variable: *NurbsS
 	// NURBS曲面
-	NURBSS *NurbsS;		
+	std::vector<NURBSS>	NurbsS;
 
 	// Variable: *ConpS
 	// 面上線
-	CONPS *ConpS;		
+	std::vector<CONPS>	ConpS;
 
 	// Variable: *TrmS
 	// トリム面
-	TRMS  *TrmS;	
+	std::vector<TRMS>	TrmS;
 
 	// Variable: TypeNum[ALL_ENTITY_TYPE_NUM]
 	// BODYを構成する各エンティティの数を格納した配列
-	int  TypeNum[ALL_ENTITY_TYPE_NUM];	
+//	int  TypeNum[ALL_ENTITY_TYPE_NUM];	
 
 	// Variable: *Mesh
 	// Half-Edge構造メッシュ(リスト構造、リストの先頭アドレスを示す)
