@@ -8,101 +8,18 @@ BODY::BODY()
 	MaxCoord = 1;
 }
 
-
-// Function: CopyBody
-// 他のBODYを自身にコピーする
-//
-// Parameters:
-// *body - コピー元のBODYポインタ
-void BODY::CopyBody(BODY *body)
-{
-    NURBS_Func NFunc;
-
-    for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++)
-        this->TypeNum[i] = body->TypeNum[i];
-
-    this->NewNurbsC(TypeNum[_NURBSC]);
-    this->NewNurbsS(TypeNum[_NURBSS]);
-    this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
-
-    for(int n=0;n<TypeNum[_NURBSC];n++)
-        NFunc.GenNurbsC(&this->NurbsC[n],&body->NurbsC[n]);
-
-    for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
-
-        NURBSS *nurbsS;
-        NURBSC *nurbsC;
-        CONPS *conps_o,*conps_i;
-        COMPC *compc_o,*compc_i;
-        int curve_num=0;
-
-        nurbsS = &this->NurbsS[n];
-        conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
-        compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
-
-        NFunc.GenNurbsS(nurbsS,*body->TrmS[n].pts);		// 新たなNURBS曲面を1つ得る
-        this->TrmS[n].pts = nurbsS;						// NURBS曲面をトリム面に関連付ける
-        nurbsS->TrmdSurfFlag = KOD_TRUE;
-
-        NFunc.New_TrmS(&this->TrmS[n],body->TrmS[n].n2);				// トリム面のメモリー確保
-
-        conps_i = new CONPS[body->TrmS[n].n2];		// 内側を構成する面上線のメモリー確保
-        compc_i = new COMPC[body->TrmS[n].n2];		// 内側を構成する複合曲線のメモリー確保
-
-        // NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
-        // 外周トリム
-        this->TrmS[n].pTO = conps_o;
-        NFunc.New_CompC(compc_o,body->TrmS[n].pTO->pB.CompC->N);
-        for(int i=0;i<body->TrmS[n].pTO->pB.CompC->N;i++){
-            nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
-            compc_o->pDE[i].NurbsC = nurbsC;
-            compc_o->DEType[i] = body->TrmS[n].pTO->pB.CompC->DEType[i];
-        }
-        this->TrmS[n].pTO->pB.substitution = compc_o;
-        this->TrmS[n].pTO->BType = body->TrmS[n].pTO->BType;
-        this->TrmS[n].pTO->pB.CompC->DegeFlag = body->TrmS[n].pTO->pB.CompC->DegeFlag;
-        this->TrmS[n].pTO->pB.CompC->DegeNurbs = body->TrmS[n].pTO->pB.CompC->DegeNurbs;
-
-        // 内周トリム
-        curve_num = 0;
-        for(int i=0;i<body->TrmS[n].n2;i++){
-            this->TrmS[n].pTI[i] = &(conps_i[i]);
-            NFunc.New_CompC(&compc_i[i],body->TrmS[n].pTI[i]->pB.CompC->N);
-            for(int j=0;j<body->TrmS[n].pTI[i]->pB.CompC->N;j++){
-                nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
-                compc_i[i].pDE[j].NurbsC = nurbsC;
-                compc_i[i].DEType[j] = body->TrmS[n].pTI[i]->pB.CompC->DEType[j];
-                curve_num++;
-            }
-            this->TrmS[n].pTI[i]->pB.substitution = &(compc_i[i]);
-            this->TrmS[n].pTI[i]->BType = body->TrmS[n].pTI[i]->BType;
-            this->TrmS[n].pTI[i]->pB.CompC->DegeFlag = body->TrmS[n].pTI[i]->pB.CompC->DegeFlag;
-            this->TrmS[n].pTI[i]->pB.CompC->DegeNurbs = body->TrmS[n].pTI[i]->pB.CompC->DegeNurbs;
-        }
-
-        this->TrmS[n].n1 = body->TrmS[n].n1;
-        this->TrmS[n].n2 = body->TrmS[n].n2;
-
-    }
-
-
-}
-
 // Function: RotBody
 // BODYを回転させる
 //
 // Parameters:
 //	Axis - 回転軸
 //	deg - 回転角度
-void BODY::RotBody(Coord Axis,double deg)
+void BODY::RotBody(const Coord& Axis, double deg)
 {
-	NURBS_Func NFunc;
-
-	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面の回転
-		NFunc.RotNurbsS(&NurbsS[i],Axis,deg);
-	for(int i=0;i<TypeNum[_NURBSC];i++){		// NURBS曲線の回転
-		if(NurbsC[i].EntUseFlag == GEOMTRYELEM)	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-			NFunc.RotNurbsC(&NurbsC[i],Axis,deg);
+	for ( auto& a : NurbsS ) a.RotNurbsS(Axis, deg);	// NURBS曲面の回転
+	for ( auto& a : NurbsC ) {
+		if ( a.m_EntUseFlag == GEOMTRYELEM )	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
+			a.RotNurbsC(Axis, deg);						// NURBS曲線の回転
 	}
 }
 
@@ -112,15 +29,12 @@ void BODY::RotBody(Coord Axis,double deg)
 //
 // Parameters:
 //	d - 移動量
-void BODY::ShiftBody(Coord d)
+void BODY::ShiftBody(const Coord& d)
 {
-	NURBS_Func NFunc;
-
-	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面のシフト
-		NFunc.ShiftNurbsS(&NurbsS[i],d);
-	for(int i=0;i<TypeNum[_NURBSC];i++){		// NURBS曲線のシフト
-		if(NurbsC[i].EntUseFlag == GEOMTRYELEM)	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-			NFunc.ShiftNurbsC(&NurbsC[i],d);
+	for ( auto& a : NurbsS ) a.ShiftNurbsS(d);			// NURBS曲面のシフト
+	for ( auto& a : NurbsC ) {
+		if ( a.m_EntUseFlag == GEOMTRYELEM )	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
+			a.ShiftNurbsC(d);							// NURBS曲線のシフト
 	}
 }
 
@@ -129,17 +43,15 @@ void BODY::ShiftBody(Coord d)
 //
 // Parameters:
 //		  r - X, Y, Z各方向それぞれの拡大(縮小)率(1を基準)
-void BODY::ExpandBody(Coord r)
+void BODY::ExpandBody(const Coord& r)
 {
-	NURBS_Func NFunc;
-
-	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面のシフト
-		NFunc.ChRatioNurbsS(&NurbsS[i],r);
-	for(int i=0;i<TypeNum[_NURBSC];i++){		// NURBS曲線のシフト
-		if(NurbsC[i].EntUseFlag == GEOMTRYELEM)	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-		NFunc.ChRatioNurbsC(&NurbsC[i],r);		// NURBS曲線の拡大
+	for ( auto& a : NurbsS ) a.ChRatioNurbsS(r);		// NURBS曲面の拡大
+	for ( auto& a : NurbsC ) {
+		if ( a.m_EntUseFlag == GEOMTRYELEM )	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
+			a.ChRatioNurbsC(r);							// NURBS曲線の拡大
 	}
 }
+
 // Function: RegistBody
 //	自分を新たなBODYとして登録する
 // 

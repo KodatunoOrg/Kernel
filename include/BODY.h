@@ -352,22 +352,18 @@ public:
 	// Constructor: BODY
 	// BODYクラスのコンストラクタ．各種初期化
 	BODY();
-
-    // Funciton: CopyBody
-    // Bodyのコピー
-    void CopyBody(BODY *);
 	
 	// Function: RotBody
 	// BODYの回転
-	void RotBody(Coord,double);	
+	void RotBody(const Coord&, double);
 
 	// Function: ShiftBody
 	// BODYのシフト
-	void ShiftBody(Coord);		
+	void ShiftBody(const Coord&);
 
 	// Function: ExpandBody
 	// BODYの拡大縮小
-	void ExpandBody(Coord);		
+	void ExpandBody(const Coord&);
 
 	// Function: RegistBody
 	// 自分を新たなBODYとして登録する
