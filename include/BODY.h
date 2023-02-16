@@ -407,7 +407,7 @@ public:
 
 	// Function: GetNurbsCFromCirA
 	// 円・円弧エンティティをNURBS曲線エンティティへと変換する
-	int GetNurbsCFromCirA(int,int);							
+	int GetNurbsCFromCirA(int);
 
 private:
 
@@ -417,56 +417,56 @@ private:
 
 	// Function: CirAToNurbsC_seg1
 	// (private)円・円弧エンティティが1セグメントの場合
-	int CirAToNurbsC_seg1(int,int,Coord [],double);
+	int CirAToNurbsC_seg1(NURBSC*, int, const Coord[], double);
 
 	// Function: CirAToNurbsC_seg2
 	// (private)円・円弧エンティティが2セグメントの場合
-	int CirAToNurbsC_seg2(int,int,Coord [],double);	
+	int CirAToNurbsC_seg2(NURBSC*, int, const Coord[], double);
 
 	// Function: CirAToNurbsC_seg3
 	// (private)円・円弧エンティティが3セグメントの場合
-	int CirAToNurbsC_seg3(int,int,Coord [],double);	
+	int CirAToNurbsC_seg3(NURBSC*, int, const Coord[], double);
 
 	// Function: CirAToNurbsC_seg4
 	// (private)円・円弧エンティティが4セグメントの場合
-	int CirAToNurbsC_seg4(int,int,Coord [],double);			
+	int CirAToNurbsC_seg4(NURBSC*, int, const Coord[], double);
 
 public:
 	// Variable: *CirA
 	// 円・円弧
-	std::vector<CIRA>	CirA;
+	std::vector<CIRA>	m_CirA;
 
 	// Variable: *CompC
 	// 複合曲線
-	std::vector<COMPC>	CompC;
+	std::vector<COMPC>	m_CompC;
 
 	// Variable: *ConA
 	// 円錐曲線
-	std::vector<CONA>	ConA;
+	std::vector<CONA>	m_ConA;
 
 	// Variable: *Line
 	// 線分
-	std::vector<LINE_>	Line;
+	std::vector<LINE_>	m_Line;
 
 	// Variable: *TMat
 	// 変換行列
-	std::vector<TMAT>	TMat;
+	std::vector<TMAT>	m_TMat;
 
 	// Variable: *NurbsC
 	// NURBS曲線
-	std::vector<NURBSC>	NurbsC;
+	std::vector<NURBSC>	m_NurbsC;
 
 	// Variable: *NurbsS
 	// NURBS曲面
-	std::vector<NURBSS>	NurbsS;
+	std::vector<NURBSS>	m_NurbsS;
 
 	// Variable: *ConpS
 	// 面上線
-	std::vector<CONPS>	ConpS;
+	std::vector<CONPS>	m_ConpS;
 
 	// Variable: *TrmS
 	// トリム面
-	std::vector<TRMS>	TrmS;
+	std::vector<TRMS>	m_TrmS;
 
 	// Variable: TypeNum[ALL_ENTITY_TYPE_NUM]
 	// BODYを構成する各エンティティの数を格納した配列
@@ -474,19 +474,19 @@ public:
 
 	// Variable: *Mesh
 	// Half-Edge構造メッシュ(リスト構造、リストの先頭アドレスを示す)
-	MESH  *Mesh;
+	MESH* m_Mesh;
 
 	// Variable: MaxCoord
 	// 立体の寸法の最大値(この値で初期表示倍率を決定)
-	double MaxCoord;		
+	double m_MaxCoord;
 
 	// Variable: Name
 	// BODY名
-	std::string	Name;
+	std::string	m_Name;
 
 	// Variable: *Mom
 	// 自分が属する親(BodyList)のアドレス
-	Data *Mom;				
+	Data* m_Mom;
 };
 
 #endif

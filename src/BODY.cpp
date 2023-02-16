@@ -263,7 +263,7 @@ catch(std::bad_alloc&) {
 // Parameters:
 // NurbsCount - NURBS曲線への変換後のNURBSCのインデックス番号
 // CirCount - 変換したいCIRAのインデックス番号
-int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)	
+int BODY::GetNurbsCFromCirA(int CirCount)
 {
 	int	 flag=KOD_TRUE;
 	double	angle_deg = 0.0,
@@ -272,166 +272,133 @@ int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)
 	Coord	vec[2];
 	
 	// 円/円弧の中心点O-始点Psベクトル成分、中心点-終点Peベクトル成分をそれぞれ求める
-	vec[0] = CirA[CirCount].cp[1] - CirA[CirCount].cp[0];
-	vec[1] = CirA[CirCount].cp[2] - CirA[CirCount].cp[0];	
+	vec[0] = m_CirA[CirCount].cp[1] - m_CirA[CirCount].cp[0];
+	vec[1] = m_CirA[CirCount].cp[2] - m_CirA[CirCount].cp[0];	
 
-	radius = CirA[CirCount].R;	// 円/円弧の中心点と始点の距離(半径)
+	radius = m_CirA[CirCount].R;	// 円/円弧の中心点と始点の距離(半径)
 	angle_rad = vec[0].CalcVecAngle2D(vec[1]);		// 円/円弧を成す中心角の大きさ(degree)を求める
 	angle_deg = RadToDeg(angle_rad);				// 円/円弧を成す中心角の大きさ(radian)を求める
 
+	NURBSC NurbsC;
+
 	// 中心角(degree)の大きさごとにセグメント数を変更する
 	if( angle_deg > 0 && angle_deg <= 90 ){								// 0°<θ<=90°
-		flag = CirAToNurbsC_seg1(NurbsCount ,CirCount ,vec, angle_rad);		// 1セグメント
+		flag = CirAToNurbsC_seg1(&NurbsC, CirCount ,vec, angle_rad);	// 1セグメント
 	}
 	else if( angle_deg > 90 && angle_deg <= 270 ){						// 90°<θ<=270°
-		flag = CirAToNurbsC_seg2(NurbsCount ,CirCount ,vec, angle_rad);		// 2セグメント
+		flag = CirAToNurbsC_seg2(&NurbsC ,CirCount ,vec, angle_rad);	// 2セグメント
 	}
 	else if( angle_deg > 270 && angle_deg < 360 ){						// 270°<θ<360°
-		flag = CirAToNurbsC_seg3(NurbsCount ,CirCount ,vec, angle_rad);		// 3セグメント
+		flag = CirAToNurbsC_seg3(&NurbsC ,CirCount ,vec, angle_rad);	// 3セグメント
 	}
 	else if( angle_deg == 0 ){											// θ=0°(360°)
-		flag = CirAToNurbsC_seg4(NurbsCount ,CirCount ,vec, radius);			//　4セグメント
+		flag = CirAToNurbsC_seg4(&NurbsC ,CirCount ,vec, radius);		//　4セグメント
 	}
 	else{
 //		GuiIFB.SetMessage("Center angle of a circle or circular arc is not calculated normally");
 		return KOD_ERR;
 	}
 
-    NurbsC[NurbsCount].BlankStat = CirA[CirCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
-	NurbsC[NurbsCount].EntUseFlag = CirA[CirCount].EntUseFlag;	// ディレクトリ部の情報"Entity Use Flag"を得る(NURBSC)
-	NurbsC[NurbsCount].OriginEnt = CIRCLE_ARC;					// 元は円・円弧要素であったことを記憶
-	NurbsC[NurbsCount].pOriginEnt = &CirA[CirCount];		// その円・円弧要素へのポインタ
+    NurbsC.m_BlankStat = m_CirA[CirCount].BlankStat;		// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
+	NurbsC.m_EntUseFlag = m_CirA[CirCount].EntUseFlag;		// ディレクトリ部の情報"Entity Use Flag"を得る(NURBSC)
+	NurbsC.m_OriginEnt = CIRCLE_ARC;						// 元は円・円弧要素であったことを記憶
+	NurbsC.m_pOriginEnt = &m_CirA[CirCount];				// その円・円弧要素へのポインタ
+
+	m_NurbsC.push_back(NurbsC);
 
 	return KOD_TRUE;
 }
 
 // 1セグメントの円弧(中心角が0°<θ<=90°の時)
-int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angle_rad)
+int BODY::CirAToNurbsC_seg1(NURBSC* NurbsC, int CirCount, const Coord vec[], double angle_rad)
 {
-	int i=0;
-	int KOD_ERRflag=0;
+	int i=0,
+		K=3,			// 総和記号の上側添字（コントロールポイント-1）の値
+		M=3,			// 基底関数の階数
+		N=K+M;			// ノットベクトルの数
 	
 	Coord	vec_cp;
 	
-	NurbsC[NurbsCount].K = 3;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
+	NurbsC->m_M = M;
 
 	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
+	NurbsC->m_prop[0] = 0;
+	NurbsC->m_prop[1] = 0;
+	NurbsC->m_prop[2] = 1;
+	NurbsC->m_prop[3] = 0;
 
-try {	
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
-	
-	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 1.;
-	NurbsC[NurbsCount].T[4] = 1.;
-	NurbsC[NurbsCount].T[5] = 1.;
+	// ノットベクトルの値
+	NurbsC->m_T.resize(N);
+	NurbsC->m_T[0] = 0.;
+	NurbsC->m_T[1] = 0.;
+	NurbsC->m_T[2] = 0.;
+	NurbsC->m_T[3] = 1.;
+	NurbsC->m_T[4] = 1.;
+	NurbsC->m_T[5] = 1.;
 		
 	// Weightの値
-	for(i=0; i<3; i++){
+	NurbsC->m_W.resize(K);
+	for(i=0; i<K; i++){
 		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
+			NurbsC->m_W[i] = 1.;
 		}	
 		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = cos(angle_rad/2);
+			NurbsC->m_W[i] = cos(angle_rad/2);
 		}
 	}
 		
 	vec_cp = vec[0].Arc_CP(vec[1], cos(angle_rad));	//　円の中心点からコントロールポイントP1へのベクトルを求める
 	
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[1].y;		
-	NurbsC[NurbsCount].cp[1].x = vec_cp.x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[1].y = vec_cp.y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[2].x = CirA[CirCount].cp[2].x;
-	NurbsC[NurbsCount].cp[2].y = CirA[CirCount].cp[2].y;
-
-	for(i=0; i<3; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
-	}
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[1].x, m_CirA[CirCount].cp[1].y, m_CirA[CirCount].zt) );	// Z方向の大きさは一定
+	NurbsC->m_cp.push_back( Coord(vec_cp.x + m_CirA[CirCount].cp[0].x, vec_cp.y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[2].x, m_CirA[CirCount].cp[2].y, m_CirA[CirCount].zt) );
 		
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}		  
+	NurbsC->m_V[0] = 0.;		// パラメータの値
+	NurbsC->m_V[1] = 1.;
 
 	return KOD_TRUE;
 }
 
 // private
 // 2セグメントの円弧(中心角が90°<θ<=270°の時)
-int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angle_rad)
+int BODY::CirAToNurbsC_seg2(NURBSC* NurbsC, int CirCount, const Coord vec[], double angle_rad)
 {
-	int	i = 0,
-		KOD_ERRflag = 0;
+	int	i=0,
+		K=5,		// 総和記号の上側添字（コントロールポイント-1）の値
+		M=3,		// 基底関数の階数
+		N=K+M;		// ノットベクトルの数
 	double	angle_rad2 = 0.0;
 	
 	Coord vec_cp[3];
 	
-	NurbsC[NurbsCount].K = 5;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
-	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
+	NurbsC->m_M = M;
 
-try {	
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
-	
-	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 2./4.;
-	NurbsC[NurbsCount].T[4] = 2./4.;
-	NurbsC[NurbsCount].T[5] = 1.;
-	NurbsC[NurbsCount].T[6] = 1.;
-	NurbsC[NurbsCount].T[7] = 1.;
+	// ブーリアン型プロパティ4つ
+	NurbsC->m_prop[0] = 0;
+	NurbsC->m_prop[1] = 0;
+	NurbsC->m_prop[2] = 1;
+	NurbsC->m_prop[3] = 0;
+
+	// ノットベクトルの値
+	NurbsC->m_T.resize(N);
+	NurbsC->m_T[0] = 0.;
+	NurbsC->m_T[1] = 0.;
+	NurbsC->m_T[2] = 0.;
+	NurbsC->m_T[3] = 2./4.;
+	NurbsC->m_T[4] = 2./4.;
+	NurbsC->m_T[5] = 1.;
+	NurbsC->m_T[6] = 1.;
+	NurbsC->m_T[7] = 1.;
 		
 	// Weightの値
-	for(i=0; i<5; i++){
+	NurbsC->m_W.resize(K);
+	for(i=0; i<K; i++){
 		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
+			NurbsC->m_W[i] = 1.;
 		}	
 		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = cos(angle_rad/4);
+			NurbsC->m_W[i] = cos(angle_rad/4);
 		}
 	}
 		
@@ -442,91 +409,59 @@ try {
 	vec_cp[2] = vec_cp[1].Arc_CP(vec[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP3へのベクトルを求める
 	
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[1].y;		
- 	NurbsC[NurbsCount].cp[1].x = vec_cp[0].x + CirA[CirCount].cp[0].x;
- 	NurbsC[NurbsCount].cp[1].y = vec_cp[0].y + CirA[CirCount].cp[0].y;
- 	NurbsC[NurbsCount].cp[2].x = vec_cp[1].x + CirA[CirCount].cp[0].x;
- 	NurbsC[NurbsCount].cp[2].y = vec_cp[1].y + CirA[CirCount].cp[0].y;
- 	NurbsC[NurbsCount].cp[3].x = vec_cp[2].x + CirA[CirCount].cp[0].x;
- 	NurbsC[NurbsCount].cp[3].y = vec_cp[2].y + CirA[CirCount].cp[0].y;
- 	NurbsC[NurbsCount].cp[4].x = CirA[CirCount].cp[2].x;
- 	NurbsC[NurbsCount].cp[4].y = CirA[CirCount].cp[2].y;
-	for(i=0; i<5; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
-	}
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[1].x, m_CirA[CirCount].cp[1].y, m_CirA[CirCount].zt) );	// Z方向の大きさは一定
+ 	NurbsC->m_cp.push_back( Coord(vec_cp[0].x + m_CirA[CirCount].cp[0].x, vec_cp[0].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+ 	NurbsC->m_cp.push_back( Coord(vec_cp[1].x + m_CirA[CirCount].cp[0].x, vec_cp[1].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+ 	NurbsC->m_cp.push_back( Coord(vec_cp[2].x + m_CirA[CirCount].cp[0].x, vec_cp[2].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+ 	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[2].x, m_CirA[CirCount].cp[2].y, m_CirA[CirCount].zt) );
 	
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
+	NurbsC->m_V[0] = 0.;		// パラメータの値
+	NurbsC->m_V[1] = 1.;
 
 	return KOD_TRUE;
 }
 
 // private
 // 3セグメントの円弧(中心角が270°<θ<360°の時)
-int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angle_rad)
+int BODY::CirAToNurbsC_seg3(NURBSC* NurbsC, int CirCount, const Coord vec[], double angle_rad)
 {
 	int	i=0,
-		KOD_ERRflag=0;
+		K=7,		// 総和記号の上側添字（コントロールポイント-1）の値
+		M=3,		// 基底関数の階数
+		N=K+M;		// ノットベクトルの数
 	double	angle_rad3 = 0.0;
 	
 	Coord	vec_cp[5];
-	
-	NurbsC[NurbsCount].K = 7;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
+
+	NurbsC->m_M = M;
 	
 	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-try {
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+	NurbsC->m_prop[0] = 0;
+	NurbsC->m_prop[1] = 0;
+	NurbsC->m_prop[2] = 1;
+	NurbsC->m_prop[3] = 0;
 	
-	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 1./3.;
-	NurbsC[NurbsCount].T[4] = 1./3.;
-	NurbsC[NurbsCount].T[5] = 2./3.;
-	NurbsC[NurbsCount].T[6] = 2./3.;
-	NurbsC[NurbsCount].T[7] = 1.;
-	NurbsC[NurbsCount].T[8] = 1.;
-	NurbsC[NurbsCount].T[9] = 1.;
+	// ノットベクトルの値
+	NurbsC->m_T.resize(N);
+	NurbsC->m_T[0] = 0.;
+	NurbsC->m_T[1] = 0.;
+	NurbsC->m_T[2] = 0.;
+	NurbsC->m_T[3] = 1./3.;
+	NurbsC->m_T[4] = 1./3.;
+	NurbsC->m_T[5] = 2./3.;
+	NurbsC->m_T[6] = 2./3.;
+	NurbsC->m_T[7] = 1.;
+	NurbsC->m_T[8] = 1.;
+	NurbsC->m_T[9] = 1.;
 	
 	// Weightの値
-	for(i=0; i<7; i++){
+	NurbsC->m_W.resize(K);
+	for(i=0; i<K; i++){
 		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
+			NurbsC->m_W[i] = 1.;
 		}	
 		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = cos(angle_rad/6);
+			NurbsC->m_W[i] = cos(angle_rad/6);
 		}
 	}
 
@@ -539,141 +474,77 @@ try {
 	vec_cp[4] = vec_cp[3].Arc_CP(vec[1], cos(angle_rad3));		// 円の中心点からコントロールポイントP4へのベクトルを求める
 		
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[1].y;		
-	NurbsC[NurbsCount].cp[1].x = vec_cp[0].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[1].y = vec_cp[0].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[2].x = vec_cp[1].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[2].y = vec_cp[1].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[3].x = vec_cp[2].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[3].y = vec_cp[2].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[4].x = vec_cp[3].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[4].y = vec_cp[3].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[5].x = vec_cp[4].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[5].y = vec_cp[4].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[6].x = CirA[CirCount].cp[2].x;
-	NurbsC[NurbsCount].cp[6].y = CirA[CirCount].cp[2].y;
-
-	for(i=0; i<7; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
-	}
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[1].x, m_CirA[CirCount].cp[1].y, m_CirA[CirCount].zt) );	// Z方向の大きさは一定
+	NurbsC->m_cp.push_back( Coord(vec_cp[0].x + m_CirA[CirCount].cp[0].x, vec_cp[0].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(vec_cp[1].x + m_CirA[CirCount].cp[0].x, vec_cp[1].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(vec_cp[2].x + m_CirA[CirCount].cp[0].x, vec_cp[2].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(vec_cp[3].x + m_CirA[CirCount].cp[0].x, vec_cp[3].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(vec_cp[4].x + m_CirA[CirCount].cp[0].x, vec_cp[4].y + m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[2].x, m_CirA[CirCount].cp[2].y, m_CirA[CirCount].zt) );
 		
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
+	NurbsC->m_V[0] = 0.;		// パラメータの値
+	NurbsC->m_V[1] = 1.;
 
 	return KOD_TRUE;
 }
 
 // private
 // 4セグメントの円弧(円)
-int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radius)
+int BODY::CirAToNurbsC_seg4(NURBSC* NurbsC, int CirCount, const Coord vec[], double radius)
 {
-	int i=0;
-	int KOD_ERRflag=0;
+	int i=0,
+		K=9,		// 総和記号の上側添字（コントロールポイント-1）の値
+		M=3,		// 基底関数の階数
+		N=K+M;		// ノットベクトルの数
 
-	NurbsC[NurbsCount].K = 9;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
+	NurbsC->m_M = M;		// 基底関数の階数
 	
 	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
+	NurbsC->m_prop[0] = 0;
+	NurbsC->m_prop[1] = 0;
+	NurbsC->m_prop[2] = 1;
+	NurbsC->m_prop[3] = 0;
 
-try {
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
-	
-	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 1./4.;
-	NurbsC[NurbsCount].T[4] = 1./4.;
-	NurbsC[NurbsCount].T[5] = 2./4.;
-	NurbsC[NurbsCount].T[6] = 2./4.;
-	NurbsC[NurbsCount].T[7] = 3./4.;
-	NurbsC[NurbsCount].T[8] = 3./4.;
-	NurbsC[NurbsCount].T[9] = 1.;
-	NurbsC[NurbsCount].T[10] = 1.;
-	NurbsC[NurbsCount].T[11] = 1.;
+	// ノットベクトルの値
+	NurbsC->m_T.resize(N);
+	NurbsC->m_T[0] = 0.;
+	NurbsC->m_T[1] = 0.;
+	NurbsC->m_T[2] = 0.;
+	NurbsC->m_T[3] = 1./4.;
+	NurbsC->m_T[4] = 1./4.;
+	NurbsC->m_T[5] = 2./4.;
+	NurbsC->m_T[6] = 2./4.;
+	NurbsC->m_T[7] = 3./4.;
+	NurbsC->m_T[8] = 3./4.;
+	NurbsC->m_T[9] = 1.;
+	NurbsC->m_T[10] = 1.;
+	NurbsC->m_T[11] = 1.;
 		
 	// Weightの値
-	for(i=0; i<9; i++){
+	NurbsC->m_W.resize(K);
+	for(i=0; i<K; i++){
 		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
+			NurbsC->m_W[i] = 1.;
 		}	
 		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = sqrt(2.0)/2;
+			NurbsC->m_W[i] = sqrt(2.0)/2;
 		}
 	}
 
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[0].y;		
-	NurbsC[NurbsCount].cp[1].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[1].y = CirA[CirCount].cp[0].y + radius;
-	NurbsC[NurbsCount].cp[2].x = CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[2].y = CirA[CirCount].cp[0].y + radius;
-	NurbsC[NurbsCount].cp[3].x = CirA[CirCount].cp[0].x - radius;
-	NurbsC[NurbsCount].cp[3].y = CirA[CirCount].cp[0].y + radius;
-	NurbsC[NurbsCount].cp[4].x = CirA[CirCount].cp[0].x - radius;
-	NurbsC[NurbsCount].cp[4].y = CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[5].x = CirA[CirCount].cp[0].x - radius;
-	NurbsC[NurbsCount].cp[5].y = CirA[CirCount].cp[0].y - radius;
-	NurbsC[NurbsCount].cp[6].x = CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[6].y = CirA[CirCount].cp[0].y - radius;
-	NurbsC[NurbsCount].cp[7].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[7].y = CirA[CirCount].cp[0].y - radius;
-	NurbsC[NurbsCount].cp[8].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[8].y = CirA[CirCount].cp[0].y;
-
-	for(i=0; i<9; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
-	}
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x + radius, m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );	// Z方向の大きさは一定
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x + radius, m_CirA[CirCount].cp[0].y + radius, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x, m_CirA[CirCount].cp[0].y + radius, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x - radius, m_CirA[CirCount].cp[0].y + radius, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x - radius, m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x - radius, m_CirA[CirCount].cp[0].y - radius, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x, m_CirA[CirCount].cp[0].y - radius, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x + radius, m_CirA[CirCount].cp[0].y - radius, m_CirA[CirCount].zt) );
+	NurbsC->m_cp.push_back( Coord(m_CirA[CirCount].cp[0].x + radius, m_CirA[CirCount].cp[0].y, m_CirA[CirCount].zt) );
 		
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&)	{
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
+	NurbsC->m_V[0] = 0.;		// パラメータの値
+	NurbsC->m_V[1] = 1.;
+
 	return KOD_TRUE;
 }
 
