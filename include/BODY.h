@@ -403,7 +403,7 @@ public:
 
 	// Function: GetNurbsCFromLine
 	// 直線エンティティをNURBS曲線エンティティへと変換する
-	int GetNurbsCFromLine(int,int);					
+	int GetNurbsCFromLine(int);
 
 	// Function: GetNurbsCFromCirA
 	// 円・円弧エンティティをNURBS曲線エンティティへと変換する

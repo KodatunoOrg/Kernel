@@ -187,72 +187,50 @@ void BODY::InitSurfaceColor(float *col)
 // Parameters:
 // NurbsCount - NURBS曲線への変換後のNURBSCのインデックス番号
 // LineCount - 変換したいLINEのインデックス番号
-int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)	
+int BODY::GetNurbsCFromLine(int LineCount)	
 {
-	int i=0;
-	int KOD_ERRflag=0;
+	int i=0,
+		K=2,		// 総和記号の上側添字（コントロールポイント-1）の値
+		M=2,		// 基底関数の階数
+		N=K+M;		// ノットベクトルの数
 
-	NurbsC[NurbsCount].K = 2;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 2;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
+	NURBSC NurbsC;
+
+	NurbsC.m_M = M;
 
 	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-try {
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+	NurbsC.m_prop[0] = 0;
+	NurbsC.m_prop[1] = 0;
+	NurbsC.m_prop[2] = 1;
+	NurbsC.m_prop[3] = 0;
 
 	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 1.;
-	NurbsC[NurbsCount].T[3] = 1.;
+	NurbsC.m_T.resize(N);
+	NurbsC.m_T[0] = 0.;
+	NurbsC.m_T[1] = 0.;
+	NurbsC.m_T[2] = 1.;
+	NurbsC.m_T[3] = 1.;
 	
-	for(i=0;i<NurbsC[NurbsCount].K;i++){				// Weightの値
-		NurbsC[NurbsCount].W[i] = 1.;
+	NurbsC.m_W.resize(K);
+	for(i=0;i<K;i++){				// Weightの値
+		NurbsC.m_W[i] = 1.;
 	}
-	for(i=0;i<NurbsC[NurbsCount].K;i++){				// コントロールポイントの座標値
-		NurbsC[NurbsCount].cp[i].x = Line[LineCount].cp[i].x;
-		NurbsC[NurbsCount].cp[i].y = Line[LineCount].cp[i].y;
-		NurbsC[NurbsCount].cp[i].z = Line[LineCount].cp[i].z;
+	for(i=0;i<K;i++){				// コントロールポイントの座標値
+		NurbsC.m_cp.push_back( Coord(m_Line[LineCount].cp[i].x, m_Line[LineCount].cp[i].y, m_Line[LineCount].cp[i].z) );
 	}
 	
 	// パラメータの値
-	NurbsC[NurbsCount].V[0] = 0.;
-	NurbsC[NurbsCount].V[1] = 1.;
+	NurbsC.m_V[0] = 0.;
+	NurbsC.m_V[1] = 1.;
 
-    NurbsC[NurbsCount].BlankStat = Line[LineCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
-	NurbsC[NurbsCount].EntUseFlag = Line[LineCount].EntUseFlag;	// ディレクトリ部の情報"Entity Use Flag"を得る(NURBSC)
-	NurbsC[NurbsCount].OriginEnt = LINE;						// 元は線分要素であったことを記憶
-	NurbsC[NurbsCount].pOriginEnt = &Line[LineCount];			// 元は線分要素であったことを記憶
+    NurbsC.m_BlankStat = m_Line[LineCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
+	NurbsC.m_EntUseFlag = m_Line[LineCount].EntUseFlag;	// ディレクトリ部の情報"Entity Use Flag"を得る(NURBSC)
+	NurbsC.m_OriginEnt = LINE;						// 元は線分要素であったことを記憶
+	NurbsC.m_pOriginEnt = &m_Line[LineCount];			// 元は線分要素であったことを記憶
 	for(int i=0;i<4;i++)
-		NurbsC[NurbsCount].Dstat.Color[i] = Line[LineCount].Dstat.Color[i];
-}
-catch(std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
+		NurbsC.m_Dstat.Color[i] = m_Line[LineCount].Dstat.Color[i];
+
+	m_NurbsC.push_back(NurbsC);
 
 	return KOD_TRUE;
 }
