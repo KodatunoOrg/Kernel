@@ -4,8 +4,8 @@
 // BODYクラスのコンストラクタ．各種初期化
 BODY::BODY()
 {
-	Mesh = NULL;
-	MaxCoord = 1;
+	m_Mesh = NULL;
+	m_MaxCoord = 1;
 }
 
 // Function: RotBody
@@ -16,8 +16,8 @@ BODY::BODY()
 //	deg - 回転角度
 void BODY::RotBody(const Coord& Axis, double deg)
 {
-	for ( auto& a : NurbsS ) a.RotNurbsS(Axis, deg);	// NURBS曲面の回転
-	for ( auto& a : NurbsC ) {
+	for ( auto& a : m_NurbsS ) a.RotNurbsS(Axis, deg);	// NURBS曲面の回転
+	for ( auto& a : m_NurbsC ) {
 		if ( a.m_EntUseFlag == GEOMTRYELEM )	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
 			a.RotNurbsC(Axis, deg);						// NURBS曲線の回転
 	}
@@ -31,8 +31,8 @@ void BODY::RotBody(const Coord& Axis, double deg)
 //	d - 移動量
 void BODY::ShiftBody(const Coord& d)
 {
-	for ( auto& a : NurbsS ) a.ShiftNurbsS(d);			// NURBS曲面のシフト
-	for ( auto& a : NurbsC ) {
+	for ( auto& a : m_NurbsS ) a.ShiftNurbsS(d);			// NURBS曲面のシフト
+	for ( auto& a : m_NurbsC ) {
 		if ( a.m_EntUseFlag == GEOMTRYELEM )	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
 			a.ShiftNurbsC(d);							// NURBS曲線のシフト
 	}
@@ -45,8 +45,8 @@ void BODY::ShiftBody(const Coord& d)
 //		  r - X, Y, Z各方向それぞれの拡大(縮小)率(1を基準)
 void BODY::ExpandBody(const Coord& r)
 {
-	for ( auto& a : NurbsS ) a.ChRatioNurbsS(r);		// NURBS曲面の拡大
-	for ( auto& a : NurbsC ) {
+	for ( auto& a : m_NurbsS ) a.ChRatioNurbsS(r);		// NURBS曲面の拡大
+	for ( auto& a : m_NurbsC ) {
 		if ( a.m_EntUseFlag == GEOMTRYELEM )	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
 			a.ChRatioNurbsC(r);							// NURBS曲線の拡大
 	}
@@ -60,9 +60,9 @@ void BODY::ExpandBody(const Coord& r)
 //	BodyName[] - 登録するBODY名
 void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 {
-	Mom = BodyList->add(this);				// 読み込んだIGESデータをBODYListに登録する
+	m_Mom = BodyList->add(this);				// 読み込んだIGESデータをBODYListに登録する
 //	GuiIFB.AddBodyNameToWin(BodyName);		// BodyリストウィンドウにBODY名を登録
-	Name = BodyName;						// ファイル名をbody名として登録
+	m_Name = BodyName;						// ファイル名をbody名として登録
 }
 
 // Function: RegistNurbsCtoBody
@@ -74,13 +74,11 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 //  BodyName[] - 登録するBODY名
 void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char BodyName[])
 {
-	NurbsC = new NURBSC;
-	NurbsC[0] = Nurb;												// NURBS曲面の実体を代入
-	TypeNum[_NURBSC] = 1;											// NURBS曲面の数1にする
-	ChangeStatColor(this->NurbsC[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+	m_NurbsC.push_back(Nurb);										// NURBS曲面の実体を代入
+	ChangeStatColor(m_NurbsC[0].m_Dstat.Color,0.2,0.2,1.0,0.5);		// 青色
 	BodyList->add(this);											// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
-	Name = BodyName;												// 新しいBODY名を登録
+	m_Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: RegistNurbsCtoBodyN
@@ -93,15 +91,13 @@ void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char B
 //	N - 登録するNURBS曲線の数
 void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const NURBSC* Nurb,const char BodyName[],int N)
 {
-	NurbsC = new NURBSC[N];
 	for(int i=0;i<N;i++){
-		NurbsC[i] = Nurb[i];										// NURBS曲面の実体を代入
-		TypeNum[_NURBSC] = N;										// NURBS曲面の数1にする
-		ChangeStatColor(this->NurbsC[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+		m_NurbsC.push_back(Nurb[i]);								// NURBS曲面の実体を代入
+		ChangeStatColor(m_NurbsC.back().m_Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	}
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
-	Name = BodyName;												// 新しいBODY名を登録
+	m_Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: RegistNurbsStoBody
@@ -113,14 +109,12 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const NURBSC* Nurb,const char 
 //  BodyName[] - 登録するBODY名
 void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char BodyName[])
 {
-	NurbsS = new NURBSS;
-	NurbsS[0] = Nurb;												// NURBS曲面の実体を代入
-	NurbsS[0].TrmdSurfFlag = KOD_FALSE;								// トリムのない単純なNURBS曲面であることを明示
-	TypeNum[_NURBSS] = 1;											// NURBS曲面の数1にする
-	ChangeStatColor(this->NurbsS[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+	m_NurbsS.push_back(Nurb);										// NURBS曲面の実体を代入
+	m_NurbsS[0].m_TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
+	ChangeStatColor(m_NurbsS[0].m_Dstat.Color,0.2,0.2,1.0,0.5);		// 青色
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
-	Name = BodyName;												// 新しいBODY名を登録
+	m_Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: RegistNurbsStoBodyN
@@ -133,16 +127,14 @@ void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char B
 //	N - 登録するNURBS曲面の数
 void BODY::RegistNurbsStoBodyN(BODYList *BodyList,const NURBSS* Nurb,const char BodyName[],int N)
 {
-	NurbsS = new NURBSS[N];
 	for(int i=0;i<N;i++){
-		NurbsS[i] = Nurb[i];										// NURBS曲面の実体を代入
-		NurbsS[i].TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
-		TypeNum[_NURBSS] = N;										// NURBS曲面の数1にする
-		ChangeStatColor(this->NurbsS[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+		m_NurbsS.push_back(Nurb[i]);								// NURBS曲面の実体を代入
+		m_NurbsS.back().m_TrmdSurfFlag = KOD_FALSE;					// トリムのない単純なNURBS曲面であることを明示
+		ChangeStatColor(m_NurbsS.back().m_Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
 	}
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
-	Name = BodyName;												// 新しいBODY名を登録
+	m_Name = BodyName;												// 新しいBODY名を登録
 }
 
 // Function: ChangeStatColor
@@ -524,37 +516,4 @@ int BODY::CirAToNurbsC_seg4(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 	NurbsC->m_V[1] = 1.;
 
 	return KOD_TRUE;
-}
-
-// Funciton: CheckTheSameNurbsC
-// CopyBODY()のサブ関数．指定したNURBS曲線と同じ曲線を探し，そのポインタを返す
-//
-// Parameters:
-// *Tnurbs - 探索されるNURBS曲線
-// N - Tnurbsの数
-// *Inurbs - 探索対象のNURBS曲線
-//
-// Return:
-// Tnurbsのポインタ
-NURBSC *BODY::CheckTheSameNurbsC(NURBSC *Tnurbs, int N, NURBSC *Inurbs)
-{
-    NURBSC *nurb;
-    bool flag = false;
-
-
-    for(int i=0;i<N;i++){
-        if(Tnurbs[i].K == Inurbs->K){
-            flag = true;
-            for(int j=0;j<Inurbs->K;j++){
-                if(Tnurbs[i].cp[j].DiffCoord(Inurbs->cp[j]) == KOD_FALSE){
-                    flag = false;
-                    break;
-                }
-            }
-        }
-        if(flag == true)
-            return &Tnurbs[i];
-    }
-
-    return NULL;
 }
