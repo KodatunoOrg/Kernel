@@ -227,7 +227,7 @@ private:
 
 	// Function: GetDirectorySection
 	// ディレクトリ部の読み込み
-	int GetDirectorySection(FILE *,DirectoryParam *,int [],int);	
+	int GetDirectorySection(FILE *,DirectoryParam *,int);	
 
 	// Function: GetStatusNumber
 	// ディレクトリ部の情報#9を取得
@@ -240,10 +240,6 @@ private:
 	// Function: GetTerminateSection
 	// ターミネート部の読み込み（スケルトン）
 	int GetTerminateSection(FILE *);								
-
-	// Function: GetType
-	// 各エンティティタイプの数を記憶する
-	void GetType(int,int []);										
 
 	// Function: GetCirAPara
 	// Type100 円・円弧の読み込み
@@ -295,7 +291,7 @@ private:
 
 	// Function: SearchMaxCoord
 	// 全てのエンティティにおける座標値の最大値を調べる
-	int SearchMaxCoord(BODY *,int []);	
+	int SearchMaxCoord(BODY *);	
 
 	// Function: GetDEPointer
 	// DE部へのポインタが示す実際の構造体へのポインタを返す
@@ -334,10 +330,6 @@ private:
 	// Variable: *body
 	// (private)BODYクラスへのポインタ(IGESデータはこのBODY構造体に全て格納される)
 	BODY *body;
-
-	// Variable: NFunc
-	// (private)NURBS_Funcクラスのインスタンス
-	NURBS_Func NFunc;
 
 	// Variable: *TypeNum
 	// (private)どのBODYオブジェクトが幾つあるかを示す

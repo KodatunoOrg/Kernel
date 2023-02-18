@@ -2,8 +2,8 @@
 * IGESファイルを読み込む *
 **************************/
 
-#include <stdexcept>	// throw
 #include "KodatunoKernel.h"
+#include <algorithm>	// std::sort()
 
 // Function: IGES_Parser_Main
 // IGESパーサーのメイン
@@ -50,24 +50,22 @@ try {
 			flag = GetGlobalSection(fp,&gpara,line[i]);
 		}
 		else if(i == SECTION_DIRECTORY){		// ディレクトリ部読み込み
-			flag = GetDirectorySection(fp,dpara,body->TypeNum,line[i]);
+			flag = GetDirectorySection(fp,dpara,line[i]);
 		}
 		else if(i == SECTION_PARAMETER){		// パラメータ部読み込み
-			body->NewBodyElem();				// BODY構造体内の各エンティティのメモリー確保
 			flag = GetParameterSection(fp,dpara,*body,line[SECTION_DIRECTORY]);
 		}
 		else if(i == SECTION_TERMINATE){		// ターミネート部読み込み
 			flag = GetTerminateSection(fp);
 		}
 		if(flag == KOD_ERR){
-			body->DelBodyElem(TypeCount);		// 今まで確保した分のメモリーを解放
 			return(KOD_ERR);
 		}
 	}
 
 	ChangeEntityforNurbs(dpara,*body,line[SECTION_DIRECTORY]);	// 内部表現を全てNURBSに変更する
 
-	flag = SearchMaxCoord(body,body->TypeNum);		// 立体の最大座標値を探索(初期表示での表示倍率を決定するため)
+	flag = SearchMaxCoord(body);		// 立体の最大座標値を探索(初期表示での表示倍率を決定するため)
 
 	fclose(fp);
 
@@ -1019,17 +1017,13 @@ int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:失敗
-int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int TypeNum[],int dline)
+int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int dline)
 {
 	int i,j;
 	char *p;						// 文字列先頭判別用ポインタ
 	char str[COLUMN_MAX*2+1];		// 2行分（1エンティティ分）の文字列配列
 	char field[FIELD_NUM+1];		// 8文字で1フィールド
 	char dmy;
-
-	for(i=0;i<ALL_ENTITY_TYPE_NUM;i++){
-		TypeNum[i] = 0;			// 初期化
-	}
 
 	for(i=0;i<dline;i++){
 		strcpy(str,"");				// str初期化
@@ -1055,7 +1049,6 @@ int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int TypeNum[
 			// ディレクトリ部の情報が必要な場合は以下にコードを追加する
 			if(j == ENTITY_TYPE_NUM){					// 要素番号を取得
 				dpara[i].entity_type = atoi(field);
-				GetType(dpara[i].entity_type,TypeNum);	// エンティティタイプの数を加算
 			}
 			else if(j == PARAM_DATA){					// パラメータ部へのポインタを取得
 				dpara[i].p_param = atoi(field);
@@ -1076,28 +1069,6 @@ int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int TypeNum[
 	}
 	
 	return KOD_TRUE;
-}
-
-// Function: GetType
-// 各エンティティタイプの数を取得する
-//
-// Parameters:
-// type - エンティティのタイプ
-// entitynum[] - エンティティの数 
-void IGES_PARSER::GetType(int type,int entitynum[])
-{
-	int i;
-
-	// 直線または円・円弧エンティティの場合はNURBS曲線エンティティも同時にインクリメント
-	if(type == LINE || type == CIRCLE_ARC){
-		entitynum[_NURBSC]++;
-	}
-
-	for(i=0;i<ALL_ENTITY_TYPE_NUM;i++){
-		if(type == entity[i]){
-			entitynum[i]++;		// iはenum型EntityTypに対応 ex) entitynum[10]は_NURBSC（有理Bスプライン曲線）の数を表す
-		}
-	}
 }
 
 // Function: GetStatusNumber
@@ -1418,44 +1389,29 @@ int IGES_PARSER::SearchEntType(DirectoryParam *dpara,int pdnum,int dline)
 //
 // Return: 
 // KOD_TRUE:成功	KOD_ERR:失敗
-int IGES_PARSER::SearchMaxCoord(BODY *body,int TypeNum[])
+int IGES_PARSER::SearchMaxCoord(BODY *body)
 {
 	int i,j;
-	int temp=0;
 	int bufnum=0;
-	double *CoordBuf;
+	Vdouble vCoordBuf;
 	
 	// #100(円、円弧)、#110(線分)、#126(NURBS曲線)のコントロールポイントの座標値の個数を得る
-	for(i=0;i<TypeNum[_NURBSC];i++){
-		bufnum += 3*body->NurbsC[i].K;
-	}
-	
-	// メモリ確保
-try {	
-	CoordBuf = new double[bufnum];
-	if ( !CoordBuf ) {
-		throw std::bad_alloc();
+	for(i=0;i<body->m_NurbsC.size();i++){
+		bufnum += 3*body->m_NurbsC[i].m_cp.size();
 	}
 
 	// #100(円、円弧)、#110(線分)、#126(NURBS曲線)のコントロールポイントの座標値を得る
-	for(i=0;i<TypeNum[_NURBSC];i++){
-		for(j=0;j<body->NurbsC[i].K;j++){
-			CoordBuf[temp*3] = fabs(body->NurbsC[i].cp[j].x);	// コントロールポイントX
-			CoordBuf[temp*3+1] = fabs(body->NurbsC[i].cp[j].y);	// コントロールポイントY
-			CoordBuf[temp*3+2] = fabs(body->NurbsC[i].cp[j].z);	// コントロールポイントZ
-			temp++;
+	for(i=0;i<body->m_NurbsC.size();i++){
+		for(j=0;j<body->m_NurbsC[i].m_cp.size();j++){
+			vCoordBuf.push_back(fabs(body->m_NurbsC[i].m_cp[j].x));	// コントロールポイントX
+			vCoordBuf.push_back(fabs(body->m_NurbsC[i].m_cp[j].y));	// コントロールポイントY
+			vCoordBuf.push_back(fabs(body->m_NurbsC[i].m_cp[j].z));	// コントロールポイントZ
 		}
 	}
-	
-	qsort(CoordBuf,bufnum,sizeof(double),QCmp);	// 全ての座標値をクイックソートにより降順にソート
-	body->MaxCoord = CoordBuf[0];				// 最も大きい座標値を得る
 
-	// メモリ解放
-	delete[] CoordBuf;
-}
-catch(std::bad_alloc&)	{
-	return KOD_ERR;
-}
+	std::sort(vCoordBuf.begin(), vCoordBuf.end(), std::greater<double>());	// 全ての座標値をクイックソートにより降順にソート
+	body->MaxCoord = vCoordBuf[0];				// 最も大きい座標値を得る
+
 	return KOD_TRUE;
 }
 
