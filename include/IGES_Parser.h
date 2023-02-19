@@ -311,7 +311,7 @@ private:
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルの正規化sub1
-	int ChangeKnotVecRange(double [],double [],int,int,int,double);
+	int ChangeKnotVecRange(A2double&, ublasVector&, int, int, double);
 
 	// Function: ChangeKnot
 	// ノットベクトルの正規化sub2

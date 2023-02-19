@@ -164,7 +164,7 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 
 	// トリム曲面
 	for(int i=0;i<body->m_TrmS.size();i++){
-		COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTO.pB);	// 型保障なし(?) K.Magara
+		COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTO.pB);	// 型保障なし K.Magara
 		// 外側トリム
 		for(int j=1;j<compc->pDE.size();j++){
 			bc = boost::get<NURBSC*>(compc->pDE[j-1]);
@@ -173,7 +173,7 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 				nc->m_cp[0] = bc->m_cp.back();
 		}
 		// 内側トリム
-		for(int j=0;j<body->m_TrmS[i].m_n2;j++){
+		for(int j=0;j<body->m_TrmS[i].m_pTI.size();j++){
 			COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTI[j].pB);
 			for(int k=1;k<compc->pDE.size();k++){
 				bc = boost::get<NURBSC*>(compc->pDE[k-1]);
@@ -200,9 +200,10 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::ChangeKnotVecRange(double Range[],double Knot[],int N,int M,int K,double val)
+int IGES_PARSER::ChangeKnotVecRange(A2double& Range, ublasVector& Knot, int M, int K, double val)
 {
 	double _t[KNOTNUMMAX];
+	int N = Knot.size();
 	for(int i=0;i<N;i++){
 		_t[i] = ChangeKnot(Knot[i],Knot[M-1],Knot[K],val);
 	}
@@ -247,40 +248,43 @@ double IGES_PARSER::ChangeKnot(double Knot,double M_,double K_,double val)
 int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 {
 	// トリム面
-	for(int i=0;i<body->TypeNum[_TRIMMED_SURFACE];i++){
-		int M0 = body->TrmS[i].pts->M[0];
-		int M1 = body->TrmS[i].pts->M[1];
-		int K0 = body->TrmS[i].pts->K[0];
-		int K1 = body->TrmS[i].pts->K[1];
+	for(int i=0;i<body->m_TrmS.size();i++){
+		NURBSS* pts = body->m_TrmS[i].m_pts;
+		int M0 = pts->m_M[0];
+		int M1 = pts->m_M[1];
+		int K0 = pts->m_W.size1();
+		int K1 = pts->m_W.size2();
 		// トリム面のパラメトリック平面における外側トリム曲線の変更
-		for(int j=0;j<body->TrmS[i].pTO->pB.CompC->N;j++){
-			NURBSC *nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-			for(int k=0;k<nc->K;k++){	// パラメトリック平面上のNURBS曲線のコントロールポイントをノットの変更に合わせて変更
-				nc->cp[k].x = ChangeKnot(nc->cp[k].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],val);
-				nc->cp[k].y = ChangeKnot(nc->cp[k].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],val);
+		COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTO.pB);	// 型保障なし K.Magara
+		for(int j=0;j<compc->pDE.size();j++){
+			NURBSC* nc = boost::get<NURBSC*>(compc->pDE[j]);
+			for(int k=0;k<nc->m_cp.size();k++){	// パラメトリック平面上のNURBS曲線のコントロールポイントをノットの変更に合わせて変更
+				nc->m_cp[k].x = ChangeKnot(nc->m_cp[k].x,body->m_TrmS[i].m_pts->m_S[M0-1],body->m_TrmS[i].m_pts->m_S[K0],val);
+				nc->m_cp[k].y = ChangeKnot(nc->m_cp[k].y,body->m_TrmS[i].m_pts->m_T[M1-1],body->m_TrmS[i].m_pts->m_T[K1],val);
 			}
-			ChangeKnotVecRange(nc->V,nc->T,nc->N,nc->M,nc->K,val);
+			ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_cp.size(), val);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			for(int k=0;k<body->TrmS[i].pTI[j]->pB.CompC->N;k++){
-				NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-				for(int l=0;l<nc->K;l++){
-					nc->cp[l].x = ChangeKnot(nc->cp[l].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],val);
-					nc->cp[l].y = ChangeKnot(nc->cp[l].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],val);
+		for(int j=0;j<body->m_TrmS[i].m_pTI.size();j++){
+			COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTI[j].pB);
+			for(int k=0;k<compc->pDE.size();k++){
+				NURBSC* nc = boost::get<NURBSC*>(compc->pDE[k]);
+				for(int l=0;l<nc->m_cp.size();l++){
+					nc->m_cp[l].x = ChangeKnot(nc->m_cp[l].x,body->m_TrmS[i].m_pts->m_S[M0-1],body->m_TrmS[i].m_pts->m_S[K0],val);
+					nc->m_cp[l].y = ChangeKnot(nc->m_cp[l].y,body->m_TrmS[i].m_pts->m_T[M1-1],body->m_TrmS[i].m_pts->m_T[K1],val);
 				}
-				ChangeKnotVecRange(nc->V,nc->T,nc->N,nc->M,nc->K,val);
+				ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_cp.size(), val);
 			}
 		}
 		// ノットベクトルの範囲を変更する
-		ChangeKnotVecRange(body->TrmS[i].pts->U,body->TrmS[i].pts->S,body->TrmS[i].pts->N[0],M0,K0,val);
-		ChangeKnotVecRange(body->TrmS[i].pts->V,body->TrmS[i].pts->T,body->TrmS[i].pts->N[1],M1,K1,val);
+		ChangeKnotVecRange(body->m_TrmS[i].m_pts->m_U,body->m_TrmS[i].m_pts->m_S,M0,K0,val);
+		ChangeKnotVecRange(body->m_TrmS[i].m_pts->m_V,body->m_TrmS[i].m_pts->m_T,M1,K1,val);
 	}
 
 	// NURBS曲線
-	for(int i=0;i<body->TypeNum[_NURBSC];i++){
-		if(body->NurbsC[i].EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
-		ChangeKnotVecRange(body->NurbsC[i].V,body->NurbsC[i].T,body->NurbsC[i].N,body->NurbsC[i].M,body->NurbsC[i].K,val);
+	for(int i=0;i<body->m_NurbsC.size();i++){
+		if(body->m_NurbsC[i].m_EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
+		ChangeKnotVecRange(body->m_NurbsC[i].m_V,body->m_NurbsC[i].m_T,body->m_NurbsC[i].m_M,body->m_NurbsC[i].m_cp.size(),val);
 	}
 
 	return KOD_TRUE;

@@ -25,7 +25,7 @@ class TRMS
 public:
     NURBSS* m_pts;  // ポインタを持たせるか実体か，もう少し全体を見てから決定
     int m_n1;
-    int m_n2;
+//  int m_n2;
     CONPS   m_pTO;
     VCONPS  m_pTI;
     int m_pD;
