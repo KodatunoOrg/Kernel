@@ -106,44 +106,44 @@ int IGES_PARSER::Optimize4OpenGL(BODY *body)
 int IGES_PARSER::CheckDegenracy(BODY *body)
 {
 	int flag;
-	NURBS_Func NFunc;
 
 	// 縮退用Nurbs曲線を複合曲線の数だけ生成
-	if(body->TypeNum[_COMPOSITE_CURVE]){
-		double T[4] = {0,0,NORM_KNOT_VAL,NORM_KNOT_VAL};
-		double W[2] = {1,1};
-		double V[2] = {0,NORM_KNOT_VAL};
-		int prop[4] = {0,0,1,0};
-		Coord cp[2];
+	ublasVector T(4);
+	T[0]=0;	T[1]=0;	T[2]=NORM_KNOT_VAL;	T[3]=NORM_KNOT_VAL;
+	ublasVector W(2);
+	W[0]=1;	W[1]=1;
+	A2double V = {0,NORM_KNOT_VAL};
+	A4int prop = {0,0,1,0};
+	VCoord cp;
 
-		for(int i=0;i<body->TypeNum[_COMPOSITE_CURVE];i++){
-			 NFunc.GenNurbsC(&body->CompC[i].DegeNurbs,2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
+	for(int i=0;i<body->m_CompC.size();i++){
+		body->m_CompC[i].DegeNurbs = NURBSC(2, T, W, cp, V, prop, 1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
 
-			// 各複合曲線がNURBS曲線のみで構成されておりかつ2Dパラメトリック要素であるかのチェック
-			flag = 0;
-			for(int j=0;j<body->CompC[i].N;j++){
-				if(body->CompC[i].DEType[j] == NURBS_CURVE && body->CompC[i].pDE[j].NurbsC->EntUseFlag == PARAMETRICELEM){
-					flag++;				
-				}
+		// 各複合曲線がNURBS曲線のみで構成されておりかつ2Dパラメトリック要素であるかのチェック
+		flag = 0;
+		for(int j=0;j<body->m_CompC[i].pDE.size();j++){
+			if(body->m_CompC[i].pDE[j].type()==typeid(NURBSC*) && boost::get<NURBSC*>(body->m_CompC[i].pDE[j])->m_EntUseFlag==PARAMETRICELEM){
+				flag++;				
 			}
+		}
 
-			// NURBS曲線で構成されている複合曲線に対して、始点と終点の座標値を比較
-			if(flag == body->CompC[i].N){
-				Coord s,e;
-				s = NFunc.CalcNurbsCCoord(body->CompC[i].pDE[0].NurbsC,body->CompC[i].pDE[0].NurbsC->V[0]);					// 始点
-				e = NFunc.CalcNurbsCCoord(body->CompC[i].pDE[body->CompC[i].N-1].NurbsC,body->CompC[i].pDE[body->CompC[i].N-1].NurbsC->V[1]);	// 終点
-				if(s.DiffCoord(e,1.0E-5) == KOD_FALSE){				// 始点≠終点
-					body->CompC[i].DegeNurbs.cp[0] = e;
-					body->CompC[i].DegeNurbs.cp[1] = s;
-					body->CompC[i].DegeFlag = KOD_FALSE;			// 縮退ありのフラグを立てる
-				}
-				else{
-					body->CompC[i].DegeFlag = KOD_TRUE;				// 縮退なしのフラグを立てる
-				}
+		// NURBS曲線で構成されている複合曲線に対して、始点と終点の座標値を比較
+		if(flag == body->m_CompC[i].pDE.size()){
+			NURBSC* n1 = boost::get<NURBSC*>(body->m_CompC[i].pDE.front());
+			NURBSC* n2 = boost::get<NURBSC*>(body->m_CompC[i].pDE.back());
+			Coord s = n1->CalcNurbsCCoord(n1->m_V[0]);	// 始点
+			Coord e = n2->CalcNurbsCCoord(n2->m_V[1]);	// 終点
+			if(s.DiffCoord(e,1.0E-5) == KOD_FALSE){				// 始点≠終点
+				body->m_CompC[i].DegeNurbs.m_cp.push_back(e);
+				body->m_CompC[i].DegeNurbs.m_cp.push_back(s);
+				body->m_CompC[i].DegeFlag = KOD_FALSE;			// 縮退ありのフラグを立てる
 			}
 			else{
-				body->CompC[i].DegeFlag = KOD_TRUE;					// 複合曲線がNurbs曲線で構成されていない場合も縮退なしのフラグ
+				body->m_CompC[i].DegeFlag = KOD_TRUE;			// 縮退なしのフラグを立てる
 			}
+		}
+		else{
+			body->m_CompC[i].DegeFlag = KOD_TRUE;				// 複合曲線がNurbs曲線で構成されていない場合も縮退なしのフラグ
 		}
 	}
 

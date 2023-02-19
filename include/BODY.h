@@ -258,7 +258,7 @@ typedef boost::variant<CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタ�
 // int pD -				ディレクトリ部への逆ポインタ
 class COMPC{
 public:	
-	int N;
+//	int N;
 //	int *DEType;
 //	COMPELEM*	pDE;
 	std::vector<COMPELEM> pDE;
@@ -267,7 +267,7 @@ public:
 	int pD;
 
 	COMPC() {
-		N = 0;
+//		N = 0;
 		DegeFlag = 0;
 		pD = 0;
 	}
