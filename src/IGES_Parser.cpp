@@ -163,21 +163,23 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 	NURBSC *bc,*nc;
 
 	// トリム曲面
-	for(int i=0;i<body->TypeNum[_TRIMMED_SURFACE];i++){
+	for(int i=0;i<body->m_TrmS.size();i++){
+		COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTO.pB);	// 型保障なし(?) K.Magara
 		// 外側トリム
-		for(int j=1;j<body->TrmS[i].pTO->pB.CompC->N;j++){
-			bc = body->TrmS[i].pTO->pB.CompC->pDE[j-1].NurbsC;
-			nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-			if(bc->cp[bc->K-1].DiffCoord2D(nc->cp[0]) == KOD_FALSE)
-				nc->cp[0] = bc->cp[bc->K-1];
+		for(int j=1;j<compc->pDE.size();j++){
+			bc = boost::get<NURBSC*>(compc->pDE[j-1]);
+			nc = boost::get<NURBSC*>(compc->pDE[j]);
+			if(bc->m_cp.back().DiffCoord2D(nc->m_cp.front()) == KOD_FALSE)
+				nc->m_cp[0] = bc->m_cp.back();
 		}
 		// 内側トリム
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			for(int k=1;k<body->TrmS[i].pTI[j]->pB.CompC->N;k++){
-				bc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k-1].NurbsC;
-				nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-				if(bc->cp[bc->K-1].DiffCoord2D(nc->cp[0]) == KOD_FALSE)
-					nc->cp[0] = bc->cp[bc->K-1];
+		for(int j=0;j<body->m_TrmS[i].m_n2;j++){
+			COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTI[j].pB);
+			for(int k=1;k<compc->pDE.size();k++){
+				bc = boost::get<NURBSC*>(compc->pDE[k-1]);
+				nc = boost::get<NURBSC*>(compc->pDE[k]);
+				if(bc->m_cp.back().DiffCoord2D(nc->m_cp.front()) == KOD_FALSE)
+					nc->m_cp[0] = bc->m_cp.back();
 			}
 		}
 	}
