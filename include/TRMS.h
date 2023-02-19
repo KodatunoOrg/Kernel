@@ -32,7 +32,7 @@ public:
 
 public:
 	TRMS() {
-        m_n1 = m_n2 = 0;
+        m_n1 = 0;
         m_pD = 0;
     }
 

@@ -319,7 +319,7 @@ private:
 
 	// Function: SearchMinVecRange
 	// ノットベクトルの最小間隔を探索
-	double SearchMinVecRange(double [],int,int);	
+	double SearchMinVecRange(const ublasVector&, int, int);	
 
 	// Function: ReverseCOMPELEM
 	// COMPELEM配列を反転
