@@ -392,97 +392,75 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 // KOD_TRUE
 int IGES_PARSER::CheckCWforTrim(BODY *body)
 {
-	Coord *p;
 	int flag;
 
 	// トリム面
-	for(int i=0;i<body->TypeNum[_TRIMMED_SURFACE];i++){
-		int otrmnum = body->TrmS[i].pTO->pB.CompC->N;
+	for(int i=0;i<body->m_TrmS.size();i++){
+		COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTO.pB);
+		int otrmnum = compc->pDE.size();
 
 		if(otrmnum > 2){
 			// トリム面のパラメトリック平面における外側トリム曲線の変更
-			p = NewCoord1(otrmnum);
-
+			VCoord p;
 			// 外側トリムを構成する各NURBS曲線の始点を取り出す
 			for(int j=0;j<otrmnum;j++){
-				NURBSC *nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-				p[j] = nc->cp[0];
+				NURBSC* nc = boost::get<NURBSC*>(compc->pDE[j]);
+				p.push_back(nc->m_cp[0]);
 			}
-			flag = DiscriminateCW2D(p,otrmnum);	// 時計・反時計周りを調べる
+			flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
 
 			// 外側トリムが時計回りだったら、反時計回りに変更する
-			if(flag == KOD_FALSE){
+			if(flag == CW){
 				for(int j=0;j<otrmnum;j++){
-					NURBSC *nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-					Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
+					NURBSC* nc = boost::get<NURBSC*>(compc->pDE[j]);
+					std::reverse(nc->m_cp.begin(), nc->m_cp.end());		// コントロールポイント列の反転
 					// ノットベクトル列を反転
-					for(int k=0;k<nc->N;k++){
-						nc->T[k] *= -1;
-						nc->T[k] += nc->V[0]+nc->V[1];
+					for(int k=0;k<nc->m_T.size();k++){
+						nc->m_T[k] *= -1;
+						nc->m_T[k] += nc->m_V[0]+nc->m_V[1];
 					}
-					Reverse(nc->T,nc->N);
+					std::reverse(nc->m_T.begin(),  nc->m_T.end());
 				}
 				// COMPELEMを反転
-				ReverseCOMPELEM(body->TrmS[i].pTO->pB.CompC);
+				std::reverse(compc->pDE.begin(),  compc->pDE.end());
 			}
-
-			FreeCoord1(p);
 			// 外側トリムここまで
 		}
 
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			otrmnum = body->TrmS[i].pTI[j]->pB.CompC->N;
+		for(int j=0;j<body->m_TrmS[i].m_pTI.size();j++){
+			COMPC* compc = boost::get<COMPC*>(body->m_TrmS[i].m_pTI[j].pB);
+			otrmnum = compc->pDE.size();
 
 			if(otrmnum > 2){
-				p = NewCoord1(otrmnum);
-
+				VCoord p;
 				// 内側トリムを構成する各NURBS曲線の始点を取り出す
 				for(int k=0;k<otrmnum;k++){
-					NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-					p[k] = nc->cp[0];
+					NURBSC* nc = boost::get<NURBSC*>(compc->pDE[k]);
+					p.push_back(nc->m_cp[0]);
 				}
-				flag = DiscriminateCW2D(p,otrmnum);	// 時計・反時計周りを調べる
+				flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
 
 				// 内側トリムが反時計回りだったら、時計回りに変更する
-				if(flag == KOD_TRUE){
+				if(flag == CCW){
 					for(int k=0;k<otrmnum;k++){
-						NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-						Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
+						NURBSC* nc = boost::get<NURBSC*>(compc->pDE[k]);
+						std::reverse(nc->m_cp.begin(), nc->m_cp.end());		// コントロールポイント列の反転
 						// ノットベクトル列を反転
-						for(int l=0;l<nc->N;l++){
-							nc->T[l] *= -1;
-							nc->T[l] += nc->V[0]+nc->V[1];
+						for(int l=0;l<nc->m_T.size();l++){
+							nc->m_T[l] *= -1;
+							nc->m_T[l] += nc->m_V[0]+nc->m_V[1];
 						}
-						Reverse(nc->T,nc->N);
+						std::reverse(nc->m_T.begin(), nc->m_T.end());
 					}
 					// COMPELEMを反転
-					ReverseCOMPELEM(body->TrmS[i].pTI[j]->pB.CompC);
+					std::reverse(compc->pDE.begin(),  compc->pDE.end());
 				}
-
-				FreeCoord1(p);
 			}
 		}
 	}
 
 	return KOD_TRUE;
-}
-
-// Function: ReverseCOMPELEM
-// COMPELEM配列を反転
-//
-// Parameters:
-// *CompC - COMPC配列
-void IGES_PARSER::ReverseCOMPELEM(COMPC *CompC)
-{
-	int i,j;
-	COMPELEM tmp;
-
-	for(i=0,j=CompC->N-1;i<j;i++,j--){
-		tmp = CompC->pDE[i];
-		CompC->pDE[i] = CompC->pDE[j];
-		CompC->pDE[j] = tmp;
-	}
 }
 
 // Function: ChangeEntityforNurbs
