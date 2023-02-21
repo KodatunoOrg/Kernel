@@ -1420,7 +1420,7 @@ int IGES_PARSER::SearchMaxCoord(BODY *body)
 	}
 
 	std::sort(vCoordBuf.begin(), vCoordBuf.end(), std::greater<double>());	// 全ての座標値をクイックソートにより降順にソート
-	body->MaxCoord = vCoordBuf[0];				// 最も大きい座標値を得る
+	body->m_MaxCoord = vCoordBuf[0];				// 最も大きい座標値を得る
 
 	return KOD_TRUE;
 }
