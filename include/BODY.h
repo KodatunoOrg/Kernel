@@ -322,7 +322,6 @@ struct CONPS
 		SType = 0;
 //		BType = 0;
 //		CType = 0;
-		pS = NULL;
 		pref = 0;
 		pD = 0;
 	}
