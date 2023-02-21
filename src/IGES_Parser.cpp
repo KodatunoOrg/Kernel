@@ -932,15 +932,16 @@ CONPS IGES_PARSER::GeConpSPara(char str[], int pD, vDpara& vdpara)
 
 	pdnum = CatchStringI(&p);			// Curveが乗るSurfaceのDE部のシーケンスナンバーを得る
 	ConpS.SType = SearchEntType(vdpara,pdnum);	// pdnumが示すエンティティタイプを判別
-//	ConpS.pS = (NURBSS*)GetDEPointer(pdnum,body);		// pdnumが示す構造体のポインタを得る -> NURBSS*はCOMPELEMにないはずだが... K.Magara
+	boost::any pS = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る -> (NURBSS*)キャストは危険 K.Magara
+	if ( pS.type() == typeid(NURBSS) ) {
+		ConpS.pS = boost::any_cast<NURBSS>(pS);
+	}
 
 	pdnum = CatchStringI(&p);			// Surfaceのパラメータ空間におけるcurveを定義するEntityのDE部のシーケンスナンバーを得る
-	ConpS.BType = SearchEntType(vdpara,pdnum);	// pdnumが示すエンティティタイプを判別
-//	ConpS.pB.substitution = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る(共用体) -> CURVEとCOMPELEM違う... K.Magara
+	ConpS.pB = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る(共用体)
 
 	pdnum = CatchStringI(&p);			// Curve CのDE部へのポインタ
-	ConpS.CType = SearchEntType(vdpara,pdnum);	// pdnumが示すエンティティタイプを判別
-//	ConpS.pC.substitution = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る(共用体) -> 上に同じ K.Magara
+	ConpS.pC = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る(共用体)
 
 	ConpS.pref = CatchStringI(&p);	// 送り側システムで採られていた表現を表すフラグ
 
@@ -970,17 +971,26 @@ TRMS IGES_PARSER::GetTrmSPara(char str[], int pD, vDpara& vdpara)
 	p = str;
 	
 	pdnum = CatchStringI(&p);		// トリムされるSurface EntityのDE部の値を取得
-//	TrmS.m_pts = (NURBSS*)GetDEPointer(pdnum,body);		// トリムされるSurface Entityへのポインタを取得 -> NURBSS*はCOMPELEMにないはずだが... K.Magara
-	TrmS.m_pts->m_TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
+	boost::any pts = GetDEPointer(pdnum,body);	// トリムされるSurface Entityへのポインタを取得
+	if ( pts.type() == typeid(NURBSS) ) {
+		TrmS.m_pts = boost::any_cast<NURBSS>(pts);
+		TrmS.m_pts.m_TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
+	}
 	TrmS.m_n1 = CatchStringI(&p);		// ０：外周がDの境界と一致している　１：それ以外
 	int n2 = CatchStringI(&p);		// Trimmed Surfaceの内周の単純閉曲線の数
 
 	pdnum = CatchStringI(&p);		// Trimmed Surfaceの外周の単純閉曲線の数
-//	TrmS.m_pTO = (CONPS*)GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得 -> CONPS*はCOMPELEMにないはずだが... K.Magara
+	boost::any pTO = GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得
+	if ( pTO.type() == typeid(CONPS) ) {
+		TrmS.m_pTO = boost::any_cast<CONPS>(pTO);
+	}
 
 	for(i=0;i<n2;i++){
 		pdnum = CatchStringI(&p);	// Trimmed Surfaceの内周の単純閉曲線のDE部の値を取得
-//		TrmS.m_pTI.push_back((CONPS *)GetDEPointer(pdnum,body));	// 単純閉曲線構造体へのポインタを取得
+		boost::any pTI = GetDEPointer(pdnum,body);	// 単純閉曲線構造体へのポインタを取得
+		if ( pTI.type() == typeid(CONPS) ) {
+			TrmS.m_pTI.push_back( boost::any_cast<CONPS>(pTI) );
+		}
 	}
 
 	TrmS.m_pD = pD;		// DE部のシーケンスナンバーを得る
@@ -1302,66 +1312,66 @@ double IGES_PARSER::CatchStringD(char **p)
 //
 // Return:
 // DE部へのポインタが示す実際の構造体へのポインタをvoid型で返す
-COMPELEM IGES_PARSER::GetDEPointer(int TypeNum, BODY* body)
+boost::any IGES_PARSER::GetDEPointer(int TypeNum, BODY* body)
 {
-	COMPELEM result;	//	typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;
+	boost::any result;
 	int i,j;
 
-	for(i=0; i<ALL_ENTITY_TYPE_NUM && result.which()==0; i++){
+	for(i=0; i<ALL_ENTITY_TYPE_NUM && result.empty(); i++){
 		for ( j=0; j<body->m_CirA.size(); j++ ) {
 			if ( body->m_CirA[j].pD == TypeNum ) {
-				result = &body->m_CirA[j];
+				result = body->m_CirA[j];
 				break;
 			}
 		}
-//		for ( j=0; j<body->m_CompC.size(); j++ ) {
-//			if ( body->m_CompC[j].pD == TypeNum ) {
-//				result = &body->m_CompC[j];
-//				break;
-//			}
-//		}
+		for ( j=0; j<body->m_CompC.size(); j++ ) {
+			if ( body->m_CompC[j].pD == TypeNum ) {
+				result = body->m_CompC[j];
+				break;
+			}
+		}
 		for ( j=0; j<body->m_ConA.size(); j++ ) {
 			if ( body->m_ConA[j].pD == TypeNum ) {
-				result = &body->m_ConA[j];
+				result = body->m_ConA[j];
 				break;
 			}
 		}
 		for ( j=0; j<body->m_Line.size(); j++ ) {
 			if ( body->m_Line[j].pD == TypeNum ) {
-				result = &body->m_Line[j];
+				result = body->m_Line[j];
 				break;
 			}
 		}
-//		for ( j=0; j<body->m_TMat.size(); j++ ) {
-//			if ( body->m_TMat[j].pD == TypeNum ) {
-//				result =  &body->m_TMat[j];
-//				break;
-//			}
-//		}
+		for ( j=0; j<body->m_TMat.size(); j++ ) {
+			if ( body->m_TMat[j].pD == TypeNum ) {
+				result =  body->m_TMat[j];
+				break;
+			}
+		}
 		for ( j=0; j<body->m_NurbsC.size(); j++ ) {
 			if ( body->m_NurbsC[j].m_pD == TypeNum ) {
-				result = &body->m_NurbsC[j];
+				result = body->m_NurbsC[j];
 				break;
 			}
 		}
-//		for ( j=0; j<body->m_NurbsS.size(); j++ ) {
-//			if ( body->m_NurbsS[j].m_pD == TypeNum ) {
-//				result = &body->m_NurbsS[j];
-//				break;
-//			}
-//		}
-//		for ( j=0; j<body->m_ConpS.size(); j++ ) {
-//			if ( body->m_ConpS[j].pD == TypeNum ) {
-//				result =  &body->m_ConpS[j];
-//				break;
-//			}
-//		}
-//		for ( j=0; j<body->m_TrmS.size(); j++ ) {
-//			if ( body->m_TrmS[j].m_pD == TypeNum ) {
-//				result = &body->m_TrmS[j];
-//				break;
-//			}
-//		}
+		for ( j=0; j<body->m_NurbsS.size(); j++ ) {
+			if ( body->m_NurbsS[j].m_pD == TypeNum ) {
+				result = body->m_NurbsS[j];
+				break;
+			}
+		}
+		for ( j=0; j<body->m_ConpS.size(); j++ ) {
+			if ( body->m_ConpS[j].pD == TypeNum ) {
+				result = body->m_ConpS[j];
+				break;
+			}
+		}
+		for ( j=0; j<body->m_TrmS.size(); j++ ) {
+			if ( body->m_TrmS[j].m_pD == TypeNum ) {
+				result = body->m_TrmS[j];
+				break;
+			}
+		}
 	}
 
 	return result;

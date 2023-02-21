@@ -296,7 +296,7 @@ private:
 
 	// Function: GetDEPointer
 	// DE部へのポインタが示す実際の構造体へのポインタを返す
-	COMPELEM GetDEPointer(int, BODY*);
+	boost::any GetDEPointer(int, BODY*);
 
 	// Function: SearchEntType
 	// DE部へのポインタの値からエンティティのタイプを調べて返す

@@ -23,7 +23,7 @@ typedef TRMS TRIMD_NURBSS;	// トリム面に対してNurbs曲面を想起させ
 class TRMS
 {
 public:
-    NURBSS* m_pts;  // ポインタを持たせるか実体か，もう少し全体を見てから決定
+    NURBSS  m_pts;
     int m_n1;
 //  int m_n2;
     CONPS   m_pTO;

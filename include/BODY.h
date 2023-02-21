@@ -4,7 +4,7 @@
 #define _BODY_H_
 
 #include <string>		// std::string
-#include "boost/variant.hpp"
+#include "boost/any.hpp"
 
 #include "NURBS.h"
 #include "TRMS.h"
@@ -244,8 +244,9 @@ struct TMAT
 	LINE_*	Line;
 	NURBSC*	NurbsC;
 };*/
-typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタか実体か？
+// typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタか実体か？
 // vector要素へのポインタ保持はおそらくNG  IGES_PARSER::GetDEPointer()
+// variant -> any
 
 // Structure: COMPC
 // 複合曲線
@@ -262,7 +263,7 @@ public:
 //	int N;
 //	int *DEType;
 //	COMPELEM*	pDE;
-	std::vector<COMPELEM> pDE;
+	std::vector<boost::any> pDE;	// 実体を格納 pDE.type()==typeid(NURBSC) などで判定
 	int DegeFlag;
 	NURBSC DegeNurbs;
 	int pD;
@@ -289,7 +290,7 @@ public:
 	CONA*	ConA;
 	NURBSC*	NurbsC;
 };*/
-typedef boost::variant<boost::blank, CIRA*, COMPC*, CONA*, NURBSC*> CURVE;	// ポインタか実体か？
+//typedef boost::variant<boost::blank, CIRA*, COMPC*, CONA*, NURBSC*> CURVE;	// ポインタか実体か？
 
 // Structure: CONPS
 // 面上線
@@ -308,19 +309,19 @@ struct CONPS
 {
 	int crtn;
 	int SType;
-	int BType;
-	int CType;
-	NURBSS *pS;
-	CURVE pB;
-	CURVE pC;
+//	int BType;
+//	int CType;
+	NURBSS pS;
+	boost::any pB;		// 実体を格納
+	boost::any pC;
 	int pref;
 	int pD;
 
 	CONPS() {
 		crtn = 0;
 		SType = 0;
-		BType = 0;
-		CType = 0;
+//		BType = 0;
+//		CType = 0;
 		pS = NULL;
 		pref = 0;
 		pD = 0;
