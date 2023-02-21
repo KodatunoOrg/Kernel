@@ -61,7 +61,7 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 		}
 	}
 
-	ChangeEntityforNurbs(vdpara,*body,line[SECTION_DIRECTORY]);	// 内部表現を全てNURBSに変更する
+	ChangeEntityforNurbs(vdpara,body);	// 内部表現を全てNURBSに変更する
 
 	flag = SearchMaxCoord(body);		// 立体の最大座標値を探索(初期表示での表示倍率を決定するため)
 
@@ -466,36 +466,36 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:失敗
-int IGES_PARSER::ChangeEntityforNurbs(DirectoryParam *dpara,BODY body,int dline)
+int IGES_PARSER::ChangeEntityforNurbs(vDpara& vdpara, BODY* body)
 {
 	bool flag;
 
-	for(int i=0;i<dline;i++){
+	for(int i=0;i<vdpara.size();i++){
 		flag = KOD_FALSE;
 		// 円/円弧->NURBS曲線
-		if(dpara[i].entity_type == CIRCLE_ARC){
-			if(body.GetNurbsCFromCirA(TypeCount[_NURBSC],dpara[i].entity_count) == KOD_ERR) return KOD_ERR;		// 円/円弧パラメータからNURBS曲線パラメータを得る
-			InitDisplayStat(&body.NurbsC[TypeCount[_NURBSC]].Dstat);			// 表示属性の初期化
+		if(vdpara[i].entity_type == CIRCLE_ARC){
+			if(body->GetNurbsCFromCirA(vdpara[i].entity_count) == KOD_ERR) return KOD_ERR;		// 円/円弧パラメータからNURBS曲線パラメータを得る
+			InitDisplayStat(&body->m_NurbsC.back().m_Dstat);			// 表示属性の初期化
 			flag = KOD_TRUE;
 		}
 		// 線分->NURBS曲線
-		else if(dpara[i].entity_type == LINE){
-			if(body.GetNurbsCFromLine(TypeCount[_NURBSC],dpara[i].entity_count) == KOD_ERR) return KOD_ERR;		// 線分パラメータからNURBS曲線パラメータを得る
-			InitDisplayStat(&body.NurbsC[TypeCount[_NURBSC]].Dstat);			// 表示属性の初期化
+		else if(vdpara[i].entity_type == LINE){
+			if(body->GetNurbsCFromLine(vdpara[i].entity_count) == KOD_ERR) return KOD_ERR;		// 線分パラメータからNURBS曲線パラメータを得る
+			InitDisplayStat(&body->m_NurbsC.back().m_Dstat);			// 表示属性の初期化
 			flag = KOD_TRUE;
 		}
 		// 円/円弧、直線以外の曲線エンティティが存在する場合は、新規に処理を追加してください
 
 		// 変換行列演算
 		if(flag == KOD_TRUE){												// NURBS変換されたエンティティに対して
-			if(dpara[i].p_tm){												// 変換行列が存在する場合
-				for(int j=0;j<TypeCount[_TRANSFORMATION_MATRIX];j++){		// 全ての変換行列タイプを調べる
-					if(body.TMat[j].pD == dpara[i].p_tm){					// 対象となる変換行列タイプへのポインタ
-						if(TransformNurbsC(TypeCount[_NURBSC],j,body) == KOD_ERR) return KOD_ERR;	// NURBS曲線を座標変換する
+			if(vdpara[i].p_tm){												// 変換行列が存在する場合
+				for(int j=0;j<body->m_TMat.size();j++){						// 全ての変換行列タイプを調べる
+					if(body->m_TMat[j].pD == vdpara[i].p_tm){				// 対象となる変換行列タイプへのポインタ
+						if(TransformNurbsC(body->m_TMat[j], body->m_NurbsC.back()) == KOD_ERR) return KOD_ERR;	// NURBS曲線を座標変換する
 					}
 				}
 			}
-			TypeCount[_NURBSC]++;											// NURBSCの数をインクリメント
+//			TypeCount[_NURBSC]++;											// NURBSCの数をインクリメント
 		}
 	}
 
@@ -1477,12 +1477,12 @@ void IGES_PARSER::InitDisplayStat(DispStat *Dstat)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::TransformNurbsC(int NurbsCount,int TMp,BODY body)	
+int IGES_PARSER::TransformNurbsC(const TMAT& TMat, NURBSC& NurbsC)	
 {
 	int i;
 
-	for(i=0;i<body.NurbsC[NurbsCount].K;i++){
-		body.NurbsC[NurbsCount].cp[i] = MulFrameCoord(body.TMat[TMp].R,body.TMat[TMp].T,body.NurbsC[NurbsCount].cp[i]);	
+	for(i=0;i<NurbsC.m_cp.size();i++){
+		NurbsC.m_cp[i] = MulFrameCoord(TMat.R, TMat.T, NurbsC.m_cp[i]);
 	}
 	
 	return KOD_TRUE;

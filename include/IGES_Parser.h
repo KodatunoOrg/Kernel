@@ -288,7 +288,7 @@ private:
 
 	// Function: ChangeEntityforNurbs
 	// エンティティを全てNURBSへ変更する
-	int ChangeEntityforNurbs(DirectoryParam *,BODY,int);			
+	int ChangeEntityforNurbs(vDpara&, BODY*);
 
 	// Function: SearchMaxCoord
 	// 全てのエンティティにおける座標値の最大値を調べる
@@ -308,7 +308,7 @@ private:
 
 	// Function: TransformNurbsC
 	// NURBS曲線を座標変換する
-	int TransformNurbsC(int,int,BODY);
+	int TransformNurbsC(const TMAT&, NURBSC&);
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルの正規化sub1
