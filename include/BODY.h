@@ -244,7 +244,8 @@ struct TMAT
 	LINE_*	Line;
 	NURBSC*	NurbsC;
 };*/
-typedef boost::variant<CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタか実体か？
+typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタか実体か？
+// vector要素へのポインタ保持はおそらくNG  IGES_PARSER::GetDEPointer()
 
 // Structure: COMPC
 // 複合曲線
@@ -288,7 +289,7 @@ public:
 	CONA*	ConA;
 	NURBSC*	NurbsC;
 };*/
-typedef boost::variant<CIRA*, COMPC*, CONA*, NURBSC*> CURVE;	// ポインタか実体か？
+typedef boost::variant<boost::blank, CIRA*, COMPC*, CONA*, NURBSC*> CURVE;	// ポインタか実体か？
 
 // Structure: CONPS
 // 面上線
@@ -389,10 +390,6 @@ public:
 	// N個のNURBS曲面を新たなBODYとして登録する
 	void RegistNurbsStoBodyN(BODYList *,const NURBSS*,const char [],int);	
 
-	// Function: ChangeStatColor
-	// エンティティのステータスで定義されている色を変更
-	void ChangeStatColor(float *,float,float,float,float);	
-
 	// Function: InitCurveColor
 	// 線の色の初期値を与える
 	void InitCurveColor(float *);	
@@ -488,5 +485,11 @@ public:
 	// 自分が属する親(BodyList)のアドレス
 	Data* m_Mom;
 };
+
+// --- BODY メンバ関数である必要がない関数
+
+// Function: ChangeStatColor
+// エンティティのステータスで定義されている色を変更
+void ChangeStatColor(float *,float,float,float,float);	
 
 #endif

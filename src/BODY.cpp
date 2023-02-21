@@ -143,7 +143,7 @@ void BODY::RegistNurbsStoBodyN(BODYList *BodyList,const NURBSS* Nurb,const char 
 // Parameters:
 // *col - 色を変更したいエンティティのメンバ変数Dstatのメンバ変数Color[4]へのポインタ
 // r,g,b,t - 色属性(0.0 - 1.0)
-void BODY::ChangeStatColor(float *col,float r,float g,float b,float t)
+void ChangeStatColor(float *col,float r,float g,float b,float t)
 {
 	col[0] = r;
 	col[1] = g;

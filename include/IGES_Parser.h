@@ -173,6 +173,7 @@ typedef struct{
 	int seq_num;			
 	int param_line_count;	
 }DirectoryParam;
+typedef std::vector<DirectoryParam> vDpara;
 
 // Class: IGES_PARSER
 // IGESパーサー用クラス
@@ -227,7 +228,7 @@ private:
 
 	// Function: GetDirectorySection
 	// ディレクトリ部の読み込み
-	int GetDirectorySection(FILE *,DirectoryParam *,int);	
+	int GetDirectorySection(FILE *, vDpara&, int);
 
 	// Function: GetStatusNumber
 	// ディレクトリ部の情報#9を取得
@@ -235,7 +236,7 @@ private:
 
 	// Function: GetParameterSection
 	// パラメータ部の読み込み
-	int GetParameterSection(FILE *,DirectoryParam *,BODY,int);		
+	int GetParameterSection(FILE *, vDpara&, BODY*);
 
 	// Function: GetTerminateSection
 	// ターミネート部の読み込み（スケルトン）
@@ -243,39 +244,39 @@ private:
 
 	// Function: GetCirAPara
 	// Type100 円・円弧の読み込み
-	int GetCirAPara(char [],int,DirectoryParam *,BODY);				
+	CIRA GetCirAPara(char [], int);
 
 	// Function: GetCompCPara
 	// Type102 複合曲線の読み込み
-	int GetCompCPara(char [],int,DirectoryParam *,int,BODY);		
+	COMPC GetCompCPara(char [], int, BODY*);
 
 	// Function: GetConAPara
 	// Type104 円錐曲線の読み込み
-	int GetConAPara(char [],int,DirectoryParam *,BODY);				
+	CONA GetConAPara(char [], int, vDpara&, BODY*);
 
 	// Function: GetLinePara
 	// Type110 線分の読み込み
-	int GetLinePara(char [],int,DirectoryParam *,BODY);				
+	LINE_ GetLinePara(char [], int);
 
 	// Function: GetTMatPara
 	// Type124 変換行列の読み込み
-	int GetTMatPara(char [],int,DirectoryParam *,BODY);				
+	TMAT GetTMatPara(char [], int);
 
 	// Function: GetNurbsCPara
 	// Type126 NRBS曲線の読み込み
-	int GetNurbsCPara(char [],int,DirectoryParam *,BODY);			
+	NURBSC GetNurbsCPara(char [], int);
 
 	// Function: GetNurbsSPara
 	// Type128 NRBS曲面の読み込み
-	int GetNurbsSPara(char [],int,DirectoryParam *,BODY);			
+	NURBSS GetNurbsSPara(char [], int);
 
 	// Function: GeConpSPara
 	// Type142 面上線の読み込み
-	int GeConpSPara(char [],int,DirectoryParam *,int,BODY);			
+	CONPS GeConpSPara(char [], int, vDpara&);
 
 	// Function: GetTrmSPara
 	// Type144 トリム面の読み込み
-	int GetTrmSPara(char [],int,DirectoryParam *,BODY);				
+	TRMS GetTrmSPara(char [], int, vDpara&);
 
 	// Function: CatchStringI
 	// カンマまでの数値を読み込んで返す(int)
@@ -295,11 +296,11 @@ private:
 
 	// Function: GetDEPointer
 	// DE部へのポインタが示す実際の構造体へのポインタを返す
-	void *GetDEPointer(int ,BODY);		
+	COMPELEM GetDEPointer(int, BODY*);
 
 	// Function: SearchEntType
 	// DE部へのポインタの値からエンティティのタイプを調べて返す
-	int SearchEntType(DirectoryParam *,int,int);	
+	int SearchEntType(vDpara&, int);
 
 	// Function: InitDisplayStat
 	// 各エンティティの表示属性を設定
@@ -341,7 +342,7 @@ private:
 
 	// Variable: TypeCount[ALL_ENTITY_TYPE_NUM]
 	// (private)各エンティティタイプの正常メモリー確保数を格納
-	int  TypeCount[ALL_ENTITY_TYPE_NUM]; 
+//	int  TypeCount[ALL_ENTITY_TYPE_NUM]; 
 };
 
 #endif

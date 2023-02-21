@@ -18,7 +18,7 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 {
 	FILE *fp;
 	GlobalParam gpara;				// グローバル部のパラメータを格納
-	DirectoryParam *dpara;			// ディレクトリ部のパラメータを格納
+	vDpara vdpara;					// ディレクトリ部のパラメータを格納
 //	char mes[256];					// メッセージダンプ用string
 	int  line[SECTION_NUM];			// 各セクション毎のライン数を格納
 	int  flag = 0;
@@ -36,10 +36,8 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 	// 各セクションの行数をあらかじめ取得
 	GetSectionLine(fp,line);
 
-try {
 	// DirectoryParamのメモリー確保
 	line[SECTION_DIRECTORY] /= 2;		// ディレクトリ部は、2行で1つのシーケンスを構成するので2で割ったものをディレクトリ部のライン数とする
-	dpara = new DirectoryParam[line[SECTION_DIRECTORY]];
 
 	// IGESファイル読み込み(各セクション毎に処理)
 	for(i=0;i<SECTION_NUM;i++){
@@ -50,10 +48,10 @@ try {
 			flag = GetGlobalSection(fp,&gpara,line[i]);
 		}
 		else if(i == SECTION_DIRECTORY){		// ディレクトリ部読み込み
-			flag = GetDirectorySection(fp,dpara,line[i]);
+			flag = GetDirectorySection(fp,vdpara,line[i]);	// vdparaにセット
 		}
 		else if(i == SECTION_PARAMETER){		// パラメータ部読み込み
-			flag = GetParameterSection(fp,dpara,*body,line[SECTION_DIRECTORY]);
+			flag = GetParameterSection(fp,vdpara,body);
 		}
 		else if(i == SECTION_TERMINATE){		// ターミネート部読み込み
 			flag = GetTerminateSection(fp);
@@ -63,17 +61,12 @@ try {
 		}
 	}
 
-	ChangeEntityforNurbs(dpara,*body,line[SECTION_DIRECTORY]);	// 内部表現を全てNURBSに変更する
+	ChangeEntityforNurbs(vdpara,*body,line[SECTION_DIRECTORY]);	// 内部表現を全てNURBSに変更する
 
 	flag = SearchMaxCoord(body);		// 立体の最大座標値を探索(初期表示での表示倍率を決定するため)
 
 	fclose(fp);
 
-	delete[] dpara;
-}
-catch (std::bad_alloc&) {
-	return KOD_ERR;
-}
 	return flag;
 }
 
@@ -520,7 +513,7 @@ int IGES_PARSER::ChangeEntityforNurbs(DirectoryParam *dpara,BODY body,int dline)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:失敗
-int IGES_PARSER::GetParameterSection(FILE *fp,DirectoryParam *dpara,BODY body,int dline)
+int IGES_PARSER::GetParameterSection(FILE *fp, vDpara& vdpara, BODY* body)
 {
 	int i,j;
 	char str[COLUMN_MAX*5000];	// 文字列バッファ(5000行分確保)
@@ -528,14 +521,14 @@ int IGES_PARSER::GetParameterSection(FILE *fp,DirectoryParam *dpara,BODY body,in
 	int  pD;					// ディレクトリ部への逆ポインタの値
 
 	// TypeCountの初期化
-	for(i=0;i<ALL_ENTITY_TYPE_NUM;i++)
-		TypeCount[i] = 0;
+//	for(i=0;i<ALL_ENTITY_TYPE_NUM;i++)
+//		TypeCount[i] = 0;
 
 	// 全エンティティのパラメータをそれぞれのエンティティ構造体に格納していく
-	for(i=0;i<dline;i++){
+	for(i=0;i<vdpara.size();i++){
 		// ディレクトリ部14フィールドの情報を元に、strに各パラメータ部のライン数分を繋ぎ合わせる
 		strcpy(str,"");
-		for(j=0;j<dpara[i].param_line_count;j++){
+		for(j=0;j<vdpara[i].param_line_count;j++){
 			fgets(buf,COLUMN_MAX_,fp);
 			if((p = strchr(buf,';')) == NULL){
 				p = strchr(buf,' ');
@@ -552,70 +545,79 @@ int IGES_PARSER::GetParameterSection(FILE *fp,DirectoryParam *dpara,BODY body,in
 		// 他のエンティティを追加する場合は以下にコードを追加する
 
 		// 円・円弧(NURBS曲線としてのエンティティ情報も同時に得る)
-		if(dpara[i].entity_type == CIRCLE_ARC){							
-			if(GetCirAPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;					// 円/円弧パラメータの取得
-            body.CirA[TypeCount[_CIRCLE_ARC]].BlankStat = dpara[i].blank_stat;      // ディレクトリ部の情報"Blank Status"を得る
-			body.CirA[TypeCount[_CIRCLE_ARC]].EntUseFlag = dpara[i].useflag_stat;	// ディレクトリ部の情報"Entity Use Flag"を得る
-			dpara[i].entity_count = TypeCount[_CIRCLE_ARC];							// dparaとbodyを関連付ける
-			TypeCount[_CIRCLE_ARC]++;					// 円・円弧タイプの数をインクリメント
+		if(vdpara[i].entity_type == CIRCLE_ARC){							
+			CIRA CirA = GetCirAPara(str,pD);					// 円/円弧パラメータの取得
+            CirA.BlankStat  = vdpara[i].blank_stat;				// ディレクトリ部の情報"Blank Status"を得る
+			CirA.EntUseFlag = vdpara[i].useflag_stat;			// ディレクトリ部の情報"Entity Use Flag"を得る
+			vdpara[i].entity_count = body->m_CirA.size();		// dparaとbodyを関連付ける
+			body->m_CirA.push_back(CirA);
+//			TypeCount[_CIRCLE_ARC]++;					// 円・円弧タイプの数をインクリメント
 		}
 		// 複合曲線
-		else if(dpara[i].entity_type == COMPOSITE_CURVE){					
-			if(GetCompCPara(str,pD,dpara,dline,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_COMPOSITE_CURVE];					// dparaとbodyを関連付ける
-			TypeCount[_COMPOSITE_CURVE]++;				// 複合曲線タイプの数をインクリメント
+		else if(vdpara[i].entity_type == COMPOSITE_CURVE){					
+			COMPC CompC = GetCompCPara(str,pD,body);
+			vdpara[i].entity_count = body->m_CompC.size();		// dparaとbodyを関連付ける
+			body->m_CompC.push_back(CompC);
+//			TypeCount[_COMPOSITE_CURVE]++;				// 複合曲線タイプの数をインクリメント
 		}
 		// 円錐曲線
-		else if(dpara[i].entity_type == CONIC_ARC){											
-			if(GetConAPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-			TypeCount[_CONIC_ARC]++;					// 円錐曲線タイプの数をインクリメント
+		else if(vdpara[i].entity_type == CONIC_ARC){											
+			CONA ConA = GetConAPara(str,pD,vdpara,body);
+			body->m_ConA.push_back(ConA);
+//			TypeCount[_CONIC_ARC]++;					// 円錐曲線タイプの数をインクリメント
 		}
 		// 線分(NURBS曲線としてのエンティティ情報も同時に得る)
-		else if(dpara[i].entity_type == LINE){									
-			if(GetLinePara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;				// 線分パラメータの取得
-            body.Line[TypeCount[_LINE]].BlankStat = dpara[i].blank_stat;		// ディレクトリ部の情報"Blank Status"を得る
-			body.Line[TypeCount[_LINE]].EntUseFlag = dpara[i].useflag_stat;		// ディレクトリ部の情報"Entity Use Flag"を得る(LINE)
-			dpara[i].entity_count = TypeCount[_LINE];							// dparaとbodyを関連付ける
-			TypeCount[_LINE]++;							// 線分タイプの数をインクリメント
+		else if(vdpara[i].entity_type == LINE){									
+			LINE_ line = GetLinePara(str,pD);					// 線分パラメータの取得
+            line.BlankStat  = vdpara[i].blank_stat;				// ディレクトリ部の情報"Blank Status"を得る
+			line.EntUseFlag = vdpara[i].useflag_stat;			// ディレクトリ部の情報"Entity Use Flag"を得る(LINE)
+			vdpara[i].entity_count = body->m_Line.size();		// dparaとbodyを関連付ける
+			body->m_Line.push_back(line);
+//			TypeCount[_LINE]++;							// 線分タイプの数をインクリメント
 		}
 		// 変換行列
-		else if(dpara[i].entity_type == TRANSFORMATION_MATRIX){			
-			if(GetTMatPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_TRANSFORMATION_MATRIX];			// dparaとbodyを関連付ける
-			TypeCount[_TRANSFORMATION_MATRIX]++;		// 変換行列タイプの数をインクリメント
+		else if(vdpara[i].entity_type == TRANSFORMATION_MATRIX){			
+			TMAT TMat = GetTMatPara(str,pD);
+			vdpara[i].entity_count = body->m_TMat.size();		// dparaとbodyを関連付ける
+			body->m_TMat.push_back(TMat);
+//			TypeCount[_TRANSFORMATION_MATRIX]++;		// 変換行列タイプの数をインクリメント
 		}
 		// NURBS曲線
-		else if(dpara[i].entity_type == NURBS_CURVE){		
-			if(GetNurbsCPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-            body.NurbsC[TypeCount[_NURBSC]].BlankStat = dpara[i].blank_stat;	// ディレクトリ部の情報"Blank Status"を得る
-			body.NurbsC[TypeCount[_NURBSC]].EntUseFlag = dpara[i].useflag_stat;	// ディレクトリ部の情報"Entity Use Flag"を得る
-			body.NurbsC[TypeCount[_NURBSC]].OriginEnt = NURBS_CURVE;			// 元からNURBS曲線要素であることを明示
-			body.NurbsC[TypeCount[_NURBSC]].pOriginEnt = NULL;					// 参照元はNULL
-			dpara[i].entity_count = TypeCount[_NURBSC];							// dparaとbodyを関連付ける
-			TypeCount[_NURBSC]++;		// NURBS曲線タイプの数をインクリメント
+		else if(vdpara[i].entity_type == NURBS_CURVE){		
+			NURBSC NurbsC = GetNurbsCPara(str,pD);
+            NurbsC.m_BlankStat  = vdpara[i].blank_stat;			// ディレクトリ部の情報"Blank Status"を得る
+			NurbsC.m_EntUseFlag = vdpara[i].useflag_stat;		// ディレクトリ部の情報"Entity Use Flag"を得る
+			NurbsC.m_OriginEnt  = NURBS_CURVE;					// 元からNURBS曲線要素であることを明示
+			NurbsC.m_pOriginEnt = NULL;							// 参照元はNULL
+			vdpara[i].entity_count = body->m_NurbsC.size();		// dparaとbodyを関連付ける
+			body->m_NurbsC.push_back(NurbsC);
+//			TypeCount[_NURBSC]++;		// NURBS曲線タイプの数をインクリメント
 		}
 		// NURBS曲面
-		else if(dpara[i].entity_type == NURBS_SURFACE){		
-			if(GetNurbsSPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_NURBSS];							// dparaとbodyを関連付ける
-			TypeCount[_NURBSS]++;		// NURBS曲面タイプの数をインクリメント
+		else if(vdpara[i].entity_type == NURBS_SURFACE){		
+			NURBSS NurbsS = GetNurbsSPara(str,pD);
+			vdpara[i].entity_count = body->m_NurbsS.size();		// dparaとbodyを関連付ける
+			body->m_NurbsS.push_back(NurbsS);
+//			TypeCount[_NURBSS]++;		// NURBS曲面タイプの数をインクリメント
 		}
 		// 面上線
-		else if(dpara[i].entity_type == CURVE_ON_PARAMETRIC_SURFACE){	
-			if(GeConpSPara(str,pD,dpara,dline,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_CURVE_ON_PARAMETRIC_SURFACE];	// dparaとbodyを関連付ける
-			TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]++;	// 面上線タイプの数をインクリメント
+		else if(vdpara[i].entity_type == CURVE_ON_PARAMETRIC_SURFACE){	
+			CONPS ConpS = GeConpSPara(str,pD,vdpara);
+			vdpara[i].entity_count = body->m_ConpS.size();		// dparaとbodyを関連付ける
+			body->m_ConpS.push_back(ConpS);
+//			TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]++;	// 面上線タイプの数をインクリメント
 		}
 		// トリム面	
-		else if(dpara[i].entity_type == TRIMMED_SURFACE){				
-			if(GetTrmSPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_TRIMMED_SURFACE];				// dparaとbodyを関連付ける
-			TypeCount[_TRIMMED_SURFACE]++;				// トリム面タイプの数をインクリメント
+		else if(vdpara[i].entity_type == TRIMMED_SURFACE){				
+			TRMS TrmS = GetTrmSPara(str,pD,vdpara);
+			vdpara[i].entity_count = body->m_TrmS.size();				// dparaとbodyを関連付ける
+			body->m_TrmS.push_back(TrmS);
+//			TypeCount[_TRIMMED_SURFACE]++;				// トリム面タイプの数をインクリメント
 		}
 		// サポートしていないEntity Typeの場合
 		else{
 		//	char mes[256];
-		//	sprintf(mes,"Entity Type #%d:Unsupported",dpara[i].entity_type);
+		//	sprintf(mes,"Entity Type #%d:Unsupported",vdpara[i].entity_type);
 		//	GuiIFB.SetMessage(mes);
 			continue;
 		}
@@ -635,35 +637,35 @@ int IGES_PARSER::GetParameterSection(FILE *fp,DirectoryParam *dpara,BODY body,in
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::GetCirAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
+CIRA IGES_PARSER::GetCirAPara(char str[], int pD)
 {
-//	int i;
+	CIRA CirA;
 	char *p;
 	double x[3],y[3];
 
 	p = str;
 
-	body.CirA[TypeCount[_CIRCLE_ARC]].zt = CatchStringD(&p);		// Z軸方向の深さ
+	CirA.zt = CatchStringD(&p);		// Z軸方向の深さ
 	x[0] = CatchStringD(&p);							// 中心座標X
-	body.CirA[TypeCount[_CIRCLE_ARC]].cp[0].x = x[0];
+	CirA.cp[0].x = x[0];
 	y[0] = CatchStringD(&p);							// 中心座標Y
-	body.CirA[TypeCount[_CIRCLE_ARC]].cp[0].y = y[0];
+	CirA.cp[0].y = y[0];
 	x[1] = CatchStringD(&p);							// 始点X
-	body.CirA[TypeCount[_CIRCLE_ARC]].cp[1].x = x[1];
+	CirA.cp[1].x = x[1];
 	y[1] = CatchStringD(&p);							// 始点Y
-	body.CirA[TypeCount[_CIRCLE_ARC]].cp[1].y = y[1];
+	CirA.cp[1].y = y[1];
 	x[2] = CatchStringD(&p);							// 終点X
-	body.CirA[TypeCount[_CIRCLE_ARC]].cp[2].x = x[2];
+	CirA.cp[2].x = x[2];
 	y[2] = CatchStringD(&p);							// 終点Y
-	body.CirA[TypeCount[_CIRCLE_ARC]].cp[2].y = y[2];
+	CirA.cp[2].y = y[2];
 
-	body.CirA[TypeCount[_CIRCLE_ARC]].R = sqrt((x[1]-x[0])*(x[1]-x[0])+(y[1]-y[0])*(y[1]-y[0]));	// 半径算出
+	CirA.R = sqrt((x[1]-x[0])*(x[1]-x[0])+(y[1]-y[0])*(y[1]-y[0]));	// 半径算出
 
-	body.CirA[TypeCount[_CIRCLE_ARC]].pD = pD;		// ディレクトリ部への逆ポインタの値
+	CirA.pD = pD;		// ディレクトリ部への逆ポインタの値
 
-	InitDisplayStat(&body.CirA[TypeCount[_CIRCLE_ARC]].Dstat);	// 表示属性の初期化
+	InitDisplayStat(&CirA.Dstat);	// 表示属性の初期化
 
-	return KOD_TRUE;
+	return CirA;
 }
 
 // Function: GetConAPara
@@ -677,10 +679,11 @@ int IGES_PARSER::GetCirAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::GetConAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
+CONA IGES_PARSER::GetConAPara(char str[], int pD, vDpara& vdpara, BODY* body)
 {
+	CONA cona;
 //	GuiIFB.SetMessage("Type104:Unmounted");
-	return KOD_TRUE;
+	return cona;
 }
 
 // Function: GetLinePara
@@ -694,24 +697,25 @@ int IGES_PARSER::GetConAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::GetLinePara(char str[],int pD,DirectoryParam *dpara,BODY body)
+LINE_ IGES_PARSER::GetLinePara(char str[], int pD)
 {
+	LINE_ line;
 	char *p;
 
 	p = str;
 
-	body.Line[TypeCount[_LINE]].cp[0].x = CatchStringD(&p);		// 始点のX座標
-	body.Line[TypeCount[_LINE]].cp[0].y = CatchStringD(&p);		// 始点のY座標
-	body.Line[TypeCount[_LINE]].cp[0].z = CatchStringD(&p);		// 始点のZ座標
-	body.Line[TypeCount[_LINE]].cp[1].x = CatchStringD(&p);		// 終点のX座標
-	body.Line[TypeCount[_LINE]].cp[1].y = CatchStringD(&p);		// 終点のY座標
-	body.Line[TypeCount[_LINE]].cp[1].z = CatchStringD(&p);		// 終点のZ座標
+	line.cp[0].x = CatchStringD(&p);		// 始点のX座標
+	line.cp[0].y = CatchStringD(&p);		// 始点のY座標
+	line.cp[0].z = CatchStringD(&p);		// 始点のZ座標
+	line.cp[1].x = CatchStringD(&p);		// 終点のX座標
+	line.cp[1].y = CatchStringD(&p);		// 終点のY座標
+	line.cp[1].z = CatchStringD(&p);		// 終点のZ座標
 
-	body.Line[TypeCount[_LINE]].pD = pD;		// ディレクトリ部への逆ポインタの値
+	line.pD = pD;		// ディレクトリ部への逆ポインタの値
 
-	InitDisplayStat(&body.Line[TypeCount[_LINE]].Dstat);	// 表示属性の初期化
+	InitDisplayStat(&line.Dstat);	// 表示属性の初期化
 
-	return KOD_TRUE;
+	return line;
 }
 
 // Function: GetTMatPara
@@ -725,8 +729,9 @@ int IGES_PARSER::GetLinePara(char str[],int pD,DirectoryParam *dpara,BODY body)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::GetTMatPara(char str[],int pD,DirectoryParam *dpara,BODY body)
+TMAT IGES_PARSER::GetTMatPara(char str[], int pD)
 {
+	TMAT TMat;
 	int i,j;
 	char *p;
 	
@@ -734,17 +739,17 @@ int IGES_PARSER::GetTMatPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 	for(i=0;i<3;i++){
 		for(j=0;j<4;j++){
 			if(j != 3){
-				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].R(i,j) = CatchStringD(&p);		// 3×3回転行列成分
+				TMat.R(i,j) = CatchStringD(&p);		// 3×3回転行列成分
 			}
 			else{
-				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].T[i] = CatchStringD(&p);		// 並進ベクトル成分
+				TMat.T[i] = CatchStringD(&p);		// 並進ベクトル成分
 			}
 		}
 	}
 	
-	body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].pD = pD;		// DE部への逆ポインタの値
+	TMat.pD = pD;		// DE部への逆ポインタの値
 	
-	return KOD_TRUE;
+	return TMat;
 }
 
 // Function: GetNurbsCPara
@@ -758,51 +763,49 @@ int IGES_PARSER::GetTMatPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-int IGES_PARSER::GetNurbsCPara(char str[],int pD,DirectoryParam *dpara,BODY body)
+NURBSC IGES_PARSER::GetNurbsCPara(char str[], int pD)
 {
+	NURBSC NurbsC;
 	char *p;
 	int i=0;
 
 	p = str;
-	body.NurbsC[TypeCount[_NURBSC]].K = CatchStringI(&p) + 1;		// 総和記号の上側添字（コントロールポイント-1）の値
-	body.NurbsC[TypeCount[_NURBSC]].M = CatchStringI(&p) + 1;		// 基底関数の階数
-	body.NurbsC[TypeCount[_NURBSC]].N = body.NurbsC[TypeCount[_NURBSC]].K + body.NurbsC[TypeCount[_NURBSC]].M;	// ノットベクトルの数
+	int K = CatchStringI(&p) + 1;		// 総和記号の上側添字（コントロールポイント-1）の値
+	int M = CatchStringI(&p) + 1;		// 基底関数の階数
+	int N = K + M;						// ノットベクトルの数
+
+	NurbsC.m_M = M;
 	for(i=0;i<4;i++){	// ブーリアン型プロパティ4つ
-		body.NurbsC[TypeCount[_NURBSC]].prop[i] = CatchStringI(&p);
+		NurbsC.m_prop[i] = CatchStringI(&p);
 	}
 
-	// メモリー確保
-	if(NFunc.New_NurbsC(&body.NurbsC[TypeCount[_NURBSC]],body.NurbsC[TypeCount[_NURBSC]].K,body.NurbsC[TypeCount[_NURBSC]].N) == KOD_ERR){
-//		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
+	NurbsC.m_T.resize(N);
+	for(i=0;i<N;i++){
+		NurbsC.m_T[i] = CatchStringD(&p);	// ノットベクトルの値
 	}
-
-	for(i=0;i<body.NurbsC[TypeCount[_NURBSC]].N;i++){
-		body.NurbsC[TypeCount[_NURBSC]].T[i] = CatchStringD(&p);	// ノットベクトルの値
+	NurbsC.m_W.resize(K);
+	for(i=0;i<K;i++){						// Weightの値
+		NurbsC.m_W[i] = CatchStringD(&p);
 	}
-	for(i=0;i<body.NurbsC[TypeCount[_NURBSC]].K;i++){				// Weightの値
-		body.NurbsC[TypeCount[_NURBSC]].W[i] = CatchStringD(&p);
+	for(i=0;i<K;i++){						// コントロールポイントの座標値
+		Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
+		NurbsC.m_cp.push_back(cp);
 	}
-	for(i=0;i<body.NurbsC[TypeCount[_NURBSC]].K;i++){				// コントロールポイントの座標値
-		body.NurbsC[TypeCount[_NURBSC]].cp[i].x = CatchStringD(&p);
-		body.NurbsC[TypeCount[_NURBSC]].cp[i].y = CatchStringD(&p);
-		body.NurbsC[TypeCount[_NURBSC]].cp[i].z = CatchStringD(&p);
-	}
-	body.NurbsC[TypeCount[_NURBSC]].V[0] = CatchStringD(&p);		// パラメータの範囲
-	body.NurbsC[TypeCount[_NURBSC]].V[1] = CatchStringD(&p);
+	NurbsC.m_V[0] = CatchStringD(&p);		// パラメータの範囲
+	NurbsC.m_V[1] = CatchStringD(&p);
 
 	// 法線ベクトルは記述されている場合とされていない場合があるようなので、記述されている場合のみ読み込む
 	if(strchr(p,',') != NULL){
-		body.NurbsC[TypeCount[_NURBSC]].norm.x = CatchStringD(&p);	// 法線ベクトル
-		body.NurbsC[TypeCount[_NURBSC]].norm.y = CatchStringD(&p);
-		body.NurbsC[TypeCount[_NURBSC]].norm.z = CatchStringD(&p);
+		NurbsC.m_norm.x = CatchStringD(&p);	// 法線ベクトル
+		NurbsC.m_norm.y = CatchStringD(&p);
+		NurbsC.m_norm.z = CatchStringD(&p);
 	}
 
-	body.NurbsC[TypeCount[_NURBSC]].pD = pD;		// DE部への逆ポインタの値
+	NurbsC.m_pD = pD;		// DE部への逆ポインタの値
 
-	InitDisplayStat(&body.NurbsC[TypeCount[_NURBSC]].Dstat);	// 表示属性の初期化
+	InitDisplayStat(&NurbsC.m_Dstat);	// 表示属性の初期化
 
-	return KOD_TRUE;
+	return NurbsC;
 }
 
 // Function: GetNurbsSPara
@@ -816,59 +819,62 @@ int IGES_PARSER::GetNurbsCPara(char str[],int pD,DirectoryParam *dpara,BODY body
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-int IGES_PARSER::GetNurbsSPara(char str[],int pD,DirectoryParam *dpara,BODY body)
+NURBSS IGES_PARSER::GetNurbsSPara(char str[], int pD)
 {
+	NURBSS NurbsS;
 	char *p;
-	int i=0,j=0;
+	int i=0,j=0,
+		K[2], M[2], N[2];
 
 	p = str;
 
-	body.NurbsS[TypeCount[_NURBSS]].K[0] = CatchStringI(&p) + 1;	// u方向コントロールポイントの数
-	body.NurbsS[TypeCount[_NURBSS]].K[1] = CatchStringI(&p) + 1;	// v方向コントロールポイントの数
-	body.NurbsS[TypeCount[_NURBSS]].M[0] = CatchStringI(&p) + 1;	// 基底関数のu方向階数
-	body.NurbsS[TypeCount[_NURBSS]].M[1] = CatchStringI(&p) + 1;	// 基底関数のv方向階数
-	body.NurbsS[TypeCount[_NURBSS]].N[0] = body.NurbsS[TypeCount[_NURBSS]].K[0] + body.NurbsS[TypeCount[_NURBSS]].M[0];	// u方向ノットベクトルの数
-	body.NurbsS[TypeCount[_NURBSS]].N[1] = body.NurbsS[TypeCount[_NURBSS]].K[1] + body.NurbsS[TypeCount[_NURBSS]].M[1];	// v方向ノットベクトルの数
+	K[0] = CatchStringI(&p) + 1;	// u方向コントロールポイントの数
+	K[1] = CatchStringI(&p) + 1;	// v方向コントロールポイントの数
+	M[0] = CatchStringI(&p) + 1;	// 基底関数のu方向階数
+	M[1] = CatchStringI(&p) + 1;	// 基底関数のv方向階数
+	N[0] = K[0] + M[0];				// u方向ノットベクトルの数
+	N[1] = K[1] + M[1];				// v方向ノットベクトルの数
+
+	NurbsS.m_M[0] = M[0];
+	NurbsS.m_M[1] = M[1];
 	for(i=0;i<5;i++){
-		body.NurbsS[TypeCount[_NURBSS]].prop[i] = CatchStringI(&p);	// ブーリアン型プロパティ5つ
+		NurbsS.m_prop[i] = CatchStringI(&p);	// ブーリアン型プロパティ5つ
 	}
 
-	// メモリー確保
-	if(NFunc.New_NurbsS(&body.NurbsS[TypeCount[_NURBSS]],body.NurbsS[TypeCount[_NURBSS]].K,body.NurbsS[TypeCount[_NURBSS]].N) == KOD_ERR){
-//		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
+	NurbsS.m_S.resize(N[0]);	
+	for(i=0;i<N[0];i++){
+		NurbsS.m_S[i] = CatchStringD(&p);	// u方向ノットベクトル
 	}
-	
-	for(i=0;i<body.NurbsS[TypeCount[_NURBSS]].N[0];i++){
-		body.NurbsS[TypeCount[_NURBSS]].S[i] = CatchStringD(&p);	// u方向ノットベクトル
+	NurbsS.m_T.resize(N[1]);
+	for(i=0;i<N[1];i++){
+		NurbsS.m_T[i] = CatchStringD(&p);	// v方向ノットベクトル
 	}
-	for(i=0;i<body.NurbsS[TypeCount[_NURBSS]].N[1];i++){
-		body.NurbsS[TypeCount[_NURBSS]].T[i] = CatchStringD(&p);	// v方向ノットベクトル
-	}
-	for(i=0;i<body.NurbsS[TypeCount[_NURBSS]].K[1];i++){
-		for(j=0;j<body.NurbsS[TypeCount[_NURBSS]].K[0];j++){
-			body.NurbsS[TypeCount[_NURBSS]].W[j][i] = CatchStringD(&p);	//  u方向Weight
+	NurbsS.m_W.resize(K[0], K[1]);
+	for(i=0;i<K[1];i++){
+		for(j=0;j<K[0];j++){
+			NurbsS.m_W(j,i) = CatchStringD(&p);	//  u方向Weight
 		}
 	}
-	for(i=0;i<body.NurbsS[TypeCount[_NURBSS]].K[1];i++){
-		for(j=0;j<body.NurbsS[TypeCount[_NURBSS]].K[0];j++){
-			body.NurbsS[TypeCount[_NURBSS]].cp[j][i].x = CatchStringD(&p);	// コントロールポイントX
-			body.NurbsS[TypeCount[_NURBSS]].cp[j][i].y = CatchStringD(&p);	// コントロールポイントY
-			body.NurbsS[TypeCount[_NURBSS]].cp[j][i].z = CatchStringD(&p);	// コントロールポイントZ
+	for(i=0;i<K[1];i++){
+		VCoord vcp;
+		for(j=0;j<K[0];j++){
+			Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
+			vcp.push_back(cp);
 		}
+		NurbsS.m_cp.push_back(vcp);
 	}
-	body.NurbsS[TypeCount[_NURBSS]].U[0] = CatchStringD(&p);			// u方向の開始値
-	body.NurbsS[TypeCount[_NURBSS]].U[1] = CatchStringD(&p);			// u方向の終了値
-	body.NurbsS[TypeCount[_NURBSS]].V[0] = CatchStringD(&p);			// v方向の開始値
-	body.NurbsS[TypeCount[_NURBSS]].V[1] = CatchStringD(&p);			// v方向の終了値
+	NurbsS.m_U[0] = CatchStringD(&p);			// u方向の開始値
+	NurbsS.m_U[1] = CatchStringD(&p);			// u方向の終了値
+	NurbsS.m_V[0] = CatchStringD(&p);			// v方向の開始値
+	NurbsS.m_V[1] = CatchStringD(&p);			// v方向の終了値
 
-	body.NurbsS[TypeCount[_NURBSS]].pD = pD;		// DE部への逆ポインタの値
+	NurbsS.m_pD = pD;		// DE部への逆ポインタの値
 
-	body.NurbsS[TypeCount[_NURBSS]].TrmdSurfFlag = KOD_FALSE;	// とりあえずトリムされていない独立面としておく(Type144を読みに言ったときに変更される)
+	NurbsS.m_TrmdSurfFlag = KOD_FALSE;	// とりあえずトリムされていない独立面としておく(Type144を読みに言ったときに変更される)
 
-	body.ChangeStatColor(body.NurbsS[TypeCount[_NURBSS]].Dstat.Color,0.2,0.2,0.2,0.5);	// 曲面の色を設定
+	ChangeStatColor(NurbsS.m_Dstat.Color,0.2,0.2,0.2,0.5);	// 曲面の色を設定(BODY.cpp)
 
-	return KOD_TRUE;
+	return NurbsS;
 }
 
 // Function: GetCompCPara
@@ -882,31 +888,25 @@ int IGES_PARSER::GetNurbsSPara(char str[],int pD,DirectoryParam *dpara,BODY body
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-int IGES_PARSER::GetCompCPara(char str[],int pD,DirectoryParam *dpara,int dline,BODY body)
+COMPC IGES_PARSER::GetCompCPara(char str[], int pD, BODY* body)
 {
+	COMPC CompC;
 	char *p;
 	int  pdnum;		// DE部のシーケンスナンバー取得用
 	int  i;
 
 	p = str;
 
-	body.CompC[TypeCount[_COMPOSITE_CURVE]].N = CatchStringI(&p);	// 複合曲線の構成要素数
+	int N = CatchStringI(&p);	// 複合曲線の構成要素数
 
-	// 複合曲線のメモリーを確保
-	if(NFunc.New_CompC(&body.CompC[TypeCount[_COMPOSITE_CURVE]],body.CompC[TypeCount[_COMPOSITE_CURVE]].N) == KOD_ERR){
-//		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
-	}
-
-	for(i=0;i<body.CompC[TypeCount[_COMPOSITE_CURVE]].N;i++){		// 構成要素のDE部へのポインタ値
+	for(i=0;i<N;i++){		// 構成要素のDE部へのポインタ値
 		pdnum = CatchStringI(&p);		// 各構成要素のDE部のシーケンスナンバーを得る
-		body.CompC[TypeCount[_COMPOSITE_CURVE]].DEType[i] = SearchEntType(dpara,pdnum,dline);		// pdnumが示すエンティティタイプを判別
-		body.CompC[TypeCount[_COMPOSITE_CURVE]].pDE[i].substitution = GetDEPointer(pdnum,body);		// pdnumが示す構造体のポインタを得る
+		CompC.pDE.push_back( GetDEPointer(pdnum,body) );	// pdnumが示す構造体のポインタを得る
 	}
 
-	body.CompC[TypeCount[_COMPOSITE_CURVE]].pD = pD;		// DE部への逆ポインタの値
+	CompC.pD = pD;		// DE部への逆ポインタの値
 
-	return KOD_TRUE;
+	return CompC;
 }
 
 // Function: GeConpSPara
@@ -920,32 +920,33 @@ int IGES_PARSER::GetCompCPara(char str[],int pD,DirectoryParam *dpara,int dline,
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::GeConpSPara(char str[],int pD,DirectoryParam *dpara,int dline,BODY body)
+CONPS IGES_PARSER::GeConpSPara(char str[], int pD, vDpara& vdpara)
 {
+	CONPS ConpS;
 	char *p;
 	int pdnum;		// DE部のシーケンスナンバー取得用
 
 	p = str;
 
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].crtn = CatchStringI(&p);	// 面上線がどのように作られたかを表す
+	ConpS.crtn = CatchStringI(&p);	// 面上線がどのように作られたかを表す
 
 	pdnum = CatchStringI(&p);			// Curveが乗るSurfaceのDE部のシーケンスナンバーを得る
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].SType = SearchEntType(dpara,pdnum,dline);	// pdnumが示すエンティティタイプを判別
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].pS = (NURBSS *)GetDEPointer(pdnum,body);		// pdnumが示す構造体のポインタを得る
+	ConpS.SType = SearchEntType(vdpara,pdnum);	// pdnumが示すエンティティタイプを判別
+//	ConpS.pS = (NURBSS*)GetDEPointer(pdnum,body);		// pdnumが示す構造体のポインタを得る -> NURBSS*はCOMPELEMにないはずだが... K.Magara
 
 	pdnum = CatchStringI(&p);			// Surfaceのパラメータ空間におけるcurveを定義するEntityのDE部のシーケンスナンバーを得る
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].BType = SearchEntType(dpara,pdnum,dline);	// pdnumが示すエンティティタイプを判別
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].pB.substitution = GetDEPointer(pdnum,body);		// pdnumが示す構造体のポインタを得る(共用体)
+	ConpS.BType = SearchEntType(vdpara,pdnum);	// pdnumが示すエンティティタイプを判別
+//	ConpS.pB.substitution = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る(共用体) -> CURVEとCOMPELEM違う... K.Magara
 
 	pdnum = CatchStringI(&p);			// Curve CのDE部へのポインタ
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].CType = SearchEntType(dpara,pdnum,dline);	// pdnumが示すエンティティタイプを判別
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].pC.substitution = GetDEPointer(pdnum,body);		// pdnumが示す構造体のポインタを得る(共用体)
+	ConpS.CType = SearchEntType(vdpara,pdnum);	// pdnumが示すエンティティタイプを判別
+//	ConpS.pC.substitution = GetDEPointer(pdnum,body);	// pdnumが示す構造体のポインタを得る(共用体) -> 上に同じ K.Magara
 
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].pref = CatchStringI(&p);	// 送り側システムで採られていた表現を表すフラグ
+	ConpS.pref = CatchStringI(&p);	// 送り側システムで採られていた表現を表すフラグ
 
-	body.ConpS[TypeCount[_CURVE_ON_PARAMETRIC_SURFACE]].pD = pD;	// DE部のシーケンスナンバーを得る
+	ConpS.pD = pD;	// DE部のシーケンスナンバーを得る
 
-	return KOD_TRUE;
+	return ConpS;
 }
 
 // Function: GetTrmSPara
@@ -959,8 +960,9 @@ int IGES_PARSER::GeConpSPara(char str[],int pD,DirectoryParam *dpara,int dline,B
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY body)
+TRMS IGES_PARSER::GetTrmSPara(char str[], int pD, vDpara& vdpara)
 {
+	TRMS TrmS;
 	char *p;
 	int  i;
 	int  pdnum;		// DE部のシーケンスナンバー取得用
@@ -968,28 +970,22 @@ int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 	p = str;
 	
 	pdnum = CatchStringI(&p);		// トリムされるSurface EntityのDE部の値を取得
-	body.TrmS[TypeCount[_TRIMMED_SURFACE]].pts = (NURBSS *)GetDEPointer(pdnum,body);		// トリムされるSurface Entityへのポインタを取得
-	body.TrmS[TypeCount[_TRIMMED_SURFACE]].pts->TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
-	body.TrmS[TypeCount[_TRIMMED_SURFACE]].n1 = CatchStringI(&p);		// ０：外周がDの境界と一致している　１：それ以外
-	body.TrmS[TypeCount[_TRIMMED_SURFACE]].n2 = CatchStringI(&p);		// Trimmed Surfaceの内周の単純閉曲線の数
+//	TrmS.m_pts = (NURBSS*)GetDEPointer(pdnum,body);		// トリムされるSurface Entityへのポインタを取得 -> NURBSS*はCOMPELEMにないはずだが... K.Magara
+	TrmS.m_pts->m_TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
+	TrmS.m_n1 = CatchStringI(&p);		// ０：外周がDの境界と一致している　１：それ以外
+	int n2 = CatchStringI(&p);		// Trimmed Surfaceの内周の単純閉曲線の数
 
 	pdnum = CatchStringI(&p);		// Trimmed Surfaceの外周の単純閉曲線の数
-	body.TrmS[TypeCount[_TRIMMED_SURFACE]].pTO = (CONPS *)GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得
+//	TrmS.m_pTO = (CONPS*)GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得 -> CONPS*はCOMPELEMにないはずだが... K.Magara
 
-	// 単純閉曲線N2の数だけメモリー確保
-	if((NFunc.New_TrmS(&body.TrmS[TypeCount[_TRIMMED_SURFACE]],body.TrmS[TypeCount[_TRIMMED_SURFACE]].n2)) == KOD_ERR){
-//		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
-	}
-
-	for(i=0;i<body.TrmS[TypeCount[_TRIMMED_SURFACE]].n2;i++){
+	for(i=0;i<n2;i++){
 		pdnum = CatchStringI(&p);	// Trimmed Surfaceの内周の単純閉曲線のDE部の値を取得
-		body.TrmS[TypeCount[_TRIMMED_SURFACE]].pTI[i] = (CONPS *)GetDEPointer(pdnum,body);	// 単純閉曲線構造体へのポインタを取得
+//		TrmS.m_pTI.push_back((CONPS *)GetDEPointer(pdnum,body));	// 単純閉曲線構造体へのポインタを取得
 	}
 
-	body.TrmS[TypeCount[_TRIMMED_SURFACE]].pD = pD;		// DE部のシーケンスナンバーを得る
+	TrmS.m_pD = pD;		// DE部のシーケンスナンバーを得る
 
-	return KOD_TRUE;
+	return TrmS;
 }
 
 // Function: GetDirectorySection
@@ -1003,13 +999,14 @@ int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:失敗
-int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int dline)
+int IGES_PARSER::GetDirectorySection(FILE *fp, vDpara& vdpara, int dline)
 {
 	int i,j;
 	char *p;						// 文字列先頭判別用ポインタ
 	char str[COLUMN_MAX*2+1];		// 2行分（1エンティティ分）の文字列配列
 	char field[FIELD_NUM+1];		// 8文字で1フィールド
 	char dmy;
+	DirectoryParam dpara;
 
 	for(i=0;i<dline;i++){
 		strcpy(str,"");				// str初期化
@@ -1034,24 +1031,25 @@ int IGES_PARSER::GetDirectorySection(FILE *fp,DirectoryParam *dpara,int dline)
 			p += FIELD_NUM;							// pを次のフィールドの先頭へ移動
 			// ディレクトリ部の情報が必要な場合は以下にコードを追加する
 			if(j == ENTITY_TYPE_NUM){					// 要素番号を取得
-				dpara[i].entity_type = atoi(field);
+				dpara.entity_type = atoi(field);
 			}
 			else if(j == PARAM_DATA){					// パラメータ部へのポインタを取得
-				dpara[i].p_param = atoi(field);
+				dpara.p_param = atoi(field);
 			}
 			else if(j == TRAN_MATRIX){					// マトリックスへのポインタを取得
-				dpara[i].p_tm = atoi(field);
+				dpara.p_tm = atoi(field);
 			}
 			else if(j == STATUS_NUM){					// ステータスを取得
-				GetStatusNumber(field,&dpara[i]);
+				GetStatusNumber(field,&dpara);
 			}
 			else if(j == SEQUENCE_NUM){					// シーケンス番号を取得
-				sscanf(field,"%c %d",&dmy,&dpara[i].seq_num);
+				sscanf(field,"%c %d",&dmy,&dpara.seq_num);
 			}
 			else if(j == PARAM_LINE_COUNT){				// パラメータ部のライン数
-				dpara[i].param_line_count = atoi(field);
+				dpara.param_line_count = atoi(field);
 			}
 		}
+		vdpara.push_back(dpara);
 	}
 	
 	return KOD_TRUE;
@@ -1304,43 +1302,69 @@ double IGES_PARSER::CatchStringD(char **p)
 //
 // Return:
 // DE部へのポインタが示す実際の構造体へのポインタをvoid型で返す
-void *IGES_PARSER::GetDEPointer(int TypeNum,BODY body)
+COMPELEM IGES_PARSER::GetDEPointer(int TypeNum, BODY* body)
 {
+	COMPELEM result;	//	typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;
 	int i,j;
 
-	for(i=0;i<ALL_ENTITY_TYPE_NUM;i++){
-		for(j=0;j<TypeCount[i];j++){
-			if(i==_CIRCLE_ARC && body.CirA[j].pD == TypeNum){
-				return &body.CirA[j];
-			}
-			else if(i==_COMPOSITE_CURVE && body.CompC[j].pD == TypeNum){
-				return &body.CompC[j];
-			}
-			else if(i==_CONIC_ARC && body.ConA[j].pD == TypeNum){
-				return &body.ConA[j];
-			}
-			else if(i==_LINE && body.Line[j].pD == TypeNum){
-				return &body.Line[j];
-			}
-			else if(i==_TRANSFORMATION_MATRIX && body.TMat[j].pD == TypeNum){
-				return &body.TMat[j];
-			}
-			else if(i==_NURBSC && body.NurbsC[j].pD == TypeNum){
-				return &body.NurbsC[j];
-			}
-			else if(i==_NURBSS && body.NurbsS[j].pD == TypeNum){
-				return &body.NurbsS[j];
-			}
-			else if(i==_CURVE_ON_PARAMETRIC_SURFACE && body.ConpS[j].pD == TypeNum){
-				return &body.ConpS[j];
-			}
-			else if(i==_TRIMMED_SURFACE && body.TrmS[j].pD == TypeNum){
-				return &body.TrmS[j];
+	for(i=0; i<ALL_ENTITY_TYPE_NUM && result.which()==0; i++){
+		for ( j=0; j<body->m_CirA.size(); j++ ) {
+			if ( body->m_CirA[j].pD == TypeNum ) {
+				result = &body->m_CirA[j];
+				break;
 			}
 		}
+//		for ( j=0; j<body->m_CompC.size(); j++ ) {
+//			if ( body->m_CompC[j].pD == TypeNum ) {
+//				result = &body->m_CompC[j];
+//				break;
+//			}
+//		}
+		for ( j=0; j<body->m_ConA.size(); j++ ) {
+			if ( body->m_ConA[j].pD == TypeNum ) {
+				result = &body->m_ConA[j];
+				break;
+			}
+		}
+		for ( j=0; j<body->m_Line.size(); j++ ) {
+			if ( body->m_Line[j].pD == TypeNum ) {
+				result = &body->m_Line[j];
+				break;
+			}
+		}
+//		for ( j=0; j<body->m_TMat.size(); j++ ) {
+//			if ( body->m_TMat[j].pD == TypeNum ) {
+//				result =  &body->m_TMat[j];
+//				break;
+//			}
+//		}
+		for ( j=0; j<body->m_NurbsC.size(); j++ ) {
+			if ( body->m_NurbsC[j].m_pD == TypeNum ) {
+				result = &body->m_NurbsC[j];
+				break;
+			}
+		}
+//		for ( j=0; j<body->m_NurbsS.size(); j++ ) {
+//			if ( body->m_NurbsS[j].m_pD == TypeNum ) {
+//				result = &body->m_NurbsS[j];
+//				break;
+//			}
+//		}
+//		for ( j=0; j<body->m_ConpS.size(); j++ ) {
+//			if ( body->m_ConpS[j].pD == TypeNum ) {
+//				result =  &body->m_ConpS[j];
+//				break;
+//			}
+//		}
+//		for ( j=0; j<body->m_TrmS.size(); j++ ) {
+//			if ( body->m_TrmS[j].m_pD == TypeNum ) {
+//				result = &body->m_TrmS[j];
+//				break;
+//			}
+//		}
 	}
 
-	return NULL;
+	return result;
 }
 
 // Funciton: SearchEntType
@@ -1353,13 +1377,13 @@ void *IGES_PARSER::GetDEPointer(int TypeNum,BODY body)
 //
 // Return: 
 // エンティティタイプ(DE部のシーケンスナンバーと一致し無かった場合はKOD_ERR)
-int IGES_PARSER::SearchEntType(DirectoryParam *dpara,int pdnum,int dline)
+int IGES_PARSER::SearchEntType(vDpara& vdpara, int pdnum)
 {
 	int i;
 
-	for(i=0;i<dline;i++){
-		if(dpara[i].seq_num == pdnum){
-			return dpara[i].entity_type;
+	for(i=0;i<vdpara.size();i++){
+		if(vdpara[i].seq_num == pdnum){
+			return vdpara[i].entity_type;
 		}
 	}
 
