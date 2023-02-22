@@ -50,37 +50,37 @@ public:
 
     // Function: GetOuterCompC
     // トリム面を構成する外側トリム曲線(複合曲線)へのポインタを取得する
-    COMPC* GetOuterCompC() const;
+    COMPC* GetOuterCompC();
 
     // Function: GetInnerCompC
     // トリム面を構成する内側トリム曲線(複合曲線)へのポインタを取得する
-    COMPC* GetInnerCompC(int) const;
+    COMPC* GetInnerCompC(int);
 
     // Funciton: GetNurbsS
     // トリム面を構成するNURBS曲面へのポインタを得る
-    NURBSS* GetNurbsS() const;
+    NURBSS* GetNurbsS();
 
     // ---
 
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
-	int DetermPtOnTRMSurf(double,double) const;
+	int DetermPtOnTRMSurf(double,double);
 
 	// Function: GetPtsOnOuterTRMSurf
 	// 外周トリム面内の点のみ残す
-	VCoord GetPtsOnOuterTRMSurf(const VCoord&) const;
+	VCoord GetPtsOnOuterTRMSurf(const VCoord&);
 
 	// Function: GetPtsOnInnerTRMSurf
 	// 内周トリム面外の点のみ残す
-	VCoord GetPtsOnInnerTRMSurf(const VCoord&) const;
+	VCoord GetPtsOnInnerTRMSurf(const VCoord&);
 
 	// Function: GetPtsOnInnerOuterTRMSurf
 	// 内外周トリム面内の点のみ残す
-	VCoord GetPtsOnInnerOuterTRMSurf(const VCoord&) const;
+	VCoord GetPtsOnInnerOuterTRMSurf(const VCoord&);
 
 	// Function: DetectInterfereTrmS
 	// NURBS曲面(トリム有)同士の干渉検出
-	int DetectInterfereTrmS(const TRIMD_NURBSS*, int) const;
+	int DetectInterfereTrmS(TRIMD_NURBSS*, int);
 
     // NURBS曲面を平面でトリムする(準備中)
 	int TrimNurbsSPlane(const Coord&, const Coord&);
@@ -89,11 +89,11 @@ private:
 
 	// Function: DetermPtOnTRMSurf_sub
 	// (private)トリム境界線が複合曲線の場合のトリミング領域内外判定
-	int DetermPtOnTRMSurf_sub(const CONPS *,double,double) const;
+	int DetermPtOnTRMSurf_sub(CONPS*, double, double);
 
 	// Function: ApproxTrimBorder
 	// (private)トリム境界線を点群で近似する
-	VCoord ApproxTrimBorder(const COMPC *) const;
+	VCoord ApproxTrimBorder(COMPC *);
 
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
