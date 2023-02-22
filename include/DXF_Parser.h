@@ -85,7 +85,7 @@ private:
 	
 	// Function: ResearchEntNum
 	// (private)各エンティティの数をリサーチ
-	int ResearchEntNum(FILE *,BODY *);
+//	int ResearchEntNum(FILE *,BODY *);
 	
 	// Function: GetArcData
 	// (private)円弧のデータを取得しBODYに格納
@@ -136,10 +136,6 @@ private:
 	// Variable: Gcode
 	// (private)グループコード格納バッファ
 	int  Gcode;
-	
-	// Variable: Count
-	// (private)エンティティカウンタ
-	int  Count[ALL_ENTITY_TYPE_NUM];
 };
 
 

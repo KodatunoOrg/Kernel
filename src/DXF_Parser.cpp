@@ -8,9 +8,6 @@
 // コンストラクタ
 DXF_PARSER::DXF_PARSER()
 {
-	for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++){
-		Count[i] = 0;
-	}
 }
 
 // Function: DXF_Parser_Main
@@ -25,7 +22,6 @@ DXF_PARSER::DXF_PARSER()
 int DXF_PARSER::DXF_Parser_Main(BODY *body,const char *DXF_fname)
 {
 	FILE *fp;
-	NURBS_Func nfunc;
 //	char mes[BUFSIZEMAX_DXF];		// 出力用メッセージ格納バッファ
 	int line = 1;				// 現在の行番号
 	int section = 0;			// セクション番号
@@ -71,7 +67,7 @@ int DXF_PARSER::DXF_Parser_Main(BODY *body,const char *DXF_fname)
 
 	fclose(fp);
 
-	body->MaxCoord = 200;
+	body->m_MaxCoord = 200;
 
 	return KOD_TRUE;
 }
@@ -92,8 +88,7 @@ int DXF_PARSER::ReadEntitiesSection(FILE *fp,int Line,BODY *body)
 
 	fgetpos(fp,&pos);			// 現在のfpの位置を覚えておく
 
-	ResearchEntNum(fp,body);	// 各エンティティの数をリサーチ
-	body->NewBodyElem();		// BODY構造体内の各エンティティのメモリー確保
+//	ResearchEntNum(fp,body);	// 各エンティティの数をリサーチ
 	fseek(fp,pos,SEEK_SET);		// エンティティセクションの最初の位置へ戻る
 	fgets(Buf,sizeof(Buf),fp);	// 1行読み捨て
 
@@ -124,16 +119,13 @@ int DXF_PARSER::ReadEntitiesSection(FILE *fp,int Line,BODY *body)
 // メモリー確保に失敗：KOD_ERR
 int DXF_PARSER::ChangeEntityforNurbs(BODY *body)
 {
-	int ncount = 0;
-	for(int i=0;i<body->TypeNum[_LINE];i++){
-		if(body->GetNurbsCFromLine(ncount,i) == KOD_ERR) return KOD_ERR;	// 円/円弧パラメータからNURBS曲線パラメータを得る
-		InitDisplayStat(&body->NurbsC[ncount].Dstat);						// 表示属性の初期化
-		ncount++;
+	for(int i=0;i<body->m_Line.size();i++){
+		if(body->GetNurbsCFromLine(i) == KOD_ERR) return KOD_ERR;	// 円/円弧パラメータからNURBS曲線パラメータを得る
+		InitDisplayStat(&body->m_NurbsC.back().m_Dstat);			// 表示属性の初期化
 	}
-	for(int i=0;i<body->TypeNum[_CIRCLE_ARC];i++){
-		if(body->GetNurbsCFromCirA(ncount,i) == KOD_ERR) return KOD_ERR;	// 線分パラメータからNURBS曲線パラメータを得る
-		InitDisplayStat(&body->NurbsC[ncount].Dstat);								// 表示属性の初期化
-		ncount++;
+	for(int i=0;i<body->m_CirA.size();i++){
+		if(body->GetNurbsCFromCirA(i) == KOD_ERR) return KOD_ERR;	// 線分パラメータからNURBS曲線パラメータを得る
+		InitDisplayStat(&body->m_NurbsC.back().m_Dstat);								// 表示属性の初期化
 	}
 }
 
@@ -148,6 +140,8 @@ int DXF_PARSER::ChangeEntityforNurbs(BODY *body)
 // KOD_TRUE
 int DXF_PARSER::GetArcData(FILE *fp,BODY *body)
 {
+	CIRA CirA;
+
 	while(1){
 		fgets(Buf,sizeof(Buf),fp);		// 奇数行
 		sscanf(Buf,"%d",&Gcode);
@@ -158,38 +152,38 @@ int DXF_PARSER::GetArcData(FILE *fp,BODY *body)
 			fgets(Buf,sizeof(Buf),fp);	// 偶数行
 
 			if(Gcode == COORD_X)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].cp[0].x);		// 円弧の中心座標X
+				sscanf(Buf,"%lf",&CirA.cp[0].x);	// 円弧の中心座標X
 			else if(Gcode == COORD_Y)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].cp[0].y);		// 円弧の中心座標Y
+				sscanf(Buf,"%lf",&CirA.cp[0].y);	// 円弧の中心座標Y
 			else if(Gcode == COORD_Z)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].cp[0].z);		// 円弧の中心座標Z
+				sscanf(Buf,"%lf",&CirA.cp[0].z);	// 円弧の中心座標Z
 			else if(Gcode == RADIUS)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].R);			// 円弧の半径
+				sscanf(Buf,"%lf",&CirA.R);			// 円弧の半径
 			else if(Gcode == START_ANG)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].t[0]);			// 円弧の開始角度
+				sscanf(Buf,"%lf",&CirA.t[0]);		// 円弧の開始角度
 			else if(Gcode == END_ANG)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].t[1]);			// 円弧の終了角度
+				sscanf(Buf,"%lf",&CirA.t[1]);		// 円弧の終了角度
 		}
 	}
 
 	// debug
 	//fprintf(stderr,"%d:%lf,%lf,%lf,%lf,%lf,%lf\n",Count[_CIRCLE_ARC],
-	//	body->CirA[Count[_CIRCLE_ARC]].cp[0].x,
-	//	body->CirA[Count[_CIRCLE_ARC]].cp[0].y,
-	//	body->CirA[Count[_CIRCLE_ARC]].cp[0].z,
-	//	body->CirA[Count[_CIRCLE_ARC]].R,
-	//	body->CirA[Count[_CIRCLE_ARC]].t[0],
-	//	body->CirA[Count[_CIRCLE_ARC]].t[1]);
+	//	CirA.cp[0].x,
+	//	CirA.cp[0].y,
+	//	CirA.cp[0].z,
+	//	CirA.R,
+	//	CirA.t[0],
+	//	CirA.t[1]);
 
-	SetStartEndPtArc(&body->CirA[Count[_CIRCLE_ARC]]);			// 円弧の始点，終点をセット
-	CalcUVvec(&body->CirA[Count[_CIRCLE_ARC]]);					// CIRAのUV直交座標を設定する
+	SetStartEndPtArc(&CirA);						// 円弧の始点，終点をセット
+	CalcUVvec(&CirA);								// CIRAのUV直交座標を設定する
 
-	InitDisplayStat(&body->CirA[Count[_CIRCLE_ARC]].Dstat);		// 色指定
-    body->CirA[Count[_CIRCLE_ARC]].BlankStat = DISPLAY;         // 描画対象であることを宣言
-	body->CirA[Count[_CIRCLE_ARC]].EntUseFlag = GEOMTRYELEM;	// 幾何要素であることを宣言
-	body->CirA[Count[_CIRCLE_ARC]].pD = NULL;					// IGESでないので関係なし
+	InitDisplayStat(&CirA.Dstat);					// 色指定
+    CirA.BlankStat = DISPLAY;						// 描画対象であることを宣言
+	CirA.EntUseFlag = GEOMTRYELEM;					// 幾何要素であることを宣言
+	CirA.pD = NULL;									// IGESでないので関係なし
 
-	Count[_CIRCLE_ARC]++;
+	body->m_CirA.push_back(CirA);
 
 	return KOD_TRUE;
 }
@@ -244,6 +238,8 @@ int DXF_PARSER::SetStartEndPtArc(CIRA *Cira)
 // KOD_TRUE
 int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 {
+	CIRA CirA;
+
 	while(1){
 		fgets(Buf,sizeof(Buf),fp);		// 奇数行
 		sscanf(Buf,"%d",&Gcode);
@@ -254,34 +250,34 @@ int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 			fgets(Buf,sizeof(Buf),fp);	// 偶数行
 
 			if(Gcode == COORD_X)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].cp[0].x);		// 円の中心座標X
+				sscanf(Buf,"%lf",&CirA.cp[0].x);		// 円の中心座標X
 			else if(Gcode == COORD_Y)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].cp[0].y);		// 円の中心座標Y
+				sscanf(Buf,"%lf",&CirA.cp[0].y);		// 円の中心座標Y
 			else if(Gcode == COORD_Z)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].cp[0].z);		// 円の中心座標Z
+				sscanf(Buf,"%lf",&CirA.cp[0].z);		// 円の中心座標Z
 			else if(Gcode == RADIUS)
-				sscanf(Buf,"%lf",&body->CirA[Count[_CIRCLE_ARC]].R);			// 円の半径
+				sscanf(Buf,"%lf",&CirA.R);				// 円の半径
 		}
 	}
 
 	// debug
 	//fprintf(stderr,"%d:%lf,%lf,%lf,%lf\n",Count[_CIRCLE_ARC],
-	//	body->CirA[Count[_CIRCLE_ARC]].cp[0].x,
-	//	body->CirA[Count[_CIRCLE_ARC]].cp[0].y,
-	//	body->CirA[Count[_CIRCLE_ARC]].cp[0].z,
-	//	body->CirA[Count[_CIRCLE_ARC]].R);
+	//	CirA.cp[0].x,
+	//	CirA.cp[0].y,
+	//	CirA.cp[0].z,
+	//	CirA.R);
 
-	body->CirA[Count[_CIRCLE_ARC]].t[0] = 0;		// 円の開始角度
-	body->CirA[Count[_CIRCLE_ARC]].t[1] = 360;		// 円の終了角度
-	SetStartEndPtArc(&body->CirA[Count[_CIRCLE_ARC]]);			// 円弧の始点，終点をセット
-	CalcUVvec(&body->CirA[Count[_CIRCLE_ARC]]);					// CIRAのUV直交座標を設定する
+	CirA.t[0] = 0;										// 円の開始角度
+	CirA.t[1] = 360;									// 円の終了角度
+	SetStartEndPtArc(&CirA);							// 円弧の始点，終点をセット
+	CalcUVvec(&CirA);									// CIRAのUV直交座標を設定する
 
-	InitDisplayStat(&body->CirA[Count[_CIRCLE_ARC]].Dstat);
-    body->CirA[Count[_CIRCLE_ARC]].BlankStat = DISPLAY;         // 描画対象であることを宣言
-	body->CirA[Count[_CIRCLE_ARC]].EntUseFlag = GEOMTRYELEM;
-	body->CirA[Count[_CIRCLE_ARC]].pD = NULL;
+	InitDisplayStat(&CirA.Dstat);
+ 	CirA.BlankStat = DISPLAY;        					 // 描画対象であることを宣言
+	CirA.EntUseFlag = GEOMTRYELEM;
+	CirA.pD = NULL;
 
-	Count[_CIRCLE_ARC]++;
+	body->m_CirA.push_back(CirA);
 
 	return KOD_TRUE;
 }
@@ -297,6 +293,8 @@ int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 // KOD_TRUE
 int DXF_PARSER::GetLineData(FILE *fp,BODY *body)
 {
+	LINE_ Line;
+
 	while(1){
 		fgets(Buf,sizeof(Buf),fp);		// 奇数行
 		sscanf(Buf,"%d",&Gcode);
@@ -307,39 +305,39 @@ int DXF_PARSER::GetLineData(FILE *fp,BODY *body)
 			fgets(Buf,sizeof(Buf),fp);	// 偶数行
 
 			if(Gcode == COORD_X)
-				sscanf(Buf,"%lf",&body->Line[Count[_LINE]].cp[0].x);		// 線分の始点X
+				sscanf(Buf,"%lf",&Line.cp[0].x);		// 線分の始点X
 			else if(Gcode == COORD_Y)
-				sscanf(Buf,"%lf",&body->Line[Count[_LINE]].cp[0].y);		// 線分の始点Y
+				sscanf(Buf,"%lf",&Line.cp[0].y);		// 線分の始点Y
 			else if(Gcode == COORD_Z)
-				sscanf(Buf,"%lf",&body->Line[Count[_LINE]].cp[0].z);		// 線分の始点Z
+				sscanf(Buf,"%lf",&Line.cp[0].z);		// 線分の始点Z
 			else if(Gcode == COORD_X_)
-				sscanf(Buf,"%lf",&body->Line[Count[_LINE]].cp[1].x);		// 線分の終点X
+				sscanf(Buf,"%lf",&Line.cp[1].x);		// 線分の終点X
 			else if(Gcode == COORD_Y_)
-				sscanf(Buf,"%lf",&body->Line[Count[_LINE]].cp[1].y);		// 線分の終点Y
+				sscanf(Buf,"%lf",&Line.cp[1].y);		// 線分の終点Y
 			else if(Gcode == COORD_Z_)
-				sscanf(Buf,"%lf",&body->Line[Count[_LINE]].cp[1].z);		// 線分の終点Z
+				sscanf(Buf,"%lf",&Line.cp[1].z);		// 線分の終点Z
 		}
 	}
 
 	// debug
 	//fprintf(stderr,"%d:%lf,%lf,%lf,%lf,%lf,%lf\n",Count[_LINE],
-	//	body->Line[Count[_LINE]].cp[0].x,
-	//	body->Line[Count[_LINE]].cp[0].y,
-	//	body->Line[Count[_LINE]].cp[0].z,
-	//	body->Line[Count[_LINE]].cp[1].x,
-	//	body->Line[Count[_LINE]].cp[1].y,
-	//	body->Line[Count[_LINE]].cp[1].z);
+	//	Line.cp[0].x,
+	//	Line.cp[0].y,
+	//	Line.cp[0].z,
+	//	Line.cp[1].x,
+	//	Line.cp[1].y,
+	//	Line.cp[1].z);
 
-	InitDisplayStat(&body->Line[Count[_LINE]].Dstat);
-    body->Line[Count[_LINE]].BlankStat = DISPLAY;
-	body->Line[Count[_LINE]].EntUseFlag = GEOMTRYELEM;
-	body->Line[Count[_LINE]].pD = NULL;
+	InitDisplayStat(&Line.Dstat);
+    Line.BlankStat = DISPLAY;
+	Line.EntUseFlag = GEOMTRYELEM;
+	Line.pD = NULL;
 
-	Count[_LINE]++;
+	body->m_Line.push_back(Line);
 
 	return KOD_TRUE;
 }
-
+/*
 // Function: ResearchEntNum
 // 各エンティティの数をリサーチ
 //
@@ -370,7 +368,7 @@ int DXF_PARSER::ResearchEntNum(FILE *fp,BODY *body)
 
 	return KOD_TRUE;
 }
-
+*/
 // Function:ReadHeaderSection
 // ヘッダセクションの読み込み(スケルトン)
 //
