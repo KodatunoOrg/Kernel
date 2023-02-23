@@ -25,7 +25,7 @@ Describe_BODY::~Describe_BODY()
 //
 // Parameters:
 // *Body - 描画するBODYへのポインタ
-void Describe_BODY::DrawBody(const BODY *Body)
+void Describe_BODY::DrawBody(BODY *Body)
 {
 	for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++){
 		if(i == _CIRCLE_ARC){						// 円・円弧
@@ -105,20 +105,20 @@ void Describe_BODY::DrawNurbsCurve(const NURBSC* NurbsC)
 	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
 
-	for(i=0;i<NurbsC->K;i++){			// コントロールポイント取り出し
-		CCtlp[i][0] = NurbsC->cp[i].x*NurbsC->W[i];
-		CCtlp[i][1] = NurbsC->cp[i].y*NurbsC->W[i];
-		CCtlp[i][2] = NurbsC->cp[i].z*NurbsC->W[i];
-		CCtlp[i][3] = NurbsC->W[i];
+	for(i=0;i<NurbsC->m_cp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = NurbsC->m_cp[i].x*NurbsC->m_W[i];
+		CCtlp[i][1] = NurbsC->m_cp[i].y*NurbsC->m_W[i];
+		CCtlp[i][2] = NurbsC->m_cp[i].z*NurbsC->m_W[i];
+		CCtlp[i][3] = NurbsC->m_W[i];
 	}
 
-	for(j=0;j<NurbsC->N;j++){			// ノットベクトル取り出し
-		uKnot[j] = NurbsC->T[j];
+	for(j=0;j<NurbsC->m_T.size();j++){			// ノットベクトル取り出し
+		uKnot[j] = NurbsC->m_T[j];
 	}
 
 	glDisable(GL_LIGHTING);
 	gluBeginCurve(NurbsCurve);
-	gluNurbsCurve(NurbsCurve,NurbsC->N,uKnot,4,&CCtlp[0][0],NurbsC->M,GL_MAP1_VERTEX_4);	// ノットベクトルの値の範囲が0～1でないと、
+	gluNurbsCurve(NurbsCurve,NurbsC->m_T.size(),uKnot,4,&CCtlp[0][0],NurbsC->m_M,GL_MAP1_VERTEX_4);	// ノットベクトルの値の範囲が0～1でないと、
 	gluEndCurve(NurbsCurve);															// "ノット数がスプライン命令より多くありますと怒られる"
 	glFlush();																			// ノットベクトルの正規化が必要(pp111)
 	glEnable(GL_LIGHTING);
@@ -140,26 +140,26 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	//NURBS_Func NFunc;					// for debug
 	//NFunc.DebugForNurbsS(NurbsS);		// for debug
 
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->Dstat.Color);
-	for(k=0;k<NurbsS->K[1];k++){
-		for(j=0;j<NurbsS->K[0];j++){
-			SCtlp[j][k][0] = NurbsS->cp[j][k].x*NurbsS->W[j][k];	// コントロールポイント取り出し
-			SCtlp[j][k][1] = NurbsS->cp[j][k].y*NurbsS->W[j][k];
-			SCtlp[j][k][2] = NurbsS->cp[j][k].z*NurbsS->W[j][k];
-			SCtlp[j][k][3] = NurbsS->W[j][k];
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->m_Dstat.Color);
+	for(k=0;k<NurbsS->m_W.size2();k++){
+		for(j=0;j<NurbsS->m_W.size1();j++){
+			SCtlp[j][k][0] = NurbsS->m_cp[j][k].x*NurbsS->m_W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = NurbsS->m_cp[j][k].y*NurbsS->m_W(j,k);
+			SCtlp[j][k][2] = NurbsS->m_cp[j][k].z*NurbsS->m_W(j,k);
+			SCtlp[j][k][3] = NurbsS->m_W(j,k);
 		}
 	}
-	for(j=0;j<NurbsS->N[0];j++){
-		uKnot[j] = NurbsS->S[j];		// uノットベクトル取り出し
+	for(j=0;j<NurbsS->m_S.size();j++){
+		uKnot[j] = NurbsS->m_S[j];		// uノットベクトル取り出し
 		//fprintf(stderr,"U:%d-%.12lf\n",j+1,uKnot[j]);
 	}
-	for(j=0;j<NurbsS->N[1];j++){
-		vKnot[j] = NurbsS->T[j];		// vノットベクトル取り出し
+	for(j=0;j<NurbsS->m_T.size();j++){
+		vKnot[j] = NurbsS->m_T[j];		// vノットベクトル取り出し
 		//fprintf(stderr,"V:%d-%.12lf\n",j+1,vKnot[j]);
 	}
 
 	// NURBS曲面の描画
-	gluNurbsSurface(NurbsSurf,(GLdouble)NurbsS->N[0],uKnot,(GLdouble)NurbsS->N[1],vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->M[0],NurbsS->M[1],GL_MAP2_VERTEX_4);
+	gluNurbsSurface(NurbsSurf,(GLdouble)NurbsS->m_S.size(),uKnot,(GLdouble)NurbsS->m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
 }
 
 // Function: DrawNurbsSurfe
@@ -174,25 +174,25 @@ void Describe_BODY::DrawNurbsSurfe(const NURBSS* NurbsS)
 	static GLfloat	vKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	SCtlp[CTLPNUMMAX][CTLPNUMMAX][4];	// NURBS描画用バッファ
 
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->Dstat.Color);
-	for(k=0;k<NurbsS->K[1];k++){
-		for(j=0;j<NurbsS->K[0];j++){
-			SCtlp[j][k][0] = NurbsS->cp[j][k].x*NurbsS->W[j][k];	// コントロールポイント取り出し
-			SCtlp[j][k][1] = NurbsS->cp[j][k].y*NurbsS->W[j][k];
-			SCtlp[j][k][2] = NurbsS->cp[j][k].z*NurbsS->W[j][k];
-			SCtlp[j][k][3] = NurbsS->W[j][k];
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->m_Dstat.Color);
+	for(k=0;k<NurbsS->m_W.size2();k++){
+		for(j=0;j<NurbsS->m_W.size1();j++){
+			SCtlp[j][k][0] = NurbsS->m_cp[j][k].x*NurbsS->m_W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = NurbsS->m_cp[j][k].y*NurbsS->m_W(j,k);
+			SCtlp[j][k][2] = NurbsS->m_cp[j][k].z*NurbsS->m_W(j,k);
+			SCtlp[j][k][3] = NurbsS->m_W(j,k);
 		}
 	}
-	for(j=0;j<NurbsS->N[0];j++){
-		uKnot[j] = NurbsS->S[j];		// uノットベクトル取り出し
+	for(j=0;j<NurbsS->m_S.size();j++){
+		uKnot[j] = NurbsS->m_S[j];		// uノットベクトル取り出し
 	}
-	for(j=0;j<NurbsS->N[1];j++){
-		vKnot[j] = NurbsS->T[j];		// vノットベクトル取り出し
+	for(j=0;j<NurbsS->m_T.size();j++){
+		vKnot[j] = NurbsS->m_T[j];		// vノットベクトル取り出し
 	}
 
 	// NURBS曲面の描画
 	gluBeginSurface(NurbsSurf);
-	gluNurbsSurface(NurbsSurf,NurbsS->N[0],uKnot,NurbsS->N[1],vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->M[0],NurbsS->M[1],GL_MAP2_VERTEX_4);
+	gluNurbsSurface(NurbsSurf,NurbsS->m_S.size(),uKnot,NurbsS->m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
 	gluEndSurface(NurbsSurf);
 
 }
@@ -202,13 +202,14 @@ void Describe_BODY::DrawNurbsSurfe(const NURBSS* NurbsS)
 //
 // Parameters:
 // *CompC - 描画する複合曲線へのポインタ
-void Describe_BODY::DrawCompositeCurve(const COMPC *CompC)
+void Describe_BODY::DrawCompositeCurve(COMPC *CompC)
 {
 	int i;
 
-	for(i=0;i<CompC->N;i++){
-		if(CompC->DEType[i] == NURBS_CURVE){
-			DrawNurbsCurve_Param(CompC->pDE[i].NurbsC);	// NURBS曲線
+	for(i=0;i<CompC->pDE.size();i++){
+		if ( CompC->pDE[i].type() == typeid(NURBSC) ) {
+			NURBSC* NurbsC = boost::any_cast<NURBSC>(&CompC->pDE[i]);
+			DrawNurbsCurve_Param(NurbsC);	// NURBS曲線
 		}
 		//else if(CompC->DEType[i] == CIRCLE_ARC){
 		//	glDraw_CircleArc_Param((CIRA *)CompC->pDE[i]);		// 円・円弧
@@ -230,11 +231,12 @@ void Describe_BODY::DrawCompositeCurve(const COMPC *CompC)
 //
 // Parameters:
 // *ConpS - 描画する面上線へのポインタ
-void Describe_BODY::DrawCurveOnParamSurfe(const CONPS *ConpS)
+void Describe_BODY::DrawCurveOnParamSurfe(CONPS *ConpS)
 {
 	// 2Dパラメトリック曲線
-	if(ConpS->BType == COMPOSITE_CURVE){
-		DrawCompositeCurve(ConpS->pB.CompC);	// 複合曲線
+	if ( ConpS->pB.type() == typeid(COMPC) ) {
+		COMPC* CompC = boost::any_cast<COMPC>(&ConpS->pB);
+		DrawCompositeCurve(CompC);		// 複合曲線
 	}
 //	else if(ConpS->BType == NURBS_SURFACE){
 //		glDraw_NurbsCurve(ConpS->pB);		// NURBS曲線
@@ -252,21 +254,21 @@ void Describe_BODY::DrawCurveOnParamSurfe(const CONPS *ConpS)
 //
 // Parameters:
 // TrmS - 描画するトリム面構造体
-void Describe_BODY::DrawTrimdSurf(const TRMS* TrmS)
+void Describe_BODY::DrawTrimdSurf(TRMS* TrmS)
 {
 	gluBeginSurface(NurbsSurf);
 
-	DrawTrimdNurbsSurfe(TrmS->pts);				// NURBS曲面の描画
+	DrawTrimdNurbsSurfe(&TrmS->m_pts);				// NURBS曲面の描画
 
 	// 外周トリム(反時計回りであること)
 	gluBeginTrim(NurbsSurf);
-	DrawCurveOnParamSurfe(TrmS->pTO);			// 面上線
+	DrawCurveOnParamSurfe(&TrmS->m_pTO);			// 面上線
 	gluEndTrim(NurbsSurf);
 
 	// 内周トリム(時計回りであること)
-	for(int j=0;j<TrmS->n2;j++){
+	for(int j=0;j<TrmS->m_pTI.size();j++){
 		gluBeginTrim(NurbsSurf);
-		DrawCurveOnParamSurfe(TrmS->pTI[j]);		// 面上線
+		DrawCurveOnParamSurfe(&TrmS->m_pTI[j]);		// 面上線
 		gluEndTrim(NurbsSurf);
 	}
 
@@ -285,17 +287,17 @@ void Describe_BODY::DrawNurbsCurve_Param(const NURBSC *NurbsC)
 	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
 
-	for(i=0;i<NurbsC->K;i++){			// コントロールポイント取り出し
-		CCtlp[i][0] = NurbsC->cp[i].x*NurbsC->W[i];
-		CCtlp[i][1] = NurbsC->cp[i].y*NurbsC->W[i];
-		CCtlp[i][2] = NurbsC->W[i];
+	for(i=0;i<NurbsC->m_cp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = NurbsC->m_cp[i].x*NurbsC->m_W[i];
+		CCtlp[i][1] = NurbsC->m_cp[i].y*NurbsC->m_W[i];
+		CCtlp[i][2] = NurbsC->m_W[i];
 	}
-	for(i=0;i<NurbsC->N;i++){			// ノットベクトル取り出し
-		uKnot[i] = NurbsC->T[i];
+	for(i=0;i<NurbsC->m_T.size();i++){			// ノットベクトル取り出し
+		uKnot[i] = NurbsC->m_T[i];
 	}
 
 	// トリム面を構成するNURBS曲線を指定
-	gluNurbsCurve(NurbsSurf,NurbsC->N,uKnot,4,&CCtlp[0][0],NurbsC->M,GLU_MAP1_TRIM_3);
+	gluNurbsCurve(NurbsSurf,NurbsC->m_T.size(),uKnot,4,&CCtlp[0][0],NurbsC->m_M,GLU_MAP1_TRIM_3);
 
 }
 
@@ -306,11 +308,11 @@ void Describe_BODY::DrawNurbsCurve_Param(const NURBSC *NurbsC)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_Lines(const BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_LINE];i++){
-		glColor3f(Body->Line[i].Dstat.Color[0],Body->Line[i].Dstat.Color[1],Body->Line[i].Dstat.Color[2]);
+	for(int i=0;i<Body->m_Line.size();i++){
+		glColor3f(Body->m_Line[i].Dstat.Color[0],Body->m_Line[i].Dstat.Color[1],Body->m_Line[i].Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->Line[i].EntUseFlag == GEOMTRYELEM && Body->Line[i].BlankStat == DISPLAY){
-			DrawLine(&Body->Line[i]);
+        if(Body->m_Line[i].EntUseFlag == GEOMTRYELEM && Body->m_Line[i].BlankStat == DISPLAY){
+			DrawLine(&Body->m_Line[i]);
 		}
 	}
 }
@@ -322,11 +324,11 @@ void Describe_BODY::Draw_Lines(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_CircleArcs(const BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_CIRCLE_ARC];i++){
-		glColor3f(Body->CirA[i].Dstat.Color[0],Body->CirA[i].Dstat.Color[1],Body->CirA[i].Dstat.Color[2]);
+	for(int i=0;i<Body->m_CirA.size();i++){
+		glColor3f(Body->m_CirA[i].Dstat.Color[0],Body->m_CirA[i].Dstat.Color[1],Body->m_CirA[i].Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->CirA[i].EntUseFlag == GEOMTRYELEM && Body->CirA[i].BlankStat == DISPLAY){
-			DrawCircleArc(&Body->CirA[i]);
+        if(Body->m_CirA[i].EntUseFlag == GEOMTRYELEM && Body->m_CirA[i].BlankStat == DISPLAY){
+			DrawCircleArc(&Body->m_CirA[i]);
 		}
 	}
 }
@@ -338,11 +340,11 @@ void Describe_BODY::Draw_CircleArcs(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_NurbsCurves(const BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_NURBSC];i++){
-		glColor3f(Body->NurbsC[i].Dstat.Color[0],Body->NurbsC[i].Dstat.Color[1],Body->NurbsC[i].Dstat.Color[2]);
+	for(int i=0;i<Body->m_NurbsC.size();i++){
+		glColor3f(Body->m_NurbsC[i].m_Dstat.Color[0],Body->m_NurbsC[i].m_Dstat.Color[1],Body->m_NurbsC[i].m_Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->NurbsC[i].EntUseFlag == GEOMTRYELEM && Body->NurbsC[i].BlankStat == DISPLAY){
-			DrawNurbsCurve(&Body->NurbsC[i]);						// 描画
+        if(Body->m_NurbsC[i].m_EntUseFlag == GEOMTRYELEM && Body->m_NurbsC[i].m_BlankStat == DISPLAY){
+			DrawNurbsCurve(&Body->m_NurbsC[i]);						// 描画
 		}
 	}
 }
@@ -354,11 +356,11 @@ void Describe_BODY::Draw_NurbsCurves(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_NURBSS];i++){
-		if(Body->NurbsS[i].TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
+	for(int i=0;i<Body->m_NurbsS.size();i++){
+		if(Body->m_NurbsS[i].m_TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
 			continue;		// 描画しない
 		else{
-			DrawNurbsSurfe(&Body->NurbsS[i]);	// NURBS曲面描画
+			DrawNurbsSurfe(&Body->m_NurbsS[i]);	// NURBS曲面描画
 		}
 	}
 }
@@ -368,10 +370,10 @@ void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 //
 // Parameters:
 // *Body - BODYへのポインタ
-void Describe_BODY::Draw_TrimSurfes(const BODY *Body)
+void Describe_BODY::Draw_TrimSurfes(BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_TRIMMED_SURFACE];i++){
-		DrawTrimdSurf(&Body->TrmS[i]);
+	for(int i=0;i<Body->m_TrmS.size();i++){
+		DrawTrimdSurf(&Body->m_TrmS[i]);
 	}
 }
 

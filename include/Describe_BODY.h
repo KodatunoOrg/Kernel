@@ -26,11 +26,11 @@ public:
 
 	// Function: DrawBody
 	// BODYを描画
-	static void DrawBody(const BODY *);					
+	static void DrawBody(BODY *);					
 
 	// Function: DrawCompositeCurve
 	// 複合曲線を描画
-	static void DrawCompositeCurve(const COMPC *);		
+	static void DrawCompositeCurve(COMPC *);		
 
 	// Function: DrawLine
 	// 直線を描画
@@ -54,11 +54,11 @@ public:
 
 	// Function: DrawCurveOnParamSurfe
 	// 面上線を描画
-	static void DrawCurveOnParamSurfe(const CONPS *);		
+	static void DrawCurveOnParamSurfe(CONPS *);		
 
 	// Function: DrawTrimdSurf
 	// トリム面を描画
-	static void DrawTrimdSurf(const TRMS*);				
+	static void DrawTrimdSurf(TRMS*);				
 
 	// Function: DrawNurbsCurve_Param
 	// 2DパラメトリックNURBS曲線要素の描画
@@ -82,7 +82,7 @@ public:
 
 	// Function: Draw_TrimSurfes
 	// BODYに含まれるトリム面を全て描画
-	static void Draw_TrimSurfes(const BODY *Body);		
+	static void Draw_TrimSurfes(BODY *Body);		
 
 	// Function: 
 	// NURBS描画時の描画ステータスを設定
