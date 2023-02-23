@@ -24,7 +24,12 @@ class HEvert{
 public:
 	// Constructor: HEvert
 	// コンストラクタ
-	HEvert() {edge=NULL; index=-1; mom = NULL; qemQ=NULL; NewQEM(); flag = false;}
+	HEvert() : qemQ(QUADINDEX,QUADINDEX) {
+		edge=NULL;
+		index=-1;
+		mom = NULL;
+		flag = false;
+	}
 
 	// Function: GetCoord
 	// この頂点の座標値を返す
@@ -54,29 +59,21 @@ public:
 	// flag
 	int    GetFlag()	{return flag;}			
 
-	// Function: NewQEM
-	// QEM法用係数行列qemQのメモリ確保(4x4)
-	void NewQEM();
-
-	// Function: DelQEM
-	// QEM法用係数行列qemQのメモリ解放
-	void DelQEM();
-
 	// Function: InitQEM
 	// QEM法用係数行列qemQの初期化
 	void InitQEM();
 
 	// Function: SetQEM
 	// QEM法用係数行列qemQのqemパラメータをセットする
-	int SetQEM(Matrix);
+	int SetQEM(const ublasMatrix&);
 
 	// Function: AddQEM
 	// QEM法用係数行列qemQのqemパラメータを加える
-	int AddQEM(Matrix);	
+	int AddQEM(const ublasMatrix&);	
 
 	// Function: GetQEM
 	// QEM法用係数行列qemQのqemパラメータを得る
-	double **GetQEM();
+	ublasMatrix GetQEM(void);
 
 	// Function: SetEdge
 	// この頂点から伸びるハーフエッジをセット
@@ -126,7 +123,7 @@ public:
 
 	// Variable: **qemQ
 	// QEM法用係数行列
-	double **qemQ;	
+	ublasMatrix qemQ;
 
 	// Variable: flag
 	// 汎用フラグ
