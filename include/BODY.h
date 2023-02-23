@@ -6,8 +6,10 @@
 #include <string>		// std::string
 #include "boost/any.hpp"
 
-#include "NURBS.h"
-#include "TRMS.h"
+// prototype
+class NURBSC;
+class NURBSS;
+class TRMS;
 
 // Constants: General Defines
 // ALL_ENTITY_TYPE_NUM -	全エンティティタイプの数(21)
@@ -305,8 +307,9 @@ public:
 // CURVE *pC -	Curve C構造体へのポインタ
 // int pref -	送り側システムで採られていた表現を示すフラグ
 // int pD -		ディレクトリ部への逆ポインタ
-struct CONPS
+class CONPS
 {
+public:
 	int crtn;
 	int SType;
 //	int BType;

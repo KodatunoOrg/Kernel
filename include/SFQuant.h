@@ -25,6 +25,14 @@ public:
     // S(u,v)での第一基本量を得る
     int SetSFQ1(const NURBSS* S, double u, double v);
 
+	// Function: CalcMeanCurvature
+	// NURBS曲面上の(u,v)における平均曲率を求める
+	double CalcMeanCurvature(void) const;
+
+	// Function: CalcGaussCurvature
+	// NURBS曲面上の(u,v)におけるガウス曲率を求める
+	double CalcGaussCurvature(void) const;
+
 public:
 
 	// Variables: U,V

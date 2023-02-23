@@ -1,5 +1,4 @@
 #include "KodatunoKernel.h"
-#include "TRMS.h"
 
 // Function: GetOuterEdgeNum
 // トリム面を構成する外側エッジの数を取得する

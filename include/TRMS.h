@@ -3,6 +3,7 @@
 
 // prototype
 class COMPC;
+class CONPS;
 class NURBSS;
 class TRMS;
 

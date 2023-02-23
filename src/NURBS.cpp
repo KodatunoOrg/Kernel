@@ -1,5 +1,4 @@
 ﻿#include "KodatunoKernel.h"
-#include "NURBS.h"
 
 // Function: GenInterpolatedNurbsC1
 // 与えられた点列を補間するn階のNURBS曲線を生成する.

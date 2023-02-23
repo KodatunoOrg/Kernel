@@ -1,6 +1,4 @@
-﻿#include <GL/gl.h>
-#include <GL/glu.h>
-#include "KodatunoKernel.h"
+﻿#include "KodatunoKernel.h"
 
 // コンストラクタ
 Coord::Coord()
@@ -1997,32 +1995,6 @@ double CalcDiffBSbasisN(double t, const ublasVector& knot, int I, int M, int Dn)
 	if(n2 != 0) n2 = (M-1)/n2*CalcDiffBSbasisN(t,knot,I+1,M-1,Dn-1);
 
 	return(n1-n2);
-}
-
-// Function: CalcMeanCurvature
-// NURBS曲面上の(u,v)における平均曲率を求める（オーバーロード）
-// 
-// Parameters:
-// q - 曲面の基本量をセットにした構造体
-//
-// Retrurn:
-// 計算結果
-double CalcMeanCurvature(const SFQuant& q)
-{
-	return -(q.G*q.L+q.E*q.N-2*q.F*q.M)/(q.E*q.G-q.F*q.F)/2;		// 平均曲率
-}
-
-// Function: CalcGaussCurvature
-// NURBS曲面上の(u,v)におけるガウス曲率を求める（オーバーロード）
-//
-// Parameters:
-// q - 曲面の基本量をセットにした構造体
-//
-// Retrurn:
-// 計算結果
-double CalcGaussCurvature(const SFQuant& q)
-{
-	return (q.L*q.N-q.M*q.M)/(q.E*q.G-q.F*q.F);					// ガウス曲率
 }
 
 // Function: GetBSplCoef3

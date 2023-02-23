@@ -3,6 +3,9 @@
 
 #include <math.h>
 #include <vector>							// std::vector
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 #include "boost/numeric/ublas/vector.hpp"	// ublas::vector
 #include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
 namespace ublas = boost::numeric::ublas;
@@ -475,14 +478,6 @@ double CalcDiffBSbasis(double, const ublasVector&, int, int);
 // Bスプライン基底関数のN階微分係数を求める
 double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
 
-// Function: CalcMeanCurvature
-// NURBS曲面上の(u,v)における平均曲率を求める
-double CalcMeanCurvature(const SFQuant&);
-
-// Function: CalcGaussCurvature
-// NURBS曲面上の(u,v)におけるガウス曲率を求める
-double CalcGaussCurvature(const SFQuant&);
-
 // Function: GetBSplCoef3
 // 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
 ublasMatrix GetBSplCoef3(int, int, int, const ublasVector&);
@@ -514,6 +509,7 @@ ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
 #include "NURBS.h"
 #include "BODY.h"
 #include "Describe_BODY.h"
+#include "TRMS.h"
 #include "SFQuant.h"
 #include "DXF_Parser.h"
 #include "IGES_Parser.h"

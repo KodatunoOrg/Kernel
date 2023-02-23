@@ -384,7 +384,7 @@ double NURBSS::CalcGaussCurvature(double u, double v) const
 Coord NURBSS::CalcGaussCurvatureNormVec(double u, double v) const
 {
 	SFQuant q(this,u,v);
-	return q.n * ::CalcGaussCurvature(q);	// ガウス曲率法線ベクトル(KodatunoKernel.h)
+	return q.n * q.CalcGaussCurvature();	// ガウス曲率法線ベクトル
 }
 
 // Function: CalcuIntersecPtNurbsLine
@@ -2523,8 +2523,8 @@ boost::tuple<int, A2double> NURBSS::SearchIntersectPt_OS(const Coord& pt, const 
 			//GuiIFB.SetMessage("NURBS KOD_ERROR:The process is stoped by detected singular point.");
 			return boost::make_tuple(KOD_ERR, A2double());
 		}
-		double Kg = ::CalcGaussCurvature(sfq);
-		double Km = ::CalcMeanCurvature(sfq);
+		double Kg = sfq.CalcGaussCurvature();
+		double Km = sfq.CalcMeanCurvature();
 		double nunu = -Kg*sfq.E+2*Km*sfq.L;
 		double nunv = -Kg*sfq.G+2*Km*sfq.N;
 		double nvnv = -Kg*sfq.F+2*Km*sfq.M;

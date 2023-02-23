@@ -78,3 +78,29 @@ int SFQuant::SetSFQ1(const NURBSS* S, double u, double v)
 
     return KOD_TRUE;
 }
+
+// Function: CalcMeanCurvature
+// NURBS曲面上の(u,v)における平均曲率を求める（オーバーロード）
+// 
+// Parameters:
+// q - 曲面の基本量をセットにした構造体
+//
+// Retrurn:
+// 計算結果
+double SFQuant::CalcMeanCurvature(void) const
+{
+	return -(G*L+E*N-2*F*M)/(E*G-F*F)/2;		// 平均曲率
+}
+
+// Function: CalcGaussCurvature
+// NURBS曲面上の(u,v)におけるガウス曲率を求める（オーバーロード）
+//
+// Parameters:
+// q - 曲面の基本量をセットにした構造体
+//
+// Retrurn:
+// 計算結果
+double SFQuant::CalcGaussCurvature(void) const
+{
+	return (L*N-M*M)/(E*G-F*F);					// ガウス曲率
+}
