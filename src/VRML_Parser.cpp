@@ -38,7 +38,7 @@ int VRML_PARSER::Vrml_Parser_Main(BODY *body, const char *fname)
 		return(KOD_ERR);
 	}
 
-	body->Mesh = new MESH;		// MESHクラスのメモリー確保
+	MESH Mesh;
 
 	// 1行ずつ読み込みながら、タグ解析していく
 	while(fgets(buf,sizeof(buf),fp) != NULL){
@@ -47,17 +47,17 @@ int VRML_PARSER::Vrml_Parser_Main(BODY *body, const char *fname)
 		}
 
 		if(tag == Coordinate3){					// 三次元座標用タグを発見
-			flag = GetCoords(fp,body->Mesh);	// 三次元座標値をMESHに格納
+			flag = GetCoords(fp,&Mesh);			// 三次元座標値をMESHに格納
 			if(flag == KOD_ERR){
-				body->Mesh->clear();
+				Mesh.clear();
 				return KOD_ERR;
 			}
 
 		}
 		else if(tag == IndexedFaceSet){			// ファセット定義用タグを発見
-			flag = GetFacets(fp,body->Mesh);	// ファセットをMESHに格納
+			flag = GetFacets(fp,&Mesh);			// ファセットをMESHに格納
 			if(flag == KOD_ERR){
-				body->Mesh->clear();
+				Mesh.clear();
 				return KOD_ERR;
 			}
 		}
@@ -66,17 +66,17 @@ int VRML_PARSER::Vrml_Parser_Main(BODY *body, const char *fname)
 	fclose(fp);
 
 	// ハーフエッジ、頂点、面それぞれの総数を得る
-	body->Mesh->EdgeNum = body->Mesh->Edge.getNum();
-	body->Mesh->VertNum = body->Mesh->Vert.getNum();
-	body->Mesh->FaceNum = body->Mesh->Face.getNum();
+	Mesh.EdgeNum = Mesh.Edge.getNum();
+	Mesh.VertNum = Mesh.Vert.getNum();
+	Mesh.FaceNum = Mesh.Face.getNum();
 
-	GetHalfEdgePair(body->Mesh);	// 対となる逆方向ハーフエッジへのポインタを得る
+	GetHalfEdgePair(&Mesh);			// 対となる逆方向ハーフエッジへのポインタを得る
 
-	SetFaceParam(body->Mesh);		// 各面に面積と単位法線ベクトルの情報を付加する
+	SetFaceParam(&Mesh);			// 各面に面積と単位法線ベクトルの情報を付加する
 
-	body->MaxCoord = 10;			// 倍率はとりあえず10にしておく
+	body->m_MaxCoord = 10;			// 倍率はとりあえず10にしておく
 
-	body->TypeNum[_MESH] = 1;		// TypeNumは1
+	body->m_Mesh.push_back(Mesh);
 
 	return KOD_TRUE;
 }

@@ -4,7 +4,6 @@
 // BODYクラスのコンストラクタ．各種初期化
 BODY::BODY()
 {
-	m_Mesh = NULL;
 	m_MaxCoord = 1;
 }
 

@@ -471,7 +471,7 @@ public:
 
 	// Variable: *Mesh
 	// Half-Edge構造メッシュ(リスト構造、リストの先頭アドレスを示す)
-	MESH* m_Mesh;
+	std::vector<MESH>	m_Mesh;
 
 	// Variable: MaxCoord
 	// 立体の寸法の最大値(この値で初期表示倍率を決定)
