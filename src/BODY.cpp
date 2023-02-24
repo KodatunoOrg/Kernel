@@ -7,6 +7,20 @@ BODY::BODY()
 	m_MaxCoord = 1;
 }
 
+BODY::~BODY()
+{
+	for ( auto& x : m_vCirA )	delete x;
+	for ( auto& x : m_vCompC )	delete x;
+	for ( auto& x : m_vConA )	delete x;
+	for ( auto& x : m_vLine )	delete x;
+	for ( auto& x : m_vTMat )	delete x;
+	for ( auto& x : m_vNurbsC )	delete x;
+	for ( auto& x : m_vNurbsS )	delete x;
+	for ( auto& x : m_vConpS )	delete x;
+	for ( auto& x : m_vTrmS )	delete x;
+	for ( auto& x : m_vMesh )	delete x;
+}
+
 // Function: RotBody
 // BODYを回転させる
 //

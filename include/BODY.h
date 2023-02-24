@@ -356,6 +356,7 @@ public:
 	// Constructor: BODY
 	// BODYクラスのコンストラクタ．各種初期化
 	BODY();
+	~BODY();
 	
 	// Function: RotBody
 	// BODYの回転
@@ -426,47 +427,43 @@ private:
 public:
 	// Variable: *CirA
 	// 円・円弧
-	std::vector<CIRA>	m_CirA;
+	std::vector<CIRA*>	m_vCirA;
 
 	// Variable: *CompC
 	// 複合曲線
-	std::vector<COMPC>	m_CompC;
+	std::vector<COMPC*>	m_vCompC;
 
 	// Variable: *ConA
 	// 円錐曲線
-	std::vector<CONA>	m_ConA;
+	std::vector<CONA*>	m_vConA;
 
 	// Variable: *Line
 	// 線分
-	std::vector<LINE_>	m_Line;
+	std::vector<LINE_*>	m_vLine;
 
 	// Variable: *TMat
 	// 変換行列
-	std::vector<TMAT>	m_TMat;
+	std::vector<TMAT*>	m_vTMat;
 
 	// Variable: *NurbsC
 	// NURBS曲線
-	std::vector<NURBSC>	m_NurbsC;
+	std::vector<NURBSC*>	m_vNurbsC;
 
 	// Variable: *NurbsS
 	// NURBS曲面
-	std::vector<NURBSS>	m_NurbsS;
+	std::vector<NURBSS*>	m_vNurbsS;
 
 	// Variable: *ConpS
 	// 面上線
-	std::vector<CONPS>	m_ConpS;
+	std::vector<CONPS*>	m_vConpS;
 
 	// Variable: *TrmS
 	// トリム面
-	std::vector<TRMS>	m_TrmS;
-
-	// Variable: TypeNum[ALL_ENTITY_TYPE_NUM]
-	// BODYを構成する各エンティティの数を格納した配列
-//	int  TypeNum[ALL_ENTITY_TYPE_NUM];	
+	std::vector<TRMS*>	m_vTrmS;
 
 	// Variable: *Mesh
 	// Half-Edge構造メッシュ(リスト構造、リストの先頭アドレスを示す)
-	std::vector<MESH>	m_Mesh;
+	std::vector<MESH*>	m_vMesh;
 
 	// Variable: MaxCoord
 	// 立体の寸法の最大値(この値で初期表示倍率を決定)
