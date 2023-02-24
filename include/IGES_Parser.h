@@ -244,39 +244,39 @@ private:
 
 	// Function: GetCirAPara
 	// Type100 円・円弧の読み込み
-	CIRA GetCirAPara(char [], int);
+	CIRA* GetCirAPara(char [], int);
 
 	// Function: GetCompCPara
 	// Type102 複合曲線の読み込み
-	COMPC GetCompCPara(char [], int, BODY*);
+	COMPC* GetCompCPara(char [], int, BODY*);
 
 	// Function: GetConAPara
 	// Type104 円錐曲線の読み込み
-	CONA GetConAPara(char [], int, vDpara&, BODY*);
+	CONA* GetConAPara(char [], int, vDpara&, BODY*);
 
 	// Function: GetLinePara
 	// Type110 線分の読み込み
-	LINE_ GetLinePara(char [], int);
+	LINE_* GetLinePara(char [], int);
 
 	// Function: GetTMatPara
 	// Type124 変換行列の読み込み
-	TMAT GetTMatPara(char [], int);
+	TMAT* GetTMatPara(char [], int);
 
 	// Function: GetNurbsCPara
 	// Type126 NRBS曲線の読み込み
-	NURBSC GetNurbsCPara(char [], int);
+	NURBSC* GetNurbsCPara(char [], int);
 
 	// Function: GetNurbsSPara
 	// Type128 NRBS曲面の読み込み
-	NURBSS GetNurbsSPara(char [], int);
+	NURBSS* GetNurbsSPara(char [], int);
 
 	// Function: GeConpSPara
 	// Type142 面上線の読み込み
-	CONPS GeConpSPara(char [], int, vDpara&);
+	CONPS* GeConpSPara(char [], int, vDpara&);
 
 	// Function: GetTrmSPara
 	// Type144 トリム面の読み込み
-	TRMS GetTrmSPara(char [], int, vDpara&);
+	TRMS* GetTrmSPara(char [], int, vDpara&);
 
 	// Function: CatchStringI
 	// カンマまでの数値を読み込んで返す(int)
@@ -308,7 +308,7 @@ private:
 
 	// Function: TransformNurbsC
 	// NURBS曲線を座標変換する
-	int TransformNurbsC(const TMAT&, NURBSC&);
+	int TransformNurbsC(const TMAT*, NURBSC*);
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルの正規化sub1

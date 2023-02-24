@@ -263,12 +263,16 @@ class COMPC{
 public:	
 	std::vector<boost::any> pDE;
 	int DegeFlag;
-	NURBSC DegeNurbs;
+	NURBSC* DegeNurbs;
 	int pD;
 
 	COMPC() {
+		DegeNurbs = NULL;
 		DegeFlag = 0;
 		pD = 0;
+	}
+	~COMPC() {
+		if ( DegeNurbs ) delete DegeNurbs;
 	}
 };
 
@@ -320,7 +324,7 @@ public:
 		pD = 0;
 	}
 };
-typedef std::vector<CONPS>	VCONPS;
+typedef std::vector<CONPS*>	VCONPS;
 
 // Structure: OBJECT
 // ピックされたオブジェクトを示す構造体

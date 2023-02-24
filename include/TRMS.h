@@ -26,13 +26,14 @@ class TRMS
 public:
     NURBSS* m_pts;
     int m_n1;
-    CONPS   m_pTO;
+    CONPS*  m_pTO;
     VCONPS  m_pTI;
     int m_pD;
 
 public:
 	TRMS() {
         m_pts = NULL;
+        m_pTO = NULL;
         m_n1 = 0;
         m_pD = 0;
     }
