@@ -393,14 +393,6 @@ public:
 	// N個のNURBS曲面を新たなBODYとして登録する
 	void RegistNurbsStoBodyN(BODYList *,const NURBSS*,const char [],int);	
 
-	// Function: InitCurveColor
-	// 線の色の初期値を与える
-	void InitCurveColor(float *);	
-
-	// Function: InitSurfaceColor
-	// 面の色の初期値を与える
-	void InitSurfaceColor(float *);							
-
 	// Function: GetNurbsCFromLine
 	// 直線エンティティをNURBS曲線エンティティへと変換する
 	int GetNurbsCFromLine(int);
@@ -490,6 +482,14 @@ public:
 };
 
 // --- BODY メンバ関数である必要がない関数
+
+// Function: InitCurveColor
+// 線の色の初期値を与える
+void InitCurveColor(float *);	
+
+// Function: InitSurfaceColor
+// 面の色の初期値を与える
+void InitSurfaceColor(float *);							
 
 // Function: ChangeStatColor
 // エンティティのステータスで定義されている色を変更

@@ -155,7 +155,7 @@ void ChangeStatColor(float *col,float r,float g,float b,float t)
 //
 // Parameters:
 // *col - 色を変更したいエンティティのメンバ変数Dstatのメンバ変数Color[4]へのポインタ
-void BODY::InitCurveColor(float *col)
+void InitCurveColor(float *col)
 {
 	col[0] = col[1] = col[2] = 1.0;
 	col[3] = 0.5;
@@ -166,7 +166,7 @@ void BODY::InitCurveColor(float *col)
 //
 // Parameters:
 // *col - 色を変更したいエンティティのメンバ変数Dstatのメンバ変数Color[4]へのポインタ
-void BODY::InitSurfaceColor(float *col)
+void InitSurfaceColor(float *col)
 {
 	col[0] = col[1] = col[2] = 0.2;
 	col[3] = 0.5;
