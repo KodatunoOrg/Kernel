@@ -63,7 +63,7 @@ COMPC* TRMS::GetInnerCompC(int N)
 // トリム面を構成するNURBS曲面へのポインタ
 NURBSS* TRMS::GetNurbsS()
 {
-    return &m_pts;
+    return m_pts;
 }
 
 /////////////////////////////////////////////////
@@ -214,21 +214,21 @@ int TRMS::DetectInterfereTrmS(TRIMD_NURBSS* tNurbS, int divnum)
 			for(int u=0;u<divnum;u++){
 				for(int v=0;v<divnum;v++){
 					// 各曲面に分割点を生成する
-					double w0 =         m_pts.m_U[0] + (        m_pts.m_U[1] -         m_pts.m_U[0])*(double)w/(double)divnum;
-					double t0 =         m_pts.m_V[0] + (        m_pts.m_V[1] -         m_pts.m_V[0])*(double)t/(double)divnum;
-					double u0 = tNurbS->m_pts.m_U[0] + (tNurbS->m_pts.m_U[1] - tNurbS->m_pts.m_U[0])*(double)u/(double)divnum;
-					double v0 = tNurbS->m_pts.m_V[0] + (tNurbS->m_pts.m_V[1] - tNurbS->m_pts.m_V[0])*(double)v/(double)divnum;
+					double w0 =         m_pts->m_U[0] + (        m_pts->m_U[1] -         m_pts->m_U[0])*(double)w/(double)divnum;
+					double t0 =         m_pts->m_V[0] + (        m_pts->m_V[1] -         m_pts->m_V[0])*(double)t/(double)divnum;
+					double u0 = tNurbS->m_pts->m_U[0] + (tNurbS->m_pts->m_U[1] - tNurbS->m_pts->m_U[0])*(double)u/(double)divnum;
+					double v0 = tNurbS->m_pts->m_V[0] + (tNurbS->m_pts->m_V[1] - tNurbS->m_pts->m_V[0])*(double)v/(double)divnum;
 					for(int i=0;i<10;i++){
 						// 各種パラメータを算出する
-						Coord p0 =         m_pts.CalcNurbsSCoord(w0,t0);					// R(w0,t0)となる点(初期点)の座標
-						Coord q0 = tNurbS->m_pts.CalcNurbsSCoord(u0,v0);					// S(u0,v0)となる点(初期点)の座標
-						Coord rw =         m_pts.CalcDiffuNurbsS(w0,t0);					// 点R(w0,t0)のu偏微分(基本ベクトル)
-						Coord rt =         m_pts.CalcDiffvNurbsS(w0,t0);					// 点R(w0,t0)のv偏微分(基本ベクトル)
+						Coord p0 =         m_pts->CalcNurbsSCoord(w0,t0);					// R(w0,t0)となる点(初期点)の座標
+						Coord q0 = tNurbS->m_pts->CalcNurbsSCoord(u0,v0);					// S(u0,v0)となる点(初期点)の座標
+						Coord rw =         m_pts->CalcDiffuNurbsS(w0,t0);					// 点R(w0,t0)のu偏微分(基本ベクトル)
+						Coord rt =         m_pts->CalcDiffvNurbsS(w0,t0);					// 点R(w0,t0)のv偏微分(基本ベクトル)
 						double rwt = (rw&&rt).CalcEuclid();
 						if(rwt==0.0) break;
 						Coord np = (rw&&rt)/rwt;										// 点R(w0,t0)の単位法線ベクトル
-						Coord su = tNurbS->m_pts.CalcDiffuNurbsS(u0,v0);					// 点S(u0,v0)のu偏微分(基本ベクトル)
-						Coord sv = tNurbS->m_pts.CalcDiffvNurbsS(u0,v0);					// 点S(u0,v0)のv偏微分(基本ベクトル)
+						Coord su = tNurbS->m_pts->CalcDiffuNurbsS(u0,v0);					// 点S(u0,v0)のu偏微分(基本ベクトル)
+						Coord sv = tNurbS->m_pts->CalcDiffvNurbsS(u0,v0);					// 点S(u0,v0)のv偏微分(基本ベクトル)
 						double suv = (su&&sv).CalcEuclid();
 						if(suv==0.0) break;
 						Coord nq = (su&&sv)/suv;										// 点S(u0,v0)の単位法線ベクトル
@@ -261,10 +261,10 @@ int TRMS::DetectInterfereTrmS(TRIMD_NURBSS* tNurbS, int divnum)
 						v0 += dv;														// 新しい点のvパラメータを得る
 						
 						// 曲面の範囲外に出てしまったらループを抜ける
-						if(!CheckRange(        m_pts.m_U[0],        m_pts.m_U[1],w0,1) || !CheckRange(        m_pts.m_V[0],        m_pts.m_V[1],t0,1)){
+						if(!CheckRange(        m_pts->m_U[0],        m_pts->m_U[1],w0,1) || !CheckRange(        m_pts->m_V[0],        m_pts->m_V[1],t0,1)){
 							break;
 						}
-						if(!CheckRange(tNurbS->m_pts.m_U[0],tNurbS->m_pts.m_U[1],u0,1) || !CheckRange(tNurbS->m_pts.m_V[0],tNurbS->m_pts.m_V[1],v0,1)){
+						if(!CheckRange(tNurbS->m_pts->m_U[0],tNurbS->m_pts->m_U[1],u0,1) || !CheckRange(tNurbS->m_pts->m_V[0],tNurbS->m_pts->m_V[1],v0,1)){
 							break;
 						}
 						
@@ -303,7 +303,7 @@ int TRMS::TrimNurbsSPlane(const Coord& pt, const Coord& nvec)
 	double pcolor[3] = {0,1,0};		// 表示の色
 	double tcolor[3] = {1,0,0};
 
-	VCoord t = m_pts.CalcIntersecPtsPlaneSearch(pt, nvec, 0.5, 5, RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
+	VCoord t = m_pts->CalcIntersecPtsPlaneSearch(pt, nvec, 0.5, 5, RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
 	
 	// パラメトリック領域内で直線近似(最小2乗法で近似直線の係数2つを求める)
 	ublasMatrix A(2,2,0);
@@ -326,15 +326,15 @@ int TRMS::TrimNurbsSPlane(const Coord& pt, const Coord& nvec)
 	// 端点抽出
 	// パラメトリック領域内のU-Vの範囲を決める4点から得られる4本の直線と、さっき求めた近似直線との交点4つを求める
 	Coord P[4];
-	P[0] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts.m_U[0],m_pts.m_V[0],m_pts.m_U[1],m_pts.m_V[0]);
-	P[1] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts.m_U[1],m_pts.m_V[0],m_pts.m_U[1],m_pts.m_V[1]);
-	P[2] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts.m_U[1],m_pts.m_V[1],m_pts.m_U[0],m_pts.m_V[1]);
-	P[3] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts.m_U[0],m_pts.m_V[1],m_pts.m_U[0],m_pts.m_V[0]);
+	P[0] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[0],m_pts->m_V[0],m_pts->m_U[1],m_pts->m_V[0]);
+	P[1] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[1],m_pts->m_V[0],m_pts->m_U[1],m_pts->m_V[1]);
+	P[2] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[1],m_pts->m_V[1],m_pts->m_U[0],m_pts->m_V[1]);
+	P[3] = TrimNurbsSPlaneSub1(B_[0],B_[1],m_pts->m_U[0],m_pts->m_V[1],m_pts->m_U[0],m_pts->m_V[0]);
 	// 得られた4つの交点Pから、U-V範囲内にある2点を抽出
 	Coord Q[2];
 	int j=0;
 	for(int i=0;i<4;i++){
-		if(P[i].x >= m_pts.m_U[0] && P[i].x <= m_pts.m_U[1] && P[i].y >= m_pts.m_V[0] && P[i].y <= m_pts.m_V[1]){
+		if(P[i].x >= m_pts->m_U[0] && P[i].x <= m_pts->m_U[1] && P[i].y >= m_pts->m_V[0] && P[i].y <= m_pts->m_V[1]){
 			Q[j] = P[i];
 			j++;
 		}
@@ -352,7 +352,7 @@ int TRMS::TrimNurbsSPlane(const Coord& pt, const Coord& nvec)
 
 	FILE *fp = fopen("Debug.csv","w");
 	for(size_t i=0;i<t.size();i++){
-		Coord p = m_pts.CalcNurbsSCoord(t[i].x,t[i].y);			// 交点をパラメータ値から座標値へ変換
+		Coord p = m_pts->CalcNurbsSCoord(t[i].x,t[i].y);			// 交点をパラメータ値から座標値へ変換
 		DrawPoint(p,1,3,pcolor);			// 交点を描画
 		fprintf(fp,"%lf,%lf\n",t[i].x,t[i].y);
 	}

@@ -17,22 +17,22 @@ typedef TRMS TRIMD_NURBSS;	// トリム面に対してNurbs曲面を想起させ
 // Variable:
 // *pts -       トリムされるSurface EntityのDE部へのポインタ
 // n1 -         0:外周がDの境界と一致、1:それ以外
-// n2 -         Trimmed Surfaceの内周にあたる単純閉曲線の数
+// n2 -         Trimmed Surfaceの内周にあたる単純閉曲線の数 -> m_pTI.size()
 // *pTO -       Trimmed Surfaceの外周にあたる単純閉曲線構造体へのポインタ
 // **pTI -      Trimmed Surfaceの内周にあたる単純閉曲線構造体へのポインタ
 // pD -         ディレクトリ部への逆ポインタ
 class TRMS
 {
 public:
-    NURBSS  m_pts;
+    NURBSS* m_pts;
     int m_n1;
-//  int m_n2;
     CONPS   m_pTO;
     VCONPS  m_pTI;
     int m_pD;
 
 public:
 	TRMS() {
+        m_pts = NULL;
         m_n1 = 0;
         m_pD = 0;
     }

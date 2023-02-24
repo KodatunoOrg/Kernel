@@ -246,32 +246,27 @@ struct TMAT
 	LINE_*	Line;
 	NURBSC*	NurbsC;
 };*/
-// typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;	// ポインタか実体か？
-// vector要素へのポインタ保持はおそらくNG  IGES_PARSER::GetDEPointer()
+// typedef boost::variant<boost::blank, CIRA*, CONA*, LINE_*, NURBSC*> COMPELEM;
 // variant -> any
 
 // Structure: COMPC
 // 複合曲線
 //
 // Variables:
-// int N -				構成要素数
-// int *DEType -		各構成要素のエンティティタイプ
+// int N -				構成要素数 -> pDE.size()
+// int *DEType -		各構成要素のエンティティタイプ -> pDE.type()==typeid(NURBSC*) などで判定
 // COMPELEM **pDE -		各構成要素の構造体へのポインタ
 // int DegeFlag -		複合曲線が縮退した2Dパラメトリック曲線を表すフラグ
 // NURBSC DegeNurbs -	複合曲線が縮退した2Dパラメトリック曲線だった場合に縮退を解消するためのNURBS曲線
 // int pD -				ディレクトリ部への逆ポインタ
 class COMPC{
 public:	
-//	int N;
-//	int *DEType;
-//	COMPELEM*	pDE;
-	std::vector<boost::any> pDE;	// 実体を格納 pDE.type()==typeid(NURBSC) などで判定
+	std::vector<boost::any> pDE;
 	int DegeFlag;
 	NURBSC DegeNurbs;
 	int pD;
 
 	COMPC() {
-//		N = 0;
 		DegeFlag = 0;
 		pD = 0;
 	}
@@ -292,7 +287,7 @@ public:
 	CONA*	ConA;
 	NURBSC*	NurbsC;
 };*/
-//typedef boost::variant<boost::blank, CIRA*, COMPC*, CONA*, NURBSC*> CURVE;	// ポインタか実体か？
+//typedef boost::variant<boost::blank, CIRA*, COMPC*, CONA*, NURBSC*> CURVE;
 
 // Structure: CONPS
 // 面上線
@@ -300,8 +295,8 @@ public:
 // Variables:
 // int crtn -	面上線がどのように作られたかを示す
 // int SType -	Surface Sのエンティティタイプ
-// int BType -	Curve Bのエンティティタイプ
-// int CType -	Curve Cのエンティティタイプ
+// int BType -	Curve Bのエンティティタイプ -> pB.type()==typeid(*)
+// int CType -	Curve Cのエンティティタイプ -> pC.type()==typeid(*)
 // NURBSS *pS - Curveが乗るSurface構造体へのポインタ
 // CURVE *pB -	Surface Sのパラメータ空間におけるCurve B構造体へのポインタ
 // CURVE *pC -	Curve C構造体へのポインタ
@@ -312,10 +307,8 @@ class CONPS
 public:
 	int crtn;
 	int SType;
-//	int BType;
-//	int CType;
-	NURBSS pS;
-	boost::any pB;		// 実体を格納
+	NURBSS* pS;
+	boost::any pB;
 	boost::any pC;
 	int pref;
 	int pD;
@@ -323,8 +316,6 @@ public:
 	CONPS() {
 		crtn = 0;
 		SType = 0;
-//		BType = 0;
-//		CType = 0;
 		pref = 0;
 		pD = 0;
 	}
