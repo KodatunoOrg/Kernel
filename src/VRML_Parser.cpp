@@ -76,7 +76,7 @@ int VRML_PARSER::Vrml_Parser_Main(BODY *body, const char *fname)
 
 	body->m_MaxCoord = 10;			// 倍率はとりあえず10にしておく
 
-	body->m_Mesh.push_back(Mesh);
+	body->m_vMesh.push_back(new MESH(Mesh));
 
 	return KOD_TRUE;
 }

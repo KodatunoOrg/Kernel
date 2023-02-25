@@ -77,10 +77,10 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 			facet[UVCPNUM-1][UVCPNUM-1] = facet[UVCPNUM-1][0];
 			
 			VVCoord vvfacet{ {facet[0][0], facet[0][1]}, {facet[1][0], facet[1][0]} };
-			NURBSS NurbsS(M[0], M[1], S, T, W, vvfacet, U[0], U[1], V[0], V[1]);	// NURBSファセット生成
-			NurbsS.m_TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
-			ChangeStatColor(NurbsS.m_Dstat.Color,0.2,0.2,1,0.5);		// 初期色を青にセット
-			body->m_NurbsS.push_back(NurbsS);
+			NURBSS* NurbsS = new NURBSS(M[0], M[1], S, T, W, vvfacet, U[0], U[1], V[0], V[1]);	// NURBSファセット生成
+			NurbsS->m_TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
+			ChangeStatColor(NurbsS->m_Dstat.Color,0.2,0.2,1,0.5);		// 初期色を青にセット
+			body->m_vNurbsS.push_back(NurbsS);
 		}
 	}
 
