@@ -207,7 +207,7 @@ void Describe_BODY::DrawCompositeCurve(COMPC *CompC)
 	int i;
 
 	for(i=0;i<CompC->pDE.size();i++){
-		if ( CompC->pDE[i].type() == typeid(NURBSC) ) {
+		if ( CompC->pDE[i].type() == typeid(NURBSC*) ) {
 			NURBSC* NurbsC = boost::any_cast<NURBSC*>(CompC->pDE[i]);
 			DrawNurbsCurve_Param(NurbsC);	// NURBS曲線
 		}
@@ -234,7 +234,7 @@ void Describe_BODY::DrawCompositeCurve(COMPC *CompC)
 void Describe_BODY::DrawCurveOnParamSurfe(CONPS *ConpS)
 {
 	// 2Dパラメトリック曲線
-	if ( ConpS->pB.type() == typeid(COMPC) ) {
+	if ( ConpS->pB.type() == typeid(COMPC*) ) {
 		COMPC* CompC = boost::any_cast<COMPC*>(ConpS->pB);
 		DrawCompositeCurve(CompC);		// 複合曲線
 	}

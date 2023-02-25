@@ -376,12 +376,12 @@ int TRMS::TrimNurbsSPlane(const Coord& pt, const Coord& nvec)
 int TRMS::DetermPtOnTRMSurf_sub(CONPS* Conps, double u, double v)
 {
 	// 面上線が複合曲線になっていること
-	if(Conps->pB.type() != typeid(COMPC) ){
+	if(Conps->pB.type() != typeid(COMPC*) ){
 //		GuiIFB.SetMessage("NURBS_Func ERROR:TRIM未実装!");
 		return KOD_ERR;
 	}
 
-	COMPC* CompC= boost::any_cast<COMPC>(&Conps->pB);	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
+	COMPC* CompC= boost::any_cast<COMPC*>(Conps->pB);	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
 	VCoord P = ApproxTrimBorder(CompC);	// トリム境界線上に生成した点(多角形近似用の点)を格納
 	
 	int trm_flag = KOD_FALSE;							// トリミング領域内外判定用フラグ
@@ -411,8 +411,8 @@ VCoord TRMS::ApproxTrimBorder(COMPC* CompC)
 	// トリム境界線上に点を生成（トリム境界線を多角形近似）
 	for(int i=0;i<CompC->pDE.size();i++){
 		// トリム境界線がNURBS曲線で構成されている
-		if(CompC->pDE[i].type() == typeid(NURBSC)){
-			NurbsC = boost::any_cast<NURBSC>(&CompC->pDE[i]);	// 注目中のNurbs曲線のポインタを取得
+		if(CompC->pDE[i].type() == typeid(NURBSC*)){
+			NurbsC = boost::any_cast<NURBSC*>(CompC->pDE[i]);	// 注目中のNurbs曲線のポインタを取得
 			if(NurbsC->m_cp.size() == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
 			else divnum = TRM_BORDERDIVNUM;
 			for(int j=0;j<divnum-1;j++){
