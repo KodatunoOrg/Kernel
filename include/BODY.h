@@ -375,19 +375,19 @@ public:
 
 	// Function: RegistNurbsCtoBody
 	// 1つのNURBS曲線を新たなBODYとして登録する
-	void RegistNurbsCtoBody(BODYList *,const NURBSC&,const char []);	
+	void RegistNurbsCtoBody(BODYList *,const NURBSC*,const char []);	
 
-	// Function: RegistNurbsCtoBodyN
+	// Function: RegistNurbsCtoBodyN -> 不要の判断 K.Magara
 	// N個のNURBS曲線を新たなBODYとして登録する
-	void RegistNurbsCtoBodyN(BODYList *,const std::vector<NURBSC>&,const char []);
+//	void RegistNurbsCtoBodyN(BODYList *,const std::vector<NURBSC>&,const char []);
 
 	// Function: RegistNurbsStoBody
 	// 1つのNURBS曲面を新たなBODYとして登録する
-	void RegistNurbsStoBody(BODYList *,const NURBSS&,const char []);	
+	void RegistNurbsStoBody(BODYList *,const NURBSS*,const char []);	
 
-	// Function: RegistNurbsStoBodyN
+	// Function: RegistNurbsStoBodyN -> 不要の判断 K.Magara
 	// N個のNURBS曲面を新たなBODYとして登録する
-	void RegistNurbsStoBodyN(BODYList *,const std::vector<NURBSS>&,const char []);	
+//	void RegistNurbsStoBodyN(BODYList *,const std::vector<NURBSS>&,const char []);	
 
 	// Function: GetNurbsCFromLine
 	// 直線エンティティをNURBS曲線エンティティへと変換する

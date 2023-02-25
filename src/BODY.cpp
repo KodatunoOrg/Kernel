@@ -85,15 +85,15 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 //	*BodyList - 登録先リスト
 //	Nurb - 登録するNURBS曲線の実体
 //  BodyName[] - 登録するBODY名
-void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char BodyName[])
+void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC* Nurb,const char BodyName[])
 {
-	m_vNurbsC.push_back(new NURBSC(Nurb));									// NURBS曲面の実体を代入
+	m_vNurbsC.push_back(const_cast<NURBSC*>(Nurb));					// NURBS曲面の実体を代入
 	ChangeStatColor(m_vNurbsC.back()->m_Dstat.Color,0.2,0.2,1.0,0.5);		// 青色
 	BodyList->add(this);											// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	m_Name = BodyName;												// 新しいBODY名を登録
 }
-
+/*
 // Function: RegistNurbsCtoBodyN
 // N個のNURBS曲線を新たなBODYとして登録する
 // 
@@ -112,7 +112,7 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const std::vector<NURBSC>& vNu
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	m_Name = BodyName;												// 新しいBODY名を登録
 }
-
+*/
 // Function: RegistNurbsStoBody
 // 1個のNURBS曲面を新たなBODYとして登録する
 //
@@ -120,16 +120,16 @@ void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const std::vector<NURBSC>& vNu
 //	*BodyList - 登録先リスト
 //	Nurb - 登録するNURBS曲面の実体
 //  BodyName[] - 登録するBODY名
-void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char BodyName[])
+void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS* Nurb,const char BodyName[])
 {
-	m_vNurbsS.push_back(new NURBSS(Nurb));							// NURBS曲面の実体を代入
+	m_vNurbsS.push_back(const_cast<NURBSS*>(Nurb));					// NURBS曲面の実体を代入
 	m_vNurbsS.back()->m_TrmdSurfFlag = KOD_FALSE;					// トリムのない単純なNURBS曲面であることを明示
 	ChangeStatColor(m_vNurbsS.back()->m_Dstat.Color,0.2,0.2,1.0,0.5);		// 青色
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	m_Name = BodyName;												// 新しいBODY名を登録
 }
-
+/*
 // Function: RegistNurbsStoBodyN
 // N個のNURBS曲面を新たなBODYとして登録する
 // 
@@ -149,7 +149,7 @@ void BODY::RegistNurbsStoBodyN(BODYList *BodyList,const std::vector<NURBSS>& vNu
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	m_Name = BodyName;												// 新しいBODY名を登録
 }
-
+*/
 // Function: ChangeStatColor
 // エンティティのステータスで定義されている色を変更
 //
