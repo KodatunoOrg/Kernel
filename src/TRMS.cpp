@@ -7,7 +7,7 @@
 // トリム面を構成する外側エッジの数
 int TRMS::GetOuterEdgeNum() const
 {
-    return boost::any_cast<COMPC>(m_pTO.pB).pDE.size();
+    return boost::any_cast<COMPC*>(m_pTO->pB)->pDE.size();
 }
 
 // Function: GetInnerTrmNum
@@ -30,7 +30,7 @@ int TRMS::GetInnerTrmNum() const
 // トリム面を構成する内側エッジの数
 int TRMS::GetInnerEdgeNum(int N) const
 {
-    return boost::any_cast<COMPC>(m_pTI[N].pB).pDE.size();
+    return boost::any_cast<COMPC*>(m_pTI[N]->pB)->pDE.size();
 }
 
 // Function: GetOuterCompC
@@ -40,7 +40,7 @@ int TRMS::GetInnerEdgeNum(int N) const
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
 COMPC* TRMS::GetOuterCompC()
 {
-    return boost::any_cast<COMPC>(&m_pTO.pB);
+    return boost::any_cast<COMPC*>(m_pTO->pB);
 }
 
 // Function: GetInnerCompC
@@ -53,7 +53,7 @@ COMPC* TRMS::GetOuterCompC()
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
 COMPC* TRMS::GetInnerCompC(int N)
 {
-    return boost::any_cast<COMPC>(&m_pTI[N].pB);
+    return boost::any_cast<COMPC*>(m_pTI[N]->pB);
 }
 
 // Funciton: GetNurbsS
@@ -83,7 +83,7 @@ int TRMS::DetermPtOnTRMSurf(double u,double v)
 
 	// 外周トリム
 	if(m_n1){
-		flag = DetermPtOnTRMSurf_sub(&m_pTO,u,v);
+		flag = DetermPtOnTRMSurf_sub(m_pTO,u,v);
 		if(flag == KOD_ERR)
 			return KOD_ERR;
 		else if(flag == KOD_FALSE)		// 外
@@ -95,7 +95,7 @@ int TRMS::DetermPtOnTRMSurf(double u,double v)
 	// 内周トリム
 //	if(m_n2){
 		for(int i=0;i<m_pTI.size();i++){		// 内周のトリミング領域全てに対して
-			flag = DetermPtOnTRMSurf_sub(&m_pTI[i],u,v);
+			flag = DetermPtOnTRMSurf_sub(m_pTI[i],u,v);
 			if(flag == KOD_ERR)
 				return KOD_ERR;
 			else if(flag == KOD_TRUE)	// 内
@@ -121,7 +121,7 @@ VCoord TRMS::GetPtsOnOuterTRMSurf(const VCoord& Pt)
 	// 外周トリムが存在しない場合は0をリターン
 	if(!m_n1) return VCoord();
 
-	COMPC *CompC = boost::any_cast<COMPC>(&m_pTO.pB);	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
+	COMPC* CompC = boost::any_cast<COMPC*>(m_pTO->pB);	// NURBS曲面のパラメータ空間上に構成されている複合曲線へのポインタを取り出す
 	VCoord P = ApproxTrimBorder(CompC);	// トリム境界線上に生成した点(多角形近似用の点)を格納
 
 	VCoord ans;							// 残す点の格納先
@@ -160,7 +160,7 @@ VCoord TRMS::GetPtsOnInnerTRMSurf(const VCoord& Pt)
 	// 内周トリムの数だけループ
 	for(int k=0;k<m_pTI.size();k++){
 
-		CompC = boost::any_cast<COMPC>(&m_pTI[k].pB);
+		CompC = boost::any_cast<COMPC*>(m_pTI[k]->pB);
 
 		// メモリ確保
 		VCoord P = ApproxTrimBorder(CompC);	// トリム境界線上に生成した点(多角形近似用の点)を格納

@@ -208,7 +208,7 @@ void Describe_BODY::DrawCompositeCurve(COMPC *CompC)
 
 	for(i=0;i<CompC->pDE.size();i++){
 		if ( CompC->pDE[i].type() == typeid(NURBSC) ) {
-			NURBSC* NurbsC = boost::any_cast<NURBSC>(&CompC->pDE[i]);
+			NURBSC* NurbsC = boost::any_cast<NURBSC*>(CompC->pDE[i]);
 			DrawNurbsCurve_Param(NurbsC);	// NURBS曲線
 		}
 		//else if(CompC->DEType[i] == CIRCLE_ARC){
@@ -223,7 +223,7 @@ void Describe_BODY::DrawCompositeCurve(COMPC *CompC)
 	}
 
 	if(CompC->DegeFlag == KOD_FALSE)
-		DrawNurbsCurve_Param(&CompC->DegeNurbs);		// 縮退がある場合、縮退用Nurbs曲線をトリムエンティティとして追加
+		DrawNurbsCurve_Param(CompC->DegeNurbs);		// 縮退がある場合、縮退用Nurbs曲線をトリムエンティティとして追加
 }
 
 // Function: DrawCurveOnParamSurfe
@@ -235,7 +235,7 @@ void Describe_BODY::DrawCurveOnParamSurfe(CONPS *ConpS)
 {
 	// 2Dパラメトリック曲線
 	if ( ConpS->pB.type() == typeid(COMPC) ) {
-		COMPC* CompC = boost::any_cast<COMPC>(&ConpS->pB);
+		COMPC* CompC = boost::any_cast<COMPC*>(ConpS->pB);
 		DrawCompositeCurve(CompC);		// 複合曲線
 	}
 //	else if(ConpS->BType == NURBS_SURFACE){
@@ -258,17 +258,17 @@ void Describe_BODY::DrawTrimdSurf(TRMS* TrmS)
 {
 	gluBeginSurface(NurbsSurf);
 
-	DrawTrimdNurbsSurfe(&TrmS->m_pts);				// NURBS曲面の描画
+	DrawTrimdNurbsSurfe(TrmS->m_pts);				// NURBS曲面の描画
 
 	// 外周トリム(反時計回りであること)
 	gluBeginTrim(NurbsSurf);
-	DrawCurveOnParamSurfe(&TrmS->m_pTO);			// 面上線
+	DrawCurveOnParamSurfe(TrmS->m_pTO);			// 面上線
 	gluEndTrim(NurbsSurf);
 
 	// 内周トリム(時計回りであること)
 	for(int j=0;j<TrmS->m_pTI.size();j++){
 		gluBeginTrim(NurbsSurf);
-		DrawCurveOnParamSurfe(&TrmS->m_pTI[j]);		// 面上線
+		DrawCurveOnParamSurfe(TrmS->m_pTI[j]);		// 面上線
 		gluEndTrim(NurbsSurf);
 	}
 
@@ -308,11 +308,11 @@ void Describe_BODY::DrawNurbsCurve_Param(const NURBSC *NurbsC)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_Lines(const BODY *Body)
 {
-	for(int i=0;i<Body->m_Line.size();i++){
-		glColor3f(Body->m_Line[i].Dstat.Color[0],Body->m_Line[i].Dstat.Color[1],Body->m_Line[i].Dstat.Color[2]);
+	for(int i=0;i<Body->m_vLine.size();i++){
+		glColor3f(Body->m_vLine[i]->Dstat.Color[0],Body->m_vLine[i]->Dstat.Color[1],Body->m_vLine[i]->Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->m_Line[i].EntUseFlag == GEOMTRYELEM && Body->m_Line[i].BlankStat == DISPLAY){
-			DrawLine(&Body->m_Line[i]);
+        if(Body->m_vLine[i]->EntUseFlag == GEOMTRYELEM && Body->m_vLine[i]->BlankStat == DISPLAY){
+			DrawLine(Body->m_vLine[i]);
 		}
 	}
 }
@@ -324,11 +324,11 @@ void Describe_BODY::Draw_Lines(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_CircleArcs(const BODY *Body)
 {
-	for(int i=0;i<Body->m_CirA.size();i++){
-		glColor3f(Body->m_CirA[i].Dstat.Color[0],Body->m_CirA[i].Dstat.Color[1],Body->m_CirA[i].Dstat.Color[2]);
+	for(int i=0;i<Body->m_vCirA.size();i++){
+		glColor3f(Body->m_vCirA[i]->Dstat.Color[0],Body->m_vCirA[i]->Dstat.Color[1],Body->m_vCirA[i]->Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->m_CirA[i].EntUseFlag == GEOMTRYELEM && Body->m_CirA[i].BlankStat == DISPLAY){
-			DrawCircleArc(&Body->m_CirA[i]);
+        if(Body->m_vCirA[i]->EntUseFlag == GEOMTRYELEM && Body->m_vCirA[i]->BlankStat == DISPLAY){
+			DrawCircleArc(Body->m_vCirA[i]);
 		}
 	}
 }
@@ -340,11 +340,11 @@ void Describe_BODY::Draw_CircleArcs(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_NurbsCurves(const BODY *Body)
 {
-	for(int i=0;i<Body->m_NurbsC.size();i++){
-		glColor3f(Body->m_NurbsC[i].m_Dstat.Color[0],Body->m_NurbsC[i].m_Dstat.Color[1],Body->m_NurbsC[i].m_Dstat.Color[2]);
+	for(int i=0;i<Body->m_vNurbsC.size();i++){
+		glColor3f(Body->m_vNurbsC[i]->m_Dstat.Color[0],Body->m_vNurbsC[i]->m_Dstat.Color[1],Body->m_vNurbsC[i]->m_Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->m_NurbsC[i].m_EntUseFlag == GEOMTRYELEM && Body->m_NurbsC[i].m_BlankStat == DISPLAY){
-			DrawNurbsCurve(&Body->m_NurbsC[i]);						// 描画
+        if(Body->m_vNurbsC[i]->m_EntUseFlag == GEOMTRYELEM && Body->m_vNurbsC[i]->m_BlankStat == DISPLAY){
+			DrawNurbsCurve(Body->m_vNurbsC[i]);						// 描画
 		}
 	}
 }
@@ -356,11 +356,11 @@ void Describe_BODY::Draw_NurbsCurves(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 {
-	for(int i=0;i<Body->m_NurbsS.size();i++){
-		if(Body->m_NurbsS[i].m_TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
+	for(int i=0;i<Body->m_vNurbsS.size();i++){
+		if(Body->m_vNurbsS[i]->m_TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
 			continue;		// 描画しない
 		else{
-			DrawNurbsSurfe(&Body->m_NurbsS[i]);	// NURBS曲面描画
+			DrawNurbsSurfe(Body->m_vNurbsS[i]);	// NURBS曲面描画
 		}
 	}
 }
@@ -372,8 +372,8 @@ void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_TrimSurfes(BODY *Body)
 {
-	for(int i=0;i<Body->m_TrmS.size();i++){
-		DrawTrimdSurf(&Body->m_TrmS[i]);
+	for(int i=0;i<Body->m_vTrmS.size();i++){
+		DrawTrimdSurf(Body->m_vTrmS[i]);
 	}
 }
 
