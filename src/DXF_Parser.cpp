@@ -119,13 +119,13 @@ int DXF_PARSER::ReadEntitiesSection(FILE *fp,int Line,BODY *body)
 // メモリー確保に失敗：KOD_ERR
 int DXF_PARSER::ChangeEntityforNurbs(BODY *body)
 {
-	for(int i=0;i<body->m_Line.size();i++){
+	for(int i=0;i<body->m_vLine.size();i++){
 		if(body->GetNurbsCFromLine(i) == KOD_ERR) return KOD_ERR;	// 円/円弧パラメータからNURBS曲線パラメータを得る
-		InitDisplayStat(&body->m_NurbsC.back().m_Dstat);			// 表示属性の初期化
+		InitDisplayStat(&body->m_vNurbsC.back()->m_Dstat);			// 表示属性の初期化
 	}
-	for(int i=0;i<body->m_CirA.size();i++){
+	for(int i=0;i<body->m_vCirA.size();i++){
 		if(body->GetNurbsCFromCirA(i) == KOD_ERR) return KOD_ERR;	// 線分パラメータからNURBS曲線パラメータを得る
-		InitDisplayStat(&body->m_NurbsC.back().m_Dstat);								// 表示属性の初期化
+		InitDisplayStat(&body->m_vNurbsC.back()->m_Dstat);								// 表示属性の初期化
 	}
 }
 
@@ -140,7 +140,7 @@ int DXF_PARSER::ChangeEntityforNurbs(BODY *body)
 // KOD_TRUE
 int DXF_PARSER::GetArcData(FILE *fp,BODY *body)
 {
-	CIRA CirA;
+	CIRA* CirA = new CIRA;
 
 	while(1){
 		fgets(Buf,sizeof(Buf),fp);		// 奇数行
@@ -152,38 +152,38 @@ int DXF_PARSER::GetArcData(FILE *fp,BODY *body)
 			fgets(Buf,sizeof(Buf),fp);	// 偶数行
 
 			if(Gcode == COORD_X)
-				sscanf(Buf,"%lf",&CirA.cp[0].x);	// 円弧の中心座標X
+				sscanf(Buf,"%lf",&CirA->cp[0].x);	// 円弧の中心座標X
 			else if(Gcode == COORD_Y)
-				sscanf(Buf,"%lf",&CirA.cp[0].y);	// 円弧の中心座標Y
+				sscanf(Buf,"%lf",&CirA->cp[0].y);	// 円弧の中心座標Y
 			else if(Gcode == COORD_Z)
-				sscanf(Buf,"%lf",&CirA.cp[0].z);	// 円弧の中心座標Z
+				sscanf(Buf,"%lf",&CirA->cp[0].z);	// 円弧の中心座標Z
 			else if(Gcode == RADIUS)
-				sscanf(Buf,"%lf",&CirA.R);			// 円弧の半径
+				sscanf(Buf,"%lf",&CirA->R);			// 円弧の半径
 			else if(Gcode == START_ANG)
-				sscanf(Buf,"%lf",&CirA.t[0]);		// 円弧の開始角度
+				sscanf(Buf,"%lf",&CirA->t[0]);		// 円弧の開始角度
 			else if(Gcode == END_ANG)
-				sscanf(Buf,"%lf",&CirA.t[1]);		// 円弧の終了角度
+				sscanf(Buf,"%lf",&CirA->t[1]);		// 円弧の終了角度
 		}
 	}
 
 	// debug
 	//fprintf(stderr,"%d:%lf,%lf,%lf,%lf,%lf,%lf\n",Count[_CIRCLE_ARC],
-	//	CirA.cp[0].x,
-	//	CirA.cp[0].y,
-	//	CirA.cp[0].z,
-	//	CirA.R,
-	//	CirA.t[0],
-	//	CirA.t[1]);
+	//	CirA->cp[0].x,
+	//	CirA->cp[0].y,
+	//	CirA->cp[0].z,
+	//	CirA->R,
+	//	CirA->t[0],
+	//	CirA->t[1]);
 
-	SetStartEndPtArc(&CirA);						// 円弧の始点，終点をセット
-	CalcUVvec(&CirA);								// CIRAのUV直交座標を設定する
+	SetStartEndPtArc(CirA);							// 円弧の始点，終点をセット
+	CalcUVvec(CirA);								// CIRAのUV直交座標を設定する
 
-	InitDisplayStat(&CirA.Dstat);					// 色指定
-    CirA.BlankStat = DISPLAY;						// 描画対象であることを宣言
-	CirA.EntUseFlag = GEOMTRYELEM;					// 幾何要素であることを宣言
-	CirA.pD = NULL;									// IGESでないので関係なし
+	InitDisplayStat(&CirA->Dstat);					// 色指定
+    CirA->BlankStat = DISPLAY;						// 描画対象であることを宣言
+	CirA->EntUseFlag = GEOMTRYELEM;					// 幾何要素であることを宣言
+	CirA->pD = NULL;								// IGESでないので関係なし
 
-	body->m_CirA.push_back(CirA);
+	body->m_vCirA.push_back(CirA);
 
 	return KOD_TRUE;
 }
@@ -238,7 +238,7 @@ int DXF_PARSER::SetStartEndPtArc(CIRA *Cira)
 // KOD_TRUE
 int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 {
-	CIRA CirA;
+	CIRA* CirA = new CIRA;
 
 	while(1){
 		fgets(Buf,sizeof(Buf),fp);		// 奇数行
@@ -250,34 +250,34 @@ int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 			fgets(Buf,sizeof(Buf),fp);	// 偶数行
 
 			if(Gcode == COORD_X)
-				sscanf(Buf,"%lf",&CirA.cp[0].x);		// 円の中心座標X
+				sscanf(Buf,"%lf",&CirA->cp[0].x);		// 円の中心座標X
 			else if(Gcode == COORD_Y)
-				sscanf(Buf,"%lf",&CirA.cp[0].y);		// 円の中心座標Y
+				sscanf(Buf,"%lf",&CirA->cp[0].y);		// 円の中心座標Y
 			else if(Gcode == COORD_Z)
-				sscanf(Buf,"%lf",&CirA.cp[0].z);		// 円の中心座標Z
+				sscanf(Buf,"%lf",&CirA->cp[0].z);		// 円の中心座標Z
 			else if(Gcode == RADIUS)
-				sscanf(Buf,"%lf",&CirA.R);				// 円の半径
+				sscanf(Buf,"%lf",&CirA->R);				// 円の半径
 		}
 	}
 
 	// debug
 	//fprintf(stderr,"%d:%lf,%lf,%lf,%lf\n",Count[_CIRCLE_ARC],
-	//	CirA.cp[0].x,
-	//	CirA.cp[0].y,
-	//	CirA.cp[0].z,
-	//	CirA.R);
+	//	CirA->cp[0].x,
+	//	CirA->cp[0].y,
+	//	CirA->cp[0].z,
+	//	CirA->R);
 
-	CirA.t[0] = 0;										// 円の開始角度
-	CirA.t[1] = 360;									// 円の終了角度
-	SetStartEndPtArc(&CirA);							// 円弧の始点，終点をセット
-	CalcUVvec(&CirA);									// CIRAのUV直交座標を設定する
+	CirA->t[0] = 0;										// 円の開始角度
+	CirA->t[1] = 360;									// 円の終了角度
+	SetStartEndPtArc(CirA);								// 円弧の始点，終点をセット
+	CalcUVvec(CirA);									// CIRAのUV直交座標を設定する
 
-	InitDisplayStat(&CirA.Dstat);
- 	CirA.BlankStat = DISPLAY;        					 // 描画対象であることを宣言
-	CirA.EntUseFlag = GEOMTRYELEM;
-	CirA.pD = NULL;
+	InitDisplayStat(&CirA->Dstat);
+ 	CirA->BlankStat = DISPLAY;        					 // 描画対象であることを宣言
+	CirA->EntUseFlag = GEOMTRYELEM;
+	CirA->pD = NULL;
 
-	body->m_CirA.push_back(CirA);
+	body->m_vCirA.push_back(CirA);
 
 	return KOD_TRUE;
 }
@@ -293,7 +293,7 @@ int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 // KOD_TRUE
 int DXF_PARSER::GetLineData(FILE *fp,BODY *body)
 {
-	LINE_ Line;
+	LINE_* Line = new LINE_;
 
 	while(1){
 		fgets(Buf,sizeof(Buf),fp);		// 奇数行
@@ -305,35 +305,35 @@ int DXF_PARSER::GetLineData(FILE *fp,BODY *body)
 			fgets(Buf,sizeof(Buf),fp);	// 偶数行
 
 			if(Gcode == COORD_X)
-				sscanf(Buf,"%lf",&Line.cp[0].x);		// 線分の始点X
+				sscanf(Buf,"%lf",&Line->cp[0].x);		// 線分の始点X
 			else if(Gcode == COORD_Y)
-				sscanf(Buf,"%lf",&Line.cp[0].y);		// 線分の始点Y
+				sscanf(Buf,"%lf",&Line->cp[0].y);		// 線分の始点Y
 			else if(Gcode == COORD_Z)
-				sscanf(Buf,"%lf",&Line.cp[0].z);		// 線分の始点Z
+				sscanf(Buf,"%lf",&Line->cp[0].z);		// 線分の始点Z
 			else if(Gcode == COORD_X_)
-				sscanf(Buf,"%lf",&Line.cp[1].x);		// 線分の終点X
+				sscanf(Buf,"%lf",&Line->cp[1].x);		// 線分の終点X
 			else if(Gcode == COORD_Y_)
-				sscanf(Buf,"%lf",&Line.cp[1].y);		// 線分の終点Y
+				sscanf(Buf,"%lf",&Line->cp[1].y);		// 線分の終点Y
 			else if(Gcode == COORD_Z_)
-				sscanf(Buf,"%lf",&Line.cp[1].z);		// 線分の終点Z
+				sscanf(Buf,"%lf",&Line->cp[1].z);		// 線分の終点Z
 		}
 	}
 
 	// debug
 	//fprintf(stderr,"%d:%lf,%lf,%lf,%lf,%lf,%lf\n",Count[_LINE],
-	//	Line.cp[0].x,
-	//	Line.cp[0].y,
-	//	Line.cp[0].z,
-	//	Line.cp[1].x,
-	//	Line.cp[1].y,
-	//	Line.cp[1].z);
+	//	Line->cp[0].x,
+	//	Line->cp[0].y,
+	//	Line->cp[0].z,
+	//	Line->cp[1].x,
+	//	Line->cp[1].y,
+	//	Line->cp[1].z);
 
-	InitDisplayStat(&Line.Dstat);
-    Line.BlankStat = DISPLAY;
-	Line.EntUseFlag = GEOMTRYELEM;
-	Line.pD = NULL;
+	InitDisplayStat(&Line->Dstat);
+    Line->BlankStat = DISPLAY;
+	Line->EntUseFlag = GEOMTRYELEM;
+	Line->pD = NULL;
 
-	body->m_Line.push_back(Line);
+	body->m_vLine.push_back(Line);
 
 	return KOD_TRUE;
 }
