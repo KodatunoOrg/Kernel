@@ -96,6 +96,10 @@ typedef std::vector<Coord>		VCoord;
 // VVCoord - Coord型の2次元配列をVVCoordとして定義
 typedef std::vector<VCoord>		VVCoord;
 
+// Typedef: vector<VVCoord>
+// VVVCoord - Coord型の3次元配列をVVVCoordとして定義
+typedef std::vector<VVCoord>	VVVCoord;
+
 // Typedef: array<Coord, 3>
 // A3Coord - Coord型の3要素固定配列をA3Coordとして定義
 typedef boost::array<Coord, 3>	A3Coord;
