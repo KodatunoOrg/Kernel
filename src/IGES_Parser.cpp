@@ -22,7 +22,6 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 //	char mes[256];					// メッセージダンプ用string
 	int  line[SECTION_NUM];			// 各セクション毎のライン数を格納
 	int  flag = 0;
-	int  i;
 
 	// IGESファイルオープン
 	if((fp = fopen(IGES_fname,"r")) == NULL){
@@ -40,25 +39,20 @@ int IGES_PARSER::IGES_Parser_Main(BODY *body,const char *IGES_fname)
 	line[SECTION_DIRECTORY] /= 2;		// ディレクトリ部は、2行で1つのシーケンスを構成するので2で割ったものをディレクトリ部のライン数とする
 
 	// IGESファイル読み込み(各セクション毎に処理)
-	for(i=0;i<SECTION_NUM;i++){
-		if(i == SECTION_START){					// スタート部読み込み
-			flag = GetStartSection(fp,line[i]);
-		}
-		else if(i == SECTION_GLOBAL){			// グローバル部読み込み
-			flag = GetGlobalSection(fp,&gpara,line[i]);
-		}
-		else if(i == SECTION_DIRECTORY){		// ディレクトリ部読み込み
-			flag = GetDirectorySection(fp,vdpara,line[i]);	// vdparaにセット
-		}
-		else if(i == SECTION_PARAMETER){		// パラメータ部読み込み
-			flag = GetParameterSection(fp,vdpara,body);
-		}
-		else if(i == SECTION_TERMINATE){		// ターミネート部読み込み
-			flag = GetTerminateSection(fp);
-		}
-		if(flag == KOD_ERR){
-			return(KOD_ERR);
-		}
+	if ( GetStartSection(fp,line[SECTION_START]) == KOD_ERR ) {		// スタート部読み込み
+		return KOD_ERR;
+	}
+	if ( GetGlobalSection(fp,&gpara,line[SECTION_GLOBAL]) == KOD_ERR ) {	// グローバル部読み込み
+		return KOD_ERR;
+	}
+	if ( GetDirectorySection(fp,vdpara,line[SECTION_DIRECTORY]) == KOD_ERR ) {	// ディレクトリ部読み込み// vdparaにセット
+		return KOD_ERR;
+	}
+	if ( GetParameterSection(fp,vdpara,body) == KOD_ERR ) {		// パラメータ部読み込み
+		return KOD_ERR;
+	}
+	if ( GetTerminateSection(fp) == KOD_ERR ) {		// ターミネート部読み込み
+		return KOD_ERR;
 	}
 
 	ChangeEntityforNurbs(vdpara,body);	// 内部表現を全てNURBSに変更する
@@ -589,13 +583,13 @@ int IGES_PARSER::GetParameterSection(FILE *fp, vDpara& vdpara, BODY* body)
 		}
 		// 面上線
 		else if(vdpara[i].entity_type == CURVE_ON_PARAMETRIC_SURFACE){	
-			CONPS* ConpS = GeConpSPara(str,pD,vdpara);
+			CONPS* ConpS = GeConpSPara(str,pD,vdpara, body);
 			vdpara[i].entity_count = body->m_vConpS.size();		// dparaとbodyを関連付ける
 			body->m_vConpS.push_back(ConpS);
 		}
 		// トリム面	
 		else if(vdpara[i].entity_type == TRIMMED_SURFACE){				
-			TRMS* TrmS = GetTrmSPara(str,pD,vdpara);
+			TRMS* TrmS = GetTrmSPara(str,pD,vdpara, body);
 			vdpara[i].entity_count = body->m_vTrmS.size();				// dparaとbodyを関連付ける
 			body->m_vTrmS.push_back(TrmS);
 		}
@@ -905,7 +899,7 @@ COMPC* IGES_PARSER::GetCompCPara(char str[], int pD, BODY* body)
 //
 // Return:
 // KOD_TRUE
-CONPS* IGES_PARSER::GeConpSPara(char str[], int pD, vDpara& vdpara)
+CONPS* IGES_PARSER::GeConpSPara(char str[], int pD, vDpara& vdpara, BODY* body)
 {
 	CONPS* ConpS = new CONPS;
 	char *p;
@@ -946,7 +940,7 @@ CONPS* IGES_PARSER::GeConpSPara(char str[], int pD, vDpara& vdpara)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-TRMS* IGES_PARSER::GetTrmSPara(char str[], int pD, vDpara& vdpara)
+TRMS* IGES_PARSER::GetTrmSPara(char str[], int pD, vDpara& vdpara, BODY* body)
 {
 	TRMS* TrmS = new TRMS;
 	char *p;
@@ -1423,26 +1417,27 @@ int IGES_PARSER::SearchMaxCoord(BODY *body)
 // コンストラクタ
 IGES_PARSER::IGES_PARSER()
 {
-		entity[0] = CIRCLE_ARC;							// 円/円弧
-		entity[1] = COMPOSITE_CURVE;					// 複合曲線
-		entity[2] = CONIC_ARC;							// 円錐曲線
-		entity[3] = COPIOUS_DATA;						// 有意点列
-		entity[4] = PLANE;								// 平面
-		entity[5] = LINE;								// 線分
-		entity[6] = PARAMETRIC_SPLINE_CURVE;			// パラメトリックスプライン曲線
-		entity[7] = PARAMETRIC_SPLINE_SURFACE;			// パラメトリックスプライン曲面
-		entity[8] = POINT;								// 点
-		entity[9] = TRANSFORMATION_MATRIX;				// 変換行列
-		entity[10] = NURBS_CURVE;						// 有理Bスプライン曲線
-		entity[11] = NURBS_SURFACE;						// 有理Bスプライン曲面
-		entity[12] = CURVE_ON_PARAMETRIC_SURFACE; 		// 面上線
-		entity[13] = TRIMMED_SURFACE;					// トリム面
-		entity[14] = SUBFIGURE_DEFINITION;				// 子図の定義
-		entity[15] = ASSOCIATIVITY_INSTANCE;			// グループ
-		entity[16] = DRAWING;							// 図面
-		entity[17] = PROPERTY;							// 図面サイズ
-		entity[18] = SINGULAR_SUBFIGURE_INSTANCE;		// 子図の参照
-		entity[19] = VIEW;								// 投象面
+//	m_body = NULL;
+	entity[0] = CIRCLE_ARC;							// 円/円弧
+	entity[1] = COMPOSITE_CURVE;					// 複合曲線
+	entity[2] = CONIC_ARC;							// 円錐曲線
+	entity[3] = COPIOUS_DATA;						// 有意点列
+	entity[4] = PLANE;								// 平面
+	entity[5] = LINE;								// 線分
+	entity[6] = PARAMETRIC_SPLINE_CURVE;			// パラメトリックスプライン曲線
+	entity[7] = PARAMETRIC_SPLINE_SURFACE;			// パラメトリックスプライン曲面
+	entity[8] = POINT;								// 点
+	entity[9] = TRANSFORMATION_MATRIX;				// 変換行列
+	entity[10] = NURBS_CURVE;						// 有理Bスプライン曲線
+	entity[11] = NURBS_SURFACE;						// 有理Bスプライン曲面
+	entity[12] = CURVE_ON_PARAMETRIC_SURFACE; 		// 面上線
+	entity[13] = TRIMMED_SURFACE;					// トリム面
+	entity[14] = SUBFIGURE_DEFINITION;				// 子図の定義
+	entity[15] = ASSOCIATIVITY_INSTANCE;			// グループ
+	entity[16] = DRAWING;							// 図面
+	entity[17] = PROPERTY;							// 図面サイズ
+	entity[18] = SINGULAR_SUBFIGURE_INSTANCE;		// 子図の参照
+	entity[19] = VIEW;								// 投象面
 }
 
 // Funciton: InitDisplayStat

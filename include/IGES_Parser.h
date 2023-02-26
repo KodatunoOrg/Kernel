@@ -272,11 +272,11 @@ private:
 
 	// Function: GeConpSPara
 	// Type142 面上線の読み込み
-	CONPS* GeConpSPara(char [], int, vDpara&);
+	CONPS* GeConpSPara(char [], int, vDpara&, BODY*);
 
 	// Function: GetTrmSPara
 	// Type144 トリム面の読み込み
-	TRMS* GetTrmSPara(char [], int, vDpara&);
+	TRMS* GetTrmSPara(char [], int, vDpara&, BODY*);
 
 	// Function: CatchStringI
 	// カンマまでの数値を読み込んで返す(int)
@@ -326,11 +326,11 @@ private:
 private:
 	// Variable: *body
 	// (private)BODYクラスへのポインタ(IGESデータはこのBODY構造体に全て格納される)
-	BODY *body;
+//	BODY* m_body;
 
 	// Variable: *TypeNum
 	// (private)どのBODYオブジェクトが幾つあるかを示す
-	int *TypeNum;
+//	int *TypeNum;
 
 	// Variable: buf[COLUMN_MAX_]
 	// (private)汎用文字列バッファ
