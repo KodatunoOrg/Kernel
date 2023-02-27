@@ -31,7 +31,7 @@ public:
 	ublasVector m_S;
 	ublasVector m_T;
 	ublasMatrix m_W;
-	VVCoord  m_cp;
+	VVCoord  m_vvCp;
 	A2double m_U;
 	A2double m_V;
 	int m_pD;
@@ -43,7 +43,7 @@ public:
 		m_S = S;
 		m_T = T;
 		m_W = W;
-		m_cp = cp;
+		m_vvCp = cp;
 		m_M[0] = Mu;	m_M[1] = Mv;
 		m_U[0] = U_s;	m_U[1] = U_e;
 		m_V[0] = V_s;	m_V[1] = V_e;

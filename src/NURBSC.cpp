@@ -18,10 +18,10 @@ Coord NURBSC::CalcNurbsCCoord(double t) const
 	double bsw=0;
 	double bs=0;
 
-	for(size_t i=0;i<m_cp.size();i++){
+	for(size_t i=0;i<m_vCp.size();i++){
 		bs = CalcBSbasis(t,m_T,i,m_M);      // Bスプライン基底関数を求める
 		bsw += bs*m_W[i];					// 分母
-		bscpw += m_cp[i] * (bs*m_W[i]);		// 分子
+		bscpw += m_vCp[i] * (bs*m_W[i]);		// 分子
 	}
 	
 	p = bscpw / bsw;	// 座標値を求める
@@ -61,7 +61,7 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
 {
 	NURBSS* NurbsS = NULL;
 	Coord norm( Axis.NormalizeVec() );		// 正規化
-	int K = m_cp.size();
+	int K = m_vCp.size();
 
     // 回転角度によって，いくつのセグメントで円弧を生成するか判断する
     // 回転角度が180度未満の場合，1セグメントで円弧を表現する
@@ -75,8 +75,8 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
         for(int i=0;i<3;i++){
 			VCoord cp;
             for(int j=0;j<K;j++){
-                Coord Q_  = m_cp[j].CalcRotVec(norm,(double)i*rad/2);	// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
-                Coord P   = m_cp[j].CalcNormalLine(Coord(),norm);		// Axis上の回転中心の座標
+                Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*rad/2);	// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
+                Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);		// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;	// PQ_ベクトルを生成
                 if(i%2 == 0){		// i=0,2のとき
                     W(i,j) = m_W[j];
@@ -103,8 +103,8 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
         for(int i=0;i<5;i++){
 			VCoord cp;
             for(int j=0;j<K;j++){
-                Coord Q_  = m_cp[j].CalcRotVec(norm,(double)i*rad/4);	// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
-                Coord P   = m_cp[j].CalcNormalLine(Coord(),norm);		// Axis上の回転中心の座標
+                Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*rad/4);	// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
+                Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);		// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;	// PQ_ベクトルを生成
                 if(i%2 ==  1){	// i=1,3のとき
 					W(i,j) = m_W[j]*cos(rad/4);
@@ -131,8 +131,8 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
         for(int i=0;i<7;i++){
 			VCoord cp;
             for(int j=0;j<K;j++){
-                Coord Q_  = m_cp[j].CalcRotVec(norm,(double)i*rad/6);		// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
-                Coord P   = m_cp[j].CalcNormalLine(Coord(),norm);	// Axis上の回転中心の座標
+                Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*rad/6);		// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
+                Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);	// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;	// PQ_ベクトルを生成
                 if(i%2 ==  0){	// i=0,2,4,6のとき
                     W(i,j) = m_W[j];
@@ -158,8 +158,8 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
         for(int i=0;i<9;i++){		// u方向
 			VCoord cp;
             for(int j=0;j<K;j++){	// v方向
-                Coord Q_  = m_cp[j].CalcRotVec(norm,(double)i*PI/4);		// 元々のNURBS曲線上のコントロールポイントをAxis周りに45度回転
-                Coord P   = m_cp[j].CalcNormalLine(Coord(),norm);			// Axis上の回転中心の座標
+                Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*PI/4);		// 元々のNURBS曲線上のコントロールポイントをAxis周りに45度回転
+                Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);			// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;												// PQ_ベクトルを生成
                 if(i%2 == 0){													// i=0,2,4,6のとき
                     W(i,j) = m_W[j];										// ウエイト
@@ -192,7 +192,7 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
 NURBSS* NURBSC::GenSweepNurbsS(const Coord& Axis, double Len) const
 {
 	Coord norm( Axis.NormalizeVec() );		// 正規化
-	int K = m_cp.size();
+	int K = m_vCp.size();
 
 	// NurbsSを生成
 	ublasVector T(4);				// v方向ノットベクトル
@@ -205,9 +205,9 @@ NURBSS* NURBSC::GenSweepNurbsS(const Coord& Axis, double Len) const
 		for(int j=0;j<2;j++){
 			W(i,j) = m_W[i];	// ウエイト計算
 			if(j==0)
-				cp.push_back(m_cp[i]);		// コントロールポイント計算
+				cp.push_back(m_vCp[i]);		// コントロールポイント計算
 			else
-				cp.push_back(m_cp[i] + (norm * Len));		// コントロールポイント計算
+				cp.push_back(m_vCp[i] + (norm * Len));		// コントロールポイント計算
 		}
 		Cp.push_back(cp);
 	}
@@ -234,12 +234,12 @@ Coord NURBSC::CalcDiffNurbsC(double t) const
 	diff_Gt = 0;
 
 	// 各係数算出
-	for(size_t i=0;i<m_cp.size();i++){
+	for(size_t i=0;i<m_vCp.size();i++){
 		bs = CalcBSbasis(t,m_T,i,m_M);
 		diff_bs = CalcDiffBSbasis(t,m_T,i,m_M);
 
-		Ft += m_cp[i] * (bs*m_W[i]);
-		diff_Ft += m_cp[i] * (diff_bs*m_W[i]);
+		Ft += m_vCp[i] * (bs*m_W[i]);
+		diff_Ft += m_vCp[i] * (diff_bs*m_W[i]);
 
 		Gt += bs*m_W[i];
 		diff_Gt += diff_bs*m_W[i];
@@ -271,11 +271,11 @@ Coord NURBSC::CalcDiff2NurbsC(double t) const
 	P0 = CalcNurbsCCoord(t);
 	P1 = CalcDiffNurbsC(t);
 
-	for(size_t i=0;i<m_cp.size();i++){
+	for(size_t i=0;i<m_vCp.size();i++){
 		w0 += CalcBSbasis(t,m_T,i,m_M) * m_W[i];
 		w1 += CalcDiffBSbasis(t,m_T,i,m_M) * m_W[i];
 		w2 += CalcDiffBSbasisN(t,m_T,i,m_M,2) * m_W[i];
-		A2 += m_cp[i] * (CalcDiffBSbasisN(t,m_T,i,m_M,2) * m_W[i]);
+		A2 += m_vCp[i] * (CalcDiffBSbasisN(t,m_T,i,m_M,2) * m_W[i]);
 	}
 
 	return (A2-((P1*2*w1)+(P0*2*w2)))/w0;
@@ -295,13 +295,13 @@ Coord NURBSC::CalcDiffNNurbsC(int r, double t) const
 {
 	if(!r) return CalcNurbsCCoord(t);
 
-	int K=m_cp.size();
+	int K=m_vCp.size();
 	Coord Ar;
 	double W = 0;
 
 	for(int i=0;i<K;i++){
 		double bsr = CalcDiffBSbasisN(t,m_T,i,m_M,r);
-		Ar += m_cp[i] * (bsr*m_W[i]);
+		Ar += m_vCp[i] * (bsr*m_W[i]);
 		W  += m_W[i]*CalcBSbasis(t,m_T,i,m_M);
 	}
 
@@ -498,7 +498,7 @@ Vdouble NURBSC::CalcIntersecCurve3(const Coord& pt, const Coord& nvec) const
 	Vdouble a;
 	Vdouble t;
 	int num;
-	int K=m_cp.size();
+	int K=m_vCp.size();
 
 	ublasMatrix coef(m_M,m_M);
 
@@ -1266,7 +1266,7 @@ boost::tuple<NURBSC*, NURBSC*> NURBSC::DivNurbsCParam(double t) const
 	InsertNewKnotOnNurbsC(t, deg, C0_);
 
 	// 2本の分割曲線を生成
-	int k  = C0_->m_cp.size();
+	int k  = C0_->m_vCp.size();
 	int N1 = k+1;
 	int K1 = N1 - m_M;
 	int N2 = C0_->m_T.size() - k + deg+1;
@@ -1284,7 +1284,7 @@ boost::tuple<NURBSC*, NURBSC*> NURBSC::DivNurbsCParam(double t) const
 		T1[i] = C0_->m_T[i];
 	T1[N1-1] = t;
 	for(int i=0;i<K1;i++){
-		cp1.push_back(C0_->m_cp[i]);
+		cp1.push_back(C0_->m_vCp[i]);
 		W1[i] = C0_->m_W[i];
 	}
 	for(int i=0;i<m_M;i++)
@@ -1292,7 +1292,7 @@ boost::tuple<NURBSC*, NURBSC*> NURBSC::DivNurbsCParam(double t) const
 	for(int i=m_M;i<N2;i++)
 		T2[i] = C0_->m_T[k+i-m_M];
 	for(int i=0;i<K2;i++){
-		cp2.push_back(C0_->m_cp[i+K1-1]);
+		cp2.push_back(C0_->m_vCp[i+K1-1]);
 		W2[i] = C0_->m_W[i+K1-1];
 	}
 
@@ -1365,16 +1365,16 @@ NURBSC* NURBSC::ConnectNurbsC(const NURBSC* C2) const
 	NURBSC	C2_ = *C2;
 
 	// 2曲線の連結位置を調べ，連結点がC1(1), C2(0)となるようどちらかの曲線を調整する
-	if(m_cp[0].DiffCoord(C2->m_cp[0]) == KOD_TRUE){
+	if(m_vCp[0].DiffCoord(C2->m_vCp[0]) == KOD_TRUE){
 		C1_.ReverseNurbsC();			// C1の向きを反転する
 	}
-	else if(m_cp.front().DiffCoord(C2->m_cp.back()) == KOD_TRUE){
+	else if(m_vCp.front().DiffCoord(C2->m_vCp.back()) == KOD_TRUE){
 		std::swap(C1_, C2_);
 	}
-	else if(m_cp.back().DiffCoord(C2->m_cp.front()) == KOD_TRUE){
+	else if(m_vCp.back().DiffCoord(C2->m_vCp.front()) == KOD_TRUE){
 		// このケースはOK．特に調整必要なし
 	}
-	else if(m_cp.back().DiffCoord(C2->m_cp.back()) == KOD_TRUE){
+	else if(m_vCp.back().DiffCoord(C2->m_vCp.back()) == KOD_TRUE){
 		C2_.ReverseNurbsC();			// C2の向きを反転する
 	}
 	else{
@@ -1418,8 +1418,8 @@ NURBSC* NURBSC::ConnectNurbsC(const NURBSC* C2) const
 // shift - シフト量
 void NURBSC::ShiftNurbsC(const Coord& shift)
 {
-	for(size_t i=0;i<m_cp.size();i++){
-		m_cp[i] += shift;
+	for(size_t i=0;i<m_vCp.size();i++){
+		m_vCp[i] += shift;
 	}
 }
 
@@ -1431,8 +1431,8 @@ void NURBSC::ShiftNurbsC(const Coord& shift)
 // ratio - 倍率
 void NURBSC::ChRatioNurbsC(const Coord& ratio)
 {
-	for(size_t i=0;i<m_cp.size();i++){
-		m_cp[i] *= ratio;
+	for(size_t i=0;i<m_vCp.size();i++){
+		m_vCp[i] *= ratio;
 	}
 }
 
@@ -1452,13 +1452,13 @@ void NURBSC::RotNurbsC(const Coord& axis, double deg)
 	Quat ConjuQ;		// 共役クォータニオン
 	Quat TargetQ;		// 回転後の座標を格納するクォータニオン
 	
-	for(size_t i=0;i<m_cp.size();i++){		// コントロールポイント分ループ
-		StartQ = QFunc.QInit(1,m_cp[i].x,m_cp[i].y,m_cp[i].z);		// NURBS曲面を構成するcpの座標を登録
+	for(size_t i=0;i<m_vCp.size();i++){		// コントロールポイント分ループ
+		StartQ = QFunc.QInit(1,m_vCp[i].x,m_vCp[i].y,m_vCp[i].z);		// NURBS曲面を構成するcpの座標を登録
 		rad = DegToRad(deg);									// degreeからradianに変換
 		RotQ = QFunc.QGenRot(rad,axis.x,axis.y,axis.z);			// 回転クォータニオンに回転量を登録(ここの数字をいじれば任意に回転できる)
 		ConjuQ = QFunc.QConjugation(RotQ);						// RotQの共役クォータニオンを登録
 		TargetQ = QFunc.QMult(QFunc.QMult(RotQ,StartQ),ConjuQ);	// 回転させる
-		m_cp[i].SetCoord(TargetQ.x,TargetQ.y,TargetQ.z);	// 回転後の座標を登録
+		m_vCp[i].SetCoord(TargetQ.x,TargetQ.y,TargetQ.z);	// 回転後の座標を登録
 	}
 }
 
@@ -1469,11 +1469,11 @@ void NURBSC::RotNurbsC(const Coord& axis, double deg)
 // *C - NURBS曲線 
 void NURBSC::ReverseNurbsC(void)
 {
-	std::reverse(m_W.begin(),  m_W.end());
-	std::reverse(m_cp.begin(), m_cp.end());
-	std::reverse(m_T.begin(),  m_T.end());
+	std::reverse(m_W.begin(),   m_W.end());
+	std::reverse(m_vCp.begin(), m_vCp.end());
+	std::reverse(m_T.begin(),   m_T.end());
 	for(auto& TT : m_T) TT *= -1;
-    ChangeKnotVecRange(m_T,m_M,m_cp.size(),0,1);
+    ChangeKnotVecRange(m_T,m_M,m_vCp.size(),0,1);
 }
 
 /////////////////////////////////////////////////
@@ -1499,7 +1499,7 @@ boost::tuple<VCoord, Vdouble> NURBSC::GetNurbsCCoef(const ublasMatrix& coef, int
 		Coord  p;
 		for(int k=0;k<m_M;k++){
 			q += coef(k,j)*m_W[i+k];
-			p += m_cp[i+k] * (coef(k,j)*m_W[i+k]);
+			p += m_vCp[i+k] * (coef(k,j)*m_W[i+k]);
 		}
 		Q.push_back(q);
 		P.push_back(p);
@@ -1521,7 +1521,7 @@ boost::tuple<VCoord, Vdouble> NURBSC::GetNurbsCCoef(const ublasMatrix& coef, int
 // 新たなノットベクトル列におけるtの挿入位置
 void NURBSC::InsertNewKnotOnNurbsC(double t, int deg, NURBSC* C_) const
 {
-	int CK = m_cp.size();
+	int CK = m_vCp.size();
 	int k=0;					// tの挿入位置
 	int m = m_M;				// 階数
 	int n = CK;					// コントロールポイントの数
@@ -1535,7 +1535,7 @@ void NURBSC::InsertNewKnotOnNurbsC(double t, int deg, NURBSC* C_) const
 	for(int i=0;i<m+n;i++)
 		C_->m_T[i] = m_T[i];
 	for(int i=0;i<n;i++)
-		C_->m_cp.push_back(m_cp[i]);
+		C_->m_vCp.push_back(m_vCp[i]);
 	C_->m_W.resize(n);
 	for(int i=0;i<n;i++)
 		C_->m_W[i] = m_W[i];
@@ -1546,7 +1546,7 @@ void NURBSC::InsertNewKnotOnNurbsC(double t, int deg, NURBSC* C_) const
 		for(int i=0;i<n+m;i++)
 			T_buf[i] = C_->m_T[i];
 		for(int i=0;i<n;i++)
-			cp_buf[i] = C_->m_cp[i];
+			cp_buf[i] = C_->m_vCp[i];
 		for(int i=0;i<n;i++)
 			W_buf[i] = C_->m_W[i];
 
@@ -1568,16 +1568,16 @@ void NURBSC::InsertNewKnotOnNurbsC(double t, int deg, NURBSC* C_) const
 
 		// コントロールポイントとウェイトの更新
 		for(int i=0;i<=k-m+1;i++){
-			C_->m_cp[i] = cp_buf[i];
+			C_->m_vCp[i] = cp_buf[i];
 			C_->m_W[i]  = W_buf[i];
 		}
 		for(int i=k-m+2;i<=k;i++){
 			double a = (t-T_buf[i])/(T_buf[i+m-1]-T_buf[i]);
-			C_->m_cp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
+			C_->m_vCp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
 			C_->m_W[i]  = (1-a)*W_buf[i-1] + a*W_buf[i];
 		}
 		for(int i=k+1;i<=n;i++){
-			C_->m_cp[i] = cp_buf[i-1];
+			C_->m_vCp[i] = cp_buf[i-1];
 			C_->m_W[i]  = W_buf[i-1];
 		}
 
@@ -1603,17 +1603,17 @@ void NURBSC::SetKnotVecC_ConnectC(const NURBSC* C2, NURBSC* C_) const
 	c = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// C_のノットベクトル範囲を得る
-	ublasVector T1 = ChangeKnotVecRange(    m_T,    m_M,    m_cp.size(),s,c);	// C1のノットベクトルの範囲を変更
-	ublasVector T2 = ChangeKnotVecRange(C2->m_T,C2->m_M,C2->m_cp.size(),c,e);	// C2(U2)のノットベクトルの範囲を変更
+	ublasVector T1 = ChangeKnotVecRange(    m_T,    m_M,    m_vCp.size(),s,c);	// C1のノットベクトルの範囲を変更
+	ublasVector T2 = ChangeKnotVecRange(C2->m_T,C2->m_M,C2->m_vCp.size(),c,e);	// C2(U2)のノットベクトルの範囲を変更
 	C_->m_V[0] = s;						// C_のノットベクトルの範囲
 	C_->m_V[1] = e;
 	C_->m_T.resize(m_T.size() + C2->m_T.size() - C2->m_M - 1);	// C_のノットベクトル数
 
 	// C_のノットベクトルを得る
-	for(int i=0;i<m_cp.size();i++)
+	for(int i=0;i<m_vCp.size();i++)
 		C_->m_T[i] = T1[i];
 	for(int i=1;i<C2->m_T.size();i++)
-		C_->m_T[m_cp.size()+i-1] = T2[i];
+		C_->m_T[m_vCp.size()+i-1] = T2[i];
 }
 
 // Function: SetCPC_ConnectC
@@ -1624,17 +1624,17 @@ void NURBSC::SetKnotVecC_ConnectC(const NURBSC* C2, NURBSC* C_) const
 // *C_ - 連結後のNURBS曲線
 void NURBSC::SetCPC_ConnectC(const NURBSC* C2, NURBSC* C_) const
 {
-	int K[] = {m_cp.size(), C2->m_cp.size()};
+	int K[] = {m_vCp.size(), C2->m_vCp.size()};
 
-	C_->m_cp.clear();
+	C_->m_vCp.clear();
 	C_->m_W.resize(K[0] + K[1] - 1);
 
 	for(int i=0;i<K[0];i++){
-		C_->m_cp.push_back(m_cp[i]);
+		C_->m_vCp.push_back(m_vCp[i]);
 		C_->m_W[i] = m_W[i];
 	}
 	for(int i=1;i<K[1];i++){
-		C_->m_cp.push_back(C2->m_cp[i]);
+		C_->m_vCp.push_back(C2->m_vCp[i]);
 		C_->m_W[K[0]+i-1] = C2->m_W[i];
 	}
 }
@@ -1649,7 +1649,7 @@ void NURBSC::SetCPC_ConnectC(const NURBSC* C2, NURBSC* C_) const
 // *nurbs - デバッグするNURBS曲線
 void NURBSC::DebugForNurbsC(void) const
 {
-	int K = m_cp.size();
+	int K = m_vCp.size();
 	fprintf(stderr,"Cp num: %d\n",K);
 	fprintf(stderr,"Rank: %d\n",m_M);
 	fprintf(stderr,"Knot num: %d\n",m_T.size());
@@ -1658,7 +1658,7 @@ void NURBSC::DebugForNurbsC(void) const
 	// コントロールポイント
 	fprintf(stderr,"Control Point\n");
 	for(int i=0;i<K;i++){
-		fprintf(stderr,"#%d: (%lf,%lf,%lf)\t",i+1,m_cp[i].x,m_cp[i].y,m_cp[i].z);
+		fprintf(stderr,"#%d: (%lf,%lf,%lf)\t",i+1,m_vCp[i].x,m_vCp[i].y,m_vCp[i].z);
 	}
 	fprintf(stderr,"\n");
 

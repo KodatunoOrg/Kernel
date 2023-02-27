@@ -105,10 +105,10 @@ void Describe_BODY::DrawNurbsCurve(const NURBSC* NurbsC)
 	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
 
-	for(i=0;i<NurbsC->m_cp.size();i++){			// コントロールポイント取り出し
-		CCtlp[i][0] = NurbsC->m_cp[i].x*NurbsC->m_W[i];
-		CCtlp[i][1] = NurbsC->m_cp[i].y*NurbsC->m_W[i];
-		CCtlp[i][2] = NurbsC->m_cp[i].z*NurbsC->m_W[i];
+	for(i=0;i<NurbsC->m_vCp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = NurbsC->m_vCp[i].x*NurbsC->m_W[i];
+		CCtlp[i][1] = NurbsC->m_vCp[i].y*NurbsC->m_W[i];
+		CCtlp[i][2] = NurbsC->m_vCp[i].z*NurbsC->m_W[i];
 		CCtlp[i][3] = NurbsC->m_W[i];
 	}
 
@@ -143,9 +143,9 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->m_Dstat.Color);
 	for(k=0;k<NurbsS->m_W.size2();k++){
 		for(j=0;j<NurbsS->m_W.size1();j++){
-			SCtlp[j][k][0] = NurbsS->m_cp[j][k].x*NurbsS->m_W(j,k);	// コントロールポイント取り出し
-			SCtlp[j][k][1] = NurbsS->m_cp[j][k].y*NurbsS->m_W(j,k);
-			SCtlp[j][k][2] = NurbsS->m_cp[j][k].z*NurbsS->m_W(j,k);
+			SCtlp[j][k][0] = NurbsS->m_vvCp[j][k].x*NurbsS->m_W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = NurbsS->m_vvCp[j][k].y*NurbsS->m_W(j,k);
+			SCtlp[j][k][2] = NurbsS->m_vvCp[j][k].z*NurbsS->m_W(j,k);
 			SCtlp[j][k][3] = NurbsS->m_W(j,k);
 		}
 	}
@@ -177,9 +177,9 @@ void Describe_BODY::DrawNurbsSurfe(const NURBSS* NurbsS)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->m_Dstat.Color);
 	for(k=0;k<NurbsS->m_W.size2();k++){
 		for(j=0;j<NurbsS->m_W.size1();j++){
-			SCtlp[j][k][0] = NurbsS->m_cp[j][k].x*NurbsS->m_W(j,k);	// コントロールポイント取り出し
-			SCtlp[j][k][1] = NurbsS->m_cp[j][k].y*NurbsS->m_W(j,k);
-			SCtlp[j][k][2] = NurbsS->m_cp[j][k].z*NurbsS->m_W(j,k);
+			SCtlp[j][k][0] = NurbsS->m_vvCp[j][k].x*NurbsS->m_W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = NurbsS->m_vvCp[j][k].y*NurbsS->m_W(j,k);
+			SCtlp[j][k][2] = NurbsS->m_vvCp[j][k].z*NurbsS->m_W(j,k);
 			SCtlp[j][k][3] = NurbsS->m_W(j,k);
 		}
 	}
@@ -287,9 +287,9 @@ void Describe_BODY::DrawNurbsCurve_Param(const NURBSC *NurbsC)
 	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
 
-	for(i=0;i<NurbsC->m_cp.size();i++){			// コントロールポイント取り出し
-		CCtlp[i][0] = NurbsC->m_cp[i].x*NurbsC->m_W[i];
-		CCtlp[i][1] = NurbsC->m_cp[i].y*NurbsC->m_W[i];
+	for(i=0;i<NurbsC->m_vCp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = NurbsC->m_vCp[i].x*NurbsC->m_W[i];
+		CCtlp[i][1] = NurbsC->m_vCp[i].y*NurbsC->m_W[i];
 		CCtlp[i][2] = NurbsC->m_W[i];
 	}
 	for(i=0;i<NurbsC->m_T.size();i++){			// ノットベクトル取り出し

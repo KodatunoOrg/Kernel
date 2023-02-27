@@ -121,8 +121,8 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 			Coord s = n1->CalcNurbsCCoord(n1->m_V[0]);	// 始点
 			Coord e = n2->CalcNurbsCCoord(n2->m_V[1]);	// 終点
 			if(s.DiffCoord(e,1.0E-5) == KOD_FALSE){				// 始点≠終点
-				body->m_vCompC[i]->DegeNurbs->m_cp.push_back(e);
-				body->m_vCompC[i]->DegeNurbs->m_cp.push_back(s);
+				body->m_vCompC[i]->DegeNurbs->m_vCp.push_back(e);
+				body->m_vCompC[i]->DegeNurbs->m_vCp.push_back(s);
 				body->m_vCompC[i]->DegeFlag = KOD_FALSE;			// 縮退ありのフラグを立てる
 			}
 			else{
@@ -156,8 +156,8 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 		for(int j=1;j<compc->pDE.size();j++){
 			bc = boost::any_cast<NURBSC*>(compc->pDE[j-1]);
 			nc = boost::any_cast<NURBSC*>(compc->pDE[j]);
-			if(bc->m_cp.back().DiffCoord2D(nc->m_cp.front()) == KOD_FALSE)
-				nc->m_cp[0] = bc->m_cp.back();
+			if(bc->m_vCp.back().DiffCoord2D(nc->m_vCp.front()) == KOD_FALSE)
+				nc->m_vCp[0] = bc->m_vCp.back();
 		}
 		// 内側トリム
 		for(int j=0;j<body->m_vTrmS[i]->m_pTI.size();j++){
@@ -165,8 +165,8 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 			for(int k=1;k<compc->pDE.size();k++){
 				bc = boost::any_cast<NURBSC*>(compc->pDE[k-1]);
 				nc = boost::any_cast<NURBSC*>(compc->pDE[k]);
-				if(bc->m_cp.back().DiffCoord2D(nc->m_cp.front()) == KOD_FALSE)
-					nc->m_cp[0] = bc->m_cp.back();
+				if(bc->m_vCp.back().DiffCoord2D(nc->m_vCp.front()) == KOD_FALSE)
+					nc->m_vCp[0] = bc->m_vCp.back();
 			}
 		}
 	}
@@ -244,22 +244,22 @@ int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 		COMPC* compc = boost::any_cast<COMPC*>(body->m_vTrmS[i]->m_pTO->pB);	// 型保障なし K.Magara
 		for(int j=0;j<compc->pDE.size();j++){
 			NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[j]);
-			for(int k=0;k<nc->m_cp.size();k++){	// パラメトリック平面上のNURBS曲線のコントロールポイントをノットの変更に合わせて変更
-				nc->m_cp[k].x = ChangeKnot(nc->m_cp[k].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],val);
-				nc->m_cp[k].y = ChangeKnot(nc->m_cp[k].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],val);
+			for(int k=0;k<nc->m_vCp.size();k++){	// パラメトリック平面上のNURBS曲線のコントロールポイントをノットの変更に合わせて変更
+				nc->m_vCp[k].x = ChangeKnot(nc->m_vCp[k].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],val);
+				nc->m_vCp[k].y = ChangeKnot(nc->m_vCp[k].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],val);
 			}
-			ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_cp.size(), val);
+			ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_vCp.size(), val);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
 		for(int j=0;j<body->m_vTrmS[i]->m_pTI.size();j++){
 			COMPC* compc = boost::any_cast<COMPC*>(body->m_vTrmS[i]->m_pTI[j]->pB);
 			for(int k=0;k<compc->pDE.size();k++){
 				NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[k]);
-				for(int l=0;l<nc->m_cp.size();l++){
-					nc->m_cp[l].x = ChangeKnot(nc->m_cp[l].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],val);
-					nc->m_cp[l].y = ChangeKnot(nc->m_cp[l].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],val);
+				for(int l=0;l<nc->m_vCp.size();l++){
+					nc->m_vCp[l].x = ChangeKnot(nc->m_vCp[l].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],val);
+					nc->m_vCp[l].y = ChangeKnot(nc->m_vCp[l].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],val);
 				}
-				ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_cp.size(), val);
+				ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_vCp.size(), val);
 			}
 		}
 		// ノットベクトルの範囲を変更する
@@ -270,7 +270,7 @@ int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 	// NURBS曲線
 	for(int i=0;i<body->m_vNurbsC.size();i++){
 		if(body->m_vNurbsC[i]->m_EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
-		ChangeKnotVecRange(body->m_vNurbsC[i]->m_V,body->m_vNurbsC[i]->m_T,body->m_vNurbsC[i]->m_M,body->m_vNurbsC[i]->m_cp.size(),val);
+		ChangeKnotVecRange(body->m_vNurbsC[i]->m_V,body->m_vNurbsC[i]->m_T,body->m_vNurbsC[i]->m_M,body->m_vNurbsC[i]->m_vCp.size(),val);
 	}
 
 	return KOD_TRUE;
@@ -336,22 +336,22 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 		COMPC* compc = boost::any_cast<COMPC*>(body->m_vTrmS[i]->m_pTO->pB);
 		for(int j=0;j<compc->pDE.size();j++){
 			NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[j]);
-			for(int k=0;k<nc->m_cp.size();k++){	// パラメトリック平面上のNURBS曲線のコントロールポイントをノットの変更に合わせて変更
-				nc->m_cp[k].x = ChangeKnot(nc->m_cp[k].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],uval);
-				nc->m_cp[k].y = ChangeKnot(nc->m_cp[k].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],vval);
+			for(int k=0;k<nc->m_vCp.size();k++){	// パラメトリック平面上のNURBS曲線のコントロールポイントをノットの変更に合わせて変更
+				nc->m_vCp[k].x = ChangeKnot(nc->m_vCp[k].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],uval);
+				nc->m_vCp[k].y = ChangeKnot(nc->m_vCp[k].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],vval);
 			}
-			ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_cp.size(), NORM_KNOT_VAL);
+			ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_vCp.size(), NORM_KNOT_VAL);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
 		for(int j=0;j<body->m_vTrmS[i]->m_pTI.size();j++){
 			COMPC* compc = boost::any_cast<COMPC*>(body->m_vTrmS[i]->m_pTI[j]->pB);
 			for(int k=0;k<compc->pDE.size();k++){
 				NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[k]);
-				for(int l=0;l<nc->m_cp.size();l++){
-					nc->m_cp[l].x = ChangeKnot(nc->m_cp[l].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],uval);
-					nc->m_cp[l].y = ChangeKnot(nc->m_cp[l].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],vval);
+				for(int l=0;l<nc->m_vCp.size();l++){
+					nc->m_vCp[l].x = ChangeKnot(nc->m_vCp[l].x,body->m_vTrmS[i]->m_pts->m_S[M0-1],body->m_vTrmS[i]->m_pts->m_S[K0],uval);
+					nc->m_vCp[l].y = ChangeKnot(nc->m_vCp[l].y,body->m_vTrmS[i]->m_pts->m_T[M1-1],body->m_vTrmS[i]->m_pts->m_T[K1],vval);
 				}
-				ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_cp.size(), NORM_KNOT_VAL);
+				ChangeKnotVecRange(nc->m_V, nc->m_T, nc->m_M, nc->m_vCp.size(), NORM_KNOT_VAL);
 			}
 		}
 		// ノットベクトルの範囲を変更する
@@ -362,7 +362,7 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 	// NURBS曲線
 	for(int i=0;i<body->m_vNurbsC.size();i++){
 		if(body->m_vNurbsC[i]->m_EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
-		ChangeKnotVecRange(body->m_vNurbsC[i]->m_V,body->m_vNurbsC[i]->m_T,body->m_vNurbsC[i]->m_M,body->m_vNurbsC[i]->m_cp.size(),NORM_KNOT_VAL);
+		ChangeKnotVecRange(body->m_vNurbsC[i]->m_V,body->m_vNurbsC[i]->m_T,body->m_vNurbsC[i]->m_M,body->m_vNurbsC[i]->m_vCp.size(),NORM_KNOT_VAL);
 	}
 
 	return KOD_TRUE;
@@ -391,7 +391,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 			// 外側トリムを構成する各NURBS曲線の始点を取り出す
 			for(int j=0;j<otrmnum;j++){
 				NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[j]);
-				p.push_back(nc->m_cp[0]);
+				p.push_back(nc->m_vCp[0]);
 			}
 			flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
 
@@ -399,7 +399,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 			if(flag == CW){
 				for(int j=0;j<otrmnum;j++){
 					NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[j]);
-					std::reverse(nc->m_cp.begin(), nc->m_cp.end());		// コントロールポイント列の反転
+					std::reverse(nc->m_vCp.begin(), nc->m_vCp.end());		// コントロールポイント列の反転
 					// ノットベクトル列を反転
 					for(int k=0;k<nc->m_T.size();k++){
 						nc->m_T[k] *= -1;
@@ -423,7 +423,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 				// 内側トリムを構成する各NURBS曲線の始点を取り出す
 				for(int k=0;k<otrmnum;k++){
 					NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[k]);
-					p.push_back(nc->m_cp[0]);
+					p.push_back(nc->m_vCp[0]);
 				}
 				flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
 
@@ -431,7 +431,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 				if(flag == CCW){
 					for(int k=0;k<otrmnum;k++){
 						NURBSC* nc = boost::any_cast<NURBSC*>(compc->pDE[k]);
-						std::reverse(nc->m_cp.begin(), nc->m_cp.end());		// コントロールポイント列の反転
+						std::reverse(nc->m_vCp.begin(), nc->m_vCp.end());		// コントロールポイント列の反転
 						// ノットベクトル列を反転
 						for(int l=0;l<nc->m_T.size();l++){
 							nc->m_T[l] *= -1;
@@ -768,7 +768,7 @@ NURBSC* IGES_PARSER::GetNurbsCPara(char str[], int pD)
 	}
 	for(i=0;i<K;i++){						// コントロールポイントの座標値
 		Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
-		NurbsC->m_cp.push_back(cp);
+		NurbsC->m_vCp.push_back(cp);
 	}
 	NurbsC->m_V[0] = CatchStringD(&p);		// パラメータの範囲
 	NurbsC->m_V[1] = CatchStringD(&p);
@@ -840,7 +840,7 @@ NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD)
 			Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
 			vcp.push_back(cp);
 		}
-		NurbsS->m_cp.push_back(vcp);
+		NurbsS->m_vvCp.push_back(vcp);
 	}
 	NurbsS->m_U[0] = CatchStringD(&p);			// u方向の開始値
 	NurbsS->m_U[1] = CatchStringD(&p);			// u方向の終了値
@@ -1396,15 +1396,15 @@ int IGES_PARSER::SearchMaxCoord(BODY *body)
 	
 	// #100(円、円弧)、#110(線分)、#126(NURBS曲線)のコントロールポイントの座標値の個数を得る
 	for(i=0;i<body->m_vNurbsC.size();i++){
-		bufnum += 3*body->m_vNurbsC[i]->m_cp.size();
+		bufnum += 3*body->m_vNurbsC[i]->m_vCp.size();
 	}
 
 	// #100(円、円弧)、#110(線分)、#126(NURBS曲線)のコントロールポイントの座標値を得る
 	for(i=0;i<body->m_vNurbsC.size();i++){
-		for(j=0;j<body->m_vNurbsC[i]->m_cp.size();j++){
-			vCoordBuf.push_back(fabs(body->m_vNurbsC[i]->m_cp[j].x));	// コントロールポイントX
-			vCoordBuf.push_back(fabs(body->m_vNurbsC[i]->m_cp[j].y));	// コントロールポイントY
-			vCoordBuf.push_back(fabs(body->m_vNurbsC[i]->m_cp[j].z));	// コントロールポイントZ
+		for(j=0;j<body->m_vNurbsC[i]->m_vCp.size();j++){
+			vCoordBuf.push_back(fabs(body->m_vNurbsC[i]->m_vCp[j].x));	// コントロールポイントX
+			vCoordBuf.push_back(fabs(body->m_vNurbsC[i]->m_vCp[j].y));	// コントロールポイントY
+			vCoordBuf.push_back(fabs(body->m_vNurbsC[i]->m_vCp[j].z));	// コントロールポイントZ
 		}
 	}
 
@@ -1470,8 +1470,8 @@ int IGES_PARSER::TransformNurbsC(const TMAT* TMat, NURBSC* NurbsC)
 {
 	int i;
 
-	for(i=0;i<NurbsC->m_cp.size();i++){
-		NurbsC->m_cp[i] = MulFrameCoord(TMat->R, TMat->T, NurbsC->m_cp[i]);
+	for(i=0;i<NurbsC->m_vCp.size();i++){
+		NurbsC->m_vCp[i] = MulFrameCoord(TMat->R, TMat->T, NurbsC->m_vCp[i]);
 	}
 	
 	return KOD_TRUE;

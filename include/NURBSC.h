@@ -31,7 +31,7 @@ public:
     A4int m_prop;
     ublasVector m_T;
     ublasVector m_W;
-    VCoord m_cp;
+    VCoord m_vCp;
     A2double m_V;
     Coord m_norm;
     int m_BlankStat;
@@ -45,7 +45,7 @@ public:
 	NURBSC(int M, const ublasVector& T, const ublasVector& W, const VCoord& cp, const A2double& V, const A4int& prop, int euflag) {
 		m_T = T;
 		m_W = W;
-		m_cp = cp;
+		m_vCp = cp;
 		m_V = V;
 		m_M = M;
 		m_prop = prop;

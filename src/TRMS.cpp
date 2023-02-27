@@ -413,10 +413,10 @@ VCoord TRMS::ApproxTrimBorder(COMPC* CompC)
 		// トリム境界線がNURBS曲線で構成されている
 		if(CompC->pDE[i].type() == typeid(NURBSC*)){
 			NurbsC = boost::any_cast<NURBSC*>(CompC->pDE[i]);	// 注目中のNurbs曲線のポインタを取得
-			if(NurbsC->m_cp.size() == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
+			if(NurbsC->m_vCp.size() == 2 && CompC->DegeFlag == KOD_TRUE)	divnum = 2;		// コントロールポイントが2つの場合は直線なので、分割点を生成しなくてもよくする
 			else divnum = TRM_BORDERDIVNUM;
 			for(int j=0;j<divnum-1;j++){
-				ent_dev = NurbsC->m_T[NurbsC->m_M-1]+(NurbsC->m_T[NurbsC->m_cp.size()]-NurbsC->m_T[NurbsC->m_M-1])*(double)j/((double)divnum-1);	// 分割点tを求める
+				ent_dev = NurbsC->m_T[NurbsC->m_M-1]+(NurbsC->m_T[NurbsC->m_vCp.size()]-NurbsC->m_T[NurbsC->m_M-1])*(double)j/((double)divnum-1);	// 分割点tを求める
 				P.push_back(NurbsC->CalcNurbsCCoord(ent_dev));	// NURBS曲面のパラメータ空間内のNURBS曲線の分割点tの座標値(u,v)を得る
 			}
 		}

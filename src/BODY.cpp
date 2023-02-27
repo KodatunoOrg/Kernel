@@ -221,7 +221,7 @@ int BODY::GetNurbsCFromLine(int LineCount)
 		NurbsC->m_W[i] = 1.;
 	}
 	for(i=0;i<K;i++){				// コントロールポイントの座標値
-		NurbsC->m_cp.push_back( Coord(m_vLine[LineCount]->cp[i].x, m_vLine[LineCount]->cp[i].y, m_vLine[LineCount]->cp[i].z) );
+		NurbsC->m_vCp.push_back( Coord(m_vLine[LineCount]->cp[i].x, m_vLine[LineCount]->cp[i].y, m_vLine[LineCount]->cp[i].z) );
 	}
 	
 	// パラメータの値
@@ -333,9 +333,9 @@ int BODY::CirAToNurbsC_seg1(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 	vec_cp = vec[0].Arc_CP(vec[1], cos(angle_rad));	//　円の中心点からコントロールポイントP1へのベクトルを求める
 	
 	// コントロールポイントの座標値
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[1].x, m_vCirA[CirCount]->cp[1].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
-	NurbsC->m_cp.push_back( Coord(vec_cp.x + m_vCirA[CirCount]->cp[0].x, vec_cp.y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[2].x, m_vCirA[CirCount]->cp[2].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[1].x, m_vCirA[CirCount]->cp[1].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
+	NurbsC->m_vCp.push_back( Coord(vec_cp.x + m_vCirA[CirCount]->cp[0].x, vec_cp.y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[2].x, m_vCirA[CirCount]->cp[2].y, m_vCirA[CirCount]->zt) );
 		
 	NurbsC->m_V[0] = 0.;		// パラメータの値
 	NurbsC->m_V[1] = 1.;
@@ -392,11 +392,11 @@ int BODY::CirAToNurbsC_seg2(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 	vec_cp[2] = vec_cp[1].Arc_CP(vec[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP3へのベクトルを求める
 	
 	// コントロールポイントの座標値
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[1].x, m_vCirA[CirCount]->cp[1].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
- 	NurbsC->m_cp.push_back( Coord(vec_cp[0].x + m_vCirA[CirCount]->cp[0].x, vec_cp[0].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
- 	NurbsC->m_cp.push_back( Coord(vec_cp[1].x + m_vCirA[CirCount]->cp[0].x, vec_cp[1].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
- 	NurbsC->m_cp.push_back( Coord(vec_cp[2].x + m_vCirA[CirCount]->cp[0].x, vec_cp[2].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
- 	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[2].x, m_vCirA[CirCount]->cp[2].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[1].x, m_vCirA[CirCount]->cp[1].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
+ 	NurbsC->m_vCp.push_back( Coord(vec_cp[0].x + m_vCirA[CirCount]->cp[0].x, vec_cp[0].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+ 	NurbsC->m_vCp.push_back( Coord(vec_cp[1].x + m_vCirA[CirCount]->cp[0].x, vec_cp[1].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+ 	NurbsC->m_vCp.push_back( Coord(vec_cp[2].x + m_vCirA[CirCount]->cp[0].x, vec_cp[2].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+ 	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[2].x, m_vCirA[CirCount]->cp[2].y, m_vCirA[CirCount]->zt) );
 	
 	NurbsC->m_V[0] = 0.;		// パラメータの値
 	NurbsC->m_V[1] = 1.;
@@ -457,13 +457,13 @@ int BODY::CirAToNurbsC_seg3(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 	vec_cp[4] = vec_cp[3].Arc_CP(vec[1], cos(angle_rad3));		// 円の中心点からコントロールポイントP4へのベクトルを求める
 		
 	// コントロールポイントの座標値
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[1].x, m_vCirA[CirCount]->cp[1].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
-	NurbsC->m_cp.push_back( Coord(vec_cp[0].x + m_vCirA[CirCount]->cp[0].x, vec_cp[0].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(vec_cp[1].x + m_vCirA[CirCount]->cp[0].x, vec_cp[1].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(vec_cp[2].x + m_vCirA[CirCount]->cp[0].x, vec_cp[2].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(vec_cp[3].x + m_vCirA[CirCount]->cp[0].x, vec_cp[3].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(vec_cp[4].x + m_vCirA[CirCount]->cp[0].x, vec_cp[4].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[2].x, m_vCirA[CirCount]->cp[2].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[1].x, m_vCirA[CirCount]->cp[1].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
+	NurbsC->m_vCp.push_back( Coord(vec_cp[0].x + m_vCirA[CirCount]->cp[0].x, vec_cp[0].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(vec_cp[1].x + m_vCirA[CirCount]->cp[0].x, vec_cp[1].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(vec_cp[2].x + m_vCirA[CirCount]->cp[0].x, vec_cp[2].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(vec_cp[3].x + m_vCirA[CirCount]->cp[0].x, vec_cp[3].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(vec_cp[4].x + m_vCirA[CirCount]->cp[0].x, vec_cp[4].y + m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[2].x, m_vCirA[CirCount]->cp[2].y, m_vCirA[CirCount]->zt) );
 		
 	NurbsC->m_V[0] = 0.;		// パラメータの値
 	NurbsC->m_V[1] = 1.;
@@ -515,15 +515,15 @@ int BODY::CirAToNurbsC_seg4(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 	}
 
 	// コントロールポイントの座標値
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y + radius, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x, m_vCirA[CirCount]->cp[0].y + radius, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x - radius, m_vCirA[CirCount]->cp[0].y + radius, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x - radius, m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x - radius, m_vCirA[CirCount]->cp[0].y - radius, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x, m_vCirA[CirCount]->cp[0].y - radius, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y - radius, m_vCirA[CirCount]->zt) );
-	NurbsC->m_cp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );	// Z方向の大きさは一定
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y + radius, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x, m_vCirA[CirCount]->cp[0].y + radius, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x - radius, m_vCirA[CirCount]->cp[0].y + radius, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x - radius, m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x - radius, m_vCirA[CirCount]->cp[0].y - radius, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x, m_vCirA[CirCount]->cp[0].y - radius, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y - radius, m_vCirA[CirCount]->zt) );
+	NurbsC->m_vCp.push_back( Coord(m_vCirA[CirCount]->cp[0].x + radius, m_vCirA[CirCount]->cp[0].y, m_vCirA[CirCount]->zt) );
 		
 	NurbsC->m_V[0] = 0.;		// パラメータの値
 	NurbsC->m_V[1] = 1.;
