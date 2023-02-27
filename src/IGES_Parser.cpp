@@ -76,7 +76,7 @@ int IGES_PARSER::Optimize4OpenGL(BODY *body)
 {
 	ExpandKnotRange(body);		// ノットベクトルの範囲をOpenGLの仕様に沿って最適化
 	CheckCWforTrim(body);		// トリム曲線が時計回り、反時計回りをOpenGLの仕様に沿って変更
-	CheckDegenracy(body);		// 縮退(2Dパラメトリック曲線の始点と終点が一致しているか)のチェック
+//	CheckDegenracy(body);		// 縮退(2Dパラメトリック曲線の始点と終点が一致しているか)のチェック
 	ModifyParamConect(body);	// パラメトリック平面内のトリム曲線同士のつながりをチェック、修正する
 
 	return KOD_TRUE;
