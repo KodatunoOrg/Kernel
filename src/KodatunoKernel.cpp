@@ -1913,7 +1913,7 @@ double CalcBSbasis(double t, const ublasVector& knot, int I, int M)
 	if(M == 1){
 		// 注目中のノットの値がノットベクトルの終端値と同じ場合、基底関数が1を取りうる範囲をknot[I+1]も含むようにする
 		// こうしないと、このときだけ全ての基底関数値が0になってしまう。
-		if(t==knot[knot.max_size()-1]){
+		if(t==knot[knot.size()-1]){
 			if(knot[I] <= t && t <= knot[I+1])	return 1.0;
 			else		return 0.0;
 		}

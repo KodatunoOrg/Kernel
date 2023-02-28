@@ -76,7 +76,7 @@ int IGES_PARSER::Optimize4OpenGL(BODY *body)
 {
 	ExpandKnotRange(body);		// ノットベクトルの範囲をOpenGLの仕様に沿って最適化
 	CheckCWforTrim(body);		// トリム曲線が時計回り、反時計回りをOpenGLの仕様に沿って変更
-//	CheckDegenracy(body);		// 縮退(2Dパラメトリック曲線の始点と終点が一致しているか)のチェック
+    CheckDegenracy(body);		// 縮退(2Dパラメトリック曲線の始点と終点が一致しているか)のチェック
 	ModifyParamConect(body);	// パラメトリック平面内のトリム曲線同士のつながりをチェック、修正する
 
 	return KOD_TRUE;
@@ -834,11 +834,19 @@ NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD)
 			NurbsS->m_W(j,i) = CatchStringD(&p);	//  u方向Weight
 		}
 	}
+	VVCoord vvCp;
 	for(i=0;i<K[1];i++){
 		VCoord vcp;
 		for(j=0;j<K[0];j++){
 			Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
 			vcp.push_back(cp);
+		}
+		vvCp.push_back(vcp);
+	}
+	for ( j=0; j<K[0]; j++ ) {		// 登録順の入れ替え K.Magara
+		VCoord vcp;
+		for ( i=0; i<K[1]; i++ ) {
+			vcp.push_back(Coord(vvCp[i][j]));
 		}
 		NurbsS->m_vvCp.push_back(vcp);
 	}
