@@ -851,7 +851,10 @@ NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD)
 	for(i=0;i<K[1];i++){
 		VCoord vcp;
 		for(j=0;j<K[0];j++){
-			Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
+			Coord cp;
+			cp.x = CatchStringD(&p);
+			cp.y = CatchStringD(&p);
+			cp.z = CatchStringD(&p);
 			vcp.push_back(cp);
 		}
 		vvCp.push_back(vcp);
