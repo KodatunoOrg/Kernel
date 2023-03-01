@@ -31,19 +31,19 @@ public:
 	ublasVector m_S;
 	ublasVector m_T;
 	ublasMatrix m_W;
-	VVCoord  m_vvCp;
-	A2double m_U;
-	A2double m_V;
+	AACoord		m_aaCp;
+	A2double	m_U;
+	A2double	m_V;
 	int m_pD;
 	int m_TrmdSurfFlag;
 	DispStat m_Dstat;
 
 	NURBSS() {}
-	NURBSS(int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, const VVCoord& cp, double U_s, double U_e, double V_s, double V_e) {
+	NURBSS(int Mu, int Mv, const ublasVector& S, const ublasVector& T, const ublasMatrix& W, const AACoord& cp, double U_s, double U_e, double V_s, double V_e) {
 		m_S = S;
 		m_T = T;
 		m_W = W;
-		m_vvCp = cp;
+		m_aaCp = cp;
 		m_M[0] = Mu;	m_M[1] = Mv;
 		m_U[0] = U_s;	m_U[1] = U_e;
 		m_V[0] = V_s;	m_V[1] = V_e;
@@ -218,7 +218,7 @@ public:
 
 	// Function: SetCPNurbsS
 	// コントロールポイントを代入する
-	int SetCPNurbsS(const NURBSS&);
+	int SetCPNurbsS(const NURBSS*);
 
 private:
 

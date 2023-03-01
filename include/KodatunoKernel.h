@@ -10,6 +10,7 @@
 #include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
 namespace ublas = boost::numeric::ublas;
 #include "boost/array.hpp"					// 固定長配列
+#include "boost/multi_array.hpp"			// 固定長多次元配列
 #include "boost/tuple/tuple.hpp"			// 関数から2つ以上の値を返す
 #include "boost/optional.hpp"				// 無効値表現
 
@@ -91,10 +92,12 @@ typedef boost::array<int, 2>	A2int;
 // VCoord - Coord型の1次元配列をVCoordとして定義
 class Coord;
 typedef std::vector<Coord>		VCoord;
+typedef boost::array<Coord, 1>	ACoord;			// resize()して使用
 
 // Typedef: vector<VCoord>
 // VVCoord - Coord型の2次元配列をVVCoordとして定義
 typedef std::vector<VCoord>		VVCoord;
+typedef boost::multi_array<Coord,2>	AACoord;	// boost::extents[][]でサイズ指定
 
 // Typedef: vector<VVCoord>
 // VVVCoord - Coord型の3次元配列をVVVCoordとして定義
@@ -338,7 +341,7 @@ ublasMatrix TranMx(const ublasMatrix&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-VVCoord TranMx(const VVCoord&);
+AACoord TranMx(const AACoord&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)

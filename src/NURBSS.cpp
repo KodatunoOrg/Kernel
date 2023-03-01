@@ -26,7 +26,7 @@ Coord NURBSS::CalcNurbsSCoord(double div_u, double div_v) const
 		for(j=0;j<K[1];j++){
 			bs_v = CalcBSbasis(div_v, m_T, j, m_M[1]);		// v方向Bスプライン基底関数を求める
 			bsw += bs_u*bs_v*m_W(i,j);
-			bscpw += m_vvCp[i][j] * (bs_u*bs_v*m_W(i,j));
+			bscpw += m_aaCp[i][j] * (bs_u*bs_v*m_W(i,j));
 		}
 	}
 
@@ -76,7 +76,7 @@ NURBSC* NURBSS::GenIsoparamCurveU(double u) const
         W[i] = 0;
         for(int j=0;j<K[0];j++){
             double bs = CalcBSbasis(u,m_S,j,m_M[0]);
-            Q[i] = Q[i] + (m_vvCp[j][i] * (bs*m_W(j,i)));
+            Q[i] = Q[i] + (m_aaCp[j][i] * (bs*m_W(j,i)));
             W[i] += bs*m_W(j,i);
         }
         Q[i] /= W[i];
@@ -111,7 +111,7 @@ NURBSC* NURBSS::GenIsoparamCurveV(double v) const
         W[i] = 0;
         for(int j=0;j<K[1];j++){
             double bs = CalcBSbasis(v,m_T,j,m_M[1]);
-            Q[i] = Q[i] + (m_vvCp[i][j] * (bs*m_W(i,j)));
+            Q[i] = Q[i] + (m_aaCp[i][j] * (bs*m_W(i,j)));
             W[i] += bs*m_W(i,j);
         }
         Q[i] /= W[i];
@@ -147,8 +147,8 @@ Coord NURBSS::CalcDiffuNurbsS(double div_u, double div_v) const
 		diff_bs_u = CalcDiffBSbasis(div_u,m_S,i,m_M[0]);	// u方向Bスプライン基底関数の1階微分を求める
 		for(j=0;j<K[1];j++){
 			bs_v = CalcBSbasis(div_v,m_T,j,m_M[1]);			// v方向Bスプライン基底関数を求める
-			Ft += m_vvCp[i][j] * (bs_u*bs_v*m_W(i,j));
-			diff_Ft += m_vvCp[i][j] * (diff_bs_u*bs_v*m_W(i,j));
+			Ft += m_aaCp[i][j] * (bs_u*bs_v*m_W(i,j));
+			diff_Ft += m_aaCp[i][j] * (diff_bs_u*bs_v*m_W(i,j));
 			Gt += bs_u*bs_v*m_W(i,j);
 			diff_Gt += diff_bs_u*bs_v*m_W(i,j);
 		}
@@ -187,8 +187,8 @@ Coord NURBSS::CalcDiffvNurbsS(double div_u, double div_v) const
 		for(j=0;j<K[1];j++){
 			bs_v = CalcBSbasis(div_v,m_T,j,m_M[1]);				// v方向Bスプライン基底関数を求める
 			diff_bs_v = CalcDiffBSbasis(div_v,m_T,j,m_M[1]);	// v方向Bスプライン基底関数の1階微分を求める
-			Ft += m_vvCp[i][j]*(bs_u*bs_v*m_W(i,j));
-			diff_Ft += m_vvCp[i][j]*(bs_u*diff_bs_v*m_W(i,j));
+			Ft += m_aaCp[i][j]*(bs_u*bs_v*m_W(i,j));
+			diff_Ft += m_aaCp[i][j]*(bs_u*diff_bs_v*m_W(i,j));
 			Gt += bs_u*bs_v*m_W(i,j);
 			diff_Gt += bs_u*diff_bs_v*m_W(i,j);
 		}
@@ -777,7 +777,7 @@ VCoord NURBSS::CalcIntersecPtsPlaneV3(const Coord& pt, const Coord& nvec, int v_
 			Coord  BB;
 			for(int j=0;j<K[1];j++){
 				AA += N[j]*m_W(i,j);						// v_const上のNURBS曲線C(u)の分母の係数
-				BB += m_vvCp[i][j]*(N[j]*m_W(i,j));		// v_const上のNURBS曲線C(u)の分子の係数
+				BB += m_aaCp[i][j]*(N[j]*m_W(i,j));		// v_const上のNURBS曲線C(u)の分子の係数
 			}
 			A.push_back(AA);
 			B.push_back(BB);
@@ -852,7 +852,7 @@ VCoord NURBSS::CalcIntersecPtsPlaneU3(const Coord& pt, const Coord& nvec, int u_
 			Coord  BB;
 			for(int i=0;i<K[0];i++){
 				AA += N[i]*m_W(i,j);			// u_const上のNURBS曲線C(v)の分母の係数
-				BB += m_vvCp[i][j]*(N[i]*m_W(i,j));				// u_const上のNURBS曲線C(v)の分子の係数
+				BB += m_aaCp[i][j]*(N[i]*m_W(i,j));				// u_const上のNURBS曲線C(v)の分子の係数
 			}
 			A.push_back(AA);
 			B.push_back(BB);
@@ -1851,7 +1851,7 @@ NURBSS* NURBSS::ConnectNurbsSU(const NURBSS* S2) const
 	}
 	// 連結されるエッジのV方向コントロールポイントが全て等しいこと
 	for(int i=0;i<S1K[1];i++){
-		if(m_vvCp[S1K[0]-1][i].DiffCoord(S2->m_vvCp[0][i]) == KOD_FALSE){
+		if(m_aaCp[S1K[0]-1][i].DiffCoord(S2->m_aaCp[0][i]) == KOD_FALSE){
 			fprintf(stderr,"ERROR: Knot value on V direction is not equal.");
 			return NULL;
 		}
@@ -1893,7 +1893,7 @@ NURBSS* NURBSS::ConnectNurbsSV(const NURBSS* S2) const
 	}
 	// 連結されるエッジのU方向コントロールポイントが全て等しいこと
 	for(int i=0;i<S1K[0];i++){
-		if(m_vvCp[i][S1K[0]-1].DiffCoord(S2->m_vvCp[i][0]) == KOD_FALSE){
+		if(m_aaCp[i][S1K[0]-1].DiffCoord(S2->m_aaCp[i][0]) == KOD_FALSE){
 			fprintf(stderr,"ERROR: Knot value on U direction is not equal.");
 			return NULL;
 		}
@@ -2068,7 +2068,7 @@ void NURBSS::ShiftNurbsS(const Coord& shift)
 	size_t K[] = {m_W.size1(), m_W.size2()};
 	for(size_t i=0;i<K[0];i++){
 		for(size_t j=0;j<K[1];j++){
-			m_vvCp[i][j] += shift;
+			m_aaCp[i][j] += shift;
 		}
 	}
 }
@@ -2084,7 +2084,7 @@ void NURBSS::ChRatioNurbsS(const Coord& ratio)
 	size_t K[] = {m_W.size1(), m_W.size2()};
 	for(size_t i=0;i<K[0];i++){
 		for(size_t j=0;j<K[1];j++){
-			m_vvCp[i][j] *= ratio;
+			m_aaCp[i][j] *= ratio;
 		}
 	}
 }
@@ -2108,12 +2108,12 @@ void NURBSS::RotNurbsS(const Coord& axis, double deg)
 	
 	for(size_t i=0;i<K[0];i++){			// u方向のコントロールポイント分ループ
 		for(size_t j=0;j<K[1];j++){		// v方向のコントロールポイント分ループ
-			StartQ = QFunc.QInit(1,m_vvCp[i][j].x,m_vvCp[i][j].y,m_vvCp[i][j].z);		// NURBS曲面を構成するcpの座標を登録
+			StartQ = QFunc.QInit(1,m_aaCp[i][j].x,m_aaCp[i][j].y,m_aaCp[i][j].z);		// NURBS曲面を構成するcpの座標を登録
 			rad = DegToRad(deg);										// degreeからradianに変換
 			RotQ = QFunc.QGenRot(rad,axis.x,axis.y,axis.z);				// 回転クォータニオンに回転量を登録(ここの数字をいじれば任意に回転できる)
 			ConjuQ = QFunc.QConjugation(RotQ);							// RotQの共役クォータニオンを登録
 			TargetQ = QFunc.QMult(QFunc.QMult(RotQ,StartQ),ConjuQ);		// 回転させる
-			m_vvCp[i][j].SetCoord(TargetQ.x,TargetQ.y,TargetQ.z);			// 回転後の座標を登録
+			m_aaCp[i][j].SetCoord(TargetQ.x,TargetQ.y,TargetQ.z);			// 回転後の座標を登録
 		}
 	}
 }
@@ -2127,9 +2127,9 @@ void NURBSS::RotNurbsS(const Coord& axis, double deg)
 //
 // Return:
 // 正常終了：KOD_TRUE, 両曲面のコントロールポイント数が一致していない：KOD_ERR
-int NURBSS::SetCPNurbsS(const NURBSS& Nurbs)
+int NURBSS::SetCPNurbsS(const NURBSS* Nurbs)
 {
-	int K[] = {Nurbs.m_W.size1(), Nurbs.m_W.size2()};
+	int K[] = {Nurbs->m_W.size1(), Nurbs->m_W.size2()};
 	if(m_W.size1() != K[0] || m_W.size2() != K[1]){
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Control point count is different");
 		return KOD_ERR;
@@ -2137,7 +2137,7 @@ int NURBSS::SetCPNurbsS(const NURBSS& Nurbs)
 
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			m_vvCp[i][j] = Nurbs.m_vvCp[i][j];
+			m_aaCp[i][j] = Nurbs->m_aaCp[i][j];
 		}
 	}
 
@@ -2191,7 +2191,7 @@ Coord NURBSS::CalcDiffNurbsSNumer(int k, int l, double u, double v) const
 		double Nk = CalcDiffBSbasisN(u,m_S,i,m_M[0],k);		// u方向のk階微分
 		for(int j=0;j<K[1];j++){
 			double Nl = CalcDiffBSbasisN(v,m_T,j,m_M[1],l);	// v方向のl階微分
-			A += m_vvCp[i][j]*(Nk*Nl*m_W(i,j));
+			A += m_aaCp[i][j]*(Nk*Nl*m_W(i,j));
 		}
 	}
 	return A;
@@ -3194,23 +3194,20 @@ void NURBSS::SetCPSU_ConnectS(const NURBSS* S2, NURBSS* S_) const
 		S2K[] = {S2->m_W.size1(), S2->m_W.size2()};
 
 	S_->m_W.resize(S1K[0]+S2K[0]-1, S1K[1]);
-	S_->m_vvCp.clear();
+	S_->m_aaCp.resize(boost::extents[0][0]);	// 一旦空にしてから
+	S_->m_aaCp.resize(boost::extents[S1K[0]+S2K[0]-1][S1K[1]]);
 
 	for(int i=0;i<S1K[0];i++){
-		VCoord cp;
 		for(int j=0;j<S1K[1];j++){
-			cp.push_back(m_vvCp[i][j]);
+			S_->m_aaCp[i][j] = m_aaCp[i][j];
 			S_->m_W(i,j) = m_W(i,j);
 		}
-		S_->m_vvCp.push_back(cp);
 	}
 	for(int i=1;i<S2K[0];i++){
-		VCoord cp;
 		for(int j=0;j<S2K[1];j++){
-			cp.push_back(S2->m_vvCp[i][j]);
+			S_->m_aaCp[S1K[0]+i-1][j] = S2->m_aaCp[i][j];
 			S_->m_W(S1K[0]+i-1,j)  = S2->m_W(i,j);
 		}
-		S_->m_vvCp.push_back(cp);
 	}
 }
 
@@ -3227,23 +3224,21 @@ void NURBSS::SetCPSV_ConnectS(const NURBSS* S2, NURBSS* S_) const
 		S2K[] = {S2->m_W.size1(), S2->m_W.size2()};
 
 	S_->m_W.resize(S1K[0], S1K[1]+S2K[1]-1);
-	S_->m_vvCp.clear();
+	S_->m_aaCp.resize(boost::extents[0][0]);	// 一旦空にしてから
+	S_->m_aaCp.resize(boost::extents[S1K[0][S1K[1]+S2K[1]-1]);
 
 	for(int i=0;i<S1K[0];i++){
 		VCoord cp;
 		for(int j=0;j<S1K[1];j++){
-			cp.push_back(m_vvCp[i][j]);
+			S_->m_aaCp[i][i] = m_aaCp[i][j];
 			S_->m_W(i,j)  = m_W(i,j);
 		}
-		S_->m_vvCp.push_back(cp);
 	}
 	for(int i=0;i<S2K[0];i++){
-		VCoord cp;
 		for(int j=1;j<S2K[1];j++){
-			cp.push_back(S2->m_vvCp[i][j]);
+			S_->m_aaCp[i][S1K[1]+j-1] = S2->m_aaCp[i][j];
 			S_->m_W(i,S1K[1]+j-1)  = S2->m_W(i,j);
 		}
-		S_->m_vvCp.push_back(cp);
 	}
 }
 
@@ -3268,7 +3263,7 @@ void NURBSS::DebugForNurbsS(void) const
 	fprintf(stderr,"Control Point\n");
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			fprintf(stderr,"#(%d-%d): (%lf,%lf,%lf)\t",i+1,j+1,m_vvCp[i][j].x,m_vvCp[i][j].y,m_vvCp[i][j].z);
+			fprintf(stderr,"#(%d-%d): (%lf,%lf,%lf)\t",i+1,j+1,m_aaCp[i][j].x,m_aaCp[i][j].y,m_aaCp[i][j].z);
 		}
 	}
 	fprintf(stderr,"\n");

@@ -70,7 +70,7 @@ NURBSC* GenPolygonalLine(const VCoord&);
 
 // Function: GenInterpolatedNurbsS1
 // 与えられた点列を補間するn階NURBS曲面を生成する
-NURBSS* GenInterpolatedNurbsS1(const VVCoord&, int, int, int, int);
+NURBSS* GenInterpolatedNurbsS1(const AACoord&, int, int, int, int);
 
 // Function: GenPolygonalSurface
 // 折れ面を生成する
@@ -101,7 +101,7 @@ ublasVector	GetCurveKnotParam2(const VCoord&);
 
 // Function: GetSurfaceKnotParam
 // (private)各通過点の曲面パラメータを算出
-boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const VVCoord&, int, int);
+boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const AACoord&, int, int);
 
 // Function: GetInterpolatedKnot
 // (private)曲線/曲面パラメータから補間用ノットベクトルを算出

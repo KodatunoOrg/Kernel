@@ -834,21 +834,12 @@ NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD)
 			NurbsS->m_W(j,i) = CatchStringD(&p);	//  u方向Weight
 		}
 	}
-	VVCoord vvCp;
+	NurbsS->m_aaCp.resize( boost::extents[K[0]][K[1]] );
 	for(i=0;i<K[1];i++){
-		VCoord vcp;
 		for(j=0;j<K[0];j++){
 			Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
-			vcp.push_back(cp);
+			NurbsS->m_aaCp[j][i] = cp;
 		}
-		vvCp.push_back(vcp);
-	}
-	for ( j=0; j<K[0]; j++ ) {		// 登録順の入れ替え K.Magara
-		VCoord vcp;
-		for ( i=0; i<K[1]; i++ ) {
-			vcp.push_back(Coord(vvCp[i][j]));
-		}
-		NurbsS->m_vvCp.push_back(vcp);
 	}
 	NurbsS->m_U[0] = CatchStringD(&p);			// u方向の開始値
 	NurbsS->m_U[1] = CatchStringD(&p);			// u方向の終了値

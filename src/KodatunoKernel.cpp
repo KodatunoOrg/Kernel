@@ -1311,16 +1311,15 @@ ublasMatrix TranMx(const ublasMatrix& A)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-VVCoord TranMx(const VVCoord& A)
+AACoord TranMx(const AACoord& A)
 {
-	VCoord	b;
-	VVCoord	B;
-	for(size_t i=0;i<A.size();i++){
-		b.clear();
-		for(size_t j=0;j<A[i].size();j++){
-			b.push_back(A[i][j]);	// B[j][i] = A[i][j];
+	int m = A.shape()[0],
+		n = A.shape()[1];
+	AACoord	B(boost::extents[n][m]);
+	for(int i=0;i<m;i++){
+		for(int j=0;j<m;j++){
+			B[j][i] = A[i][j];
 		}
-		B.push_back(b);
 	}
 	return B;
 }

@@ -70,24 +70,22 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
 		S[0]=0;	S[1]=0;	S[2]=0;
 		S[3]=1;	S[4]=1;	S[5]=1;
         ublasMatrix W(3,K);					// ウエイト
-        VVCoord		Cp;						// コントロールポイント
+        AACoord		Cp(boost::extents[3][K]);	// コントロールポイント
         double rad = DegToRad(deg);
         for(int i=0;i<3;i++){
-			VCoord cp;
             for(int j=0;j<K;j++){
                 Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*rad/2);	// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
                 Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);		// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;	// PQ_ベクトルを生成
                 if(i%2 == 0){		// i=0,2のとき
                     W(i,j) = m_W[j];
-                    cp.push_back(Q_);
+                    Cp[i][j] = Q_;
                 }
                 else{
                     W(i,j) = m_W[j]*cos(rad/2);
-                    cp.push_back(PQ_ * 1/cos(rad/2) + P);
+                    Cp[i][j] = PQ_ * 1/cos(rad/2) + P;
                 }
             }
-			Cp.push_back(cp);
         }
         NurbsS = new NURBSS(3,m_M,S,m_T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
@@ -98,24 +96,22 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
 		S[0]=0;		S[1]=0;		S[2]=0;		S[3]=0.5;
 		S[4]=0.5;	S[5]=1;		S[6]=1;		S[7]=1;
         ublasMatrix	W(5,K);				// ウエイト
-        VVCoord		Cp;					// コントロールポイント
+        AACoord		Cp(boost::extents[5][K]);	// コントロールポイント
         double rad = DegToRad(deg);
         for(int i=0;i<5;i++){
-			VCoord cp;
             for(int j=0;j<K;j++){
                 Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*rad/4);	// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
                 Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);		// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;	// PQ_ベクトルを生成
                 if(i%2 ==  1){	// i=1,3のとき
 					W(i,j) = m_W[j]*cos(rad/4);
-					cp.push_back(PQ_ * 1/cos(rad/4) + P);
+					Cp[i][j] = PQ_ * 1/cos(rad/4) + P;
                 }
                 else{		// i=0,2,4のとき
                     W(i,j) = m_W[j];
-                    cp.push_back(Q_);
+                    Cp[i][j] = Q_;
                 }
             }
-			Cp.push_back(cp);
         }
         NurbsS = new NURBSS(3,m_M,S,m_T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
@@ -126,24 +122,22 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
         S[0]=0;		S[1]=0;		S[2]=0;		S[3]=0.33;		S[4]=0.33;
 		S[5]=0.66;	S[6]=0.66;	S[7]=1;		S[8]=1;			S[9]=1;
         ublasMatrix	W(7,K);				// ウエイト
-        VVCoord		Cp;					// コントロールポイント
+        AACoord		Cp(boost::extents[7][K]);	// コントロールポイント
         double rad = DegToRad(deg);
         for(int i=0;i<7;i++){
-			VCoord cp;
             for(int j=0;j<K;j++){
                 Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*rad/6);		// 元々のNURBS曲線上のコントロールポイントをAxis周りに0,deg/2,deg度回転
                 Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);	// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;	// PQ_ベクトルを生成
                 if(i%2 ==  0){	// i=0,2,4,6のとき
                     W(i,j) = m_W[j];
-                    cp.push_back(Q_);
+                    Cp[i][j] = Q_;
                 }
                 else{		// i=1,3,5のとき
                     W(i,j) = m_W[j]*cos(rad/6);
-                    cp.push_back(PQ_ * 1/cos(rad/6) + P);
+                    Cp[i][j] = PQ_ * 1/cos(rad/6) + P;
                 }
             }
-			Cp.push_back(cp);
         }
         NurbsS = new NURBSS(3,m_M,S,m_T,W,Cp,0,1,0,1);		// NURBS曲面生成
         NurbsS->DebugForNurbsS();
@@ -154,23 +148,21 @@ NURBSS* NURBSC::GenRotNurbsS(const Coord& Axis, double deg) const
         S[0]=0;		S[1]=0;		S[2]=0;		S[3]=0.25;	S[4]=0.25;	S[5]=0.5;
 		S[6]=0.5;	S[7]=0.75;	S[8]=0.75;	S[9]=1;		S[10]=1;	S[11]=1;
         ublasMatrix	W(9,K);				// ウエイト
-        VVCoord		Cp;					// コントロールポイント
+        AACoord		Cp(boost::extents[9][K]);	// コントロールポイント
         for(int i=0;i<9;i++){		// u方向
-			VCoord cp;
             for(int j=0;j<K;j++){	// v方向
                 Coord Q_  = m_vCp[j].CalcRotVec(norm,(double)i*PI/4);		// 元々のNURBS曲線上のコントロールポイントをAxis周りに45度回転
                 Coord P   = m_vCp[j].CalcNormalLine(Coord(),norm);			// Axis上の回転中心の座標
                 Coord PQ_ = Q_ - P;												// PQ_ベクトルを生成
                 if(i%2 == 0){													// i=0,2,4,6のとき
                     W(i,j) = m_W[j];										// ウエイト
-                    cp.push_back(Q_);											// Q_がそのままコントロールポイントになる
+                    Cp[i][j] = Q_;											// Q_がそのままコントロールポイントになる
                 }
                 else{															// i=1,3,5,7のとき
                     W(i,j) = m_W[j]*cos(PI/4);								// ウエイト計算
-                    cp.push_back(PQ_ * 1/cos(PI/4) + P);						// コントロールポイント計算
+                    Cp[i][j] = PQ_ * 1/cos(PI/4) + P;						// コントロールポイント計算
                 }
             }
-			Cp.push_back(cp);
         }
 		NurbsS = new NURBSS(3,m_M,S,m_T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }

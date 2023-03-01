@@ -307,7 +307,7 @@ NURBSC* GenPolygonalLine(const VCoord& P)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-NURBSS* GenInterpolatedNurbsS1(const VVCoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
+NURBSS* GenInterpolatedNurbsS1(const AACoord& P, int PNum_u, int PNum_v, int Mu, int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
@@ -331,10 +331,10 @@ NURBSS* GenInterpolatedNurbsS1(const VVCoord& P, int PNum_u, int PNum_v, int Mu,
 	ublasMatrix Bv(K[1],K[1]);			// v方向のBスプライン基底関数行列
 	ublasMatrix Bv_(K[1],K[1]);			// v方向のBスプライン基底関数行列の逆行列格納用
 	ublasMatrix W(K[0],K[1]);			// 重み
-	VVCoord PT;							// 転置した点列P (K[1],K[0])
-	VVCoord R;							// アイソパラ曲線のコントロールポイント (K[0],K[1])
-	VVCoord RT;							// 転置したコントロールポイントR (K[1],K[0])
-	VVCoord Q;							// NURBS曲面のコントロールポイント (K[0],K[1])
+	AACoord PT(boost::extents[K[1]][K[0]]);	// 転置した点列P
+	AACoord R(boost::extents[K[0]][K[1]]);	// アイソパラ曲線のコントロールポイント
+	AACoord RT(boost::extents[K[1]][K[0]]);	// 転置したコントロールポイントR
+	AACoord Q(boost::extents[K[0]][K[1]]);	// NURBS曲面のコントロールポイント
 
 
 	boost::tie(S_, T_) = GetSurfaceKnotParam(P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
@@ -643,7 +643,7 @@ ublasVector GetCurveKnotParam2(const VCoord& P)
 // T - v方向曲線パラメータ 
 // **P - 与えられた点列
 // uNum, vNum - u方向，v方向の点列数
-boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const VVCoord& P, int uNum, int vNum)
+boost::tuple<ublasVector, ublasVector> GetSurfaceKnotParam(const AACoord& P, int uNum, int vNum)
 {
 	double d;
 	ublasVector	S(uNum), T(vNum);
