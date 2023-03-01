@@ -3,6 +3,7 @@
 **************************/
 
 #include "KodatunoKernel.h"
+#include "boost/multi_array.hpp"
 #include <algorithm>	// std::max_element()
 
 // Function: IGES_Parser_Main
@@ -834,6 +835,18 @@ NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD)
 			NurbsS->m_W(j,i) = CatchStringD(&p);	//  u方向Weight
 		}
 	}
+/*	--- このコードは登録順が違うので異常終了
+	VVCoord vvCp;
+	for(i=0;i<K[1];i++){
+		VCoord vcp;
+		for(j=0;j<K[0];j++){
+			Coord cp(CatchStringD(&p), CatchStringD(&p), CatchStringD(&p));
+			vcp.push_back(cp);
+		}
+		NurbsS->m_vvCp.push_back(vcp);
+	}
+*/
+
 	VVCoord vvCp;
 	for(i=0;i<K[1];i++){
 		VCoord vcp;
@@ -850,6 +863,24 @@ NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD)
 		}
 		NurbsS->m_vvCp.push_back(vcp);
 	}
+
+/*
+	boost::multi_array<Coord, 2> cp(boost::extents[K[0]][K[1]]);
+	for ( i=0; i<K[1]; i++ ) {
+		for ( j=0; j<K[0]; j++ ) {
+			cp[j][i].x = CatchStringD(&p);		// コントロールポイントX VScodeでエラー表示になるがQtでのコンパイルは問題なし
+			cp[j][i].y = CatchStringD(&p);		// コントロールポイントY
+			cp[j][i].z = CatchStringD(&p);		// コントロールポイントZ
+		}
+	}
+	for ( j=0; j<K[0]; j++ ) {
+		VCoord vcp;
+		for ( i=0; i<K[1]; i++ ) {
+			vcp.push_back( cp[j][i] );
+		}
+		NurbsS->m_vvCp.push_back(vcp);
+	}
+*/
 	NurbsS->m_U[0] = CatchStringD(&p);			// u方向の開始値
 	NurbsS->m_U[1] = CatchStringD(&p);			// u方向の終了値
 	NurbsS->m_V[0] = CatchStringD(&p);			// v方向の開始値
