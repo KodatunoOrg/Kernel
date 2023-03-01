@@ -137,8 +137,7 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	static GLfloat	vKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	SCtlp[CTLPNUMMAX][CTLPNUMMAX][4];	// NURBS描画用バッファ
 
-	//NURBS_Func NFunc;					// for debug
-	//NFunc.DebugForNurbsS(NurbsS);		// for debug
+    NurbsS->DebugForNurbsS();		// for debug
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->m_Dstat.Color);
 	for(k=0;k<NurbsS->m_W.size2();k++){

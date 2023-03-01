@@ -3268,30 +3268,30 @@ void NURBSS::DebugForNurbsS(void) const
 	fprintf(stderr,"Control Point\n");
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[1];j++){
-			fprintf(stderr,"#(%d-%d): (%lf,%lf,%lf)\t",i+1,j+1,m_vvCp[i][j].x,m_vvCp[i][j].y,m_vvCp[i][j].z);
+			fprintf(stderr,"\t#(%d-%d): (%lf,%lf,%lf)\n",i+1,j+1,m_vvCp[i][j].x,m_vvCp[i][j].y,m_vvCp[i][j].z);
 		}
 	}
 	fprintf(stderr,"\n");
 
 	// U方向ノットシーケンス
-	fprintf(stderr,"U Knot Vector\t");
+	fprintf(stderr,"U Knot Vector\n");
 	for(int i=0;i<K[0]+m_M[0];i++){
-		fprintf(stderr,"#%d: %lf\t",i+1,m_S[i]);
+		fprintf(stderr,"\t#%d: %lf\n",i+1,m_S[i]);
 	}
 	fprintf(stderr,"\n");
 
 	// V方向ノットシーケンス
-	fprintf(stderr,"V Knot Vector\t");
+	fprintf(stderr,"V Knot Vector\n");
 	for(int i=0;i<K[1]+m_M[1];i++){
-		fprintf(stderr,"#%d: %lf\t",i+1,m_T[i]);
+		fprintf(stderr,"\t#%d: %lf\n",i+1,m_T[i]);
 	}
 	fprintf(stderr,"\n");
 
 	// ウェイト
-	//fprintf(stderr,"Weight\n");
-	//for(int i=0;i<K[0];i++){
-	//	for(int j=0;j<K[1];j++){
-	//		fprintf(stderr,"#(%d-%d): %lf\t",i+1,j+1,W[i][j]);
-	//	}
-	//}
+	fprintf(stderr,"Weight\n");
+	for(int i=0;i<K[0];i++){
+		for(int j=0;j<K[1];j++){
+			fprintf(stderr,"\t#(%d-%d): %lf\n",i+1,j+1,m_W(i,j));
+		}
+	}
 }
