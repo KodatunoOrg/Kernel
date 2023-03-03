@@ -150,13 +150,13 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	}
 	for(j=0;j<NurbsS->m_S.size();j++){
 		uKnot[j] = NurbsS->m_S[j];		// uノットベクトル取り出し
-		fprintf(stderr,"U:%d-%.12lf\n",j+1,uKnot[j]);
+//		fprintf(stderr,"U:%d-%.12lf\n",j+1,uKnot[j]);
 	}
 	for(j=0;j<NurbsS->m_T.size();j++){
 		vKnot[j] = NurbsS->m_T[j];		// vノットベクトル取り出し
-		fprintf(stderr,"V:%d-%.12lf\n",j+1,vKnot[j]);
+//		fprintf(stderr,"V:%d-%.12lf\n",j+1,vKnot[j]);
 	}
-
+/*
     for(k=0;k<NurbsS->m_W.size2();k++){
         for(j=0;j<NurbsS->m_W.size1();j++){
             fprintf(stderr, "SCtlp[%d][%d]=(%f, %f, %f, %f)\n", j, k, SCtlp[j][k][0], SCtlp[j][k][1], SCtlp[j][k][2], SCtlp[j][k][3]);
@@ -164,10 +164,12 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
     }
     fprintf(stderr, "M[0]=%d, M[1]=%d\n", NurbsS->m_M[0], NurbsS->m_M[1]);
     fflush(stderr);
-
+*/
 
 	// NURBS曲面の描画
+//    gluBeginSurface(NurbsSurf);
     gluNurbsSurface(NurbsSurf,NurbsS->m_S.size(),uKnot,NurbsS->m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
+//    gluEndSurface(NurbsSurf);
 }
 
 // Function: DrawNurbsSurfe
@@ -264,7 +266,7 @@ void Describe_BODY::DrawCurveOnParamSurfe(CONPS *ConpS)
 // TrmS - 描画するトリム面構造体
 void Describe_BODY::DrawTrimdSurf(TRMS* TrmS)
 {
-	gluBeginSurface(NurbsSurf);
+    gluBeginSurface(NurbsSurf);
 
 	DrawTrimdNurbsSurfe(TrmS->m_pts);				// NURBS曲面の描画
 
@@ -280,7 +282,7 @@ void Describe_BODY::DrawTrimdSurf(TRMS* TrmS)
 		gluEndTrim(NurbsSurf);
 	}
 
-	gluEndSurface(NurbsSurf);
+    gluEndSurface(NurbsSurf);
 
 }
 

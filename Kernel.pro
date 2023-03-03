@@ -1,10 +1,15 @@
 # Qt 設定 Preferences -> ビルドと実行 -> Default Build Properties -> Default build directory を
 # ./build
 # に変えておく
-CONFIG -= qt
+
+QT += core gui opengl
+QT += widgets
+QT += openglwidgets
+
 TEMPLATE = lib
 CONFIG += staticlib
-CONFIG += c++17
+#CONFIG -= qt
+#CONFIG += c++17
 
 # Boost C++ のインクルードパスを各自の環境に合わせて追加
 # BoostライブラリはヘッダーのみでOK（ビルドする必要なし）
@@ -51,7 +56,7 @@ HEADERS += \
     include/KodatunoKernel.h
 
 # Default rules for deployment.
-unix {
-    target.path = $$[QT_INSTALL_PLUGINS]/generic
-}
-!isEmpty(target.path): INSTALLS += target
+#unix {
+#    target.path = $$[QT_INSTALL_PLUGINS]/generic
+#}
+#!isEmpty(target.path): INSTALLS += target
