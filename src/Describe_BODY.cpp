@@ -137,7 +137,7 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	static GLfloat	vKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	SCtlp[CTLPNUMMAX][CTLPNUMMAX][4];	// NURBS描画用バッファ
 
-    NurbsS->DebugForNurbsS();		// for debug
+//	NurbsS->DebugForNurbsS();		// for debug
 
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->m_Dstat.Color);
 	for(k=0;k<NurbsS->m_W.size2();k++){
@@ -150,15 +150,24 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	}
 	for(j=0;j<NurbsS->m_S.size();j++){
 		uKnot[j] = NurbsS->m_S[j];		// uノットベクトル取り出し
-		//fprintf(stderr,"U:%d-%.12lf\n",j+1,uKnot[j]);
+		fprintf(stderr,"U:%d-%.12lf\n",j+1,uKnot[j]);
 	}
 	for(j=0;j<NurbsS->m_T.size();j++){
 		vKnot[j] = NurbsS->m_T[j];		// vノットベクトル取り出し
-		//fprintf(stderr,"V:%d-%.12lf\n",j+1,vKnot[j]);
+		fprintf(stderr,"V:%d-%.12lf\n",j+1,vKnot[j]);
 	}
 
+    for(k=0;k<NurbsS->m_W.size2();k++){
+        for(j=0;j<NurbsS->m_W.size1();j++){
+            fprintf(stderr, "SCtlp[%d][%d]=(%f, %f, %f, %f)\n", j, k, SCtlp[j][k][0], SCtlp[j][k][1], SCtlp[j][k][2], SCtlp[j][k][3]);
+        }
+    }
+    fprintf(stderr, "M[0]=%d, M[1]=%d\n", NurbsS->m_M[0], NurbsS->m_M[1]);
+    fflush(stderr);
+
+
 	// NURBS曲面の描画
-	gluNurbsSurface(NurbsSurf,(GLdouble)NurbsS->m_S.size(),uKnot,(GLdouble)NurbsS->m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
+    gluNurbsSurface(NurbsSurf,NurbsS->m_S.size(),uKnot,NurbsS->m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],NurbsS->m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
 }
 
 // Function: DrawNurbsSurfe
