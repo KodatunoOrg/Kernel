@@ -2,9 +2,9 @@
 # ./build
 # に変えておく
 
-QT += core gui opengl
-QT += widgets
-QT += openglwidgets
+#QT += core gui opengl
+#QT += widgets
+#QT += openglwidgets
 
 TEMPLATE = lib
 CONFIG += staticlib
