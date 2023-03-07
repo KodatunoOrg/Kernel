@@ -47,49 +47,6 @@ void Describe_BODY::DrawBody(BODY *Body)
 	}
 }
 
-// Function: DrawLine
-// 線分の描画
-//
-// Parameters:
-// Line - 描画する線分構造体
-void Describe_BODY::DrawLine(const LINE_* Line)
-{
-	glLineWidth(1);
-
-	glBegin(GL_LINE_STRIP);
-	glVertex3d(Line->cp[0].x,Line->cp[0].y,Line->cp[0].z);	// 始点
-	glVertex3d(Line->cp[1].x,Line->cp[1].y,Line->cp[1].z);	// 終点
-	glEnd();
-
-}
-
-// Function: DrawCircleArc
-// 円・円弧の描画
-//
-// Parameters:
-// Cira - 描画する円・円弧構造体
-void Describe_BODY::DrawCircleArc(const CIRA* Cira)
-{
-	double delta = Cira->t[1] - Cira->t[0];
-	if(Cira->t[1] < Cira->t[0])
-		delta += 360;
-	int d = (int)fabs(delta);
-
-	for(int i=0;i<d;i++){
-		double sth = (Cira->t[0] + delta/(double)d*(double)i)*PI/180;
-		double eth = (Cira->t[0] + delta/(double)d*(double)(i+1))*PI/180;
-		double sx = Cira->R*cos(sth) + Cira->cp[0].x;
-		double sy = Cira->R*sin(sth) + Cira->cp[0].y;
-		double ex = Cira->R*cos(eth) + Cira->cp[0].x;
-		double ey = Cira->R*sin(eth) + Cira->cp[0].y;
-		glBegin(GL_LINES);
-			glVertex3d(sx,sy,0);
-			glVertex3d(ex,ey,0);
-		glEnd();
-	}
-
-}
-
 // Function: Draw_Lines
 // BODYに含まれる線分を全て描画
 //
@@ -101,7 +58,7 @@ void Describe_BODY::Draw_Lines(const BODY *Body)
 		glColor3f(Body->m_vLine[i]->Dstat.Color[0],Body->m_vLine[i]->Dstat.Color[1],Body->m_vLine[i]->Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
         if(Body->m_vLine[i]->EntUseFlag == GEOMTRYELEM && Body->m_vLine[i]->BlankStat == DISPLAY){
-			DrawLine(Body->m_vLine[i]);
+			Body->m_vLine[i]->DrawLine();
 		}
 	}
 }
@@ -117,7 +74,7 @@ void Describe_BODY::Draw_CircleArcs(const BODY *Body)
 		glColor3f(Body->m_vCirA[i]->Dstat.Color[0],Body->m_vCirA[i]->Dstat.Color[1],Body->m_vCirA[i]->Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
         if(Body->m_vCirA[i]->EntUseFlag == GEOMTRYELEM && Body->m_vCirA[i]->BlankStat == DISPLAY){
-			DrawCircleArc(Body->m_vCirA[i]);
+			Body->m_vCirA[i]->DrawCircleArc();
 		}
 	}
 }

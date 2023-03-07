@@ -28,14 +28,6 @@ public:
 	// BODYを描画
 	static void DrawBody(BODY *);					
 
-	// Function: DrawLine
-	// 直線を描画
-	static void DrawLine(const LINE_*);					
-
-	// Function: DrawCircleArc
-	// 円・円弧を描画
-	static void DrawCircleArc(const CIRA*);				
-
 	// Function: Draw_Lines
 	// BODYに含まれる線分を全て描画
 	static void Draw_Lines(const BODY *Body);				

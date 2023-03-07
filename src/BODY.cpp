@@ -533,6 +533,49 @@ int BODY::CirAToNurbsC_seg4(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 
 /////////////////////////////////////////////////////////////////////
 
+// Function: DrawCircleArc
+// 円・円弧の描画
+//
+// Parameters:
+// Cira - 描画する円・円弧構造体
+void CIRA::DrawCircleArc(void) const
+{
+	double delta = t[1] - t[0];
+	if(t[1] < t[0])
+		delta += 360;
+	int d = (int)fabs(delta);
+
+	for(int i=0;i<d;i++){
+		double sth = (t[0] + delta/(double)d*(double)i)*PI/180;
+		double eth = (t[0] + delta/(double)d*(double)(i+1))*PI/180;
+		double sx = R*cos(sth) + cp[0].x;
+		double sy = R*sin(sth) + cp[0].y;
+		double ex = R*cos(eth) + cp[0].x;
+		double ey = R*sin(eth) + cp[0].y;
+		glBegin(GL_LINES);
+			glVertex3d(sx,sy,0);
+			glVertex3d(ex,ey,0);
+		glEnd();
+	}
+
+}
+
+// Function: DrawLine
+// 線分の描画
+//
+// Parameters:
+// Line - 描画する線分構造体
+void LINE_::DrawLine(void) const
+{
+	glLineWidth(1);
+
+	glBegin(GL_LINE_STRIP);
+	glVertex3d(cp[0].x,cp[0].y,cp[0].z);	// 始点
+	glVertex3d(cp[1].x,cp[1].y,cp[1].z);	// 終点
+	glEnd();
+
+}
+
 // Function: DrawCurveOnParamSurfe
 // 面上線の描画
 //

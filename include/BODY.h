@@ -144,8 +144,9 @@ enum EntityType{
 // int		EntUseFlag -	ディレクトリ部 Entity Use Flag の値(0:幾何要素 5:2Dパラメトリック要素)
 // int		pD -			ディレクトリ部への逆ポインタ
 // DispStat	Dstat -			 表示属性（色r,g,b）
-struct CIRA
+class CIRA
 {
+public:
 	double zt;		
 	Coord  cp[3];	
 	double R;
@@ -164,6 +165,10 @@ struct CIRA
 		EntUseFlag = 0;
 		pD = 0;
 	}
+
+	// Function: DrawCircleArc
+	// 円・円弧を描画
+	void DrawCircleArc(void) const;
 };
 
 // Structure: CONA
@@ -199,8 +204,9 @@ struct CONA
 // int EntUseFlag - ディレクトリ部 Entity Use Flag の値(0:幾何要素 5:2Dパラメトリック要素)
 // int pD -			ディレクトリ部への逆ポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
-struct LINE_
+class LINE_
 {
+public:
 	Coord cp[2];
     int BlankStat;
 	int EntUseFlag;
@@ -212,6 +218,10 @@ struct LINE_
 		EntUseFlag = 0;
 		pD = 0;
 	}
+
+	// Function: DrawLine
+	// 直線を描画
+	void DrawLine(void) const;
 };
 
 // Structure: TMAT
