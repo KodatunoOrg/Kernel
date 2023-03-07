@@ -220,6 +220,14 @@ public:
 	// コントロールポイントを代入する
 	int SetCPNurbsS(const NURBSS&);
 
+	// Function: DrawNurbsSurfe
+	// NURBS曲面の描画(トリムなし)
+	void DrawNurbsSurfe(void) const;
+
+	// Function: DrawTrimdNurbsSurfe
+	// NURBS曲面の描画(トリムあり)
+	void DrawTrimdNurbsSurfe(void) const;
+
 private:
 
 	// Function: CalcDiffNurbsSDenom

@@ -2144,6 +2144,88 @@ int NURBSS::SetCPNurbsS(const NURBSS& Nurbs)
 	return KOD_TRUE;
 }
 
+// Function: DrawNurbsSurfe
+// NURBS曲面の描画(トリムなし)
+//
+// Parameters:
+// NurbsS - 描画するNURBS曲面構造体
+void NURBSS::DrawNurbsSurfe(void) const
+{
+	int j,k;
+	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
+	static GLfloat	vKnot[KNOTNUMMAX];					// NURBS描画用バッファ
+	static GLfloat	SCtlp[CTLPNUMMAX][CTLPNUMMAX][4];	// NURBS描画用バッファ
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,m_Dstat.Color);
+	for(k=0;k<m_W.size2();k++){
+		for(j=0;j<m_W.size1();j++){
+			SCtlp[j][k][0] = m_vvCp[j][k].x * m_W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = m_vvCp[j][k].y * m_W(j,k);
+			SCtlp[j][k][2] = m_vvCp[j][k].z * m_W(j,k);
+			SCtlp[j][k][3] = m_W(j,k);
+		}
+	}
+	for(j=0;j<m_S.size();j++){
+		uKnot[j] = m_S[j];		// uノットベクトル取り出し
+	}
+	for(j=0;j<m_T.size();j++){
+		vKnot[j] = m_T[j];		// vノットベクトル取り出し
+	}
+
+	// NURBS曲面の描画
+	gluBeginSurface(NurbsSurf);
+	gluNurbsSurface(NurbsSurf,m_S.size(),uKnot,m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
+	gluEndSurface(NurbsSurf);
+
+}
+
+// Function: DrawTrimdNurbsSurfe
+// トリム面を持つNURBS曲面を描画する
+//
+// Parameters:
+// *NurbsS - 描画するNURBS曲面のポインタ
+void NURBSS::DrawTrimdNurbsSurfe(void) const
+{
+	int j,k;
+	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
+	static GLfloat	vKnot[KNOTNUMMAX];					// NURBS描画用バッファ
+	static GLfloat	SCtlp[CTLPNUMMAX][CTLPNUMMAX][4];	// NURBS描画用バッファ
+
+//	DebugForNurbsS();		// for debug
+
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,m_Dstat.Color);
+	for(k=0;k<m_W.size2();k++){
+		for(j=0;j<m_W.size1();j++){
+			SCtlp[j][k][0] = m_vvCp[j][k].x * m_W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = m_vvCp[j][k].y * m_W(j,k);
+			SCtlp[j][k][2] = m_vvCp[j][k].z * m_W(j,k);
+			SCtlp[j][k][3] = m_W(j,k);
+		}
+	}
+	for(j=0;j<m_S.size();j++){
+		uKnot[j] = m_S[j];		// uノットベクトル取り出し
+//		fprintf(stderr,"U:%d-%.12lf\n",j+1,uKnot[j]);
+	}
+	for(j=0;j<m_T.size();j++){
+		vKnot[j] = m_T[j];		// vノットベクトル取り出し
+//		fprintf(stderr,"V:%d-%.12lf\n",j+1,vKnot[j]);
+	}
+/*
+    for(k=0;k<NurbsS->m_W.size2();k++){
+        for(j=0;j<NurbsS->m_W.size1();j++){
+            fprintf(stderr, "SCtlp[%d][%d]=(%f, %f, %f, %f)\n", j, k, SCtlp[j][k][0], SCtlp[j][k][1], SCtlp[j][k][2], SCtlp[j][k][3]);
+        }
+    }
+    fprintf(stderr, "M[0]=%d, M[1]=%d\n", m_M[0], m_M[1]);
+    fflush(stderr);
+*/
+
+	// NURBS曲面の描画
+//    gluBeginSurface(NurbsSurf);
+    gluNurbsSurface(NurbsSurf,m_S.size(),uKnot,m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],m_M[0],m_M[1],GL_MAP2_VERTEX_4);
+//    gluEndSurface(NurbsSurf);
+}
+
 /////////////////////////////////////////////////
 // --- Private関数
 

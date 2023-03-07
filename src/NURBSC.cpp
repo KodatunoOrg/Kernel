@@ -1487,24 +1487,48 @@ void NURBSC::DrawNurbsCurve(void) const
 	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
 	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
 
-	for(i=0;i<NurbsC->m_vCp.size();i++){			// コントロールポイント取り出し
-		CCtlp[i][0] = NurbsC->m_vCp[i].x*NurbsC->m_W[i];
-		CCtlp[i][1] = NurbsC->m_vCp[i].y*NurbsC->m_W[i];
-		CCtlp[i][2] = NurbsC->m_vCp[i].z*NurbsC->m_W[i];
-		CCtlp[i][3] = NurbsC->m_W[i];
+	for(i=0;i<m_vCp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = m_vCp[i].x * m_W[i];
+		CCtlp[i][1] = m_vCp[i].y * m_W[i];
+		CCtlp[i][2] = m_vCp[i].z * m_W[i];
+		CCtlp[i][3] = m_W[i];
 	}
 
-	for(j=0;j<NurbsC->m_T.size();j++){			// ノットベクトル取り出し
-		uKnot[j] = NurbsC->m_T[j];
+	for(j=0;j<m_T.size();j++){			// ノットベクトル取り出し
+		uKnot[j] = m_T[j];
 	}
 
 	glDisable(GL_LIGHTING);
 	gluBeginCurve(NurbsCurve);
-	gluNurbsCurve(NurbsCurve,NurbsC->m_T.size(),uKnot,4,&CCtlp[0][0],NurbsC->m_M,GL_MAP1_VERTEX_4);	// ノットベクトルの値の範囲が0～1でないと、
+	gluNurbsCurve(NurbsCurve,m_T.size(),uKnot,4,&CCtlp[0][0],m_M,GL_MAP1_VERTEX_4);		// ノットベクトルの値の範囲が0～1でないと、
 	gluEndCurve(NurbsCurve);															// "ノット数がスプライン命令より多くありますと怒られる"
 	glFlush();																			// ノットベクトルの正規化が必要(pp111)
 	glEnable(GL_LIGHTING);
 
+}
+
+// Function: DrawNurbsCurve_Param
+// 2DパラメトリックNURBS曲線要素の描画
+//
+// Parameters:
+// *NurbsC - 描画する2DパラメトリックNURBS曲線のポインタ
+void NURBSC::DrawNurbsCurve_Param(void) const
+{
+	int i;
+	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
+	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
+
+	for(i=0;i<m_vCp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = m_vCp[i].x * m_W[i];
+		CCtlp[i][1] = m_vCp[i].y * m_W[i];
+		CCtlp[i][2] = m_W[i];
+	}
+	for(i=0;i<m_T.size();i++){			// ノットベクトル取り出し
+		uKnot[i] = m_T[i];
+	}
+
+	// トリム面を構成するNURBS曲線を指定
+	gluNurbsCurve(NurbsSurf,m_T.size(),uKnot,4,&CCtlp[0][0],m_M,GLU_MAP1_TRIM_3);
 }
 
 /////////////////////////////////////////////////

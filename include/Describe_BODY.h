@@ -40,14 +40,6 @@ public:
 	// 円・円弧を描画
 	static void DrawCircleArc(const CIRA*);				
 
-	// Function: DrawTrimdNurbsSurfe
-	// NURBS曲面の描画(トリムあり)
-	static void DrawTrimdNurbsSurfe(const NURBSS*);		
-
-	// Function: DrawNurbsSurfe
-	// NURBS曲面の描画(トリムなし)
-	static void DrawNurbsSurfe(const NURBSS*);				
-
 	// Function: DrawCurveOnParamSurfe
 	// 面上線を描画
 	static void DrawCurveOnParamSurfe(CONPS *);		
@@ -55,10 +47,6 @@ public:
 	// Function: DrawTrimdSurf
 	// トリム面を描画
 	static void DrawTrimdSurf(TRMS*);				
-
-	// Function: DrawNurbsCurve_Param
-	// 2DパラメトリックNURBS曲線要素の描画
-	static void DrawNurbsCurve_Param(const NURBSC *);		
 
 	// Function: Draw_Lines
 	// BODYに含まれる線分を全て描画

@@ -180,6 +180,10 @@ public:
 	// NURBS曲線を描画
 	void DrawNurbsCurve(void) const;
 
+	// Function: DrawNurbsCurve_Param
+	// 2DパラメトリックNURBS曲線要素の描画
+	void DrawNurbsCurve_Param() const;
+
 private:
 
 	// Function: GetNurbsCCoef
