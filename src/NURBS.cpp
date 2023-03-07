@@ -1,4 +1,43 @@
 ﻿#include "KodatunoKernel.h"
+#include "NURBS.h"
+
+GLUnurbsObj* NURBS::NurbsCurve = NULL;		// NURBS曲線用オブジェクト
+GLUnurbsObj* NURBS::NurbsSurf = NULL;		// NURBS曲面用オブジェクト
+
+NURBS::NURBS()
+{
+	if ( !NurbsSurf ) {
+		NurbsCurve = gluNewNurbsRenderer();
+		gluNurbsProperty(NurbsCurve,GLU_SAMPLING_TOLERANCE,20);	
+#ifdef _GLUfuncptr
+	    gluNurbsCallback(NurbsCurve, GLU_ERROR, (_GLUfuncptr)NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
+#else
+	    gluNurbsCallback(NurbsCurve, GLU_ERROR, (void (CALLBACK *) (void))NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
+#endif
+	}
+
+	if ( !NurbsSurf ) {
+	    NurbsSurf = gluNewNurbsRenderer();
+    	gluNurbsProperty(NurbsSurf,GLU_SAMPLING_TOLERANCE,20);
+#ifdef _GLUfuncptr
+	    gluNurbsCallback(NurbsSurf, GLU_ERROR, (_GLUfuncptr)NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
+#else
+	    gluNurbsCallback(NurbsSurf, GLU_ERROR, (void (CALLBACK *) (void))NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
+#endif
+	}
+}
+
+// Function: NURBS_Err
+// NURBSファンクションエラーのコールバックを登録
+// 
+// Parameters:
+// error_code - OpenGLが提供するNURBS描画関数内で発生したエラーコード
+void NURBS_Err(GLenum error_code)
+{
+	fprintf(stderr,"%s\n",gluErrorString(error_code));
+	getchar();
+	//exit(1);
+}
 
 // Function: GenInterpolatedNurbsC1
 // 与えられた点列を補間するn階のNURBS曲線を生成する.

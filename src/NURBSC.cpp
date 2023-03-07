@@ -1476,6 +1476,37 @@ void NURBSC::ReverseNurbsC(void)
     ChangeKnotVecRange(m_T,m_M,m_vCp.size(),0,1);
 }
 
+// Function: DrawNurbsCurve
+// NURBS曲線の描画
+//
+// Parameters:
+// NurbsC - 描画するNURBS曲線構造体
+void NURBSC::DrawNurbsCurve(void) const
+{
+	int i,j;
+	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
+	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
+
+	for(i=0;i<NurbsC->m_vCp.size();i++){			// コントロールポイント取り出し
+		CCtlp[i][0] = NurbsC->m_vCp[i].x*NurbsC->m_W[i];
+		CCtlp[i][1] = NurbsC->m_vCp[i].y*NurbsC->m_W[i];
+		CCtlp[i][2] = NurbsC->m_vCp[i].z*NurbsC->m_W[i];
+		CCtlp[i][3] = NurbsC->m_W[i];
+	}
+
+	for(j=0;j<NurbsC->m_T.size();j++){			// ノットベクトル取り出し
+		uKnot[j] = NurbsC->m_T[j];
+	}
+
+	glDisable(GL_LIGHTING);
+	gluBeginCurve(NurbsCurve);
+	gluNurbsCurve(NurbsCurve,NurbsC->m_T.size(),uKnot,4,&CCtlp[0][0],NurbsC->m_M,GL_MAP1_VERTEX_4);	// ノットベクトルの値の範囲が0～1でないと、
+	gluEndCurve(NurbsCurve);															// "ノット数がスプライン命令より多くありますと怒られる"
+	glFlush();																			// ノットベクトルの正規化が必要(pp111)
+	glEnable(GL_LIGHTING);
+
+}
+
 /////////////////////////////////////////////////
 // --- Private関数
 

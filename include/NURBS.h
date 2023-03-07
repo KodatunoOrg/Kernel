@@ -1,9 +1,21 @@
 ﻿#ifndef _NURBS_FUNC_H_
 #define _NURBS_FUNC_H_
 
-// prototype
-class NURBSC;
-class NURBSS;
+// NURBSC, NURBSS のベースクラス
+class NURBS
+{
+protected:
+	// Variable:
+	// NURBS曲面用オブジェクト
+	static GLUnurbsObj* NurbsSurf;
+
+	// Variable:
+	// NURBS曲線用オブジェクト
+	static GLUnurbsObj* NurbsCurve;
+
+    // コンストラクタ
+    NURBS();
+};
 
 #include "NURBSC.h"
 #include "NURBSS.h"
@@ -118,5 +130,9 @@ int SetApproximationCPnum(int);
 // Function: CalcApproximationCP_LSM
 // (private)最小2乗法で近似コントロールポイントを求める
 VCoord CalcApproximationCP_LSM(const VCoord&, const ublasVector&, const ublasVector&, int, int);
+
+// Function: NURBS_Err
+// NURBS描画時のエラーコールバック
+void NURBS_Err(GLenum error_code);
 
 #endif

@@ -24,7 +24,7 @@
 // int OriginEnt -	元のエンティティタイプ
 // void *pOriginEnt - 元のエンティティへのポインタ
 // DispStat Dstat - 表示属性（色r,g,b）
-class NURBSC
+class NURBSC : public NURBS
 {
 public:
 	int m_M;
@@ -175,6 +175,10 @@ public:
 	// Function: ReverseNurbsC
 	// NURBS曲線のノットベクトル向きを反転する
 	void ReverseNurbsC(void);
+
+	// Function: DrawNurbsCurve
+	// NURBS曲線を描画
+	void DrawNurbsCurve(void) const;
 
 private:
 

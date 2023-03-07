@@ -4,14 +4,10 @@
 
 #include "KodatunoKernel.h"
 
-GLUnurbsObj *Describe_BODY::NurbsSurf;		// NURBS曲面用オブジェクト
-GLUnurbsObj *Describe_BODY::NurbsCurve;		// NURBS曲線用オブジェクト
-
 // Function: Describe_BODY
 // コンストラクタ. NURBS描画ステータスの設定
 Describe_BODY::Describe_BODY()
 {
-	SetNurbsStat();
 }
 
 // Function: ~Describe_BODY
@@ -91,37 +87,6 @@ void Describe_BODY::DrawCircleArc(const CIRA* Cira)
 			glVertex3d(ex,ey,0);
 		glEnd();
 	}
-
-}
-
-// Function: DrawNurbsCurve
-// NURBS曲線の描画
-//
-// Parameters:
-// NurbsC - 描画するNURBS曲線構造体
-void Describe_BODY::DrawNurbsCurve(const NURBSC* NurbsC)
-{
-	int i,j;
-	static GLfloat	uKnot[KNOTNUMMAX];					// NURBS描画用バッファ
-	static GLfloat	CCtlp[CTLPNUMMAX][4];				// NURBS描画用バッファ
-
-	for(i=0;i<NurbsC->m_vCp.size();i++){			// コントロールポイント取り出し
-		CCtlp[i][0] = NurbsC->m_vCp[i].x*NurbsC->m_W[i];
-		CCtlp[i][1] = NurbsC->m_vCp[i].y*NurbsC->m_W[i];
-		CCtlp[i][2] = NurbsC->m_vCp[i].z*NurbsC->m_W[i];
-		CCtlp[i][3] = NurbsC->m_W[i];
-	}
-
-	for(j=0;j<NurbsC->m_T.size();j++){			// ノットベクトル取り出し
-		uKnot[j] = NurbsC->m_T[j];
-	}
-
-	glDisable(GL_LIGHTING);
-	gluBeginCurve(NurbsCurve);
-	gluNurbsCurve(NurbsCurve,NurbsC->m_T.size(),uKnot,4,&CCtlp[0][0],NurbsC->m_M,GL_MAP1_VERTEX_4);	// ノットベクトルの値の範囲が0～1でないと、
-	gluEndCurve(NurbsCurve);															// "ノット数がスプライン命令より多くありますと怒られる"
-	glFlush();																			// ノットベクトルの正規化が必要(pp111)
-	glEnable(GL_LIGHTING);
 
 }
 
@@ -417,28 +382,6 @@ void Describe_BODY::DrawMesh(MESH *mesh,int flag)
 
 }
 
-// Function: SetNurbsStat
-// NURBS描画ステータスの設定
-void Describe_BODY::SetNurbsStat()
-{
-	NurbsCurve = gluNewNurbsRenderer();
-	gluNurbsProperty(NurbsCurve,GLU_SAMPLING_TOLERANCE,20);	
-#ifdef _GLUfuncptr
-    gluNurbsCallback(NurbsCurve, GLU_ERROR, (_GLUfuncptr)NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
-#else
-    gluNurbsCallback(NurbsCurve, GLU_ERROR, (void (CALLBACK *) (void))NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
-#endif
-
-
-    NurbsSurf = gluNewNurbsRenderer();
-    gluNurbsProperty(NurbsSurf,GLU_SAMPLING_TOLERANCE,20);
-#ifdef _GLUfuncptr
-    gluNurbsCallback(NurbsSurf, GLU_ERROR, (_GLUfuncptr)NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
-#else
-    gluNurbsCallback(NurbsSurf, GLU_ERROR, (void (CALLBACK *) (void))NURBS_Err);	// NURBS関連のエラーのコールバック関数を登録
-#endif
-}
-
 // Function: SetNurbsSProperty
 // NURBS曲面の描画形式を変更する
 void Describe_BODY::SetNurbsSProperty(GLenum prop,GLfloat val)
@@ -455,18 +398,6 @@ void Describe_BODY::SetNurbsSTolerance(GLfloat t)
 {
 	gluNurbsProperty(NurbsSurf,GLU_SAMPLING_TOLERANCE,t);
 	gluNurbsProperty(NurbsCurve,GLU_SAMPLING_TOLERANCE,t);
-}
-
-// Function: NURBS_Err
-// NURBSファンクションエラーのコールバックを登録
-// 
-// Parameters:
-// error_code - OpenGLが提供するNURBS描画関数内で発生したエラーコード
-void Describe_BODY::NURBS_Err(GLenum error_code)
-{
-	fprintf(stderr,"%s\n",gluErrorString(error_code));
-	getchar();
-	//exit(1);
 }
 
 // 円・円弧の描画

@@ -23,7 +23,7 @@
 // int pD -			ディレクトリ部への逆ポインタ
 // int TrmdSurfFlag - このNURBS曲面がトリム面として呼ばれているのか、独立して存在するのかを示すフラグ(トリム面:KOD_TRUE  独立面:KOD_FALSE)
 // DispStat Dstat - 表示属性（色r,g,b,）
-class NURBSS
+class NURBSS : public NURBS
 {
 public:
 	A2int m_M;
