@@ -2174,7 +2174,7 @@ void NURBSS::DrawNurbsSurfe(void) const
 
 	// NURBS曲面の描画
 	gluBeginSurface(NurbsSurf);
-	gluNurbsSurface(NurbsSurf,m_S.size(),uKnot,m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],m_M[0],NurbsS->m_M[1],GL_MAP2_VERTEX_4);
+	gluNurbsSurface(NurbsSurf,m_S.size(),uKnot,m_T.size(),vKnot,CTLPNUMMAX*4,4,&SCtlp[0][0][0],m_M[0],m_M[1],GL_MAP2_VERTEX_4);
 	gluEndSurface(NurbsSurf);
 
 }

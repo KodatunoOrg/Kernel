@@ -27,6 +27,24 @@ NURBS::NURBS()
 	}
 }
 
+// Function: SetNurbsSProperty
+// NURBS曲面の描画形式を変更する
+void SetNurbsSProperty(GLenum prop,GLfloat val)
+{
+	gluNurbsProperty(NURBS::NurbsSurf,prop,val);
+}
+
+// Function: SetNurbsSTolerance
+// NURBS曲面/曲線の粗さを指定
+//
+// Parameters:
+// t - トレランス値．gluNurbsProperty()関数のPropertyにGLU_SAMPLING_TOLERANCEを指定した場合のvalue値を示す. 値が小さいほど滑らかな描画となる.デフォルトでは20が指定されている.
+void SetNurbsSTolerance(GLfloat t)
+{
+	gluNurbsProperty(NURBS::NurbsSurf,GLU_SAMPLING_TOLERANCE,t);
+	gluNurbsProperty(NURBS::NurbsCurve,GLU_SAMPLING_TOLERANCE,t);
+}
+
 // Function: NURBS_Err
 // NURBSファンクションエラーのコールバックを登録
 // 

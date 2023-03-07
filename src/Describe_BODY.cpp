@@ -162,7 +162,7 @@ void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 void Describe_BODY::Draw_TrimSurfes(BODY *Body)
 {
 	for(int i=0;i<Body->m_vTrmS.size();i++){
-		DrawTrimdSurf(Body->m_vTrmS[i]);
+		Body->m_vTrmS[i]->DrawTrimdSurf();
 	}
 }
 
@@ -194,24 +194,6 @@ void Describe_BODY::DrawMesh(MESH *mesh,int flag)
 	}
 	glFlush();
 
-}
-
-// Function: SetNurbsSProperty
-// NURBS曲面の描画形式を変更する
-void Describe_BODY::SetNurbsSProperty(GLenum prop,GLfloat val)
-{
-	gluNurbsProperty(NurbsSurf,prop,val);
-}
-
-// Function: SetNurbsSTolerance
-// NURBS曲面/曲線の粗さを指定
-//
-// Parameters:
-// t - トレランス値．gluNurbsProperty()関数のPropertyにGLU_SAMPLING_TOLERANCEを指定した場合のvalue値を示す. 値が小さいほど滑らかな描画となる.デフォルトでは20が指定されている.
-void Describe_BODY::SetNurbsSTolerance(GLfloat t)
-{
-	gluNurbsProperty(NurbsSurf,GLU_SAMPLING_TOLERANCE,t);
-	gluNurbsProperty(NurbsCurve,GLU_SAMPLING_TOLERANCE,t);
 }
 
 // 円・円弧の描画

@@ -1,6 +1,9 @@
 ﻿#ifndef _NURBS_FUNC_H_
 #define _NURBS_FUNC_H_
 
+class NURBSC;
+class NURBSS;
+
 // NURBSC, NURBSS のベースクラス
 class NURBS
 {
@@ -15,11 +18,14 @@ protected:
 
     // コンストラクタ
     NURBS();
+
+    //
+    friend void SetNurbsSProperty(GLenum prop,GLfloat val);
+    friend void SetNurbsSTolerance(GLfloat t);
 };
 
 #include "NURBSC.h"
 #include "NURBSS.h"
-#include "TRMS.h"
 
 // Constants: General Defines
 // PTNUMMAX -			NURBSの点列の最大数(10000)
@@ -102,7 +108,7 @@ NURBSS* GenNurbsSfromCP(const VVCoord&, int, int, int, int);
 ublasVector	GetEqIntervalKont(int,int);
 
 /////////////////////////////////////////////////
-// --- 以下，元NURBS_Funcのprivate関数．NURBS.cppのstatic関数へ
+// 元NURBS_Funcのprivate関数．NURBS.cppのstatic関数へ
 
 // Function: GetCurveKnotParam1
 // (private)各通過点の曲線パラメータを算出(コード長の比から算出)
@@ -132,8 +138,24 @@ int SetApproximationCPnum(int);
 // (private)最小2乗法で近似コントロールポイントを求める
 VCoord CalcApproximationCP_LSM(const VCoord&, const ublasVector&, const ublasVector&, int, int);
 
+/////////////////////////////////////////////////
+
+// Function: SetNurbsSProperty
+// NURBS曲面の描画形式を変更する
+void SetNurbsSProperty(GLenum prop,GLfloat val);
+
+// Function: SetNurbsSTolerance
+// NURBS曲面/曲線の粗さを指定
+//
+// Parameters:
+// t - トレランス値．gluNurbsProperty()関数のPropertyにGLU_SAMPLING_TOLERANCEを指定した場合のvalue値を示す. 値が小さいほど滑らかな描画となる.デフォルトでは20が指定されている.
+void SetNurbsSTolerance(GLfloat t);
+
+/////////////////////////////////////////////////
+
 // Function: NURBS_Err
 // NURBS描画時のエラーコールバック
 void NURBS_Err(GLenum error_code);
+
 
 #endif

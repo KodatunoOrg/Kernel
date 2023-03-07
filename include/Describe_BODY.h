@@ -56,14 +56,6 @@ public:
 	// BODYに含まれるトリム面を全て描画
 	static void Draw_TrimSurfes(BODY *Body);		
 
-	// Function: SetNurbsSTolerance
-	// NURBS曲面の粗さを指定
-	static void SetNurbsSTolerance(GLfloat);		
-
-	// Function: SetNurbsSProperty
-	// NURBS曲面の描画形式を変更する
-	static void SetNurbsSProperty(GLenum,GLfloat);	
-
 	// Function: DrawMesh
 	// メッシュの描画
 	static void DrawMesh(MESH *,int);				

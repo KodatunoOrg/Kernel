@@ -375,13 +375,13 @@ void TRMS::DrawTrimdSurf(void) const
 
 	// 外周トリム(反時計回りであること)
 	gluBeginTrim(NurbsSurf);
-	TrmS->m_pTO->DrawCurveOnParamSurfe();			// 面上線
+	m_pTO->DrawCurveOnParamSurfe();				// 面上線
 	gluEndTrim(NurbsSurf);
 
 	// 内周トリム(時計回りであること)
-	for(int j=0;j<TrmS->m_pTI.size();j++){
+	for(int j=0;j<m_pTI.size();j++){
 		gluBeginTrim(NurbsSurf);
-		TrmS->m_pTI[j]->DrawCurveOnParamSurfe();	// 面上線
+		m_pTI[j]->DrawCurveOnParamSurfe();		// 面上線
 		gluEndTrim(NurbsSurf);
 	}
 
