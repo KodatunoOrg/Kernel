@@ -377,6 +377,36 @@ Data *MESH::MergeListForQEMD(Data *x,Data *y)
 	return z.GetNextpData();
 }
 
+// Function: DrawMesh
+// メッシュの描画
+//
+// Parameters:
+// *mesh - Meshクラスのオブジェクトへのポインタ
+// flag - KOD_TRUE：スケルトン表示． KOD_FALSE：面表示
+void MESH::DrawMesh(int flag)
+{
+	//mesh->Face.setSentinel(0);
+	for(int i=0;i<FaceNum;i++){
+		HEface *f = (HEface *)(Face.getData(i));	// i番目のFaceリストの実体を得る
+		//HEface *f = (HEface *)mesh->Face.getSentinelData();
+		glPushName(f->index);		// ファセット1枚1枚にセレクション番号を割り当てる
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,f->Dstat.Color);
+		HEedge *e = f->edge;
+		if(flag == KOD_TRUE)	glBegin(GL_LINE_LOOP);
+		else	glBegin(GL_TRIANGLES);
+		glNormal3d(f->norm.x,f->norm.y,f->norm.z);
+		for(int j=0;j<f->vertnum;j++){
+			glVertex3d(e->vert->cod.x,e->vert->cod.y,e->vert->cod.z);
+			e = e->ne;
+		}
+		glEnd();
+		glPopName();
+		//mesh->Face.shiftSentinel(1);
+	}
+	glFlush();
+
+}
+
 //////////////////////////////////////MESH class////////////////////////////////////////////////////////////////////////
 
 

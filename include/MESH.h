@@ -491,6 +491,11 @@ public:
 	//	昇順ソートされたEdgeリストに、変更されたQEMコストを持つHEedgeを挿入
 	void InsertQEMD(HEedge *);
 
+	///////////////////////////////////////////////////////
+
+	// Function: DrawMesh
+	// メッシュの描画
+	void DrawMesh(int);
 
 private:
 	// Function: MergeSortForQEMD

@@ -48,10 +48,6 @@ public:
 	// BODYに含まれるトリム面を全て描画
 	static void Draw_TrimSurfes(BODY *Body);		
 
-	// Function: DrawMesh
-	// メッシュの描画
-	static void DrawMesh(MESH *,int);				
-
 	// 未実装
 	static void DrawCircleArc();					// 円・円弧を描画
 	static void DrawConicArc();						// 円錐曲線を描画
