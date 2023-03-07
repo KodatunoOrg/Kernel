@@ -274,6 +274,10 @@ public:
 	~COMPC() {
 		if ( DegeNurbs ) delete DegeNurbs;
 	}
+
+	// Function: DrawCompositeCurve
+	// 複合曲線を描画
+	void DrawCompositeCurve(void) const;
 };
 
 // Structure: CURVE
@@ -323,6 +327,10 @@ public:
 		pref = 0;
 		pD = 0;
 	}
+
+	// Function: DrawCurveOnParamSurfe
+	// 面上線を描画
+	void DrawCurveOnParamSurfe(void) const;
 };
 typedef std::vector<CONPS*>	VCONPS;
 

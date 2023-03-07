@@ -21,7 +21,7 @@ typedef TRMS TRIMD_NURBSS;	// トリム面に対してNurbs曲面を想起させ
 // *pTO -       Trimmed Surfaceの外周にあたる単純閉曲線構造体へのポインタ
 // **pTI -      Trimmed Surfaceの内周にあたる単純閉曲線構造体へのポインタ
 // pD -         ディレクトリ部への逆ポインタ
-class TRMS
+class TRMS : public NURBS
 {
 public:
     NURBSS* m_pts;
@@ -86,6 +86,10 @@ public:
 
     // NURBS曲面を平面でトリムする(準備中)
 	int TrimNurbsSPlane(const Coord&, const Coord&);
+
+	// Function: DrawTrimdSurf
+	// トリム面を描画
+	void DrawTrimdSurf(void) const;
 
 private:
 

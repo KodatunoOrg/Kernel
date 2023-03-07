@@ -530,3 +530,57 @@ int BODY::CirAToNurbsC_seg4(NURBSC* NurbsC, int CirCount, const Coord vec[], dou
 
 	return KOD_TRUE;
 }
+
+/////////////////////////////////////////////////////////////////////
+
+// Function: DrawCurveOnParamSurfe
+// 面上線の描画
+//
+// Parameters:
+// *ConpS - 描画する面上線へのポインタ
+void CONPS::DrawCurveOnParamSurfe(void) const
+{
+	// 2Dパラメトリック曲線
+	if ( pB.type() == typeid(COMPC*) ) {
+		COMPC* CompC = boost::any_cast<COMPC*>(pB);
+		CompC->DrawCompositeCurve();		// 複合曲線
+	}
+//	else if(BType == NURBS_SURFACE){
+//		glDraw_NurbsCurve(pB);		// NURBS曲線
+//	}
+//	else if(BType == CIRCLE_ARC){
+//		glDraw_CircleArc(pB);		// 円・円弧
+//	}
+//	else if(BType == CONIC_ARC){
+//		glDraw_ConicArc();			// 円錐曲線
+//	}
+}
+
+// Function: DrawCompositeCurve
+// 複合曲線の描画
+//
+// Parameters:
+// *CompC - 描画する複合曲線へのポインタ
+void COMPC::DrawCompositeCurve(void) const
+{
+	int i;
+
+	for(i=0;i<pDE.size();i++){
+		if ( pDE[i].type() == typeid(NURBSC*) ) {
+			NURBSC* NurbsC = boost::any_cast<NURBSC*>(pDE[i]);
+			NurbsC->DrawNurbsCurve_Param();	// NURBS曲線
+		}
+		//else if(DEType[i] == CIRCLE_ARC){
+		//	glDraw_CircleArc_Param((CIRA *)pDE[i]);		// 円・円弧
+		//}
+		//else if(DEType[i] == CONIC_ARC){
+		//	glDraw_ConicArc_Param((CONA *)pDE[i]);		// 円錐曲線
+		//}
+		//else if(DEType[i] == LINE){
+		//	glDraw_Line_Param((LINE_ *)pDE[i]);			// 線分
+		//}
+	}
+
+	if(DegeFlag == KOD_FALSE && DegeNurbs )
+		DegeNurbs->DrawNurbsCurve_Param();		// 縮退がある場合、縮退用Nurbs曲線をトリムエンティティとして追加
+}

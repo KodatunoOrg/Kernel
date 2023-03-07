@@ -1,4 +1,5 @@
 #include "KodatunoKernel.h"
+#include "NURBS.h"
 
 // Function: GetOuterEdgeNum
 // トリム面を構成する外側エッジの数を取得する
@@ -359,6 +360,33 @@ int TRMS::TrimNurbsSPlane(const Coord& pt, const Coord& nvec)
 	fclose(fp);
 
 	return KOD_TRUE;
+}
+
+// Function: DrawTrimdSurf
+// トリム面の描画
+//
+// Parameters:
+// TrmS - 描画するトリム面構造体
+void TRMS::DrawTrimdSurf(void) const
+{
+    gluBeginSurface(NurbsSurf);
+
+	m_pts->DrawTrimdNurbsSurfe();				// NURBS曲面の描画
+
+	// 外周トリム(反時計回りであること)
+	gluBeginTrim(NurbsSurf);
+	TrmS->m_pTO->DrawCurveOnParamSurfe();			// 面上線
+	gluEndTrim(NurbsSurf);
+
+	// 内周トリム(時計回りであること)
+	for(int j=0;j<TrmS->m_pTI.size();j++){
+		gluBeginTrim(NurbsSurf);
+		TrmS->m_pTI[j]->DrawCurveOnParamSurfe();	// 面上線
+		gluEndTrim(NurbsSurf);
+	}
+
+    gluEndSurface(NurbsSurf);
+
 }
 
 /////////////////////////////////////////////////

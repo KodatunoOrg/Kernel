@@ -19,6 +19,7 @@ protected:
 
 #include "NURBSC.h"
 #include "NURBSS.h"
+#include "TRMS.h"
 
 // Constants: General Defines
 // PTNUMMAX -			NURBSの点列の最大数(10000)

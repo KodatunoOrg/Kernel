@@ -28,10 +28,6 @@ public:
 	// BODYを描画
 	static void DrawBody(BODY *);					
 
-	// Function: DrawCompositeCurve
-	// 複合曲線を描画
-	static void DrawCompositeCurve(COMPC *);		
-
 	// Function: DrawLine
 	// 直線を描画
 	static void DrawLine(const LINE_*);					
@@ -39,14 +35,6 @@ public:
 	// Function: DrawCircleArc
 	// 円・円弧を描画
 	static void DrawCircleArc(const CIRA*);				
-
-	// Function: DrawCurveOnParamSurfe
-	// 面上線を描画
-	static void DrawCurveOnParamSurfe(CONPS *);		
-
-	// Function: DrawTrimdSurf
-	// トリム面を描画
-	static void DrawTrimdSurf(TRMS*);				
 
 	// Function: Draw_Lines
 	// BODYに含まれる線分を全て描画
