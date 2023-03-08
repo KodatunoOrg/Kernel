@@ -512,7 +512,6 @@ ublasVector ChangeKnotVecRange(const ublasVector&, int, int, double, double);
 #include "MESH.h"
 #include "NURBS.h"
 #include "BODY.h"
-#include "Describe_BODY.h"
 #include "TRMS.h"
 #include "SFQuant.h"
 #include "DXF_Parser.h"

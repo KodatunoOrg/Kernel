@@ -28,7 +28,6 @@ SOURCES += \
     src/TRMS.cpp \
     src/BODY.cpp \
     src/DXF_Parser.cpp \
-    src/Describe_BODY.cpp \
     src/IGES_Parser.cpp \
     src/KodListFunc.cpp \
     src/MESH.cpp \
@@ -45,7 +44,6 @@ HEADERS += \
     include/TRMS.h \
     include/BODY.h \
     include/DXF_Parser.h \
-    include/Describe_BODY.h \
     include/IGES_Parser.h \
     include/KodListFunc.h \
     include/MESH.h \

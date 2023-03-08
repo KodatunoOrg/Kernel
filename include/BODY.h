@@ -125,6 +125,15 @@ enum EntityType{
 		ALL_ENTITY_TYPE_NUM		// 21
 };
 
+// 元Describe_BODY.h
+// Constants: General Defines
+// COMMAND_DRAW_BOD					BODY描画用ディスプレイリストの登録番号(1)
+// COMMAND_DRAW_USER				Userメイン関数によってコールされたOpenGL描画関数用ディスプレイリストの登録番号(2)
+// COMMAND_DRAW_USER_COMMAND		User CommandによってコールされたOpenGL描画関数用ディスプレイリストの登録番号(100)
+#define COMMAND_DRAW_BODY  1
+#define COMMAND_DRAW_USER  2
+#define COMMAND_DRAW_USER_COMMAND 100
+
 /*
  * エンティティタイプごとに構造体を定義
  * 9つのエンティティタイプを読み込み対象とする(それ以外は読み捨て)
@@ -414,6 +423,32 @@ public:
 	// Function: GetNurbsCFromCirA
 	// 円・円弧エンティティをNURBS曲線エンティティへと変換する
 	int GetNurbsCFromCirA(int);
+
+	///////////////////////////////////////////////////////
+
+	// Function: DrawBody
+	// BODYを描画
+	void DrawBody(void) const;
+
+	// Function: Draw_Lines
+	// BODYに含まれる線分を全て描画
+	void Draw_Lines(void) const;
+
+	// Function: Draw_CircleArcs
+	// BODYに含まれる円，円弧を全て描画
+	void Draw_CircleArcs(void) const;
+
+	// Function: Draw_NurbsCurves
+	// BODYに含まれるNURBS曲線を全て描画
+	void Draw_NurbsCurves(void) const;
+
+	// Function: Draw_NurbsSurfaces
+	// BODYに含まれるNURBS曲面を全て描画
+	void Draw_NurbsSurfaces(void) const;
+
+	// Function: Draw_TrimSurfes
+	// BODYに含まれるトリム面を全て描画
+	void Draw_TrimSurfes(void) const;
 
 private:
 

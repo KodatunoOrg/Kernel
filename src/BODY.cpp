@@ -292,6 +292,118 @@ int BODY::GetNurbsCFromCirA(int CirCount)
 	return KOD_TRUE;
 }
 
+///////////////////////////////////////////////////////
+
+// Function: DrawBody
+// Bodyを描画
+//
+// Parameters:
+// *Body - 描画するBODYへのポインタ
+void BODY::DrawBody(void) const
+{
+	for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++){
+		if(i == _CIRCLE_ARC){						// 円・円弧
+			// 円・円弧はNRBS曲線に変換される
+			//Draw_CircleArc();
+		}
+		else if(i == _CONIC_ARC){					// 円錐曲線
+			//Draw_ConicArc();
+		}
+		else if(i == _LINE){						// 線分
+			// 線分はNURBS曲線に変換される
+			//Draw_Line();
+		}
+		else if(i == _NURBSC){						// NURBS曲線
+			Draw_NurbsCurves();
+		}
+		else if(i == _NURBSS){
+			Draw_NurbsSurfaces();
+		}
+		else if(i == _TRIMMED_SURFACE){				// トリム面(NURBS曲面)
+			Draw_TrimSurfes();
+		}
+	}
+}
+
+// Function: Draw_Lines
+// BODYに含まれる線分を全て描画
+//
+// Parameters:
+// *Body - BODYへのポインタ
+void BODY::Draw_Lines(void) const
+{
+	for(int i=0;i<m_vLine.size();i++){
+		glColor3f(m_vLine[i]->Dstat.Color[0],m_vLine[i]->Dstat.Color[1],m_vLine[i]->Dstat.Color[2]);
+        // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
+        if(m_vLine[i]->EntUseFlag == GEOMTRYELEM && m_vLine[i]->BlankStat == DISPLAY){
+			m_vLine[i]->DrawLine();
+		}
+	}
+}
+
+// Function: Draw_CircleArcs
+// BODYに含まれる円，円弧を全て描画
+//
+// Parameters:
+// *Body - BODYへのポインタ
+void BODY::Draw_CircleArcs(void) const
+{
+	for(int i=0;i<m_vCirA.size();i++){
+		glColor3f(m_vCirA[i]->Dstat.Color[0],m_vCirA[i]->Dstat.Color[1],m_vCirA[i]->Dstat.Color[2]);
+        // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
+        if(m_vCirA[i]->EntUseFlag == GEOMTRYELEM && m_vCirA[i]->BlankStat == DISPLAY){
+			m_vCirA[i]->DrawCircleArc();
+		}
+	}
+}
+
+// Function: Draw_NurbsCurves
+// BODYに含まれるNURBS曲線を全て描画
+//
+// Parameters:
+// *Body - BODYへのポインタ
+void BODY::Draw_NurbsCurves(void) const
+{
+	for(int i=0;i<m_vNurbsC.size();i++){
+		glColor3f(m_vNurbsC[i]->m_Dstat.Color[0],m_vNurbsC[i]->m_Dstat.Color[1],m_vNurbsC[i]->m_Dstat.Color[2]);
+        // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
+        if(m_vNurbsC[i]->m_EntUseFlag == GEOMTRYELEM && m_vNurbsC[i]->m_BlankStat == DISPLAY){
+			m_vNurbsC[i]->DrawNurbsCurve();			// 描画
+		}
+	}
+}
+
+// Function: Draw_NurbsSurfaces
+// BODYに含まれるNURBS曲面を全て描画
+//
+// Parameters:
+// *Body - BODYへのポインタ
+void BODY::Draw_NurbsSurfaces(void) const
+{
+	for(int i=0;i<m_vNurbsS.size();i++){
+		if(m_vNurbsS[i]->m_TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
+			continue;		// 描画しない
+		else{
+			m_vNurbsS[i]->DrawNurbsSurfe();	// NURBS曲面描画
+		}
+	}
+}
+		
+// Function: Draw_TrimSurfes
+// BODYに含まれるトリム面を全て描画
+//
+// Parameters:
+// *Body - BODYへのポインタ
+void BODY::Draw_TrimSurfes(void) const
+{
+	for(int i=0;i<m_vTrmS.size();i++){
+		m_vTrmS[i]->DrawTrimdSurf();
+	}
+}
+
+
+///////////////////////////////////////////////////////
+
 // 1セグメントの円弧(中心角が0°<θ<=90°の時)
 int BODY::CirAToNurbsC_seg1(NURBSC* NurbsC, int CirCount, const Coord vec[], double angle_rad)
 {
