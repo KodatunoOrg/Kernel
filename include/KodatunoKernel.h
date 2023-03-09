@@ -111,10 +111,6 @@ typedef boost::array<Coord, 3>	A3Coord;
 // Matrix - double形の2次元配列をMatrixとして定義
 typedef double **Matrix;
 
-// Typedef: double *
-// Vector - double形の1次元配列をVectorとして定義
-typedef double *Vector;
-
 // Class: Coord 
 // 座標値用クラスを定義
 class Coord
@@ -330,17 +326,9 @@ void InitFrame(FRAME *);
 
 // Group: Functions(多次元ベクトル、多次元行列の演算)
 
-// Function: InitVector
-// 1次元配列の初期化(引数:ベクトル,配列長)
-void InitVector(Vector,int);					
-
 // Function: InitMatrix
 // 2次元配列の初期化
 void InitMatrix(Matrix,int,int);				
-
-// Function: CopyVector
-// ベクトルのコピー
-void CopyVector(Vector,int,Vector);				
 
 // Function: AddMxMx
 // 行列同士の足し算
@@ -479,17 +467,9 @@ void DrawSolidCone(double,double);
 // 2次元double型配列のメモリー確保
 Matrix NewMatrix(int,int);			
 
-// Function: NewVector
-// 1次元double型配列のメモリー確保
-Vector NewVector(int);				
-
 // Function: FreeMatrix
 // 2次元double型配列のメモリー解放
 void FreeMatrix(Matrix,int);		
-
-// Function: FreeVector
-// 1次元double型配列のメモリー解放
-void FreeVector(Vector);			
 
 // Function: NewCoord1
 // 1次元Coord型配列のメモリー確保

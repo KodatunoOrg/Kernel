@@ -173,16 +173,15 @@ struct CIRA
 // DispStat Dstat - 表示属性（色r,g,b）
 struct CONA
 {
-	double prop[6];
+	ublasVector prop;
 	double zt;
 	Coord  cp[2];
 	int pD;
 	DispStat Dstat;
 
 	CONA() {
-		InitVector(prop,6);
+		prop.resize(6);
 		zt = 0;
-//		cp[0] = cp[1] = SetCoord(0,0,0);
 		pD = 0;
 	}
 };
@@ -221,14 +220,13 @@ struct LINE_
 // int pD -			ディレクトリ部への逆ポインタ
 struct TMAT
 {
-	double R[3][3];
-	double T[3];
+	ublasMatrix R;
+	ublasVector T;
 	int pD;
 
 	TMAT() {
-		for(int j=0;j<3;j++)
-			InitVector(R[j],3);
-		InitVector(T,3);
+		R.resize(3,3);
+		T.resize(3);
 		pD = 0;
 	}
 };

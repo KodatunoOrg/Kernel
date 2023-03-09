@@ -270,15 +270,15 @@ public:
 
 	// Function: GetBSplCoef3
 	// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
-	int GetBSplCoef3(int,int,int,double *,double **);			
+	int GetBSplCoef3(int,int,int,double *,ublasMatrix&);
 
 	// Function: GetBSplCoef2
 	// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
-	int GetBSplCoef2(int,int,int,double *,double **);			
+	int GetBSplCoef2(int,int,int,double *,ublasMatrix&);			
 
 	// Function: GetBSplCoef1
 	// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
-	int GetBSplCoef1(int,int,int,double *,double **);			
+	int GetBSplCoef1(int,int,int,double *,ublasMatrix&);
 
 	// Function: ShiftNurbsS
 	// NURBS曲面のシフト
@@ -524,7 +524,7 @@ private:
 
 	// Function: GetNurbsCCoef
 	// (private)NURBS曲線の係数を求める(最高3次)
-	int GetNurbsCCoef(NURBSC *,double **,int,Coord *,double *);	
+	int GetNurbsCCoef(NURBSC *,ublasMatrix&,int,Coord *,double *);	
 
 	// Function: CalcEquation
 	// (private)3次方程式までを判別して解く

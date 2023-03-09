@@ -512,7 +512,6 @@ CONA *BODY::NewConA(int N)
 	for(int i=0;i<N;i++){
 		ConA[i].Dstat.Color[0] = ConA[i].Dstat.Color[1] = ConA[i].Dstat.Color[2] = ConA[i].Dstat.Color[3] = 0;
 		ConA[i].pD = 0;
-		InitVector(ConA[i].prop,6);
 		ConA[i].zt = 0;
 	}
 	TypeNum[_CONIC_ARC] = N;
@@ -549,9 +548,6 @@ TMAT *BODY::NewTMat(int N)
 	TMat = new TMAT[N];
 
 	for(int i=0;i<N;i++){
-		for(int j=0;j<3;j++)
-			InitVector(TMat[i].R[j],3);
-		InitVector(TMat[i].T,3);
 		TMat[i].pD = 0;
 	}
 	TypeNum[_TRANSFORMATION_MATRIX] = N;

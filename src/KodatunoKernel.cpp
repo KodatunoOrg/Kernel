@@ -273,21 +273,6 @@ int Coord::ZoroCoord2D(void) const
 }
 
 // Function: NewVector
-// double型1次元配列のメモリー確保
-//
-// Parameters:
-// len - メモリー確保するdouble型配列要素数
-//
-// Return:
-// 確保されたdouble型1次元配列へのポインタ（メモリー確保に失敗：NULL）
-Vector NewVector(int len)
-{
-	Vector a;
-	a = new double[len];
-	return a;
-}
-
-// Function: NewVector
 // double型2次元配列のメモリー確保
 //
 // Parameters:
@@ -304,16 +289,6 @@ Matrix NewMatrix(int row,int col)
 	for(i=0;i<row;i++) a[i] = new double[col];
 
 	return a;
-}
-
-// Function: FreeVector
-// double型1次元配列のメモリー解放
-//
-// Parameter:
-// a - メモリー解放するdouble型1次元配列へのポインタ
-void FreeVector(Vector a)
-{
-	delete[] a;
 }
 
 // Function: FreeMatrix
@@ -1028,19 +1003,6 @@ void Reverse(double p[],int n)
 	}
 }
 
-// Function: InitVector
-// 1次元配列の初期化
-// 
-// Parameters:
-// vec - 1次元配列へのポインタ
-// size - 配列要素数
-void InitVector(Vector vec,int size)
-{
-	for(int i=0;i<size;i++){
-		vec[i] = 0.0;
-	}
-}
-
 // Function: InitMatrix
 // 2次元配列の初期化
 // 
@@ -1054,19 +1016,6 @@ void InitMatrix(Matrix mat,int size_x,int size_y)
 			mat[i][j] = 0.0;
 		}
 	}
-}
-
-// Function: CopyVector
-// ベクトルのコピー(aベクトルをbベクトルへ代入)
-//
-// Parameters:
-// a - コピー元1次元配列へのポインタ
-// n - aの要素数
-// b - コピー先1次元配列へのポインタ
-void CopyVector(Vector a,int n,Vector b)
-{
-	for(int i=0;i<n;i++)
-		b[i] = a[i];
 }
 
 // Function: CalcCubicEquation
@@ -1988,9 +1937,8 @@ double LU(int n,Matrix a,int *ip)
 {
 	int i, j, k, ii, ik;
 	long double t, u, det;
-	Vector weight;
+	ublasVector weight(n);    /* weight[0..n-1] の記憶領域確保 */
 
-	weight = NewVector(n);    /* weight[0..n-1] の記憶領域確保 */
 	det = 0;                   /* 行列式 */
 	for (k = 0; k < n; k++) {  /* 各行について */
 		ip[k] = k;             /* 行交換情報の初期値 */
@@ -2029,7 +1977,6 @@ double LU(int n,Matrix a,int *ip)
 	}
 
 EXIT:
-	FreeVector(weight);  /* 記憶領域を解放 */
 	return det;           /* 戻り値は行列式 */
 }
 
