@@ -2,10 +2,17 @@
 #define _STD_AFX_H_
 
 #include <math.h>
-#include <string.h>
-#include <iostream>
-
+#include <vector>							// std::vector
+#include <GL/gl.h>
 #include <GL/glu.h>
+
+#include "boost/numeric/ublas/vector.hpp"	// ublas::vector
+#include "boost/numeric/ublas/matrix.hpp"	// ublas::matrix
+namespace ublas = boost::numeric::ublas;
+#include "boost/array.hpp"					// 固定長配列
+#include "boost/multi_array.hpp"			// 固定長多次元配列
+#include "boost/tuple/tuple.hpp"			// 関数から2つ以上の値を返す
+#include "boost/optional.hpp"				// 無効値表現
 
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
@@ -58,6 +65,47 @@
 #define QUADINDEX 4
 #define CW  0
 #define CCW 1
+
+// Typedef: vector<double>
+// double型の1次元配列をVdoubleとublasVectorとして定義
+typedef std::vector<double>		Vdouble;
+typedef ublas::vector<double>	ublasVector;
+
+// Typedef: vector<Vdouble>
+// double型の2次元配列をVVdoubleとublasMatrixとして定義
+typedef std::vector<Vdouble>	VVdouble;
+typedef ublas::matrix<double>	ublasMatrix;
+
+// Typedef: array<double, n>
+// A[n]double - double型の固定配列をA[n]doubleとして定義
+typedef boost::array<double, 4>	A4double;
+typedef boost::array<double, 3>	A3double;
+typedef boost::array<double, 2>	A2double;
+
+// Typedef: array<int, n>
+// A[n]int - int型の固定配列をA[n]intとして定義
+typedef boost::array<int, 5>	A5int;
+typedef boost::array<int, 4>	A4int;
+typedef boost::array<int, 2>	A2int;
+
+// Typedef: vector<Coord>
+// VCoord - Coord型の1次元配列をVCoordとして定義
+class Coord;
+typedef std::vector<Coord>		VCoord;
+typedef boost::array<Coord, 1>	ACoord;			// resize()して使用
+
+// Typedef: vector<VCoord>
+// VVCoord - Coord型の2次元配列をVVCoordとして定義
+typedef std::vector<VCoord>		VVCoord;
+typedef boost::multi_array<Coord,2>	AACoord;	// boost::extents[][]でサイズ指定
+
+// Typedef: vector<VVCoord>
+// VVVCoord - Coord型の3次元配列をVVVCoordとして定義
+typedef std::vector<VVCoord>	VVVCoord;
+
+// Typedef: array<Coord, 3>
+// A3Coord - Coord型の3要素固定配列をA3Coordとして定義
+typedef boost::array<Coord, 3>	A3Coord;
 
 // Typedef: double **
 // Matrix - double形の2次元配列をMatrixとして定義
