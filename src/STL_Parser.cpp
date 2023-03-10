@@ -32,10 +32,10 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 	ublasVector S(N[0]);						// u方向のノットベクトル
 	ublasVector T(N[1]);						// v方向ノットベクトル
 	ublasMatrix W(K[0],K[1]);					// ウエイト
-	Coord **facet = NewCoord2(2,2);				// コントロールポイント
+	AACoord facet(boost::extents[2][2]);		// コントロールポイント
 	S[0] = S[1] = T[0] = T[1] = 0;				// u方向のノットベクトルは平面なので既に決まっている
 	S[2] = S[3] = T[2] = T[3] = 1;				// v方向ノットベクトルは平面なので既に決まっている
-	W[0][0] = W[0][1] = W[1][0] = W[1][1] = 1;	// ウエイトは平面なので既に決まっている
+	W(0,0) = W(0,1) = W(1,0) = W(1,1) = 1;		// ウエイトは平面なので既に決まっている
 
 	// STLファイルオープン
 	if((fp = fopen(STL_fname,"r")) == NULL){
@@ -89,8 +89,6 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 
 	body->MaxCoord = maxval;	// 最大座標値を登録
 			
-	FreeCoord2(facet,UVCPNUM);
-
 	fclose(fp);
 
 	return KOD_TRUE;

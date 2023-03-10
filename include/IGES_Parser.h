@@ -315,7 +315,7 @@ private:
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルの正規化sub1
-	int ChangeKnotVecRange(double [],double [],int,int,int,double);
+	int ChangeKnotVecRange(A2double&,ublasVector&,int,int,int,double);
 
 	// Function: ChangeKnot
 	// ノットベクトルの正規化sub2
@@ -323,7 +323,7 @@ private:
 
 	// Function: SearchMinVecRange
 	// ノットベクトルの最小間隔を探索
-	double SearchMinVecRange(double [],int,int);	
+	double SearchMinVecRange(ublasVector&,int,int);	
 
 	// Function: ReverseCOMPELEM
 	// COMPELEM配列を反転

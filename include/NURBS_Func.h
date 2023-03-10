@@ -50,7 +50,7 @@ public:
 
 	// Function: CalcNurbsCCoords
 	// 指定したt群でのNURBS曲線の座標値群を求める
-	void CalcNurbsCCoords(NURBSC *,int,double *,Coord *);		
+	void CalcNurbsCCoords(NURBSC *,int,double *,ACoord&);		
 
 	// Function: CalcNurbsSCoord
 	// 指定したu,vでのNURBS曲面の座標点を求める
@@ -58,11 +58,11 @@ public:
 
 	// Function: CalcNurbsSCoords
 	// 指定したu,v群でのNURBS曲面の座標値群を求める
-	void CalcNurbsSCoords(NURBSS *,int,Coord *,Coord *);		
+	void CalcNurbsSCoords(NURBSS *,int,ACoord&,ACoord&);		
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
-	int GenNurbsC(NURBSC *,int,int,int,double [],double [],Coord [],double [],int[],int);	
+	int GenNurbsC(NURBSC *,int,int,int,ublasVector&,ublasVector&,ACoord&,A2double&,int[],int);
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
@@ -70,7 +70,7 @@ public:
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
-	int GenNurbsS(NURBSS *,int,int,int,int,double *,double *,double **,Coord **,double,double,double,double);	
+	int GenNurbsS(NURBSS *,int,int,int,int,ublasVector&,ublasVector&,ublasMatrix&,AACoord&,double,double,double,double);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
@@ -110,15 +110,15 @@ public:
 
 	// Function: CalcBSbasis
 	// Bスプライン基底関数を計算し、計算結果を返す
-	double CalcBSbasis(double,double [],int,int,int);			
+	double CalcBSbasis(double,ublasVector&,int,int,int);
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
-	double CalcDiffBSbasis(double,double [],int,int,int);		
+	double CalcDiffBSbasis(double,ublasVector&,int,int,int);		
 
 	// Function: CalcDiffBSbasisN
 	// Bスプライン基底関数のN階微分係数を求める
-	double CalcDiffBSbasisN(double,double [],int,int,int,int);	
+	double CalcDiffBSbasisN(double,ublasVector&,int,int,int,int);	
 
 	// Function: CalcDiffNurbsC
 	// NURBS曲線の1階微分係数を求める
@@ -182,11 +182,11 @@ public:
 
 	// Function: CalcuIntersecPtNurbsLine
 	// NURBS曲面と直線の交点を算出
-	int CalcuIntersecPtNurbsLine(NURBSS *,Coord,Coord,int,Coord *,int,int);	
+	int CalcuIntersecPtNurbsLine(NURBSS *,Coord,Coord,int,ACoord&,int,int);	
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲面上の最近傍点を求める(ニュートン法)
-	int CalcIntersecPtNurbsPt(NURBSS *,Coord,int,int,Coord *);		
+	int CalcIntersecPtNurbsPt(NURBSS *,Coord,int,int,Coord*);		
 
 	// Function: CalcIntersecPtNurbsPt
 	// 空間上の1点からNURBS曲線上の最近傍点を求める(ニュートン法)(オーバーロード)
@@ -202,15 +202,15 @@ public:
 
 	// Function: CalcIntersecIsparaCurveU
 	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecIsparaCurveU(NURBSS *,double,Coord,Coord,int,double *,int);	
+	int CalcIntersecIsparaCurveU(NURBSS *,double,Coord,Coord,int,ublasVector&,int);	
 
 	// Function: CalcIntersecIsparaCurveV
 	// v方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecIsparaCurveV(NURBSS *,double,Coord,Coord,int,double *,int); 
+	int CalcIntersecIsparaCurveV(NURBSS *,double,Coord,Coord,int,ublasVector&,int);
 
 	// Function: CalcIntersecCurve
 	// NURBS曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecCurve(NURBSC *,Coord,Coord,int,double *,int,int);	
+	int CalcIntersecCurve(NURBSC *,Coord,Coord,int,ublasVector&,int,int);	
 
 	// Function: CalcIntersecCurve3
 	// 3次以下のNURBS曲線と平面との交点を求める
@@ -226,31 +226,31 @@ public:
 
 	// Function: CalcIntersecPtsPlaneV
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	int CalcIntersecPtsPlaneV(NURBSS *,Coord,Coord,int,Coord *,int);	
+	int CalcIntersecPtsPlaneV(NURBSS *,Coord,Coord,int,ACoord&,int);	
 
 	// Function: CalcIntersecPtsPlaneU
 	// U方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	int CalcIntersecPtsPlaneU(NURBSS *,Coord,Coord,int,Coord *,int);	
+	int CalcIntersecPtsPlaneU(NURBSS *,Coord,Coord,int,ACoord&,int);	
 
 	// Function: CalcIntersecPtsPlaneSearch
 	// NURBS曲面と平面との交点群を交線追跡法で求める
-	int CalcIntersecPtsPlaneSearch(NURBSS *,Coord,Coord,double,int,Coord *,int,int);	
+	int CalcIntersecPtsPlaneSearch(NURBSS *,Coord,Coord,double,int,ACoord&,int,int);	
 
 	// Function: CalcIntersecPtsOffsetPlaneSearch
 	// オフセットNURBS曲面と平面との交点群を交線追跡法で求める(準備中)
-	int CalcIntersecPtsOffsetPlaneSearch(NURBSS *,double,Coord,Coord,double,int,Coord *,int);
+	int CalcIntersecPtsOffsetPlaneSearch(NURBSS *,double,Coord,Coord,double,int,ACoord&,int);
 
 	// Function: CalcIntersecPtsNurbsSNurbsC
 	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
-	int CalcIntersecPtsNurbsSNurbsC(NURBSS *,NURBSC *,int,Coord *,int);	
+	int CalcIntersecPtsNurbsSNurbsC(NURBSS *,NURBSC *,int,ACoord&,int);	
 
 	// Function: CalcIntersecPtsNurbsSGeom
 	// NURBS曲面同士の交線上の点を幾何学的にいくつか求める
-	int CalcIntersecPtsNurbsSGeom(NURBSS *,NURBSS *,int,int,Coord *,Coord *,int);		
+	int CalcIntersecPtsNurbsSGeom(NURBSS *,NURBSS *,int,int,ACoord&,ACoord&,int);		
 
 	// Function: CalcIntersecPtsNurbsSSearch
 	// NURBS曲面同士の交線(交点群)を交線追跡法で求める
-	int CalcIntersecPtsNurbsSSearch(NURBSS *,NURBSS *,int,double,Coord *,Coord *,int);	
+	int CalcIntersecPtsNurbsSSearch(NURBSS *,NURBSS *,int,double,ACoord&,ACoord&,int);	
 
 	// Function: CalcIntersecPtsNurbsCNurbsCParam
     // 2次元NURBS曲線同士の交点を求める
@@ -270,15 +270,15 @@ public:
 
 	// Function: GetBSplCoef3
 	// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
-	int GetBSplCoef3(int,int,int,double *,ublasMatrix&);
+	int GetBSplCoef3(int,int,int,ublasVector&,ublasMatrix&);
 
 	// Function: GetBSplCoef2
 	// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
-	int GetBSplCoef2(int,int,int,double *,ublasMatrix&);			
+	int GetBSplCoef2(int,int,int,ublasVector&,ublasMatrix&);			
 
 	// Function: GetBSplCoef1
 	// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
-	int GetBSplCoef1(int,int,int,double *,ublasMatrix&);
+	int GetBSplCoef1(int,int,int,ublasVector&,ublasMatrix&);
 
 	// Function: ShiftNurbsS
 	// NURBS曲面のシフト
@@ -310,39 +310,39 @@ public:
 
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
-	int GenInterpolatedNurbsC1(NURBSC *,Coord *,int,int);		
+	int GenInterpolatedNurbsC1(NURBSC *,ACoord&,int,int);
 
 	// Function: GenInterpolatedNurbsC2
 	// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
-	int GenInterpolatedNurbsC2(NURBSC *,Coord *,int,int);		
+	int GenInterpolatedNurbsC2(NURBSC *,ACoord&,int,int);
 
 	// Function: GenApproximationNurbsC
 	// 与えられた点列を近似するn階のNURBS曲線を生成する
-	int GenApproximationNurbsC(NURBSC *,Coord *,int,int);		
+	int GenApproximationNurbsC(NURBSC *,ACoord&,int,int);
 
 	// Function: GenNurbsCfromCP
 	// コントロールポイントからNURBS曲線を生成する
-	int GenNurbsCfromCP(NURBSC *,Coord *,int,int);				
+	int GenNurbsCfromCP(NURBSC *,ACoord&,int,int);
 
 	// Function: GenPolygonalLine
 	// 折れ線を生成する
-	int GenPolygonalLine(NURBSC *,Coord *,int);					
+	int GenPolygonalLine(NURBSC *,ACoord&,int);
 
 	// Function: GenInterpolatedNurbsS1
 	// 与えられた点列を補間するn階NURBS曲面を生成する
-	int GenInterpolatedNurbsS1(NURBSS *,Coord **,int,int,int,int);	
+	int GenInterpolatedNurbsS1(NURBSS *,AACoord&,int,int,int,int);	
 
 	// Function: GenPolygonalSurface
 	// 折れ面を生成する
-	int GenPolygonalSurface(NURBSS *,Coord **,int,int);				
+	int GenPolygonalSurface(NURBSS *,AACoord&,int,int);				
 
 	// Function: GenApproximationNurbsS
 	// 与えられた点列を近似するn階のNURBS曲面を生成する
-	int GenApproximationNurbsS(NURBSS *,Coord **,int,int,int,int);	
+	int GenApproximationNurbsS(NURBSS *,AACoord&,int,int,int,int);	
 
 	// Function: GenNurbsSfromCP
 	// 与えられたコントロールポイントからn階のNURBS曲面を生成する
-	int GenNurbsSfromCP(NURBSS *,Coord **,int,int,int,int);			
+	int GenNurbsSfromCP(NURBSS *,AACoord&,int,int,int,int);			
 
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
@@ -350,15 +350,15 @@ public:
 
 	// Function: GetPtsOnOuterTRMSurf
 	// 外周トリム面内の点のみ残す
-	int GetPtsOnOuterTRMSurf(TRMS *,Coord *,int);					
+	int GetPtsOnOuterTRMSurf(TRMS *,ACoord&,int);					
 
 	// Function: GetPtsOnInnerTRMSurf
 	// 内周トリム面外の点のみ残す
-	int GetPtsOnInnerTRMSurf(TRMS *,Coord *,int);					 
+	int GetPtsOnInnerTRMSurf(TRMS *,ACoord&,int);					 
 
 	// Function: GetPtsOnInnerOuterTRMSurf
 	// 内外周トリム面内の点のみ残す
-	int GetPtsOnInnerOuterTRMSurf(TRMS *,Coord *,int);				
+	int GetPtsOnInnerOuterTRMSurf(TRMS *,ACoord&,int);				
 
 	// Function: DetectInterfereNurbsS
 	// NURBS曲面(トリム無)同士の干渉検出
@@ -370,7 +370,7 @@ public:
 
 	// Function: CalcIntersecPtsPlaneGeom
 	// NURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)
-	int CalcIntersecPtsPlaneGeom(NURBSS *,Coord,Coord,int,int,Coord *,int);			
+	int CalcIntersecPtsPlaneGeom(NURBSS *,Coord,Coord,int,int,ACoord&,int);			
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の線分長を求める
@@ -382,15 +382,15 @@ public:
 
 	// Function: CalcDeltaPtsOnNurbsC
 	// 指定した分割数でNURBS曲線上の座標値を求める
-	int CalcDeltaPtsOnNurbsC(NURBSC *,int,Coord *);				
+	int CalcDeltaPtsOnNurbsC(NURBSC *,int,ACoord&);				
 
 	// Function: CalcDeltaPtsOnNurbsS
 	// 指定した分割数でNURBS曲面上の座標値を求める
-	int CalcDeltaPtsOnNurbsS(NURBSS *,int,int,Coord **);		
+	int CalcDeltaPtsOnNurbsS(NURBSS *,int,int,AACoord&);		
 
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
-	int CalcExtremumNurbsC(NURBSC *,Coord,double *,int);		
+	int CalcExtremumNurbsC(NURBSC *,Coord,ublasVector&,int);		
 
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
@@ -463,7 +463,7 @@ public:
 
 	// Function: CalcIntersecPtsOffsetPlaneGeom
 	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
-	int CalcIntersecPtsOffsetPlaneGeom(NURBSS *,double,Coord,Coord,int,Coord *,int);	
+	int CalcIntersecPtsOffsetPlaneGeom(NURBSS *,double,Coord,Coord,int,ACoord&,int);	
 
 	// Function: CalcTanVecOnNurbsC
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる
@@ -509,7 +509,7 @@ public:
 
 	// Function: CalcDeltaPtsOnNurbsC
 	// 指定した間隔でNURBS曲線上の座標値を求める
-	int CalcDeltaPtsOnNurbsC(NURBSC *,double,Coord *);			
+	int CalcDeltaPtsOnNurbsC(NURBSC *,double,ACoord&);			
 
     // Function: CalcConstScallop
     // 等スキャロップ点を算出
@@ -524,19 +524,19 @@ private:
 
 	// Function: GetNurbsCCoef
 	// (private)NURBS曲線の係数を求める(最高3次)
-	int GetNurbsCCoef(NURBSC *,ublasMatrix&,int,Coord *,double *);	
+	int GetNurbsCCoef(NURBSC *,ublasMatrix&,int,ACoord&,ublasVector&);	
 
 	// Function: CalcEquation
 	// (private)3次方程式までを判別して解く
-	int CalcEquation(double *,double *,int);					
+	int CalcEquation(ublasVector&,ublasVector&,int);					
 
 	// Function: GetNurbsSCoef
 	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める
-	void GetNurbsSCoef(int,double **,double *,Coord *,int,Coord *,double *);	
+	void GetNurbsSCoef(int,ublasMatrix&,double *,ACoord&,int,ACoord&,ublasVector&);
 
 	// Function: GetIntersecEquation
 	// (private)NURBS曲線と平面の交線導出用3次方程式を得る
-	void GetIntersecEquation(int,Coord *,double *,Coord,Coord,double *);		
+	void GetIntersecEquation(int,ACoord&,ublasVector&,Coord,Coord,ublasVector&);
 
 	// Function: SearchIntersectPt
 	// (private)ニュートン法により交点を収束させる(NURBS曲面と平面)
@@ -568,19 +568,19 @@ private:
 
 	// Function: ApproxTrimBorder
 	// (private)トリム境界線を点群で近似する
-	int ApproxTrimBorder(COMPC *,Coord *);							
+	int ApproxTrimBorder(COMPC *,ACoord&);
 
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
-	void GetCurveKnotParam1(Coord *,int,ublasVector&);					
+	void GetCurveKnotParam1(ACoord&,int,ublasVector&);
 
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
-	void GetCurveKnotParam2(Coord *,int,ublasVector&);					
+	void GetCurveKnotParam2(ACoord&,int,ublasVector&);
 
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
-	void GetSurfaceKnotParam(ublasVector&,ublasVector&,Coord **,int,int);		
+	void GetSurfaceKnotParam(ublasVector&,ublasVector&,AACoord&,int,int);		
 
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
@@ -596,11 +596,11 @@ private:
 
 	// Function: CalcApproximationCP_LSM
 	// (private)最小2乗法で近似コントロールポイントを求める
-	void CalcApproximationCP_LSM(Coord *,ublasVector&,ublasVector&,int,int,int,int,Coord *);	
+	void CalcApproximationCP_LSM(ACoord&,ublasVector&,ublasVector&,int,int,int,int,ACoord&);
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
-	int RemoveTheSamePoints(NURBSS *,Coord *,int);					
+	int RemoveTheSamePoints(NURBSS *,ACoord&,int);					
 
 	// Function: CalcDiffNurbsSDenom
 	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
@@ -632,7 +632,7 @@ private:
 
 	// Function: GetMinDist
 	// (private)最小距離を調べる
-	int GetMinDist(NURBSS *,Coord ,Coord *,int ,Coord *);			
+	int GetMinDist(NURBSS *,Coord ,ACoord&,int ,Coord *);			
 
 	// Function: SetKnotVecSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)

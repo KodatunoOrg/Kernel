@@ -92,7 +92,7 @@ typedef boost::array<int, 2>	A2int;
 // VCoord - Coord型の1次元配列をVCoordとして定義
 class Coord;
 typedef std::vector<Coord>		VCoord;
-typedef boost::array<Coord, 1>	ACoord;			// resize()して使用
+typedef boost::multi_array<Coord,1>	ACoord;		// boost::extents[]でサイズ指定
 
 // Typedef: vector<VCoord>
 // VVCoord - Coord型の2次元配列をVVCoordとして定義
@@ -185,7 +185,7 @@ public:
 
 	// Function: IsPointInPolygon
 	// 注目点の多角形内外判別
-	int IsPointInPolygon(const Coord*, int) const;
+	int IsPointInPolygon(const ACoord&, int) const;
 
 	// -- 計算関数
 	// Function: AbsCoord
@@ -262,7 +262,7 @@ public:
 // Coord Rot[COORINDEX] -	// 回転行列
 // Coord Trl -				// 並進成分
 typedef struct{
-	Coord Rot[COORDINDEX];		
+	A3Coord Rot;	// [COORDINDEX]
 	Coord Trl;
 }FRAME;
 
@@ -286,18 +286,18 @@ typedef struct{
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る
-double ClacPolygonArea2D(Coord [],int);			
+double ClacPolygonArea2D(ACoord&,int);			
 
 // Function: DiscriminateCW2D
 // 2D平面上の多角形が時計回りか反時計回りかを判別する
-int DiscriminateCW2D(Coord [],int);				
+int DiscriminateCW2D(ACoord&,int);
 
 
 // Group: Functions(同次変換行列、回転行列の演算)
 
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算
-Coord MulFrameCoord(double[][3],double[],Coord);	
+Coord MulFrameCoord(ublasMatrix&,ublasVector&,Coord);
 
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算(オーバーロード)
@@ -336,11 +336,11 @@ void MulMxVec(ublasMatrix&,ublasVector&,ublasVector&);
 
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算
-void MulMxVec(ublasMatrix&,VCoord&,VCoord&);
+void MulMxVec(ublasMatrix&,ACoord&,ACoord&);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(Coord [],Coord);				
+Coord MulMxCoord(A3Coord&,Coord);				
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
@@ -352,11 +352,11 @@ void TranMx(ublasMatrix&,ublasMatrix&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(Coord **,int,int,Coord **);			
+void TranMx(AACoord&,int,int,AACoord&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(Coord [],Coord []);					
+void TranMx(A3Coord&,A3Coord&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める
@@ -364,7 +364,7 @@ double Gauss(int,ublasMatrix&,ublasVector&,ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
-double Gauss(int,ublasMatrix&,VCoord&,VCoord&);
+double Gauss(int,ublasMatrix&,ACoord&,ACoord&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
@@ -372,7 +372,7 @@ void LU_Solver(int,ublasMatrix&,ublasVector&,int*,ublasVector&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
-void LU_Solver(int,ublasMatrix&,VCoord&,int*,VCoord&);
+void LU_Solver(int,ublasMatrix&,ACoord&,int*,ACoord&);
 
 // Function: LU
 // LU分解
@@ -403,15 +403,15 @@ double RadToDeg(double radian);
 
 // Function: CalcCubicEquation
 // 3次方程式の解を求める
-int CalcCubicEquation(double *,double *);		
+int CalcCubicEquation(ublasVector&,ublasVector&);
 
 // Function: CalcQuadraticEquation
 // 2次方程式の解を求める
-int CalcQuadraticEquation(double *,double *);	
+int CalcQuadraticEquation(ublasVector&,ublasVector&);	
 
 // Function: CalcLinearEquation
 // 1次方程式の解を求める
-int CalcLinearEquation(double *,double *);		
+int CalcLinearEquation(ublasVector&,ublasVector&);
 
 // Function: nCr
 // 2項係数(nCrの組合せ総数)を求める
@@ -451,33 +451,6 @@ void SetColorStat(DispStat *ds,float r, float g, float b, float a=0.5);
 // Function: DrawSolidCone
 // 四角錐を描画する
 void DrawSolidCone(double,double);		
-
-
-// Group: Functions(メモリー関連)
-
-// Function: NewCoord1
-// 1次元Coord型配列のメモリー確保
-Coord *NewCoord1(int);				
-
-// Function: FreeCoord1
-// 1次元Coord型配列のメモリー解放
-void FreeCoord1(Coord *);			
-
-// Function: NewCoord2
-// 2次元Coord型配列のメモリー確保
-Coord **NewCoord2(int,int);			
-
-// Function: FreeCoord2
-// 2次元Coord型配列のメモリー解放
-void FreeCoord2(Coord **,int);		
-
-// Function: NewCoord3
-// 3次元Coord型配列のメモリー確保
-Coord ***NewCoord3(int,int,int);	
-
-// Function: FreeCoord3
-// 3次元Coord型配列のメモリー解放
-void FreeCoord3(Coord ***,int,int);	
 
 
 // Group: Functions(その他)
@@ -520,15 +493,15 @@ void Reverse(double [],int);
 
 // Function: CatCoord
 // ある配列の後ろに新たな配列を繋げる
-int CatCoord(Coord [],Coord [],int,int,int);	
+int CatCoord(ACoord&, ACoord&,int,int,int);	
 
 // Function: CheckTheSamePoints
 // 同一点を除去する
-int CheckTheSamePoints(Coord *,int);	
+int CheckTheSamePoints(ACoord&,int);	
 
 // Function: CheckTheSamePoints
 // 同一点を除去する
-int CheckTheSamePoints(double *,int);	
+int CheckTheSamePoints(ublasVector&,int);	
 
 // Function: CheckTheSamePoints2D
 // 2D平面内の同一点を除去する

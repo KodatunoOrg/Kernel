@@ -259,10 +259,10 @@ struct NURBSC{
     int M;
     int N;
     int prop[4];
-    double *T;
-    double *W;
-    Coord *cp;
-    double V[2];
+    ublasVector T;
+    ublasVector W;
+    ACoord cp;
+    A2double V;
     Coord norm;
     int BlankStat;
     int EntUseFlag;
@@ -276,9 +276,6 @@ struct NURBSC{
 		M = 0;
 		N = 0;
 		prop[0] = prop[1] = prop[2] = prop[3] = 0;
-		T = NULL;
-		W = NULL;
-		cp = NULL;
 		V[0] = V[1] = 0;
 //		norm = SetCoord(0,0,0);
 		BlankStat = 0;
@@ -288,9 +285,6 @@ struct NURBSC{
 		pOriginEnt = NULL;
 	}
 	~NURBSC() {
-		if ( T )	delete[]	T;
-		if ( W )	delete[]	W;
-		if ( cp )	delete[]	cp;
 	}
 };
 
@@ -321,12 +315,12 @@ struct NURBSS{
 	int M[2];
 	int N[2];
 	int prop[5];
-	double *S;
-	double *T;
-	double **W;
-	Coord  **cp;
-	double U[2];
-	double V[2];
+	ublasVector S;
+	ublasVector T;
+	ublasMatrix W;
+	AACoord		cp;
+	A2double U;
+	A2double V;
 	int pD;
 	int TrmdSurfFlag;
 	DispStat Dstat;
@@ -336,20 +330,12 @@ struct NURBSS{
 		M[0] = M[1] = 0;
 		N[0] = N[0] = 0;
 		prop[0] = prop[1] = prop[2] = prop[3] = prop[4] = 0;
-		S = NULL;
-		T = NULL;
-		W = NULL;
-		cp = NULL;
 		U[0] = U[1] = 0;
 		V[0] = V[1] = 0;
 		pD = 0;
 		TrmdSurfFlag = 0;
 	}
 	~NURBSS() {
-		if ( S )	delete[]	S;
-		if ( T )	delete[]	T;
-		if ( W )	delete[]	W;
-		if ( cp )	delete[]	cp;
 	}
 };
 

@@ -143,10 +143,10 @@ void Describe_BODY::DrawTrimdNurbsSurfe(const NURBSS *NurbsS)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->Dstat.Color);
 	for(k=0;k<NurbsS->K[1];k++){
 		for(j=0;j<NurbsS->K[0];j++){
-			SCtlp[j][k][0] = NurbsS->cp[j][k].x*NurbsS->W[j][k];	// コントロールポイント取り出し
-			SCtlp[j][k][1] = NurbsS->cp[j][k].y*NurbsS->W[j][k];
-			SCtlp[j][k][2] = NurbsS->cp[j][k].z*NurbsS->W[j][k];
-			SCtlp[j][k][3] = NurbsS->W[j][k];
+			SCtlp[j][k][0] = NurbsS->cp[j][k].x*NurbsS->W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = NurbsS->cp[j][k].y*NurbsS->W(j,k);
+			SCtlp[j][k][2] = NurbsS->cp[j][k].z*NurbsS->W(j,k);
+            SCtlp[j][k][3] = NurbsS->W(j,k);
 		}
 	}
 	for(j=0;j<NurbsS->N[0];j++){
@@ -177,10 +177,10 @@ void Describe_BODY::DrawNurbsSurfe(const NURBSS* NurbsS)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,NurbsS->Dstat.Color);
 	for(k=0;k<NurbsS->K[1];k++){
 		for(j=0;j<NurbsS->K[0];j++){
-			SCtlp[j][k][0] = NurbsS->cp[j][k].x*NurbsS->W[j][k];	// コントロールポイント取り出し
-			SCtlp[j][k][1] = NurbsS->cp[j][k].y*NurbsS->W[j][k];
-			SCtlp[j][k][2] = NurbsS->cp[j][k].z*NurbsS->W[j][k];
-			SCtlp[j][k][3] = NurbsS->W[j][k];
+			SCtlp[j][k][0] = NurbsS->cp[j][k].x*NurbsS->W(j,k);	// コントロールポイント取り出し
+			SCtlp[j][k][1] = NurbsS->cp[j][k].y*NurbsS->W(j,k);
+			SCtlp[j][k][2] = NurbsS->cp[j][k].z*NurbsS->W(j,k);
+			SCtlp[j][k][3] = NurbsS->W(j,k);
 		}
 	}
 	for(j=0;j<NurbsS->N[0];j++){

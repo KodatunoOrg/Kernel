@@ -565,7 +565,6 @@ NURBSC *BODY::NewNurbsC(int N)
 	NurbsC = new NURBSC[N];
 
 	for(int i=0;i<N;i++){
-		NurbsC[i].cp = NULL;
 		NurbsC[i].Dstat.Color[0] = NurbsC[i].Dstat.Color[1] = NurbsC[i].Dstat.Color[2] = NurbsC[i].Dstat.Color[3] = 0;
 		NurbsC[i].EntUseFlag = 0;
 		NurbsC[i].K = 0;
@@ -576,9 +575,7 @@ NURBSC *BODY::NewNurbsC(int N)
 		NurbsC[i].pD = 0;
 		NurbsC[i].pOriginEnt = NULL;
 		NurbsC[i].prop[0] = NurbsC[i].prop[1] = NurbsC[i].prop[2] = NurbsC[i].prop[3] = 0;
-		NurbsC[i].T = NULL;
 		NurbsC[i].V[0] = NurbsC[i].V[1] = 0;
-		NurbsC[i].W = NULL;
 	}
 	TypeNum[_NURBSC] = N;
 
@@ -595,19 +592,15 @@ NURBSS *BODY::NewNurbsS(int N)
 	NurbsS = new NURBSS[N];
 
 	for(int i=0;i<N;i++){
-		NurbsS[i].cp = NULL;
 		NurbsS[i].Dstat.Color[0] = NurbsS[i].Dstat.Color[1] = NurbsS[i].Dstat.Color[2] = NurbsS[i].Dstat.Color[3] = 0;
 		NurbsS[i].K[0] = NurbsS[i].K[1] = 0;
 		NurbsS[i].M[0] = NurbsS[i].M[1] = 0;
 		NurbsS[i].N[0] = NurbsS[i].N[0] = 0;
 		NurbsS[i].pD = 0;
 		NurbsS[i].prop[0] = NurbsS[i].prop[1] = NurbsS[i].prop[2] = NurbsS[i].prop[3] = NurbsS[i].prop[4] = 0;
-		NurbsS[i].S = NULL;
-		NurbsS[i].T = NULL;
 		NurbsS[i].TrmdSurfFlag = 0;
 		NurbsS[i].U[0] = NurbsS[i].U[1] = 0;
 		NurbsS[i].V[0] = NurbsS[i].V[1] = 0;
-		NurbsS[i].W = NULL;
 	}
 	TypeNum[_NURBSS] = N;
 
@@ -682,14 +675,13 @@ int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
 
-try {
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
+	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
 	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
 	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
 
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -716,23 +708,6 @@ try {
 	NurbsC[NurbsCount].pOriginEnt = &Line[LineCount];			// 元は線分要素であったことを記憶
 	for(int i=0;i<4;i++)
 		NurbsC[NurbsCount].Dstat.Color[i] = Line[LineCount].Dstat.Color[i];
-}
-catch(std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
 
 	return KOD_TRUE;
 }
@@ -803,14 +778,13 @@ int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angl
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
 
-try {	
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
+	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
 	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
 	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -846,23 +820,6 @@ try {
 		
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}		  
 
 	return KOD_TRUE;
 }
@@ -886,14 +843,13 @@ int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angl
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
 
-try {	
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
+	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
 	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
 	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+    NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -938,23 +894,6 @@ try {
 	
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
 
 	return KOD_TRUE;
 }
@@ -979,14 +918,13 @@ int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angl
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
 
-try {
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
+	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
 	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
 	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -1040,23 +978,6 @@ try {
 		
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&) {
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
 
 	return KOD_TRUE;
 }
@@ -1078,14 +999,13 @@ int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radi
 	NurbsC[NurbsCount].prop[2] = 1;
 	NurbsC[NurbsCount].prop[3] = 0;
 
-try {
 	// メモリー確保
 	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T = new double[NurbsC[NurbsCount].N];
+	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
 	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W = new double[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
 	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp = new Coord[NurbsC[NurbsCount].K];
+	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
 	
 	// ノットベクトルの値	
 	NurbsC[NurbsCount].T[0] = 0.;
@@ -1137,23 +1057,7 @@ try {
 		
 	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
 	NurbsC[NurbsCount].V[1] = 1.;
-}
-catch (std::bad_alloc&)	{
-	// メモリー確保に失敗した場合は今まで確保した分を開放してKOD_ERRを返す
-//	GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-	if(KOD_ERRflag == 3){
-		delete[] NurbsC[NurbsCount].cp;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 2){
-		delete[] NurbsC[NurbsCount].W;
-		KOD_ERRflag--;
-	}
-	if(KOD_ERRflag == 1){
-		delete[] NurbsC[NurbsCount].T;
-	}
-	return KOD_ERR;
-}
+
 	return KOD_TRUE;
 }
 

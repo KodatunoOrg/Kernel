@@ -272,111 +272,6 @@ int Coord::ZoroCoord2D(void) const
 	return (x==0.0 && y==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
-// Function: NewCoord1
-// 1次元Coord型配列のメモリー確保
-//
-// Parameters:
-// len - メモリー確保するCoord型配列要素数
-//
-// Return:
-// 確保されたdouble型1次元配列へのポインタ（メモリー確保に失敗：NULL）
-Coord *NewCoord1(int len)
-{
-	Coord *a;
-
-	a = new Coord[len];
-	return a;
-}
-
-// Function: NewCoord2
-// 2次元Coord型配列のメモリー確保
-//
-// Parameters:
-// row, col - メモリー確保するCoord型2次元配列の行，列の要素数
-//
-// Return:
-// 確保されたCoord型2次元配列へのポインタ（メモリー確保に失敗：NULL）
-Coord **NewCoord2(int row,int col)
-{
-	int i;
-	Coord **a;
-
-	a = new Coord *[row];
-	for(i=0;i<row;i++) a[i] = new Coord[col];
-
-	return a;
-}
-
-// Function: NewCoord3
-// 3次元Coord型配列のメモリー確保
-//
-// Parameters:
-// x, y, z - メモリー確保するCoord型3次元配列の各配列要素数
-//
-// Return:
-// 確保されたCoord型3次元配列へのポインタ（メモリー確保に失敗：NULL）
-Coord ***NewCoord3(int x,int y,int z)
-{
-	int i,j;
-	Coord ***a;
-
-	a = new Coord **[x];
-	for(i=0;i<x;i++){
-		a[i] = new Coord *[y];
-		for(j=0;j<y;j++){
-			a[i][j] = new Coord[z];
-		}
-	}
-
-	return a;
-}
-
-// Function: FreeCoord1
-// 1次元Coord型配列のメモリー解放 
-//
-// Parameters:
-// *a - 解放する1次元Coord型配列へのポインタ
-void FreeCoord1(Coord *a)
-{
-	delete[] a;
-}
-
-// Function: FreeCoord2
-// 2次元Coord型配列のメモリー解放 
-//
-// Parameters:
-// *a - 解放する2次元Coord型配列へのポインタ
-// col - aの行要素数
-void FreeCoord2(Coord **a,int col)
-{
-	Coord **b;
-
-	b=a;
-	for(int i=0;i<col;i++){
-		delete[] b[i];
-	}
-	delete[] a;
-}
-
-// Function: FreeCoord3
-// 3次元Coord型配列のメモリー解放 
-//
-// Parameters:
-// *a - 解放する3次元Coord型配列へのポインタ
-// x,y - aの行,列要素数
-void FreeCoord3(Coord ***a,int x,int y)
-{
-	int i,j;
-
-	for(i=0;i<x;i++){
-		for(j=0;j<y;j++){
-			delete[] a[i][j];
-		}
-		delete[] a[i];
-	}
-	delete[] a;
-}
-
 // Function: NormalizeVec
 // ベクトルを正規化する
 //
@@ -972,21 +867,6 @@ void Reverse(double p[],int n)
 	}
 }
 
-// Function: InitMatrix
-// 2次元配列の初期化
-// 
-// Parameters:
-// mat - 2次元配列へのポインタ
-// size_x,size_y - 行列要素数
-void InitMatrix(Matrix mat,int size_x,int size_y)
-{
-	for(int i=0;i<size_x;i++){
-		for(int j=0;j<size_y;j++){
-			mat[i][j] = 0.0;
-		}
-	}
-}
-
 // Function: CalcCubicEquation
 // 3次方程式を解く
 //
@@ -996,7 +876,7 @@ void InitMatrix(Matrix mat,int size_x,int size_y)
 //
 // Return:
 // 解が3つとも実根の場合は3、1つだけ実根の場合は1  a[0]==0の場合はKOD_ERR
-int CalcCubicEquation(double *p,double *ans)
+int CalcCubicEquation(ublasVector& p,ublasVector& ans)
 {
 	// x^3の係数が0の場合
 	if(fabs(p[0]) < APPROX_ZERO_H){
@@ -1091,7 +971,7 @@ int CalcCubicEquation(double *p,double *ans)
 //
 // Return:
 // 解が実根の場合は2、虚根の場合はKOD_ERR  a[0]==0の場合はKOD_ERR
-int CalcQuadraticEquation(double *a,double *ans)
+int CalcQuadraticEquation(ublasVector& a,ublasVector& ans)
 {
 	double Q,R;
 
@@ -1125,7 +1005,7 @@ int CalcQuadraticEquation(double *a,double *ans)
 // 
 // Return:
 // a[0]==0の場合はKOD_ERR
-int CalcLinearEquation(double *a,double *ans)
+int CalcLinearEquation(ublasVector& a,ublasVector& ans)
 {
 	if(fabs(a[0]) < APPROX_ZERO_H){
 		return KOD_FALSE;
@@ -1284,7 +1164,7 @@ int CheckMag(double val1,double val2,int flag)
 // 
 // Returns:
 // KOD_TRUE:内  KOD_FALSE:外  KOD_ONEDGE:エッジ上
-int Coord::IsPointInPolygon(const Coord* BorderPoint, int CountPoint) const
+int Coord::IsPointInPolygon(const ACoord& BorderPoint, int CountPoint) const
 {
 	int i;
 	int iCountCrossing = 0;			// 内外判定カウンタ
@@ -1382,7 +1262,7 @@ double CalcPolygonArea(Coord p[],int Vnum)
 //
 // Return:
 // 計算結果
-double ClacPolygonArea2D(Coord p[],int Vnum)
+double ClacPolygonArea2D(ACoord& p,int Vnum)
 {
 	double area=0;
 
@@ -1402,7 +1282,7 @@ double ClacPolygonArea2D(Coord p[],int Vnum)
 //
 // Return:
 // CCW：KOD_TRUE     CW：KOD_FALSE
-int DiscriminateCW2D(Coord p[],int Vnum)
+int DiscriminateCW2D(ACoord& p,int Vnum)
 {
 	// 指定点数が1点以下の場合
 	if(Vnum <= 2)
@@ -1495,7 +1375,7 @@ void MulMxVec(ublasMatrix& A,ublasVector& B,ublasVector& C)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(ublasMatrix& A,VCoord& B,VCoord& C)
+void MulMxVec(ublasMatrix& A,ACoord& B,ACoord& C)
 {
 	for(int i=0;i<A.size1();i++){
 		C[i] = 0;
@@ -1518,7 +1398,7 @@ void MulMxVec(ublasMatrix& A,VCoord& B,VCoord& C)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(Coord A[],Coord d)
+Coord MulMxCoord(A3Coord& A,Coord d)
 {
 	Coord ans;
 
@@ -1542,9 +1422,9 @@ Coord MulMxCoord(ublasMatrix& A,Coord& d)
 {
 	Coord ans;
 
-	ans.x = A[0][0]*d.x + A[0][1]*d.y + A[0][2]*d.z;
-	ans.y = A[1][0]*d.x + A[1][1]*d.y + A[1][2]*d.z;
-	ans.z = A[2][0]*d.x + A[2][1]*d.y + A[2][2]*d.z;
+	ans.x = A(0,0)*d.x + A(0,1)*d.y + A(0,2)*d.z;
+	ans.y = A(1,0)*d.x + A(1,1)*d.y + A(1,2)*d.z;
+	ans.z = A(2,0)*d.x + A(2,1)*d.y + A(2,2)*d.z;
 
 	return ans;
 }
@@ -1581,7 +1461,7 @@ void TranMx(ublasMatrix& A,ublasMatrix& B)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-void TranMx(Coord **A,int m,int n,Coord **B)
+void TranMx(AACoord& A,int m,int n,AACoord& B)
 {
 	for(int i=0;i<m;i++){
 		for(int j=0;j<n;j++){
@@ -1599,7 +1479,7 @@ void TranMx(Coord **A,int m,int n,Coord **B)
 // Parameters:
 // A[3] - 元の行列
 // B[3] - 転置行列を格納
-void TranMx(Coord A[],Coord B[])
+void TranMx(A3Coord& A,A3Coord& B)
 {
 	B[0].x = A[0].x;
 	B[0].y = A[1].x;
@@ -1622,13 +1502,13 @@ void TranMx(Coord A[],Coord B[])
 // 
 // Return: 
 // 計算結果
-Coord MulFrameCoord(double R[][3],double T[],Coord I)
+Coord MulFrameCoord(ublasMatrix& R,ublasVector& T,Coord I)
 {
 	Coord O;
 
-	O.x = R[0][0]*I.x + R[0][1]*I.y + R[0][2]*I.z + T[0];
-	O.y = R[1][0]*I.x + R[1][1]*I.y + R[1][2]*I.z + T[1];
-	O.z = R[2][0]*I.x + R[2][1]*I.y + R[2][2]*I.z + T[2];
+	O.x = R(0,0)*I.x + R(0,1)*I.y + R(0,2)*I.z + T[0];
+	O.y = R(1,0)*I.x + R(1,1)*I.y + R(1,2)*I.z + T[1];
+	O.z = R(2,0)*I.x + R(2,1)*I.y + R(2,2)*I.z + T[2];
 
 	return O;
 }
@@ -1781,7 +1661,7 @@ double Gauss(int n,ublasMatrix& a,ublasVector& b,ublasVector& x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,ublasMatrix& a,VCoord& b,VCoord& x)
+double Gauss(int n,ublasMatrix& a,ACoord& b,ACoord& x)
 {
 	long double det;	// 行列式
 	int *ip;			// 行交換の情報
@@ -1834,7 +1714,7 @@ void LU_Solver(int n,ublasMatrix& a,ublasVector& b,int *ip,ublasVector& x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺Coord配列  
 // ip - 行交換の情報
-void LU_Solver(int n,ublasMatrix& a,VCoord& b,int *ip,VCoord& x)
+void LU_Solver(int n,ublasMatrix& a,ACoord& b,int *ip,ACoord& x)
 {
 	int ii;
 	Coord t;
@@ -1880,15 +1760,15 @@ double MatInv(int n,ublasMatrix& a,ublasMatrix& a_inv)
 				ii = ip[i];
 				t = (ii==k);
 				for(j=0;j<i;j++)
-					t -= a[ii][j]*a_inv[j][k];
-				a_inv[i][k] = t;
+					t -= a(ii,j)*a_inv(j,k);
+				a_inv(i,k) = t;
 			}
 			for(i=n-1;i>=0;i--){
-				t = a_inv[i][k];
+				t = a_inv(i,k);
 				ii = ip[i];
 				for(j=i+1;j<n;j++)
-					t -= a[ii][j]*a_inv[j][k];
-				a_inv[i][k] = t/a[ii][i];
+					t -= a(ii,j)*a_inv(j,k);
+				a_inv(i,k) = t/a(ii,i);
 			}
 		}
 	}
@@ -1919,7 +1799,7 @@ double LU(int n,ublasMatrix& a,int *ip)
 		ip[k] = k;             /* 行交換情報の初期値 */
 		u = 0;                 /* その行の絶対値最大の要素を求める */
 		for (j = 0; j < n; j++) {
-			t = fabs(a[k][j]);  if (t > u) u = t;
+			t = fabs(a(k,j));  if (t > u) u = t;
 		}
 		if (u == 0){
 			goto EXIT; /* 0 なら行列はLU分解できない */
@@ -1931,7 +1811,7 @@ double LU(int n,ublasMatrix& a,int *ip)
 		u = -1;
 		for (i = k; i < n; i++) {  /* より下の各行について */
 			ii = ip[i];            /* 重み×絶対値 が最大の行を見つける */
-			t = fabs(a[ii][k]) * weight[ii];
+			t = fabs(a(ii,k)) * weight[ii];
 			if (t > u) {  u = t;  j = i;  }
 		}
 		ik = ip[j];
@@ -1939,15 +1819,15 @@ double LU(int n,ublasMatrix& a,int *ip)
 			ip[j] = ip[k];  ip[k] = ik;  /* 行番号を交換 */
 			det = -det;  /* 行を交換すれば行列式の符号が変わる */
 		}
-		u = a[ik][k];  det *= u;  /* 対角成分 */
+		u = a(ik,k);  det *= u;  /* 対角成分 */
 		if (u == 0){
 			goto EXIT;    /* 0 なら行列はLU分解できない */
 		}
 		for (i = k + 1; i < n; i++) {  /* Gauss消去法 */
 			ii = ip[i];
-			t = (a[ii][k] /= u);
+			t = (a(ii,k) /= u);
 			for (j = k + 1; j < n; j++)
-				a[ii][j] -= t * a[ik][j];
+				a(ii,j) -= t * a(ik,j);
 		}
 	}
 
@@ -1967,20 +1847,20 @@ EXIT:
 double MatInv3(ublasMatrix& A,ublasMatrix& A_inv)
 {
 	double det;
-	det = A[0][0]*A[1][1]*A[2][2] + A[1][0]*A[2][1]*A[0][2] + A[2][0]*A[0][1]*A[1][2]
-	      - A[0][0]*A[2][1]*A[1][2] - A[2][0]*A[1][1]*A[0][2] - A[1][0]*A[0][1]*A[2][2];
+	det = A(0,0)*A(1,1)*A(2,2) + A(1,0)*A(2,1)*A(0,2) + A(2,0)*A(0,1)*A(1,2)
+	      - A(0,0)*A(2,1)*A(1,2) - A(2,0)*A(1,1)*A(0,2) - A(1,0)*A(0,1)*A(2,2);
 
 	if(det == 0) return KOD_FALSE;		// 行列式が0
 
-	A_inv[0][0] = (A[1][1]*A[2][2]-A[1][2]*A[2][1])/det;
-	A_inv[0][1] = (A[0][2]*A[2][1]-A[0][1]*A[2][2])/det;
-	A_inv[0][2] = (A[0][1]*A[1][2]-A[0][2]*A[1][1])/det;
-	A_inv[1][0] = (A[1][2]*A[2][0]-A[1][0]*A[2][2])/det;
-	A_inv[1][1] = (A[0][0]*A[2][2]-A[0][2]*A[2][0])/det;
-	A_inv[1][2] = (A[0][2]*A[1][0]-A[0][0]*A[1][2])/det;
-	A_inv[2][0] = (A[1][0]*A[2][1]-A[1][1]*A[2][0])/det;
-	A_inv[2][1] = (A[0][1]*A[2][0]-A[0][0]*A[2][1])/det;
-	A_inv[2][2] = (A[0][0]*A[1][1]-A[0][1]*A[1][0])/det;
+	A_inv(0,0) = (A(1,1)*A(2,2)-A(1,2)*A(2,1))/det;
+	A_inv(0,1) = (A(0,2)*A(2,1)-A(0,1)*A(2,2))/det;
+	A_inv(0,2) = (A(0,1)*A(1,2)-A(0,2)*A(1,1))/det;
+	A_inv(1,0) = (A(1,2)*A(2,0)-A(1,0)*A(2,2))/det;
+	A_inv(1,1) = (A(0,0)*A(2,2)-A(0,2)*A(2,0))/det;
+	A_inv(1,2) = (A(0,2)*A(1,0)-A(0,0)*A(1,2))/det;
+	A_inv(2,0) = (A(1,0)*A(2,1)-A(1,1)*A(2,0))/det;
+	A_inv(2,1) = (A(0,1)*A(2,0)-A(0,0)*A(2,1))/det;
+	A_inv(2,2) = (A(0,0)*A(1,1)-A(0,1)*A(1,0))/det;
 
 	return det;
 }
@@ -1998,14 +1878,14 @@ double MatInv2(ublasMatrix& A,ublasMatrix& A_inv)
 {
 	double det;
 
-	det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+	det = A(0,0)*A(1,1) - A(0,1)*A(1,0);
 
 	if(det == 0) return KOD_FALSE;		// 行列式が0
 
-	A_inv[0][0] = A[1][1]/det;
-	A_inv[0][1] = -A[0][1]/det;
-	A_inv[1][0] = -A[1][0]/det;
-	A_inv[1][1] = A[0][0]/det;
+	A_inv(0,0) = A(1,1)/det;
+	A_inv(0,1) = -A(0,1)/det;
+	A_inv(1,0) = -A(1,0)/det;
+	A_inv(1,1) = A(0,0)/det;
 
 	return det;
 }
@@ -2087,7 +1967,7 @@ void SetColorStat(DispStat *ds,float r, float g, float b, float a)
 //
 // Return: 
 // 合算された配列要素数
-int CatCoord(Coord a[],Coord b[],int alim,int anum,int bnum)
+int CatCoord(ACoord& a, ACoord& b,int alim,int anum,int bnum)
 {
 	if(alim < anum+bnum){
 //		GuiIFB.SetMessage("stack over flow");
@@ -2110,7 +1990,7 @@ int CatCoord(Coord a[],Coord b[],int alim,int anum,int bnum)
 //
 // Return:
 // 変更後の点数
-int CheckTheSamePoints(Coord *P,int N)
+int CheckTheSamePoints(ACoord& P,int N)
 {
 	for(int i=0;i<N;i++)
 		P[i].dmy = KOD_FALSE;
@@ -2142,7 +2022,7 @@ int CheckTheSamePoints(Coord *P,int N)
 //
 // Return:
 // 変更後の点数
-int CheckTheSamePoints(double *P,int N)
+int CheckTheSamePoints(ublasVector& P,int N)
 {
 	if(!N) return 0;
 
@@ -2184,7 +2064,7 @@ int CheckTheSamePoints(double *P,int N)
 // 変更後の点数
 int CheckTheSamePoints2D(Coord *P,int N)
 {
-	Coord *Q = NewCoord1(N);
+	ACoord Q(boost::extents[N]);
 
 	for(int i=0;i<N;i++)
 		P[i].dmy = KOD_FALSE;
@@ -2204,8 +2084,6 @@ int CheckTheSamePoints2D(Coord *P,int N)
 
 	for(int i=0;i<k;i++)
 		P[i] = Q[i];
-
-	FreeCoord1(Q);
 
 	return k;
 }

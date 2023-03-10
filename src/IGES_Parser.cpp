@@ -3,6 +3,7 @@
 **************************/
 
 #include <stdexcept>	// throw
+#include <algorithm>	// reverse
 #include "KodatunoKernel.h"
 
 // Function: IGES_Parser_Main
@@ -112,11 +113,13 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 
 	// 縮退用Nurbs曲線を複合曲線の数だけ生成
 	if(body->TypeNum[_COMPOSITE_CURVE]){
-		double T[4] = {0,0,NORM_KNOT_VAL,NORM_KNOT_VAL};
-		double W[2] = {1,1};
-		double V[2] = {0,NORM_KNOT_VAL};
+		ublasVector T(4);
+		T[0]=0; T[1]=0; T[2]=NORM_KNOT_VAL; T[3]=NORM_KNOT_VAL;
+		ublasVector W(2);
+		W[0]=1; W[1]=1;
+		A2double V = {0,NORM_KNOT_VAL};
 		int prop[4] = {0,0,1,0};
-		Coord cp[2];
+		ACoord cp(boost::extents[2]);
 
 		for(int i=0;i<body->TypeNum[_COMPOSITE_CURVE];i++){
 			 NFunc.GenNurbsC(&body->CompC[i].DegeNurbs,2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
@@ -200,7 +203,7 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::ChangeKnotVecRange(double Range[],double Knot[],int N,int M,int K,double val)
+int IGES_PARSER::ChangeKnotVecRange(A2double& Range,ublasVector& Knot,int N,int M,int K,double val)
 {
 	double _t[KNOTNUMMAX];
 	for(int i=0;i<N;i++){
@@ -296,7 +299,7 @@ int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 // 
 // Return:
 // 最小値
-double IGES_PARSER::SearchMinVecRange(double Knot[],int M,int K)
+double IGES_PARSER::SearchMinVecRange(ublasVector& Knot,int M,int K)
 {
 	double min = 1.0E+6;
 	for(int i=M;i<=K;i++){
@@ -386,7 +389,7 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 // KOD_TRUE
 int IGES_PARSER::CheckCWforTrim(BODY *body)
 {
-	Coord *p;
+	ACoord p;
 	int flag;
 
 	// トリム面
@@ -395,7 +398,8 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 
 		if(otrmnum > 2){
 			// トリム面のパラメトリック平面における外側トリム曲線の変更
-			p = NewCoord1(otrmnum);
+			p.resize(boost::extents[otrmnum]);
+			p = 0;
 
 			// 外側トリムを構成する各NURBS曲線の始点を取り出す
 			for(int j=0;j<otrmnum;j++){
@@ -408,19 +412,18 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 			if(flag == KOD_FALSE){
 				for(int j=0;j<otrmnum;j++){
 					NURBSC *nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
-					Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
+					std::reverse(nc->cp.begin(), nc->cp.end());	//Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
 					// ノットベクトル列を反転
 					for(int k=0;k<nc->N;k++){
 						nc->T[k] *= -1;
 						nc->T[k] += nc->V[0]+nc->V[1];
 					}
-					Reverse(nc->T,nc->N);
+					std::reverse(nc->T.begin(), nc->T.end());	// Reverse(nc->T,nc->N);
 				}
 				// COMPELEMを反転
 				ReverseCOMPELEM(body->TrmS[i].pTO->pB.CompC);
 			}
 
-			FreeCoord1(p);
 			// 外側トリムここまで
 		}
 
@@ -429,7 +432,8 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 			otrmnum = body->TrmS[i].pTI[j]->pB.CompC->N;
 
 			if(otrmnum > 2){
-				p = NewCoord1(otrmnum);
+				p.resize(boost::extents[otrmnum]);
+				p = 0;
 
 				// 内側トリムを構成する各NURBS曲線の始点を取り出す
 				for(int k=0;k<otrmnum;k++){
@@ -442,19 +446,17 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 				if(flag == KOD_TRUE){
 					for(int k=0;k<otrmnum;k++){
 						NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
-						Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
+						std::reverse(nc->cp.begin(), nc->cp.end());	// Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
 						// ノットベクトル列を反転
 						for(int l=0;l<nc->N;l++){
 							nc->T[l] *= -1;
 							nc->T[l] += nc->V[0]+nc->V[1];
 						}
-						Reverse(nc->T,nc->N);
+						std::reverse(nc->T.begin(), nc->T.end());	// Reverse(nc->T,nc->N);
 					}
 					// COMPELEMを反転
 					ReverseCOMPELEM(body->TrmS[i].pTI[j]->pB.CompC);
 				}
-
-				FreeCoord1(p);
 			}
 		}
 	}
@@ -750,7 +752,7 @@ int IGES_PARSER::GetTMatPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 	for(i=0;i<3;i++){
 		for(j=0;j<4;j++){
 			if(j != 3){
-				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].R[i][j] = CatchStringD(&p);	// 3×3回転行列成分
+				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].R(i,j) = CatchStringD(&p);	// 3×3回転行列成分
 			}
 			else{
 				body.TMat[TypeCount[_TRANSFORMATION_MATRIX]].T[i] = CatchStringD(&p);		// 並進ベクトル成分
@@ -863,7 +865,7 @@ int IGES_PARSER::GetNurbsSPara(char str[],int pD,DirectoryParam *dpara,BODY body
 	}
 	for(i=0;i<body.NurbsS[TypeCount[_NURBSS]].K[1];i++){
 		for(j=0;j<body.NurbsS[TypeCount[_NURBSS]].K[0];j++){
-			body.NurbsS[TypeCount[_NURBSS]].W[j][i] = CatchStringD(&p);	//  u方向Weight
+			body.NurbsS[TypeCount[_NURBSS]].W(j,i) = CatchStringD(&p);	//  u方向Weight
 		}
 	}
 	for(i=0;i<body.NurbsS[TypeCount[_NURBSS]].K[1];i++){
