@@ -102,6 +102,7 @@ typedef boost::multi_array<Coord,2>	AACoord;	// boost::extents[][]でサイズ�
 // Typedef: vector<VVCoord>
 // VVVCoord - Coord型の3次元配列をVVVCoordとして定義
 typedef std::vector<VVCoord>	VVVCoord;
+typedef boost::multi_array<Coord,3>	AAACoord;	// boost::extents[][][]でサイズ指定
 
 // Typedef: array<Coord, 3>
 // A3Coord - Coord型の3要素固定配列をA3Coordとして定義
