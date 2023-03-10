@@ -272,37 +272,6 @@ int Coord::ZoroCoord2D(void) const
 	return (x==0.0 && y==0.0) ? KOD_FALSE : KOD_TRUE;
 }
 
-// Function: NewVector
-// double型2次元配列のメモリー確保
-//
-// Parameters:
-// row, col - メモリー確保するdouble型2次元配列の行，列の要素数
-//
-// Return:
-// 確保されたdouble型2次元配列へのポインタ（メモリー確保に失敗：NULL）
-Matrix NewMatrix(int row,int col)
-{
-	int i;
-	Matrix a;
-
-	a = new double*[row];
-	for(i=0;i<row;i++) a[i] = new double[col];
-
-	return a;
-}
-
-// Function: FreeMatrix
-// double型2次元配列のメモリー解放
-//
-// Parameter:
-// a - メモリー解放するdouble型2次元配列へのポインタ
-// col - aの行要素数
-void FreeMatrix(Matrix a,int col)
-{
-	for(int i=0;i<col;i++) delete[] a[i];
-	delete[] a;
-}
-
 // Function: NewCoord1
 // 1次元Coord型配列のメモリー確保
 //
@@ -1457,13 +1426,14 @@ int DiscriminateCW2D(Coord p[],int Vnum)
 // Parameters:
 // A,B,C - [C] = [A] +[B]
 // row,col - 行，列要素数
-void AddMxMx(Matrix A,Matrix B,Matrix C,int row,int col)
+void AddMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
 {
-	for(int i=0;i<row;i++){
-		for(int j=0;j<col;j++){
-			C[i][j] = A[i][j] + B[i][j];
-		}
-	}
+//	for(int i=0;i<row;i++){
+//		for(int j=0;j<col;j++){
+//			C[i][j] = A[i][j] + B[i][j];
+//		}
+//	}
+	C = A + B;
 }
 
 // Function: MulMxMx
@@ -1473,23 +1443,24 @@ void AddMxMx(Matrix A,Matrix B,Matrix C,int row,int col)
 // A,B,C - [C] = [A][B]
 // A_row, A_col - 行列Aの行，列要素数
 // B_row, B_col - 行列Bの行，列要素数
-void MulMxMx(Matrix A,int A_row,int A_col,Matrix B,int B_row,int B_col,Matrix C)
+void MulMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
 {
-	for(int i=0;i<A_row;i++){
-		for(int k=0;k<B_col;k++){
-			C[i][k] = 0;
-			if(A_col >= B_row){
-				for(int j=0;j<B_row;j++){
-					C[i][k] += A[i][j] * B[j][k];
-				}
-			}
-			else{
-				for(int j=0;j<A_col;j++){
-					C[i][k] += A[i][j] * B[j][k];
-				}
-			}
-		}
-	}
+//	for(int i=0;i<A_row;i++){
+//		for(int k=0;k<B_col;k++){
+//			C[i][k] = 0;
+//			if(A_col >= B_row){
+//				for(int j=0;j<B_row;j++){
+//					C[i][k] += A[i][j] * B[j][k];
+//				}
+//			}
+//			else{
+//				for(int j=0;j<A_col;j++){
+//					C[i][k] += A[i][j] * B[j][k];
+//				}
+//			}
+//		}
+//	}
+	C = ublas::prod(A, B);
 }	
 
 // Function: MulMxVec
@@ -1500,14 +1471,15 @@ void MulMxMx(Matrix A,int A_row,int A_col,Matrix B,int B_row,int B_col,Matrix C)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(Matrix A,int A_row,int A_col,Vector B,int B_row,Vector C)
+void MulMxVec(ublasMatrix& A,ublasVector& B,ublasVector& C)
 {
-	for(int i=0;i<A_row;i++){
-		C[i] = 0;
-		for(int j=0;j<A_col;j++){
-			C[i] += A[i][j] * B[j];
-		}
-	}
+//	for(int i=0;i<A_row;i++){
+//		C[i] = 0;
+//		for(int j=0;j<A_col;j++){
+//			C[i] += A[i][j] * B[j];
+//		}
+//	}
+	C = ublas::prod(A, B);
 }
 
 // Function: MulMxVec
@@ -1523,13 +1495,13 @@ void MulMxVec(Matrix A,int A_row,int A_col,Vector B,int B_row,Vector C)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(Matrix A,int A_row,int A_col,Coord *B,Coord *C)
+void MulMxVec(ublasMatrix& A,VCoord& B,VCoord& C)
 {
-	for(int i=0;i<A_row;i++){
+	for(int i=0;i<A.size1();i++){
 		C[i] = 0;
-		for(int j=0;j<A_col;j++){
+		for(int j=0;j<A.size2();j++){
 //			C[i] = AddCoord(C[i],MulCoord(B[j],A[i][j]));
-			C[i] += B[j] * A[i][j];
+			C[i] += B[j] * A(i,j);
 		}
 	}
 }
@@ -1566,7 +1538,7 @@ Coord MulMxCoord(Coord A[],Coord d)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(Matrix A,Coord d)
+Coord MulMxCoord(ublasMatrix& A,Coord& d)
 {
 	Coord ans;
 
@@ -1587,11 +1559,14 @@ Coord MulMxCoord(Matrix A,Coord d)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-void TranMx(Matrix A,int m,int n,Matrix B)
+void TranMx(ublasMatrix& A,ublasMatrix& B)
 {
+	int m = A.size1(),
+		n = A.size2();
+	B.resize(n, m);
 	for(int i=0;i<m;i++){
 		for(int j=0;j<n;j++){
-			B[j][i] = A[i][j];
+			B(j,i) = A(i,j);
 		}
 	}
 }
@@ -1781,7 +1756,7 @@ void InitFrame(FRAME *f)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,Matrix a,Vector b,Vector x)
+double Gauss(int n,ublasMatrix& a,ublasVector& b,ublasVector& x)
 {
 	long double det;	// 行列式
 	int *ip;			// 行交換の情報
@@ -1806,7 +1781,7 @@ double Gauss(int n,Matrix a,Vector b,Vector x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,Matrix a,Coord *b,Coord *x)
+double Gauss(int n,ublasMatrix& a,VCoord& b,VCoord& x)
 {
 	long double det;	// 行列式
 	int *ip;			// 行交換の情報
@@ -1830,7 +1805,7 @@ double Gauss(int n,Matrix a,Coord *b,Coord *x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺ベクトル  
 // ip - 行交換の情報
-void LU_Solver(int n,Matrix a,Vector b,int *ip,Vector x)
+void LU_Solver(int n,ublasMatrix& a,ublasVector& b,int *ip,ublasVector& x)
 {
 	int ii;
 	double t;
@@ -1839,15 +1814,15 @@ void LU_Solver(int n,Matrix a,Vector b,int *ip,Vector x)
 		ii = ip[i];
 		t = b[ii];
 		for(int j=0;j<i;j++)
-			t -= a[ii][j]*x[j];
+			t -= a(ii,j)*x[j];
 		x[i] = t;
 	}
 	for(int i=n-1;i>=0;i--){  // 後退代入
 		t = x[i];  
 		ii = ip[i];
 		for(int j=i+1;j<n;j++) 
-			t -= a[ii][j]*x[j];
-		x[i] = t/a[ii][i];
+			t -= a(ii,j)*x[j];
+		x[i] = t/a(ii,i);
 	}
 }
 
@@ -1859,7 +1834,7 @@ void LU_Solver(int n,Matrix a,Vector b,int *ip,Vector x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺Coord配列  
 // ip - 行交換の情報
-void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
+void LU_Solver(int n,ublasMatrix& a,VCoord& b,int *ip,VCoord& x)
 {
 	int ii;
 	Coord t;
@@ -1868,15 +1843,15 @@ void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
 		ii = ip[i];
 		t = b[ii];
 		for(int j=0;j<i;j++)
-			t -= x[j] * a[ii][j];
+			t -= x[j] * a(ii,j);
 		x[i] = t;
 	}
 	for(int i=n-1;i>=0;i--){  // 後退代入
 		t = x[i];  
 		ii = ip[i];
 		for(int j=i+1;j<n;j++) 
-			t -= x[j] * a[ii][j];
-		x[i] = t / a[ii][i];
+			t -= x[j] * a(ii,j);
+		x[i] = t / a(ii,i);
 	}
 }
 
@@ -1890,7 +1865,7 @@ void LU_Solver(int n,Matrix a,Coord *b,int *ip,Coord *x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double MatInv(int n,Matrix a,Matrix a_inv)
+double MatInv(int n,ublasMatrix& a,ublasMatrix& a_inv)
 {
 	int i, j, k, ii;
 	long double t, det;
@@ -1933,7 +1908,7 @@ double MatInv(int n,Matrix a,Matrix a_inv)
 //
 // Return:
 // 行列式
-double LU(int n,Matrix a,int *ip)
+double LU(int n,ublasMatrix& a,int *ip)
 {
 	int i, j, k, ii, ik;
 	long double t, u, det;
@@ -1989,7 +1964,7 @@ EXIT:
 //
 // Return:
 // 行列式
-double MatInv3(Matrix A,Matrix A_inv)
+double MatInv3(ublasMatrix& A,ublasMatrix& A_inv)
 {
 	double det;
 	det = A[0][0]*A[1][1]*A[2][2] + A[1][0]*A[2][1]*A[0][2] + A[2][0]*A[0][1]*A[1][2]
@@ -2019,7 +1994,7 @@ double MatInv3(Matrix A,Matrix A_inv)
 //
 // Return:
 // 行列式
-double MatInv2(Matrix A,Matrix A_inv)
+double MatInv2(ublasMatrix& A,ublasMatrix& A_inv)
 {
 	double det;
 

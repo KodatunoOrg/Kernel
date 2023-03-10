@@ -107,10 +107,6 @@ typedef std::vector<VVCoord>	VVVCoord;
 // A3Coord - Coord型の3要素固定配列をA3Coordとして定義
 typedef boost::array<Coord, 3>	A3Coord;
 
-// Typedef: double **
-// Matrix - double形の2次元配列をMatrixとして定義
-typedef double **Matrix;
-
 // Class: Coord 
 // 座標値用クラスを定義
 class Coord
@@ -326,25 +322,21 @@ void InitFrame(FRAME *);
 
 // Group: Functions(多次元ベクトル、多次元行列の演算)
 
-// Function: InitMatrix
-// 2次元配列の初期化
-void InitMatrix(Matrix,int,int);				
-
 // Function: AddMxMx
 // 行列同士の足し算
-void AddMxMx(Matrix,Matrix,Matrix,int,int);		
+void AddMxMx(ublasMatrix&,ublasMatrix&,ublasMatrix&);
 
 // Function: MulMxMx
 // 行列同士の掛け算
-void MulMxMx(Matrix,int,int,Matrix,int,int,Matrix);	
+void MulMxMx(ublasMatrix&,ublasMatrix&,ublasMatrix&);
 
 // Function: MulMxVec
 // 行列とベクトルの掛け算
-void MulMxVec(Matrix,int,int,Vector,int,Vector);	
+void MulMxVec(ublasMatrix&,ublasVector&,ublasVector&);
 
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算
-void MulMxVec(Matrix,int,int,Coord *,Coord *);	
+void MulMxVec(ublasMatrix&,VCoord&,VCoord&);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
@@ -352,11 +344,11 @@ Coord MulMxCoord(Coord [],Coord);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(Matrix,Coord);					
+Coord MulMxCoord(ublasMatrix&,Coord&);
 
 // Function: TranMx
 // 転置行列を得る
-void TranMx(Matrix,int,int,Matrix);				
+void TranMx(ublasMatrix&,ublasMatrix&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
@@ -368,35 +360,35 @@ void TranMx(Coord [],Coord []);
 
 // Function: Gauss
 // 連立1次方程式の解を求める
-double Gauss(int,Matrix,Vector,Vector);			
+double Gauss(int,ublasMatrix&,ublasVector&,ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
-double Gauss(int,Matrix,Coord *,Coord *);		
+double Gauss(int,ublasMatrix&,VCoord&,VCoord&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
-void LU_Solver(int,Matrix,Vector,int *,Vector);	
+void LU_Solver(int,ublasMatrix&,ublasVector&,int*,ublasVector&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
-void LU_Solver(int,Matrix,Coord *,int *,Coord *);
+void LU_Solver(int,ublasMatrix&,VCoord&,int*,VCoord&);
 
 // Function: LU
 // LU分解
-double LU(int,Matrix,int *);					
+double LU(int,ublasMatrix&,int *);					
 
 // Function: MatInv
 // 逆行列を求める
-double MatInv(int,Matrix,Matrix);				
+double MatInv(int,ublasMatrix&,ublasMatrix&);				
 
 // Function: MatInv3
 // 3x3の逆行列
-double MatInv3(Matrix,Matrix);					
+double MatInv3(ublasMatrix&,ublasMatrix&);					
 
 // Function: MatInv2
 // 2x2の逆行列
-double MatInv2(Matrix,Matrix);					
+double MatInv2(ublasMatrix&,ublasMatrix&);					
 
 
 // Group: Functions(数値計算)
@@ -462,14 +454,6 @@ void DrawSolidCone(double,double);
 
 
 // Group: Functions(メモリー関連)
-
-// Function: NewMatrix
-// 2次元double型配列のメモリー確保
-Matrix NewMatrix(int,int);			
-
-// Function: FreeMatrix
-// 2次元double型配列のメモリー解放
-void FreeMatrix(Matrix,int);		
 
 // Function: NewCoord1
 // 1次元Coord型配列のメモリー確保

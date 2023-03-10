@@ -24,7 +24,7 @@ class HEvert{
 public:
 	// Constructor: HEvert
 	// コンストラクタ
-	HEvert() {edge=NULL; index=-1; mom = NULL; qemQ=NULL; NewQEM(); flag = false;}
+	HEvert() {edge=NULL; index=-1; mom = NULL; NewQEM(); flag = false;}
 
 	// Function: GetCoord
 	// この頂点の座標値を返す
@@ -68,15 +68,15 @@ public:
 
 	// Function: SetQEM
 	// QEM法用係数行列qemQのqemパラメータをセットする
-	int SetQEM(Matrix);
+	int SetQEM(ublasMatrix&);
 
 	// Function: AddQEM
 	// QEM法用係数行列qemQのqemパラメータを加える
-	int AddQEM(Matrix);	
+	int AddQEM(ublasMatrix&);	
 
 	// Function: GetQEM
 	// QEM法用係数行列qemQのqemパラメータを得る
-	double **GetQEM();
+	ublasMatrix GetQEM();
 
 	// Function: SetEdge
 	// この頂点から伸びるハーフエッジをセット
@@ -126,7 +126,7 @@ public:
 
 	// Variable: **qemQ
 	// QEM法用係数行列
-	double **qemQ;	
+	ublasMatrix qemQ;
 
 	// Variable: flag
 	// 汎用フラグ

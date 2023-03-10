@@ -394,11 +394,11 @@ public:
 
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
-	void GetEqIntervalKont(int,int,Vector);						
+	void GetEqIntervalKont(int,int,ublasVector&);						
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルのパラメータ定義域を変更する
-	void ChangeKnotVecRange(Vector,int,int,int,double,double);	
+	void ChangeKnotVecRange(ublasVector&,int,int,int,double,double);	
 
 
 	int CalcExtSearchCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地探索線を得る(準備中)
@@ -572,23 +572,23 @@ private:
 
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
-	void GetCurveKnotParam1(Coord *,int,Vector);					
+	void GetCurveKnotParam1(Coord *,int,ublasVector&);					
 
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
-	void GetCurveKnotParam2(Coord *,int,Vector);					
+	void GetCurveKnotParam2(Coord *,int,ublasVector&);					
 
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
-	void GetSurfaceKnotParam(Vector,Vector,Coord **,int,int);		
+	void GetSurfaceKnotParam(ublasVector&,ublasVector&,Coord **,int,int);		
 
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
-	void GetInterpolatedKnot(Vector,int,int,int,Vector);			
+	void GetInterpolatedKnot(ublasVector&,int,int,int,ublasVector&);			
 
 	// Function: GetApproximatedKnot
 	// (private)曲線/曲面パラメータから近似用ノットベクトルを算出
-	void GetApproximatedKnot(Vector,int,int,int,Vector);			
+	void GetApproximatedKnot(ublasVector&,int,int,int,ublasVector&);			
 
 	// Function: SetApproximationCPnum
 	// (private)点列数から生成するコントロールポイント数を算定する
@@ -596,7 +596,7 @@ private:
 
 	// Function: CalcApproximationCP_LSM
 	// (private)最小2乗法で近似コントロールポイントを求める
-	void CalcApproximationCP_LSM(Coord *,Vector,Vector,int,int,int,int,Coord *);	
+	void CalcApproximationCP_LSM(Coord *,ublasVector&,ublasVector&,int,int,int,int,Coord *);	
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する

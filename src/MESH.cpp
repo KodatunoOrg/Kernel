@@ -388,31 +388,21 @@ Data *MESH::MergeListForQEMD(Data *x,Data *y)
 // qemQ[][]の初期化
 void HEvert::NewQEM()
 {
-	qemQ = NewMatrix(QUADINDEX,QUADINDEX);
-	for(int i=0;i<QUADINDEX;i++){
-		for(int j=0;j<QUADINDEX;j++){
-			qemQ[i][j] = 0;
-		}
-	}
+	qemQ.resize(QUADINDEX,QUADINDEX);
+	qemQ.clear();
 }
 
 // Function: DelQEM
 // qemQのメモリ解放
 void HEvert::DelQEM()
 {
-	if(qemQ != NULL)
-		FreeMatrix(qemQ,QUADINDEX);
 }
 
 // Function: InitQEM
 // qemQの初期化
 void HEvert::InitQEM()
 {
-	for(int i=0;i<QUADINDEX;i++){
-		for(int j=0;j<QUADINDEX;j++){
-			qemQ[i][j] = 0;
-		}
-	}
+	qemQ.clear();
 }
 
 // Function: SetQEM
@@ -423,17 +413,9 @@ void HEvert::InitQEM()
 //
 // Return:
 // qemQがNULL：KOD_ERR, 成功：KOD_TURE
-int HEvert::SetQEM(Matrix buf)
+int HEvert::SetQEM(ublasMatrix& buf)
 {
-
-	if(qemQ == NULL) return KOD_ERR;
-
-	for(int i=0;i<QUADINDEX;i++){
-		for(int j=0;j<QUADINDEX;j++){
-			qemQ[i][j] = buf[i][j];
-		}
-	}
-
+	qemQ = buf;
 	return KOD_TRUE;
 }
 
@@ -445,16 +427,9 @@ int HEvert::SetQEM(Matrix buf)
 //
 // Return:
 // qemQがNULL：KOD_ERR, 成功：KOD_TURE
-int HEvert::AddQEM(Matrix buf)
+int HEvert::AddQEM(ublasMatrix& buf)
 {
-	if(qemQ == NULL) return KOD_ERR;
-
-	for(int i=0;i<QUADINDEX;i++){
-		for(int j=0;j<QUADINDEX;j++){
-			qemQ[i][j] += buf[i][j];
-		}
-	}
-
+	qemQ += buf;
 	return KOD_TRUE;
 }
 
@@ -463,7 +438,7 @@ int HEvert::AddQEM(Matrix buf)
 //
 // Return:
 // qemQ
-Matrix HEvert::GetQEM()
+ublasMatrix HEvert::GetQEM()
 {
 	return qemQ;
 }

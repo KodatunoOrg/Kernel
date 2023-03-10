@@ -29,9 +29,9 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 	int M[2] = {2,2};							// 階数は2
 	double U[2] = {0,1};						// u方向のノットベクトルの開始値と終了値
 	double V[2] = {0,1};						// v方向ノットベクトルの開始値と終了値
-	ublasVector S(N[0]);					// u方向のノットベクトル
-	ublasVector T(N[1]);					// v方向ノットベクトル
-	Matrix W = NewMatrix(K[0],K[1]);			// ウエイト
+	ublasVector S(N[0]);						// u方向のノットベクトル
+	ublasVector T(N[1]);						// v方向ノットベクトル
+	ublasMatrix W(K[0],K[1]);					// ウエイト
 	Coord **facet = NewCoord2(2,2);				// コントロールポイント
 	S[0] = S[1] = T[0] = T[1] = 0;				// u方向のノットベクトルは平面なので既に決まっている
 	S[2] = S[3] = T[2] = T[3] = 1;				// v方向ノットベクトルは平面なので既に決まっている
@@ -89,7 +89,6 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 
 	body->MaxCoord = maxval;	// 最大座標値を登録
 			
-	FreeMatrix(W,K[0]);
 	FreeCoord2(facet,UVCPNUM);
 
 	fclose(fp);
