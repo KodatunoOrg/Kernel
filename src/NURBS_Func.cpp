@@ -16,7 +16,7 @@ int NURBS_Func::New_NurbsC(NURBSC *nurb,int K, int N)
 {
 	nurb->T.resize(N);
 	nurb->W.resize(K);
-	nurb->cp.resize(K);
+	nurb->cp.resize(boost::extents[K]);
 	return KOD_TRUE;
 }
 
@@ -191,9 +191,9 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVe
 	Nurbs->M = M;
 	Nurbs->N = N;
 	Nurbs->V = V;
-	Nurbs->T.resize(Nurbs->N);
-	Nurbs->W.resize(Nurbs->K);
-	Nurbs->cp = new Coord[Nurbs->K];
+//	Nurbs->T.resize(Nurbs->N);
+//	Nurbs->W.resize(Nurbs->K);
+//	Nurbs->cp.resize(boost::extents[Nurbs->K]);
 	Nurbs->EntUseFlag = euflag;
     Nurbs->BlankStat = DISPLAY;     // デフォルトで描画要素に設定
 	
@@ -202,9 +202,7 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVe
 	}
 	Nurbs->T = T;
 	Nurbs->W = W;
-	for(i=0;i<K;i++){
-		Nurbs->cp[i] = cp[i];
-	}
+	Nurbs->cp = cp;
 	Nurbs->Dstat.Color[0] = Nurbs->Dstat.Color[1] = Nurbs->Dstat.Color[2] = 1.0;
 	Nurbs->Dstat.Color[3] = 0.5;
 
@@ -230,16 +228,13 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC* nurb)
 	Nurbs->V[0] = nurb->V[0];
 	Nurbs->V[1] = nurb->V[1];
 	
-	Nurbs->T.resize(Nurbs->N);
-	Nurbs->W.resize(Nurbs->K);
-	Nurbs->cp = new Coord[Nurbs->K];
-	for(i=0;i<nurb->N;i++){
-		Nurbs->T[i] = nurb->T[i];
-	}
-	for(i=0;i<nurb->K;i++){
-		Nurbs->W[i] = nurb->W[i];
-		Nurbs->cp[i] = nurb->cp[i];
-	}
+//	Nurbs->T.resize(Nurbs->N);
+//	Nurbs->W.resize(Nurbs->K);
+//	Nurbs->cp.resize(boost::extents[Nurbs->K]);
+
+	Nurbs->T = nurb->T;
+	Nurbs->W = nurb->W;
+	Nurbs->cp = nurb->cp;
 
     Nurbs->BlankStat = nurb->BlankStat;
     Nurbs->EntUseFlag = nurb->EntUseFlag;
@@ -4530,12 +4525,6 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	else
 		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,Q4,U[0],U[1],V[0],V[1]);
 
-	FreeCoord2(Q1,PNum_u);
-	FreeCoord2(Q2,K[1]);
-	FreeCoord2(Q3,K[1]);
-	FreeCoord2(Q4,K[0]);
-	FreeCoord2(P_,K[1]);
-
 	return KOD_TRUE;
 }
 
@@ -5405,8 +5394,8 @@ int NURBS_Func::GetPtsOnInnerTRMSurf(TRMS *Trm,ACoord& Pt,int N)
 		CompC = Trm->pTI[k]->pB.CompC;	
 
 		// メモリ確保
-		P.resize(CompC->N*TRM_BORDERDIVNUM);
-		P = 0;
+		P.resize(boost::extents[CompC->N*TRM_BORDERDIVNUM]);
+		std::fill_n(P.data(), P.num_elements(), 0);
 
 		// トリム境界線を点群Pで近似
 		if((ptnum = ApproxTrimBorder(CompC,P)) == KOD_ERR){
@@ -6907,7 +6896,7 @@ int NURBS_Func::ConnectNurbsC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
 void NURBS_Func::ReverseNurbsC(NURBSC *C)
 {
 	std::reverse(C->W.begin(), C->W.end());		// Reverse(C->W,C->K);
-	Reverse(C->cp,C->K);
+	std::reverse(C->cp.begin(), C->cp.end());	// Reverse(C->cp,C->K);
 	std::reverse(C->T.begin(), C->T.end());		// Reverse(C->T,C->N);
 	for(int i=0;i<C->N;i++)
 		C->T[i] *= -1;

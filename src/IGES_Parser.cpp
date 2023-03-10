@@ -399,7 +399,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 		if(otrmnum > 2){
 			// トリム面のパラメトリック平面における外側トリム曲線の変更
 			p.resize(boost::extents[otrmnum]);
-			p = 0;
+			std::fill_n(p.data(), p.num_elements(), 0);
 
 			// 外側トリムを構成する各NURBS曲線の始点を取り出す
 			for(int j=0;j<otrmnum;j++){
@@ -433,7 +433,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 
 			if(otrmnum > 2){
 				p.resize(boost::extents[otrmnum]);
-				p = 0;
+				std::fill_n(p.data(), p.num_elements(), 0);
 
 				// 内側トリムを構成する各NURBS曲線の始点を取り出す
 				for(int k=0;k<otrmnum;k++){
