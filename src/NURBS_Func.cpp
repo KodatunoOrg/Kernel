@@ -4430,13 +4430,24 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	// アイソパラ曲線のコントロールポイントを得る
 	TranMx(P,K[0],K[1],PT);
 	for(int i=0;i<K[1];i++){
-		MulMxVec(Bu_,PT[i],RT[i]);
+		// --- AACoordからACoordを取り出す書き方がわかれば，こんなこと書く必要ない！ ---
+		ACoord	PT_(boost::extents[K[0]]),
+				RT_(boost::extents[K[0]]);
+		for ( int j=0; j<K[0]; j++ ) PT_[j] = PT[i][j];
+//		MulMxVec(Bu_,PT[i],RT[i]);
+		MulMxVec(Bu_,PT_,RT_);
+		for ( int j=0; j<K[0]; j++ ) RT[i][j] = RT_[j];
 	}
 
 	// NURBS曲面のコントロールポイントを得る
 	TranMx(RT,K[1],K[0],R);
 	for(int i=0;i<K[0];i++){
- 		MulMxVec(Bv_,R[i],Q[i]);
+		ACoord	R_(boost::extents[K[1]]),
+				Q_(boost::extents[K[1]]);
+		for ( int j=0; j<K[1]; j++ ) R_[j] = R[i][j];
+// 		MulMxVec(Bv_,R[i],Q[i]);
+ 		MulMxVec(Bv_,R_,Q_);
+		for ( int j=0; j<K[1]; j++ ) Q[i][j] = Q_[j];
  	}
 
 	// 重みを得る
@@ -4493,7 +4504,7 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	AACoord Q2(boost::extents[K[1]][PNum_u]);	
 	AACoord Q3(boost::extents[K[1]][K[0]]);
 	AACoord Q4(boost::extents[K[0]][K[1]]);
-	AACoord P_(boost::extents[K[1]][K[0]]);
+//	AACoord P_(boost::extents[K[1]][K[0]]);
 	ublasMatrix W(K[0],K[1]);		// 重み
 
 	GetSurfaceKnotParam(S_,T_,P,PNum_u,PNum_v);		// 補間曲面用u,vパラメータを得る
@@ -4503,12 +4514,23 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 
 	// v方向の点列から近似NURBS曲線をPNum_u個作成する
 	for(int i=0;i<PNum_u;i++){
-		CalcApproximationCP_LSM(P[i],T_,T,PNum_v,N[1],Mv,K[1],Q1[i]);	// 最小2乗法で近似コントロールポイントを求める
+		// --- AACoordからACoordを取り出す書き方がわかれば，こんなこと書く必要ない！ ---
+		ACoord	P_(boost::extents[P.shape()[1]]),
+				Q1_(boost::extents[K[1]]);
+		for ( int j=0; j<P_.shape()[0]; j++ ) P_[j] = P[i][j];
+//		CalcApproximationCP_LSM(P[i],T_,T,PNum_v,N[1],Mv,K[1],Q1[i]);	// 最小2乗法で近似コントロールポイントを求める
+		CalcApproximationCP_LSM(P_,T_,T,PNum_v,N[1],Mv,K[1],Q1_);		// 最小2乗法で近似コントロールポイントを求める
+		for ( int j=0; j<K[1]; j++ ) Q1[i][j] = Q1_[j];
 	}
 	TranMx(Q1,PNum_u,K[1],Q2);					// Qの転置
 
 	for(int i=0;i<K[1];i++){
-		CalcApproximationCP_LSM(Q2[i],S_,S,PNum_u,N[0],Mu,K[0],Q3[i]);	// 最小2乗法で近似コントロールポイントを求める
+		ACoord	Q2_(boost::extents[PNum_u]),
+				Q3_(boost::extents[K[0]]);
+		for ( int j=0; j<PNum_u; j++ ) Q2_[j] = Q2[i][j];
+//		CalcApproximationCP_LSM(Q2[i],S_,S,PNum_u,N[0],Mu,K[0],Q3[i]);	// 最小2乗法で近似コントロールポイントを求める
+		CalcApproximationCP_LSM(Q2_,S_,S,PNum_u,N[0],Mu,K[0],Q3_);		// 最小2乗法で近似コントロールポイントを求める
+		for ( int j=0; j<K[0]; j++ ) Q3[i][j] = Q3_[j];
 	}
 	TranMx(Q3,K[1],K[0],Q4);					// Qの転置
 
