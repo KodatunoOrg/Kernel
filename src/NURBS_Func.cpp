@@ -193,7 +193,7 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVe
 	Nurbs->V = V;
 //	Nurbs->T.resize(Nurbs->N);
 //	Nurbs->W.resize(Nurbs->K);
-//	Nurbs->cp.resize(boost::extents[Nurbs->K]);
+	Nurbs->cp.resize(boost::extents[Nurbs->K]);
 	Nurbs->EntUseFlag = euflag;
     Nurbs->BlankStat = DISPLAY;     // デフォルトで描画要素に設定
 	
@@ -202,7 +202,7 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVe
 	}
 	Nurbs->T = T;
 	Nurbs->W = W;
-	Nurbs->cp = cp;
+	Nurbs->cp = cp;		// resize()しないと，単純代入はASSERTエラー
 	Nurbs->Dstat.Color[0] = Nurbs->Dstat.Color[1] = Nurbs->Dstat.Color[2] = 1.0;
 	Nurbs->Dstat.Color[3] = 0.5;
 
@@ -230,7 +230,7 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC* nurb)
 	
 //	Nurbs->T.resize(Nurbs->N);
 //	Nurbs->W.resize(Nurbs->K);
-//	Nurbs->cp.resize(boost::extents[Nurbs->K]);
+	Nurbs->cp.resize(boost::extents[Nurbs->K]);
 
 	Nurbs->T = nurb->T;
 	Nurbs->W = nurb->W;
@@ -293,7 +293,7 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,ublasVector&
 	Nurbs->S = S;
 	Nurbs->T = T;
 	Nurbs->W = W;
-	Nurbs->cp = Cp;
+	Nurbs->cp = Cp;		// New_NurbsS()でresize()
 
 	for(int i=0;i<Nurbs->K[0];i++){
 		for(int j=0;j<Nurbs->K[1];j++){
