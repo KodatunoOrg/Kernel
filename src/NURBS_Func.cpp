@@ -4517,7 +4517,7 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 		// --- AACoordからACoordを取り出す書き方がわかれば，こんなこと書く必要ない！ ---
 		ACoord	P_(boost::extents[P.shape()[1]]),
 				Q1_(boost::extents[K[1]]);
-		for ( int j=0; j<P_.shape()[0]; j++ ) P_[j] = P[i][j];
+		for ( int j=0; j<P.shape()[1]; j++ ) P_[j] = P[i][j];		// P_.shape()[0]だと勘違いしそうなので
 //		CalcApproximationCP_LSM(P[i],T_,T,PNum_v,N[1],Mv,K[1],Q1[i]);	// 最小2乗法で近似コントロールポイントを求める
 		CalcApproximationCP_LSM(P_,T_,T,PNum_v,N[1],Mv,K[1],Q1_);		// 最小2乗法で近似コントロールポイントを求める
 		for ( int j=0; j<K[1]; j++ ) Q1[i][j] = Q1_[j];
