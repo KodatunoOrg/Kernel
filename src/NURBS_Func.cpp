@@ -3073,7 +3073,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 			}
 
 			// 連立方程式を解き、パラメータを更新
-			Gauss(3,J,D,ans);
+			Gauss(J,D,ans);
 			dt = ans[0];
 			du = ans[1];
 			dv = ans[2];
@@ -3117,7 +3117,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 			}
 			
 			// 連立方程式を解き、パラメータを更新
-			Gauss(3,J,D,ans);
+			Gauss(J,D,ans);
 			dw = ans[0];
 			du = ans[1];
 			dv = ans[2];
@@ -3161,7 +3161,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 			}
 			
 			// 連立方程式を解き、パラメータを更新
-			Gauss(3,J,D,ans);
+			Gauss(J,D,ans);
 			dw = ans[0];
 			dt = ans[1];
 			dv = ans[2];
@@ -3205,7 +3205,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 			}
 			
 			// 連立方程式を解き、パラメータを更新
-			Gauss(3,J,D,ans);
+			Gauss(J,D,ans);
 			dw = ans[0];
 			dt = ans[1];
 			du = ans[2];
@@ -4114,7 +4114,7 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,ACoord& P,int PNum,int M)
 	}
 
 	// Bスプライン基底関数行列の逆行列を求める
-	double det = Gauss(K,B,P,Q);
+	double det = Gauss(B,P,Q);
 	if(det == 0){
 //		GuiIFB.SetMessage("NURBS ERROR:Determinant is 0");
 		retflag = KOD_ERR;
@@ -4213,7 +4213,7 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,ACoord& P_,int PNum,int M)
 	B(K-1,K-1) = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-1,M,2);
 
 	// コントロールポイントを得る
-	Gauss(K,B,P,Q);
+	Gauss(B,P,Q);
 
 	//for(int i=0;i<K;i++)
 	//	fprintf(stderr,"%lf,%lf,%lf\n",Q[i].x,Q[i].y,Q[i].z);
@@ -4422,10 +4422,10 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	}
 
 	// u方向のBスプライン基底関数行列の逆行列を求める
-	MatInv(K[0],Bu,Bu_);
+	MatInv(Bu,Bu_);
 
 	// v方向のBスプライン基底関数行列の逆行列を求める
-	MatInv(K[1],Bv,Bv_);
+	MatInv(Bv,Bv_);
 
 	// アイソパラ曲線のコントロールポイントを得る
 	PT = TranMx(P);
@@ -6211,7 +6211,7 @@ void NURBS_Func::CalcApproximationCP_LSM(ACoord& P,ublasVector& T_,ublasVector& 
 	NTN = MulMxMx(NT,N);					// calc NTN
 
 	ACoord Q_(boost::extents[K-2]);
-	Gauss(K-2,NTN,R,Q_);
+	Gauss(NTN,R,Q_);
 
 	// コントロールポイント
 	Q[0]   = P[0];

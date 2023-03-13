@@ -82,6 +82,10 @@ typedef boost::array<double, 4>	A4double;
 typedef boost::array<double, 3>	A3double;
 typedef boost::array<double, 2>	A2double;
 
+// Typedef: vector<int>
+// int型の可変長1次元配列をVintとして定義
+typedef std::vector<int>		Vint;
+
 // Typedef: array<int, n>
 // A[n]int - int型の固定配列をA[n]intとして定義
 typedef boost::array<int, 5>	A5int;
@@ -314,7 +318,7 @@ FRAME InvFrame(const FRAME&);
 
 // Function: RotToZYZEuler
 // 回転行列をZYZオイラー角へ変換
-Coord RotToZYZEuler(Coord []);					
+Coord RotToZYZEuler(const A3Coord&);
 
 // Function: InitFrame
 // FRAMEの初期化
@@ -361,35 +365,35 @@ A3Coord TranMx(const A3Coord&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める
-double Gauss(int,ublasMatrix&,ublasVector&,ublasVector&);
+double Gauss(const ublasMatrix&, const ublasVector&, ublasVector&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める(オーバーロード)
-double Gauss(int,ublasMatrix&,ACoord&,ACoord&);
+double Gauss(const ublasMatrix&, const ACoord&, ACoord&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く
-void LU_Solver(int,ublasMatrix&,ublasVector&,int*,ublasVector&);
+ublasVector LU_Solver(const ublasMatrix&,const ublasVector&, Vint&);
 
 // Function: LU_Solver
 // LU分解の結果から連立1次方程式を解く(オーバーロード)
-void LU_Solver(int,ublasMatrix&,ACoord&,int*,ACoord&);
+ACoord LU_Solver(const ublasMatrix&, const ACoord&, Vint&);
 
 // Function: LU
 // LU分解
-double LU(int,ublasMatrix&,int *);					
+double LU(const ublasMatrix&, Vint&);
 
 // Function: MatInv
 // 逆行列を求める
-double MatInv(int,ublasMatrix&,ublasMatrix&);				
+double MatInv(const ublasMatrix&, ublasMatrix&);				
 
 // Function: MatInv3
 // 3x3の逆行列
-double MatInv3(ublasMatrix&,ublasMatrix&);					
+double MatInv3(const ublasMatrix&, ublasMatrix&);
 
 // Function: MatInv2
 // 2x2の逆行列
-double MatInv2(ublasMatrix&,ublasMatrix&);					
+double MatInv2(const ublasMatrix&, ublasMatrix&);
 
 
 // Group: Functions(数値計算)

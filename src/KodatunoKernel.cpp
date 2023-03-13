@@ -1607,7 +1607,7 @@ FRAME MulFrame(const FRAME& a, const FRAME& b)
 //
 // Return:
 // 計算結果(deg)
-Coord RotToZYZEuler( Coord rot[])
+Coord RotToZYZEuler(const A3Coord& rot)
 {
 	Coord tmp;	// 0
 
@@ -1653,18 +1653,15 @@ void InitFrame(FRAME *f)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,ublasMatrix& a,ublasVector& b,ublasVector& x)
+double Gauss(const ublasMatrix& a, const ublasVector& b, ublasVector& x)
 {
 	long double det;	// 行列式
-	int *ip;			// 行交換の情報
+	int		n = a.size1();
+	Vint	ip(n);		// 行交換の情報 new int[n]
 
-	ip = new int[n];
-
-	det = LU(n,a,ip);					// LU分解
-	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
-
-	delete[] ip;
+	det = LU(a,ip);					// LU分解
+	if(det == 0) return KOD_FALSE;	// 行列式が0
+	else x = LU_Solver(a,b,ip);		// LU分解の結果を使って連立方程式を解く
 
 	return det;					// 戻り値は行列式
 }
@@ -1678,18 +1675,15 @@ double Gauss(int n,ublasMatrix& a,ublasVector& b,ublasVector& x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double Gauss(int n,ublasMatrix& a,ACoord& b,ACoord& x)
+double Gauss(const ublasMatrix& a, const ACoord& b, ACoord& x)
 {
 	long double det;	// 行列式
-	int *ip;			// 行交換の情報
+	int		n = a.size1();
+	Vint	ip(n);		// 行交換の情報 new int[n]
 
-	ip = new int[n];
-
-	det = LU(n,a,ip);					// LU分解
+	det = LU(a,ip);						// LU分解
 	if(det == 0) return KOD_FALSE;		// 行列式が0
-	else LU_Solver(n,a,b,ip,x);	// LU分解の結果を使って連立方程式を解く
-
-	delete[] ip;                   
+	else x = LU_Solver(a,b,ip);			// LU分解の結果を使って連立方程式を解く
 
 	return det;					// 戻り値は行列式
 }
@@ -1702,10 +1696,11 @@ double Gauss(int n,ublasMatrix& a,ACoord& b,ACoord& x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺ベクトル  
 // ip - 行交換の情報
-void LU_Solver(int n,ublasMatrix& a,ublasVector& b,int *ip,ublasVector& x)
+ublasVector LU_Solver(const ublasMatrix& a,const ublasVector& b, Vint& ip)
 {
-	int ii;
+	int ii, n = a.size1();
 	double t;
+	ublasVector x(n);
 
 	for(int i=0;i<n;i++) {       // Gauss消去法の残り
 		ii = ip[i];
@@ -1721,6 +1716,8 @@ void LU_Solver(int n,ublasMatrix& a,ublasVector& b,int *ip,ublasVector& x)
 			t -= a(ii,j)*x[j];
 		x[i] = t/a(ii,i);
 	}
+
+	return x;
 }
 
 // Function: LU_Solver
@@ -1731,10 +1728,11 @@ void LU_Solver(int n,ublasMatrix& a,ublasVector& b,int *ip,ublasVector& x)
 // a - n*nの係数行列 (注意:出力としてLU分解された結果が格納される)
 // b - n次元の右辺Coord配列  
 // ip - 行交換の情報
-void LU_Solver(int n,ublasMatrix& a,ACoord& b,int *ip,ACoord& x)
+ACoord LU_Solver(const ublasMatrix& a, const ACoord& b, Vint& ip)
 {
-	int ii;
+	int ii, n = a.size1();
 	Coord t;
+	ACoord x(boost::extents[n]);
 
 	for(int i=0;i<n;i++) {       // Gauss消去法の残り
 		ii = ip[i];
@@ -1750,6 +1748,8 @@ void LU_Solver(int n,ublasMatrix& a,ACoord& b,int *ip,ACoord& x)
 			t -= x[j] * a(ii,j);
 		x[i] = t / a(ii,i);
 	}
+
+	return x;
 }
 
 // Function: MatInv
@@ -1762,15 +1762,13 @@ void LU_Solver(int n,ublasMatrix& a,ACoord& b,int *ip,ACoord& x)
 //
 // Return:
 // 行列式(メモリーエラー：KOD_ERR)
-double MatInv(int n,ublasMatrix& a,ublasMatrix& a_inv)
+double MatInv(const ublasMatrix& a,ublasMatrix& a_inv)
 {
-	int i, j, k, ii;
+	int i, j, k, ii, n = a.size1();
 	long double t, det;
-	int *ip;		// 行交換の情報
+	Vint ip(n);		// 行交換の情報 new int[n]
 
-	ip = new int[n];
-
-	det = LU(n,a,ip);		// LU分解
+	det = LU(a,ip);		// LU分解
 	if(det != 0){
 		for(k=0;k<n;k++){
 			for(i=0;i<n;i++){
@@ -1790,8 +1788,6 @@ double MatInv(int n,ublasMatrix& a,ublasMatrix& a_inv)
 		}
 	}
 
-	delete[] ip;
-
 	return det;
 }
 
@@ -1805,11 +1801,12 @@ double MatInv(int n,ublasMatrix& a,ublasMatrix& a_inv)
 //
 // Return:
 // 行列式
-double LU(int n,ublasMatrix& a,int *ip)
+double LU(const ublasMatrix& aa, Vint& ip)
 {
-	int i, j, k, ii, ik;
+	int i, j, k, ii, ik, n = aa.size1();
 	long double t, u, det;
 	ublasVector weight(n);    /* weight[0..n-1] の記憶領域確保 */
+	ublasMatrix a(aa);			// 引数aaはconst指示（ここで変更しない）
 
 	det = 0;                   /* 行列式 */
 	for (k = 0; k < n; k++) {  /* 各行について */
@@ -1861,7 +1858,7 @@ EXIT:
 //
 // Return:
 // 行列式
-double MatInv3(ublasMatrix& A,ublasMatrix& A_inv)
+double MatInv3(const ublasMatrix& A, ublasMatrix& A_inv)
 {
 	double det;
 	det = A(0,0)*A(1,1)*A(2,2) + A(1,0)*A(2,1)*A(0,2) + A(2,0)*A(0,1)*A(1,2)
@@ -1891,7 +1888,7 @@ double MatInv3(ublasMatrix& A,ublasMatrix& A_inv)
 //
 // Return:
 // 行列式
-double MatInv2(ublasMatrix& A,ublasMatrix& A_inv)
+double MatInv2(const ublasMatrix& A, ublasMatrix& A_inv)
 {
 	double det;
 
