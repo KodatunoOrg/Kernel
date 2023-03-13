@@ -765,42 +765,6 @@ Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 	return A + (u*k);
 }
 
-// Function: Reverse
-// Coord配列の反転
-// 
-// Parameters:
-// p[] - Coord配列
-// n - pの要素数
-void Reverse(Coord p[],int n)
-{
-	int i,j;
-	Coord temp;
-
-	for(i=0,j=n-1;i<j;i++,j--){
-		temp = p[i];
-		p[i] = p[j];
-		p[j] = temp;
-	}
-}
-
-// Function: Reverse
-// double型配列の反転操作(オーバーロード)
-//
-// Parameters:
-// p[] - double配列
-// n - pの要素数
-void Reverse(double p[],int n)
-{
-	int i,j;
-	double temp;
-
-	for(i=0,j=n-1;i<j;i++,j--){
-		temp = p[i];
-		p[i] = p[j];
-		p[j] = temp;
-	}
-}
-
 // Function: CalcCubicEquation
 // 3次方程式を解く
 //

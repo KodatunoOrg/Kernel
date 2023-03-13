@@ -1,5 +1,5 @@
 ﻿#include <stdexcept>	// throw
-#include <algorithm>	// reverse
+#include <algorithm>	// reverse ほか
 #include "KodatunoKernel.h"
 
 // Function: New_NurbsC

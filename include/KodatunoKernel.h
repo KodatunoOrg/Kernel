@@ -476,14 +476,6 @@ int CheckRange(double,double,double,int);
 // 2つの値の大小比較 
 int CheckMag(double,double,int);		
 
-// Function: Reverse
-// Coord配列の反転操作
-void Reverse(Coord [],int);				
-
-// Function: Reverse
-// double配列の反転操作
-void Reverse(double [],int);			
-
 // Function: CatCoord
 // ある配列の後ろに新たな配列を繋げる
 int CatCoord(ACoord&, ACoord&,int,int,int);	
