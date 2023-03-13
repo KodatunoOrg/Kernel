@@ -1425,19 +1425,13 @@ int IGES_PARSER::SearchMaxCoord(BODY *body,int TypeNum[])
 	int i,j;
 	int temp=0;
 	int bufnum=0;
-	double *CoordBuf;
 	
 	// #100(円、円弧)、#110(線分)、#126(NURBS曲線)のコントロールポイントの座標値の個数を得る
 	for(i=0;i<TypeNum[_NURBSC];i++){
 		bufnum += 3*body->NurbsC[i].K;
 	}
 	
-	// メモリ確保
-try {	
-	CoordBuf = new double[bufnum];
-	if ( !CoordBuf ) {
-		throw std::bad_alloc();
-	}
+	std::vector<double> CoordBuf(bufnum);	// new double[bufnum]
 
 	// #100(円、円弧)、#110(線分)、#126(NURBS曲線)のコントロールポイントの座標値を得る
 	for(i=0;i<TypeNum[_NURBSC];i++){
@@ -1449,15 +1443,8 @@ try {
 		}
 	}
 	
-	qsort(CoordBuf,bufnum,sizeof(double),QCmp);	// 全ての座標値をクイックソートにより降順にソート
-	body->MaxCoord = CoordBuf[0];				// 最も大きい座標値を得る
+	body->MaxCoord = *std::max_element(CoordBuf.begin(), CoordBuf.end());	// 最も大きい座標値を得る
 
-	// メモリ解放
-	delete[] CoordBuf;
-}
-catch(std::bad_alloc&)	{
-	return KOD_ERR;
-}
 	return KOD_TRUE;
 }
 

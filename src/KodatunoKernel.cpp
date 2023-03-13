@@ -765,72 +765,6 @@ Coord Coord::CalcNormalLine(const Coord& A, const Coord& u) const
 	return A + (u*k);
 }
 
-// Function: BubbleSort
-// int型配列のバブルソート(基本交換法)
-// 
-// Parameters:
-// array[] - ソートされる数値配列
-// array_size - 配列要素数
-void BubbleSort(int array[],int array_size)
-{
-	int i,j,temp;
-
-	for(i=0;i<array_size-1;i++){
-		for(j=array_size-1;j>i;j--){
-			if(array[j-1]>=array[j]) {
-				temp = array[j];
-				array[j] = array[j-1];
-				array[j-1] = temp;
-			}
-		}
-	}
-}
-
-// Function: BubbleSort
-// double型配列のバブルソート(基本交換法)(オーバーロード)
-// 
-// Parameters:
-// array[] - ソートされる数値配列
-// array_size - 配列要素数
-void BubbleSort(double array[],int array_size)
-{
-	int i,j;
-	double temp;
-
-	for(i=0;i<array_size-1;i++){
-		for(j=array_size-1;j>i;j--){
-			if(array[j-1]>=array[j]) {
-				temp = array[j];
-				array[j] = array[j-1];
-				array[j-1] = temp;
-			}
-		}
-	}
-}
-
-// Function: QCmp
-// C言語標準関数qsort(double型、降順)で用いる比較関数
-//
-// Parameters:
-// *a,*b - 比較するdouble型の数値
-//
-// Return:
-// a<b：1, a>b：-1, a=b：0
-int QCmp(const void*a,const void*b)
-{
-	double *x,*y;
-
-	x = (double*)a;
-	y = (double*)b;
-
-	if(*x < *y)
-		return 1;
-	else if(*x > *y)
-		return -1;
-	else
-		return 0;
-}
-
 // Function: Reverse
 // Coord配列の反転
 // 
@@ -876,14 +810,15 @@ void Reverse(double p[],int n)
 //
 // Return:
 // 解が3つとも実根の場合は3、1つだけ実根の場合は1  a[0]==0の場合はKOD_ERR
-int CalcCubicEquation(ublasVector& p,ublasVector& ans)
+int CalcCubicEquation(const ublasVector& p, ublasVector& ans)
 {
 	// x^3の係数が0の場合
 	if(fabs(p[0]) < APPROX_ZERO_H){
-		p[0] = p[1];
-		p[1] = p[2];
-		p[2] = p[3];
-		return(CalcQuadraticEquation(p,ans));	// 2次方程式を解く
+		ublasVector a(3);
+		a[0] = p[1];
+		a[1] = p[2];
+		a[2] = p[3];
+		return(CalcQuadraticEquation(a,ans));	// 2次方程式を解く
 	}
 
 	double a = p[0];
@@ -971,14 +906,15 @@ int CalcCubicEquation(ublasVector& p,ublasVector& ans)
 //
 // Return:
 // 解が実根の場合は2、虚根の場合はKOD_ERR  a[0]==0の場合はKOD_ERR
-int CalcQuadraticEquation(ublasVector& a,ublasVector& ans)
+int CalcQuadraticEquation(const ublasVector& a, ublasVector& ans)
 {
 	double Q,R;
 
 	if(fabs(a[0]) < APPROX_ZERO_H){
-		a[0] = a[1];
-		a[1] = a[2];
-		return(CalcLinearEquation(a,ans));
+		ublasVector b(2);
+		b[0] = a[1];
+		b[1] = a[2];
+		return(CalcLinearEquation(b,ans));
 	}
 
 	Q = a[1]*a[1] - 4*a[0]*a[2];
@@ -1005,7 +941,7 @@ int CalcQuadraticEquation(ublasVector& a,ublasVector& ans)
 // 
 // Return:
 // a[0]==0の場合はKOD_ERR
-int CalcLinearEquation(ublasVector& a,ublasVector& ans)
+int CalcLinearEquation(const ublasVector& a, ublasVector& ans)
 {
 	if(fabs(a[0]) < APPROX_ZERO_H){
 		return KOD_FALSE;

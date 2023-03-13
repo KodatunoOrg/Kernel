@@ -528,7 +528,7 @@ private:
 
 	// Function: CalcEquation
 	// (private)3次方程式までを判別して解く
-	int CalcEquation(ublasVector&,ublasVector&,int);					
+	int CalcEquation(const ublasVector&, ublasVector&, int);
 
 	// Function: GetNurbsSCoef
 	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める

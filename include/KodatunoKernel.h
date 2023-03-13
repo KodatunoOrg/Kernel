@@ -408,15 +408,15 @@ double RadToDeg(double radian);
 
 // Function: CalcCubicEquation
 // 3次方程式の解を求める
-int CalcCubicEquation(ublasVector&,ublasVector&);
+int CalcCubicEquation(const ublasVector&, ublasVector&);
 
 // Function: CalcQuadraticEquation
 // 2次方程式の解を求める
-int CalcQuadraticEquation(ublasVector&,ublasVector&);	
+int CalcQuadraticEquation(const ublasVector&, ublasVector&);	
 
 // Function: CalcLinearEquation
 // 1次方程式の解を求める
-int CalcLinearEquation(ublasVector&,ublasVector&);
+int CalcLinearEquation(const ublasVector&, ublasVector&);
 
 // Function: nCr
 // 2項係数(nCrの組合せ総数)を求める
@@ -475,18 +475,6 @@ int CheckRange(double,double,double,int);
 // Function: CheckMag
 // 2つの値の大小比較 
 int CheckMag(double,double,int);		
-
-// Function: BubbleSort
-// バブルソート(基本交換法)
-void BubbleSort(int[],int);				
-
-// Function: BubbleSort
-// オーバーロード
-void BubbleSort(double[],int);			
-
-// Function: QCmp
-// クイックソート 
-int QCmp(const void *,const void *);	
 
 // Function: Reverse
 // Coord配列の反転操作

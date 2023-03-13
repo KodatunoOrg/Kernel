@@ -3045,8 +3045,7 @@ int NURBS_Func::SearchIntersectPt(NURBSS *nurbR,NURBSS *nurbS,double ds,double *
 	double du = -f2*phi2*ds;
 	double dv = g2*phi2*ds;
 	double sort[4] = {fabs(dw),fabs(dt),fabs(du),fabs(dv)};	// ソート用変数を用意
-	BubbleSort(sort,4);					// 昇順にソート
-	double max_delta = sort[3];				// 各パラメータの中で最大値を得る
+	double max_delta = *std::max_element(std::begin(sort), std::end(sort));		// 各パラメータの中で最大値を得る
 
 	// ニュートン法を用いてw,t,u,vを真値に収束させる
 	int k=0;	// 収束計算回数を初期化
@@ -3679,7 +3678,7 @@ EXIT:
 //
 // Return:
 // 解の個数（解がなかった場合 or 次数が3,2,1のいずれかでない：KOD_ERR）
-int NURBS_Func::CalcEquation(ublasVector& a,ublasVector& t,int M)
+int NURBS_Func::CalcEquation(const ublasVector& a, ublasVector& t, int M)
 {
 	int flag;
 
