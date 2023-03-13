@@ -234,11 +234,11 @@ public:
 
 	// Function: CalcIntersecPtsPlaneSearch
 	// NURBS曲面と平面との交点群を交線追跡法で求める
-	int CalcIntersecPtsPlaneSearch(NURBSS *,Coord,Coord,double,int,ACoord&,int,int);	
+	VCoord CalcIntersecPtsPlaneSearch(NURBSS*, const Coord&, const Coord&, double, int, int);
 
 	// Function: CalcIntersecPtsOffsetPlaneSearch
 	// オフセットNURBS曲面と平面との交点群を交線追跡法で求める(準備中)
-	int CalcIntersecPtsOffsetPlaneSearch(NURBSS *,double,Coord,Coord,double,int,ACoord&,int);
+	VCoord CalcIntersecPtsOffsetPlaneSearch(NURBSS *,double, const Coord&, const Coord&, double,int);
 
 	// Function: CalcIntersecPtsNurbsSNurbsC
 	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
@@ -600,7 +600,7 @@ private:
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
-	int RemoveTheSamePoints(NURBSS *,ACoord&,int);					
+	VCoord RemoveTheSamePoints(NURBSS *, const VCoord&);					
 
 	// Function: CalcDiffNurbsSDenom
 	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める

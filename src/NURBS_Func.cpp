@@ -1892,10 +1892,11 @@ int NURBS_Func::CalcIntersecPtsPlaneGeom(NURBSS *nurb,Coord pt,Coord nf,int u_di
 //
 // Return:
 // KOD_FALSE:NURBS曲面と平面が交差していない　KOD_ERR:特異点または発散により処理を中断
-int NURBS_Func::CalcIntersecPtsOffsetPlaneSearch(NURBSS *nurb,double os,Coord pt,Coord nvec,double ds,int initdivnum,ACoord& ans,int ans_size)
+VCoord NURBS_Func::CalcIntersecPtsOffsetPlaneSearch(NURBSS *nurb,double os, const Coord& pt, const Coord& nvec,double ds,int initdivnum)
 {
-	pt.dmy = os;
-	return CalcIntersecPtsPlaneSearch(nurb,pt,nvec,ds,initdivnum,ans,ans_size,CALC_OFFSET);
+	Coord dmy(pt);
+	dmy.dmy = os;
+	return CalcIntersecPtsPlaneSearch(nurb,dmy,nvec,ds,initdivnum,CALC_OFFSET);
 }
 
 // 平面とオフセットNURBS曲面との交点を補助平面を用いて数点求める
@@ -1963,11 +1964,11 @@ int NURBS_Func::CalcIntersecPtsOffsetPlaneGeom(NURBSS *S,double d,Coord pt,Coord
 //
 // Return:
 // 返値　KOD_FALSE:NURBS曲面と平面が交差していない　KOD_ERR:特異点または発散により処理を中断
-int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,double ds,int initdivnum,ACoord& ans,int ans_size,int method)
+VCoord NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb, const Coord& pt, const Coord& nvec, double ds, int initdivnum, int method)
 {
-	int loop_count=0;		// 収束計算のループ数
+	VCoord ans;			// 戻り値
+	int loop_count=0;	// 収束計算のループ数
 	int pcount=0;
-	int anscount=0;
 	Coord oldp;
 	Coord newp;
 	ACoord init_pt(boost::extents[INTERSECPTNUMMAX]);		// 初期点(u,vパラメータ値)
@@ -2007,9 +2008,9 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 	init_pt_num = CheckTheSamePoints(init_pt,init_pt_num);		// 同一点は除去する
 	if(!init_pt_num){		// 見つからない場合は、交差していないとみなす
 //		GuiIFB.SetMessage("NURBS KOD_ERROR:Init intersection point is noexistence");
-		return KOD_FALSE;					
+		return VCoord();					
 	}
-	else if(init_pt_num == KOD_ERR) return KOD_ERR;			// init_pt_numがinit_ptの配列長を超えた
+	else if(init_pt_num == KOD_ERR) return VCoord();	// init_pt_numがinit_ptの配列長を超えた
 
 	for(int i=0;i<init_pt_num;i++){
 		init_pt_Coord[i] = CalcNurbsSCoord(nurb,init_pt[i].x,init_pt[i].y);		// 交点のuvパラメータをxyz座標値に変換したものを保持しておく
@@ -2023,8 +2024,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 		// 交線追跡のための始点(u,v)をセット
 		u = oldp.x = init_pt[pcount].x;
 		v = oldp.y = init_pt[pcount].y;
-		ans[anscount] = init_pt[pcount];
-		anscount++;
+		ans.push_back(init_pt[pcount]);
 		init_pt_flag[pcount] = KOD_TRUE;
 		init_pt_flag_count++;
 		//if(init_pt_flag_count == init_pt_num && init_pt_num > 1)	break;
@@ -2035,7 +2035,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 
 		// 交線追跡開始
 		loop_count = 0;
-		while(loop_count < ans_size){
+		while(loop_count < ans.size()){
 			// 順方向に交線追跡
 			if(inverse_flag == KOD_FALSE){
 				if(method == RUNGE_KUTTA)	search_flag = SearchIntersectPt_RKM(nurb,pt,nvec,ds,&u,&v,FORWARD);	// 順方向の交点算出
@@ -2057,8 +2057,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 				if(search_flag == KOD_ERR){					// 特異点検出により処理を継続できない場合
 					//fprintf(stderr,"b,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 //					GuiIFB.SetMessage("NURBS_FUNC CAUTION: Singler point was ditected.");
-//					break;
-					return KOD_FALSE;	// 変な情報を返すよりもゼロ扱いで by K.Magara
+					break;
 				}
 				//fprintf(stderr,"f,%d,%d,%lf,%lf\n",search_flag,inverse_flag,u,v);	// for debug
 			}
@@ -2067,8 +2066,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 			if(search_flag == KOD_FALSE){
 				newp = CalcIntersecPtsPlaneSearch_Sub(nurb,u,v,pt,nvec);		// 面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
 				//fprintf(stderr,"c,%d,%d,%.12lf,%.12lf\n",search_flag,inverse_flag,newp.x,newp.y);	// for debug
-				ans[anscount] = newp;				// 得られたu,vを交線(交点群)として登録
-				anscount++;							// 交点群の数をインクリメント
+				ans.push_back(newp);				// 得られたu,vを交線(交点群)として登録
 				// 初期点が交線追跡法によって全て通過したか調べる
 				for(int i=0;i<init_pt_num;i++){
 					if(CheckClossedPoints(oldp,newp,init_pt[i]) == KOD_TRUE){ // 新たに算出された交点と1つ前の交点を対角とする立方体の中に初期点が含まれていたら
@@ -2120,16 +2118,7 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 				break;
 			}
 
-			ans[anscount] = newp;	// 得られたu,vを交線(交点群)として登録
-			anscount++;				// 交点群の数をインクリメント
-
-			// 交点の数が指定サイズを超えた場合はそこまでで強制リターン
-			if(anscount >= ans_size){
-//				GuiIFB.SetMessage("NURBS KOD_ERROR:Intersection points exceeded the allocated array length");
-//				GuiIFB.SetMessage("There is a possibility that you set large ds.");
-                anscount = RemoveTheSamePoints(nurb,ans,anscount);
-				return anscount;
-			}
+			ans.push_back(newp);	// 得られたu,vを交線(交点群)として登録
 
 			oldp = newp;		// このループで算出された交点は次のループでは1個前の交点となる
 
@@ -2148,12 +2137,12 @@ int NURBS_Func::CalcIntersecPtsPlaneSearch(NURBSS *nurb,Coord pt,Coord nvec,doub
 		}
 		//fprintf(stderr,"%d:loop count:%d\n",init_allpt_flag,loop_count);	// debug
 	}
-	anscount = RemoveTheSamePoints(nurb,ans,anscount);
+	ans = RemoveTheSamePoints(nurb,ans);
 	//anscount = CheckTheSamePoints(ans,anscount);
 
 	//fclose(fp);
 
-	return anscount;
+	return ans;
 }
 
 // Function: CheckClossedPoints
@@ -5626,8 +5615,9 @@ int NURBS_Func::CalcDeltaPtsOnNurbsS(NURBSS *S,int Du,int Dv,AACoord& Pts)
 //
 // Return:
 // 変更後の点数
-int NURBS_Func::RemoveTheSamePoints(NURBSS *S,ACoord& Q,int N)
+VCoord NURBS_Func::RemoveTheSamePoints(NURBSS *S, const VCoord& Q)
 {
+	int N = Q.size();
 	ACoord P(boost::extents[N]);
 
 	for(int i=0;i<N;i++){
@@ -5643,15 +5633,15 @@ int NURBS_Func::RemoveTheSamePoints(NURBSS *S,ACoord& Q,int N)
 			}
 		}
 	}
-	int k=0;
+
+	VCoord result;
 	for(int i=0;i<N;i++){
 		if(P[i].dmy != KOD_TRUE){
-			Q[k] = Q[i];
-			k++;
+			result.push_back(Q[i]);
 		}
 	}
 
-	return k;
+	return result;
 }
 
 // Function: CalcExtremumNurbsC
@@ -5759,27 +5749,24 @@ int NURBS_Func::CalcExtGradCurve(NURBSS *S,Coord n,Coord pt,double ds,NURBSC *C1
 // KOD_TRUE
 int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 {
-	ACoord t(boost::extents[2000]);	// 解
-	int   num;						// 解の数
 	double pcolor[3] = {0,1,0};		// 表示の色
 	double tcolor[3] = {1,0,0};
 
-
-	num = CalcIntersecPtsPlaneSearch(Trm->pts,pt,nvec,0.5,5,t,2000,RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
+	VCoord t = CalcIntersecPtsPlaneSearch(Trm->pts,pt,nvec,0.5,5,RUNGE_KUTTA);		// NURBS曲面と平面との交点群を交線追跡法で求める
 	
 	// パラメトリック領域内で直線近似(最小2乗法で近似直線の係数2つを求める)
 	ublasMatrix A(2,2);
 	ublasMatrix A_(2,2);
 	ublasVector B(2);
 	ublasVector B_(2);
-	for(int i=0;i<num;i++){
+	for(int i=0;i<t.size();i++){
 		A(0,0) += t[i].x*t[i].x;
 		A(0,1) += t[i].x;
 		B[0] += t[i].x*t[i].y;
 		B[1] += t[i].y;
 	}
 	A(1,0) = A(0,1);
-	A(1,1) = (double)num;
+	A(1,1) = t.size();
 	MatInv2(A,A_);
 	B_ = MulMxVec(A_,B);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
 
@@ -5811,7 +5798,7 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 	
 
 	FILE *fp = fopen("Debug.csv","w");
-	for(int i=0;i<num;i++){
+	for(int i=0;i<t.size();i++){
 		Coord p = CalcNurbsSCoord(Trm->pts,t[i].x,t[i].y);			// 交点をパラメータ値から座標値へ変換
 		DrawPoint(p,1,3,pcolor);			// 交点を描画
 		fprintf(fp,"%lf,%lf\n",t[i].x,t[i].y);
