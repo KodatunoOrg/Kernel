@@ -1262,11 +1262,12 @@ double CalcPolygonArea(Coord p[],int Vnum)
 //
 // Return:
 // 計算結果
-double ClacPolygonArea2D(ACoord& p,int Vnum)
+double ClacPolygonArea2D(const ACoord& p)
 {
+	auto Vnum = p.shape()[0];
 	double area=0;
 
-	for(int i=0;i<Vnum;i++){
+	for(auto i=0;i<Vnum;i++){
 		area += p[i].CalcOuterProduct2D(p[(i+1)%Vnum]);
 	}
 
@@ -1282,15 +1283,17 @@ double ClacPolygonArea2D(ACoord& p,int Vnum)
 //
 // Return:
 // CCW：KOD_TRUE     CW：KOD_FALSE
-int DiscriminateCW2D(ACoord& p,int Vnum)
+int DiscriminateCW2D(const ACoord& p)
 {
+	auto Vnum = p.shape()[0];
+
 	// 指定点数が1点以下の場合
 	if(Vnum <= 2)
 		return KOD_ERR;
 
 	// 指定点数が3点以上の場合
 	else{
-		if(ClacPolygonArea2D(p,Vnum) > 0)	// CCW
+		if(ClacPolygonArea2D(p) > 0)	// CCW
 			return CCW;
 
 		else	// CW
@@ -1306,14 +1309,15 @@ int DiscriminateCW2D(ACoord& p,int Vnum)
 // Parameters:
 // A,B,C - [C] = [A] +[B]
 // row,col - 行，列要素数
-void AddMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
+ublasMatrix AddMxMx(const ublasMatrix& A, const ublasMatrix& B)
 {
 //	for(int i=0;i<row;i++){
 //		for(int j=0;j<col;j++){
 //			C[i][j] = A[i][j] + B[i][j];
 //		}
 //	}
-	C = A + B;
+	ublasMatrix C = A + B;
+	return C;
 }
 
 // Function: MulMxMx
@@ -1323,7 +1327,7 @@ void AddMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
 // A,B,C - [C] = [A][B]
 // A_row, A_col - 行列Aの行，列要素数
 // B_row, B_col - 行列Bの行，列要素数
-void MulMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
+ublasMatrix MulMxMx(const ublasMatrix& A, const ublasMatrix& B)
 {
 //	for(int i=0;i<A_row;i++){
 //		for(int k=0;k<B_col;k++){
@@ -1340,7 +1344,8 @@ void MulMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
 //			}
 //		}
 //	}
-	C = ublas::prod(A, B);
+	ublasMatrix C = ublas::prod(A, B);
+	return C;
 }	
 
 // Function: MulMxVec
@@ -1351,7 +1356,7 @@ void MulMxMx(ublasMatrix& A,ublasMatrix& B,ublasMatrix& C)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(ublasMatrix& A,ublasVector& B,ublasVector& C)
+ublasVector MulMxVec(const ublasMatrix& A, const ublasVector& B)
 {
 //	for(int i=0;i<A_row;i++){
 //		C[i] = 0;
@@ -1359,7 +1364,8 @@ void MulMxVec(ublasMatrix& A,ublasVector& B,ublasVector& C)
 //			C[i] += A[i][j] * B[j];
 //		}
 //	}
-	C = ublas::prod(A, B);
+	ublasVector C = ublas::prod(A, B);
+	return C;
 }
 
 // Function: MulMxVec
@@ -1375,8 +1381,9 @@ void MulMxVec(ublasMatrix& A,ublasVector& B,ublasVector& C)
 // A_row - 行数  
 // A_col - 列数  
 // B_row - ベクトルの次元数
-void MulMxVec(ublasMatrix& A,ACoord& B,ACoord& C)
+ACoord MulMxVec(const ublasMatrix& A, const ACoord& B)
 {
+	ACoord C(boost::extents[A.size1()]);
 	for(int i=0;i<A.size1();i++){
 		C[i] = 0;
 		for(int j=0;j<A.size2();j++){
@@ -1384,6 +1391,7 @@ void MulMxVec(ublasMatrix& A,ACoord& B,ACoord& C)
 			C[i] += B[j] * A(i,j);
 		}
 	}
+	return C;
 }
 
 // Function: MulMxCoord
@@ -1398,7 +1406,7 @@ void MulMxVec(ublasMatrix& A,ACoord& B,ACoord& C)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(A3Coord& A,Coord d)
+Coord MulMxCoord(const A3Coord& A, const Coord& d)
 {
 	Coord ans;
 
@@ -1418,7 +1426,7 @@ Coord MulMxCoord(A3Coord& A,Coord d)
 //
 // Return:
 // 計算結果
-Coord MulMxCoord(ublasMatrix& A,Coord& d)
+Coord MulMxCoord(const ublasMatrix& A, const Coord& d)
 {
 	Coord ans;
 
@@ -1439,16 +1447,18 @@ Coord MulMxCoord(ublasMatrix& A,Coord& d)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-void TranMx(ublasMatrix& A,ublasMatrix& B)
+ublasMatrix TranMx(const ublasMatrix& A)
 {
 	int m = A.size1(),
 		n = A.size2();
-	B.resize(n, m);
+	ublasMatrix B(n, m);
+
 	for(int i=0;i<m;i++){
 		for(int j=0;j<n;j++){
 			B(j,i) = A(i,j);
 		}
 	}
+	return B;
 }
 
 // Function: TranMx
@@ -1461,13 +1471,18 @@ void TranMx(ublasMatrix& A,ublasMatrix& B)
 // **B - 転置行列を格納
 //
 // 転置されるとmとnが逆になるので、Bのメモリー確保に注意!
-void TranMx(AACoord& A,int m,int n,AACoord& B)
+AACoord TranMx(const AACoord& A)
 {
+	auto m = A.shape()[0],
+		 n = A.shape()[1];
+	AACoord B(boost::extents[n][m]);
+
 	for(int i=0;i<m;i++){
 		for(int j=0;j<n;j++){
 			B[j][i] = A[i][j];
 		}
 	}
+	return B;
 }
 
 // Function: TranMx
@@ -1479,8 +1494,9 @@ void TranMx(AACoord& A,int m,int n,AACoord& B)
 // Parameters:
 // A[3] - 元の行列
 // B[3] - 転置行列を格納
-void TranMx(A3Coord& A,A3Coord& B)
+A3Coord TranMx(const A3Coord& A)
 {
+	A3Coord B;
 	B[0].x = A[0].x;
 	B[0].y = A[1].x;
 	B[0].z = A[2].x;
@@ -1490,6 +1506,7 @@ void TranMx(A3Coord& A,A3Coord& B)
 	B[2].x = A[0].z;
 	B[2].y = A[1].z;
 	B[2].z = A[2].z;
+	return B;
 }
 
 // Function: MulFrameCoord
@@ -1502,7 +1519,7 @@ void TranMx(A3Coord& A,A3Coord& B)
 // 
 // Return: 
 // 計算結果
-Coord MulFrameCoord(ublasMatrix& R,ublasVector& T,Coord I)
+Coord MulFrameCoord(const ublasMatrix& R, const ublasVector& T, const Coord& I)
 {
 	Coord O;
 
@@ -1522,7 +1539,7 @@ Coord MulFrameCoord(ublasMatrix& R,ublasVector& T,Coord I)
 // 
 // Return: 
 // 計算結果
-Coord MulFrameCoord(FRAME f,Coord I)
+Coord MulFrameCoord(const FRAME& f, const Coord& I)
 {
 	Coord O;
 
@@ -1543,11 +1560,11 @@ Coord MulFrameCoord(FRAME f,Coord I)
 //
 // Return:
 // 計算結果
-FRAME InvFrame(FRAME F)
+FRAME InvFrame(const FRAME& F)
 {
 	FRAME f;
 
-	TranMx(F.Rot,f.Rot);				// F.Rotの転置行列F.Rot^Tを得る
+	f.Rot = TranMx(F.Rot);				// F.Rotの転置行列F.Rot^Tを得る
 	f.Trl = MulMxCoord(f.Rot,F.Trl);	// F.Rot^T * F.Trl
 	f.Trl *= -1;						// -(F.Rot^T * F.Trl)
 
@@ -1562,7 +1579,7 @@ FRAME InvFrame(FRAME F)
 //
 // Return:
 // 計算結果
-FRAME MulFrame(FRAME a,FRAME b)
+FRAME MulFrame(const FRAME& a, const FRAME& b)
 {
 	FRAME f;
 

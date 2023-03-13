@@ -287,30 +287,30 @@ typedef struct{
 
 // Function: ClacPolygonArea2D
 // 2D平面上の多角形の符号付き面積を得る
-double ClacPolygonArea2D(ACoord&,int);			
+double ClacPolygonArea2D(const ACoord&);
 
 // Function: DiscriminateCW2D
 // 2D平面上の多角形が時計回りか反時計回りかを判別する
-int DiscriminateCW2D(ACoord&,int);
+int DiscriminateCW2D(const ACoord&);
 
 
 // Group: Functions(同次変換行列、回転行列の演算)
 
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算
-Coord MulFrameCoord(ublasMatrix&,ublasVector&,Coord);
+Coord MulFrameCoord(const ublasMatrix&, const ublasVector&, const Coord&);
 
 // Function: MulFrameCoord
 // 同次変換行列と座標値(3Dベクトル)との掛け算(オーバーロード)
-Coord MulFrameCoord(FRAME,Coord);				 
+Coord MulFrameCoord(const FRAME&, const Coord&);
 
 // Function: MulFrame
 // 同次変換行列の掛け算
-FRAME MulFrame(FRAME ,FRAME);					
+FRAME MulFrame(const FRAME&, const FRAME&);
 
 // Function: InvFrame
 // 同次変換行列の逆行列を得る
-FRAME InvFrame(FRAME);							
+FRAME InvFrame(const FRAME&);
 
 // Function: RotToZYZEuler
 // 回転行列をZYZオイラー角へ変換
@@ -325,39 +325,39 @@ void InitFrame(FRAME *);
 
 // Function: AddMxMx
 // 行列同士の足し算
-void AddMxMx(ublasMatrix&,ublasMatrix&,ublasMatrix&);
+ublasMatrix AddMxMx(const ublasMatrix&, const ublasMatrix&);
 
 // Function: MulMxMx
 // 行列同士の掛け算
-void MulMxMx(ublasMatrix&,ublasMatrix&,ublasMatrix&);
+ublasMatrix MulMxMx(const ublasMatrix&, const ublasMatrix&);
 
 // Function: MulMxVec
 // 行列とベクトルの掛け算
-void MulMxVec(ublasMatrix&,ublasVector&,ublasVector&);
+ublasVector MulMxVec(const ublasMatrix&, const ublasVector&);
 
 // Function: MulMxVec
 // 行列と座標値ベクトルの掛け算
-void MulMxVec(ublasMatrix&,ACoord&,ACoord&);
+ACoord MulMxVec(const ublasMatrix&, const ACoord&);
 
 // Function: MulMxCoord
 // Coordで表現される3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(A3Coord&,Coord);				
+Coord MulMxCoord(const A3Coord&, const Coord&);
 
 // Function: MulMxCoord
 // 3x3行列とCoordベクトルとの掛け算
-Coord MulMxCoord(ublasMatrix&,Coord&);
+Coord MulMxCoord(const ublasMatrix&, const Coord&);
 
 // Function: TranMx
 // 転置行列を得る
-void TranMx(ublasMatrix&,ublasMatrix&);
+ublasMatrix TranMx(const ublasMatrix&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(AACoord&,int,int,AACoord&);
+AACoord TranMx(const AACoord&);
 
 // Function: TranMx
 // 転置行列を得る(オーバーロード)
-void TranMx(A3Coord&,A3Coord&);
+A3Coord TranMx(const A3Coord&);
 
 // Function: Gauss
 // 連立1次方程式の解を求める

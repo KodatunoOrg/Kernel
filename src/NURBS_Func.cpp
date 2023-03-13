@@ -4428,25 +4428,23 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	MatInv(K[1],Bv,Bv_);
 
 	// アイソパラ曲線のコントロールポイントを得る
-	TranMx(P,K[0],K[1],PT);
+	PT = TranMx(P);
 	for(int i=0;i<K[1];i++){
 		// --- AACoordからACoordを取り出す書き方がわかれば，こんなこと書く必要ない！ ---
 		ACoord	PT_(boost::extents[K[0]]),
 				RT_(boost::extents[K[0]]);
 		for ( int j=0; j<K[0]; j++ ) PT_[j] = PT[i][j];
-//		MulMxVec(Bu_,PT[i],RT[i]);
-		MulMxVec(Bu_,PT_,RT_);
+		RT_ = MulMxVec(Bu_,PT_);
 		for ( int j=0; j<K[0]; j++ ) RT[i][j] = RT_[j];
 	}
 
 	// NURBS曲面のコントロールポイントを得る
-	TranMx(RT,K[1],K[0],R);
+	R = TranMx(RT);
 	for(int i=0;i<K[0];i++){
 		ACoord	R_(boost::extents[K[1]]),
 				Q_(boost::extents[K[1]]);
 		for ( int j=0; j<K[1]; j++ ) R_[j] = R[i][j];
-// 		MulMxVec(Bv_,R[i],Q[i]);
- 		MulMxVec(Bv_,R_,Q_);
+ 		Q_ = MulMxVec(Bv_,R_);
 		for ( int j=0; j<K[1]; j++ ) Q[i][j] = Q_[j];
  	}
 
@@ -4522,7 +4520,7 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 		CalcApproximationCP_LSM(P_,T_,T,PNum_v,N[1],Mv,K[1],Q1_);		// 最小2乗法で近似コントロールポイントを求める
 		for ( int j=0; j<K[1]; j++ ) Q1[i][j] = Q1_[j];
 	}
-	TranMx(Q1,PNum_u,K[1],Q2);					// Qの転置
+	Q2 = TranMx(Q1);					// Qの転置
 
 	for(int i=0;i<K[1];i++){
 		ACoord	Q2_(boost::extents[PNum_u]),
@@ -4532,7 +4530,7 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 		CalcApproximationCP_LSM(Q2_,S_,S,PNum_u,N[0],Mu,K[0],Q3_);		// 最小2乗法で近似コントロールポイントを求める
 		for ( int j=0; j<K[0]; j++ ) Q3[i][j] = Q3_[j];
 	}
-	TranMx(Q3,K[1],K[0],Q4);					// Qの転置
+	Q4 = TranMx(Q3);					// Qの転置
 
 	// 重みを得る
 	for(int i=0;i<K[0];i++){
@@ -5784,7 +5782,7 @@ int NURBS_Func::TrimNurbsSPlane(TRMS *Trm,Coord pt,Coord nvec)
 	A(1,0) = A(0,1);
 	A(1,1) = (double)num;
 	MatInv2(A,A_);
-	MulMxVec(A_,B,B_);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
+	B_ = MulMxVec(A_,B);		// 直線の係数がB_に格納される。y = B_[0]x + B_[1]
 
 	// 端点抽出
 	// パラメトリック領域内のU-Vの範囲を決める4点から得られる4本の直線と、さっき求めた近似直線との交点4つを求める
@@ -6209,8 +6207,8 @@ void NURBS_Func::CalcApproximationCP_LSM(ACoord& P,ublasVector& T_,ublasVector& 
 	ublasMatrix N_(K-2,K-2);				// (NTN)^-1
 	ublasMatrix NTN(K-2,K-2);				// NT*N
 	ublasMatrix NT(K-2,Pnum-2);				// Nの転置行列NT
-	TranMx(N,NT);							// calc NT
-	MulMxMx(NT,N,NTN);						// calc NTN
+	NT = TranMx(N);							// calc NT
+	NTN = MulMxMx(NT,N);					// calc NTN
 
 	ACoord Q_(boost::extents[K-2]);
 	Gauss(K-2,NTN,R,Q_);

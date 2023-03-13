@@ -406,7 +406,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 				NURBSC *nc = body->TrmS[i].pTO->pB.CompC->pDE[j].NurbsC;
 				p[j] = nc->cp[0];
 			}
-			flag = DiscriminateCW2D(p,otrmnum);	// 時計・反時計周りを調べる
+			flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
 
 			// 外側トリムが時計回りだったら、反時計回りに変更する
 			if(flag == KOD_FALSE){
@@ -440,7 +440,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 					NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
 					p[k] = nc->cp[0];
 				}
-				flag = DiscriminateCW2D(p,otrmnum);	// 時計・反時計周りを調べる
+				flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
 
 				// 内側トリムが反時計回りだったら、時計回りに変更する
 				if(flag == KOD_TRUE){
