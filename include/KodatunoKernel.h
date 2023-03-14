@@ -13,6 +13,7 @@ namespace ublas = boost::numeric::ublas;
 #include "boost/multi_array.hpp"			// 固定長多次元配列
 #include "boost/tuple/tuple.hpp"			// 関数から2つ以上の値を返す
 #include "boost/optional.hpp"				// 無効値表現
+#include <boost/foreach.hpp>				// BOOST_FOREACHマクロ
 
 // Constants: General Defines
 // KOD_ERR -					ERRORのシンボル(-1)
@@ -487,6 +488,9 @@ int CheckTheSamePoints(ACoord&,int);
 // Function: CheckTheSamePoints
 // 同一点を除去する
 int CheckTheSamePoints(ublasVector&,int);	
+
+bool IsCheckTheSamePoints(const VCoord&,  const Coord&);
+bool IsCheckTheSamePoints(const Vdouble&, double);
 
 // Function: CheckTheSamePoints2D
 // 2D平面内の同一点を除去する

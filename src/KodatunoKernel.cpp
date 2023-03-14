@@ -1966,6 +1966,25 @@ int CheckTheSamePoints(ublasVector& P,int N)
 
 	return k;
 }
+bool IsCheckTheSamePoints(const VCoord& v,  const Coord& p)
+{
+	BOOST_FOREACH(const Coord& P, v) {
+		if ( P.DiffCoord(p,APPROX_ZERO_L) == KOD_TRUE) {
+			return true;	// 同じ値がある
+		}
+	}
+	return false;			// 同じ値がない
+}
+
+bool IsCheckTheSamePoints(const Vdouble& v, double d)
+{
+	BOOST_FOREACH(double P, v) {
+		if ( CheckZero(P-d,MID_ACCURACY) == KOD_TRUE ) {
+			return true;	// 同じ値がある
+		}
+	}
+	return false;			// 同じ値がない
+}
 
 // Function: CheckTheSamePoints2D
 // 2次元平面内の同一点を除去する (座標値はCoordのxとyで与える)

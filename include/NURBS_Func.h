@@ -202,11 +202,11 @@ public:
 
 	// Function: CalcIntersecIsparaCurveU
 	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecIsparaCurveU(NURBSS *,double,Coord,Coord,int,ublasVector&,int);	
+	Vdouble CalcIntersecIsparaCurveU(NURBSS *,double, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecIsparaCurveV
 	// v方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecIsparaCurveV(NURBSS *,double,Coord,Coord,int,ublasVector&,int);
+	Vdouble CalcIntersecIsparaCurveV(NURBSS *,double, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecCurve
 	// NURBS曲線と平面との交点を求める(ニュートン法)
@@ -226,11 +226,11 @@ public:
 
 	// Function: CalcIntersecPtsPlaneV
 	// V方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	int CalcIntersecPtsPlaneV(NURBSS *,Coord,Coord,int,ACoord&,int);	
+	VCoord CalcIntersecPtsPlaneV(NURBSS *, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneU
 	// U方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	int CalcIntersecPtsPlaneU(NURBSS *,Coord,Coord,int,ACoord&,int);	
+	VCoord CalcIntersecPtsPlaneU(NURBSS *, const Coord&, const Coord&, int);
 
 	// Function: CalcIntersecPtsPlaneSearch
 	// NURBS曲面と平面との交点群を交線追跡法で求める
@@ -370,7 +370,7 @@ public:
 
 	// Function: CalcIntersecPtsPlaneGeom
 	// NURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)
-	int CalcIntersecPtsPlaneGeom(NURBSS *,Coord,Coord,int,int,ACoord&,int);			
+	VCoord CalcIntersecPtsPlaneGeom(NURBSS *, const Coord&, const Coord&, int,int);
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の線分長を求める
@@ -463,7 +463,7 @@ public:
 
 	// Function: CalcIntersecPtsOffsetPlaneGeom
 	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
-	int CalcIntersecPtsOffsetPlaneGeom(NURBSS *,double,Coord,Coord,int,ACoord&,int);	
+	VCoord CalcIntersecPtsOffsetPlaneGeom(NURBSS *,double, const Coord&, const Coord&, int);
 
 	// Function: CalcTanVecOnNurbsC
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる
@@ -616,11 +616,11 @@ private:
 
 	// Function: CalcIntersecPtsPlaneSearch_Sub
 	// (private)面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
-	Coord CalcIntersecPtsPlaneSearch_Sub(NURBSS *,double,double,Coord,Coord);	
+	Coord CalcIntersecPtsPlaneSearch_Sub(NURBSS *,double,double, const Coord&, const Coord&);
 
 	// Function: GetMinDistance
 	// (private)最小距離を持つ座標値を返す
-	Coord GetMinDistance(Coord,Coord *,int);						
+	Coord GetMinDistance(const Coord&, const VCoord&);
 
 	// Function: CheckClossedPoints
 	// (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる
