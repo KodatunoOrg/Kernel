@@ -183,7 +183,7 @@ void NURBS_Func::Free_CompC(COMPC *a)
 // 
 // return:
 // KOD_TRUE
-int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVector& W,ACoord& cp,A2double& V,int prop[],int euflag)
+int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,const ublasVector& T, const ublasVector& W, const ACoord& cp, const A2double& V, const A4int& prop, int euflag)
 {
 	int i;
 
@@ -191,17 +191,12 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVe
 	Nurbs->M = M;
 	Nurbs->N = N;
 	Nurbs->V = V;
-//	Nurbs->T.resize(Nurbs->N);
-//	Nurbs->W.resize(Nurbs->K);
-	Nurbs->cp.resize(boost::extents[Nurbs->K]);
 	Nurbs->EntUseFlag = euflag;
     Nurbs->BlankStat = DISPLAY;     // デフォルトで描画要素に設定
-	
-	for(i=0;i<4;i++){
-		Nurbs->prop[i] = prop[i];
-	}
-	Nurbs->T = T;
+	Nurbs->prop = prop;
+	Nurbs->T = T;		// resize()必要なし．要素数が代入元に合わさる
 	Nurbs->W = W;
+	Nurbs->cp.resize(boost::extents[Nurbs->K]);
 	Nurbs->cp = cp;		// resize()しないと，単純代入はASSERTエラー
 	Nurbs->Dstat.Color[0] = Nurbs->Dstat.Color[1] = Nurbs->Dstat.Color[2] = 1.0;
 	Nurbs->Dstat.Color[3] = 0.5;
@@ -218,7 +213,7 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,int K,int M,int N,ublasVector& T,ublasVe
 // 
 // return:
 // KOD_TRUE
-int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC* nurb)
+int NURBS_Func::GenNurbsC(NURBSC *Nurbs, const NURBSC* nurb)
 {
 	int i;
 
@@ -227,15 +222,10 @@ int NURBS_Func::GenNurbsC(NURBSC *Nurbs,NURBSC* nurb)
 	Nurbs->N = nurb->N;
 	Nurbs->V[0] = nurb->V[0];
 	Nurbs->V[1] = nurb->V[1];
-	
-//	Nurbs->T.resize(Nurbs->N);
-//	Nurbs->W.resize(Nurbs->K);
-	Nurbs->cp.resize(boost::extents[Nurbs->K]);
-
 	Nurbs->T = nurb->T;
 	Nurbs->W = nurb->W;
+	Nurbs->cp.resize(boost::extents[Nurbs->K]);
 	Nurbs->cp = nurb->cp;
-
     Nurbs->BlankStat = nurb->BlankStat;
     Nurbs->EntUseFlag = nurb->EntUseFlag;
 
@@ -266,7 +256,7 @@ void NURBS_Func::DelNurbsC(NURBSC *Nurbs)
 // 
 // return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,ublasVector& S,ublasVector& T,ublasMatrix& W,AACoord& Cp,double U_s,double U_e,double V_s,double V_e)
+int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double U_s,double U_e,double V_s,double V_e)
 {
 	Nurbs->K[0] = Ku;
 	Nurbs->K[1] = Kv;
@@ -295,11 +285,6 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,ublasVector&
 	Nurbs->W = W;
 	Nurbs->cp = Cp;		// New_NurbsS()でresize()
 
-	for(int i=0;i<Nurbs->K[0];i++){
-		for(int j=0;j<Nurbs->K[1];j++){
-		}
-	}
-
 	return KOD_TRUE;
 }
 
@@ -312,22 +297,22 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,ublasVector&
 // 
 // return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenNurbsS(NURBSS *Nurbs,NURBSS nurb)
+int NURBS_Func::GenNurbsS(NURBSS *Nurbs, const NURBSS* nurb)
 {
 	NURBS_Func hbody;
 	int i,j;
 
 	for(i=0;i<2;i++){
-		Nurbs->K[i] = nurb.K[i];
-		Nurbs->M[i] = nurb.M[i];
-		Nurbs->N[i] = nurb.N[i];
-		Nurbs->U[i] = nurb.U[i];
-		Nurbs->V[i] = nurb.V[i];
+		Nurbs->K[i] = nurb->K[i];
+		Nurbs->M[i] = nurb->M[i];
+		Nurbs->N[i] = nurb->N[i];
+		Nurbs->U[i] = nurb->U[i];
+		Nurbs->V[i] = nurb->V[i];
 	}
 	for(i=0;i<5;i++)
-		Nurbs->prop[i] = nurb.prop[i];
+		Nurbs->prop[i] = nurb->prop[i];
 
-	Nurbs->Dstat = nurb.Dstat;
+	Nurbs->Dstat = nurb->Dstat;
 
 	// メモリー確保
 	if(hbody.New_NurbsS(Nurbs,Nurbs->K,Nurbs->N) == KOD_ERR){
@@ -336,13 +321,13 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,NURBSS nurb)
 	}
 
 	for(i=0;i<Nurbs->N[0];i++)
-		Nurbs->S[i] = nurb.S[i];
+		Nurbs->S[i] = nurb->S[i];
 	for(i=0;i<Nurbs->N[1];i++)
-		Nurbs->T[i] = nurb.T[i];
+		Nurbs->T[i] = nurb->T[i];
 	for(i=0;i<Nurbs->K[0];i++){
 		for(j=0;j<Nurbs->K[1];j++){
-			Nurbs->W(i,j) = nurb.W(i,j);
-			Nurbs->cp[i][j] = nurb.cp[i][j];
+			Nurbs->W(i,j) = nurb->W(i,j);
+			Nurbs->cp[i][j] = nurb->cp[i][j];
 		}
 	}
 
@@ -519,7 +504,7 @@ int NURBS_Func::GenIsoparamCurveU(NURBSS *P,double u,NURBSC *C)
     if(u < P->U[0] || u > P->U[1])	return KOD_ERR;
 
     A2double V = {P->V[0],P->V[1]};	// ノットベクトルの範囲
-    int prop[4] = {0,0,1,0};			// パラメータ
+    A4int prop = {0,0,1,0};			// パラメータ
 
     ACoord Q(boost::extents[P->K[1]]);	// コントロールポイント
     ublasVector W(P->K[1]);				// ウェイト
@@ -555,7 +540,7 @@ int NURBS_Func::GenIsoparamCurveV(NURBSS *P,double v,NURBSC *C)
     if(v < P->V[0] || v > P->V[1])	return KOD_ERR;
 
     A2double U = {P->U[0],P->U[1]};	// ノットベクトルの範囲
-    int prop[4] = {0,0,1,0};			// パラメータ
+    A4int prop = {0,0,1,0};			// パラメータ
 
     ACoord Q(boost::extents[P->K[0]]);	// コントロールポイント
     ublasVector W(P->K[0]);				// ウェイト
@@ -618,7 +603,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 
 	nurbsC = new NURBSC[curve_num];	// トリム面を構成するNURBS曲線の数だけNURBS曲線のメモリーを確保
 
-	GenNurbsS(nurbsS,*tnurb.pts);							// 新たなNURBS曲面を1つ得る
+	GenNurbsS(nurbsS, tnurb.pts);							// 新たなNURBS曲面を1つ得る
 	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
 
 	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
@@ -740,11 +725,13 @@ Coord NURBS_Func::CalcNurbsCCoord(NURBSC *NurbsC,double t)
 // Ptnum - 求める点群の数   
 // *T - tパラメータ群を格納した配列
 // *Pt - 実座標値を格納
-void NURBS_Func::CalcNurbsCCoords(NURBSC *NurbsC,int Ptnum,double *T,ACoord& Pt)
+VCoord NURBS_Func::CalcNurbsCCoords(NURBSC *NurbsC, const Vdouble& V)
 {
-	for(int i=0;i<Ptnum;i++){
-		Pt[i] = CalcNurbsCCoord(NurbsC,T[i]);
+	VCoord Pt;
+	BOOST_FOREACH(double t, V) {
+		Pt.push_back(CalcNurbsCCoord(NurbsC, t));
 	}
+	return Pt;
 }
 
 // Function: CalcNurbsSCoord
@@ -784,11 +771,13 @@ Coord NURBS_Func::CalcNurbsSCoord(NURBSS *NurbsS,double div_u,double div_v)
 // Ptnum - 求める点群の数   
 // *UV - u,vパラメータ群を格納したCoord型配列(UV[].xにu方向、UV[].ｙにV方向のパラメータを格納しておくこと)
 // *Pt - 実座標値を格納
-void NURBS_Func::CalcNurbsSCoords(NURBSS *NurbsS,int Ptnum,ACoord& UV,ACoord& Pt)
+VCoord NURBS_Func::CalcNurbsSCoords(NURBSS *NurbsS, const VCoord& UV)
 {
-	for(int i=0;i<Ptnum;i++){
-		Pt[i] = CalcNurbsSCoord(NurbsS,UV[i].x,UV[i].y);
+	VCoord Pt;
+	BOOST_FOREACH(const Coord& uv, UV) {
+		Pt.push_back(CalcNurbsSCoord(NurbsS, uv.x, uv.y));
 	}
+	return Pt;
 }
 
 // Function: CalcBSbasis
@@ -3239,8 +3228,9 @@ void NURBS_Func::GetNurbsSCoef(int M,ublasMatrix& coef,double *a,ACoord& b,int i
 // 
 // Return:
 // 解の個数（ans_sizeを超えたら，KOD_ERR）
-int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int Divnum,Coord *ans,int ans_size)
+VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int Divnum)
 {
+	VCoord ans;
 	double t = NurbA->V[0];		// 現在のNurbAのパラメータ値
 	double u = 0;				// 現在のNurbBのパラメータ値
 	double dt = 0;				// ニュートン法によるtパラメータの更新量
@@ -3286,19 +3276,14 @@ int NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,int
 			loopcount++;
 		}// end of wihle
 		if(flag == true){
-			ans[anscount].x = t;		// 解として登録
-			ans[anscount].y = u;
-			anscount++;
-			if(anscount == ans_size){	// 解の個数がans_sizeを超えたら、ERRをリターン
-//				GuiIFB.SetMessage("NURBS_Func ERROR: Ans_size overflow");
-				return KOD_ERR;
+			Coord cp(t, u, 0);
+			if ( !IsCheckTheSamePoints(ans, cp) ) {
+				ans.push_back(cp);		// 解として登録
 			}
 		}
 	}// end of i loop
 
-	anscount = CheckTheSamePoints2D(ans,anscount);		// 同一点は除去する
-
-	return anscount;
+	return ans;
 }
 
 // Function: ClacIntersecPtsNurbsCLine
@@ -4047,10 +4032,10 @@ int NURBS_Func::GenInterpolatedNurbsC1(NURBSC *Nurbs,ACoord& P,int PNum,int M)
 	}
 	if(PNum == 2 || PNum == 3)	M = PNum;	// 与えられた点が2個か3個の場合は、階数を強制的に2か3にする
 
-	int K = PNum;			// コントロールポイントの数
-	int N = M+K;			// ノットベクトルの数
-	int prop[4] = {0,0,1,0};// パラメータ
-	A2double V = {0,1};	// ノットベクトルの開始値,終了値
+	int K = PNum;				// コントロールポイントの数
+	int N = M+K;				// ノットベクトルの数
+	A4int prop = {0,0,1,0};		// パラメータ
+	A2double V = {0,1};			// ノットベクトルの開始値,終了値
 
 	ublasVector T_(K);			// 通過点上の曲線パラメータ
 	ublasVector T(N);			// ノットベクトル
@@ -4123,10 +4108,10 @@ int NURBS_Func::GenInterpolatedNurbsC2(NURBSC *Nurbs,ACoord& P_,int PNum,int M)
 	}
 	if(PNum == 2 || PNum == 3)	M = PNum;	// 与えられた点が2個か3個の場合は、階数を強制的に2か3にする
 
-	int K = PNum+2;				// コントロールポイントの数
-	int N = M+K;				// ノットベクトルの数
-	int prop[4] = {0,0,1,0};	// パラメータ
-	A2double V = {0,1};		// ノットベクトルの開始値,終了値
+	int K = PNum+2;					// コントロールポイントの数
+	int N = M+K;					// ノットベクトルの数
+	A4int prop = {0,0,1,0}; 		// パラメータ
+	A2double V = {0,1};				// ノットベクトルの開始値,終了値
 
 	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
 	ublasVector T(N);				// ノットベクトル
@@ -4213,8 +4198,8 @@ int NURBS_Func::GenApproximationNurbsC(NURBSC *Nurbs,ACoord& P,int PNum,int M)
 
 	int K = SetApproximationCPnum(PNum);		// 与えられた点列からコントロールポイントの数を決める(コントロールポイントの数で近似される曲線が変わる)
 	int Nnum = M+K;					// ノットベクトルの数
-	int prop[4] = {0,0,1,0};		// パラメータ
-	A2double V = {0,1};			// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};			// パラメータ
+	A2double V = {0,1};				// ノットベクトルの開始値,終了値
 
 	ublasVector T_(PNum);			// 通過点上の曲線パラメータ
 	ublasVector T(Nnum);			// ノットベクトル
@@ -4257,8 +4242,8 @@ int NURBS_Func::GenNurbsCfromCP(NURBSC *Nurbs,ACoord& P,int PNum,int M)
 	}
 
 	int Nnum = M+PNum;				// ノットベクトルの数
-	int prop[4] = {0,0,1,0};		// パラメータ
-	A2double V = {0,1};			// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};			// パラメータ
+	A2double V = {0,1};				// ノットベクトルの開始値,終了値
 	ublasVector T(Nnum);			// ノットベクトル
 	ublasVector W(PNum);			// 重み
 
@@ -4293,8 +4278,8 @@ int NURBS_Func::GenPolygonalLine(NURBSC *Nurbs,ACoord& P,int PNum)
 	int M=2;					// 階数2
 	int K=PNum;					// コントロールポイントの数
 	int N=PNum+2;				// ノットベクトルの数
-	int prop[4] = {0,0,1,0};	// パラメータ
-	A2double V = {0,1};		// ノットベクトルの開始値,終了値
+	A4int prop = {0,0,1,0};		// パラメータ
+	A2double V = {0,1};			// ノットベクトルの開始値,終了値
 	ublasVector T(N);			// ノットベクトル
 	ublasVector W(K);			// 重み
 

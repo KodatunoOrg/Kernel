@@ -258,7 +258,7 @@ struct NURBSC{
     int K;
     int M;
     int N;
-    int prop[4];
+    A4int prop;
     ublasVector T;
     ublasVector W;
     ACoord cp;
@@ -314,7 +314,7 @@ struct NURBSS{
 	int K[2];
 	int M[2];
 	int N[2];
-	int prop[5];
+	A5int prop;
 	ublasVector S;
 	ublasVector T;
 	ublasMatrix W;

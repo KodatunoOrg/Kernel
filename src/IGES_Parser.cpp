@@ -118,7 +118,7 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 		ublasVector W(2);
 		W[0]=1; W[1]=1;
 		A2double V = {0,NORM_KNOT_VAL};
-		int prop[4] = {0,0,1,0};
+		A4int prop = {0,0,1,0};
 		ACoord cp(boost::extents[2]);
 
 		for(int i=0;i<body->TypeNum[_COMPOSITE_CURVE];i++){

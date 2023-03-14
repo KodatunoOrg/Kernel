@@ -50,31 +50,31 @@ public:
 
 	// Function: CalcNurbsCCoords
 	// 指定したt群でのNURBS曲線の座標値群を求める
-	void CalcNurbsCCoords(NURBSC *,int,double *,ACoord&);		
+	VCoord CalcNurbsCCoords(NURBSC *, const Vdouble&);
 
 	// Function: CalcNurbsSCoord
 	// 指定したu,vでのNURBS曲面の座標点を求める
-	Coord CalcNurbsSCoord(NURBSS *,double,double);				
+	Coord CalcNurbsSCoord(NURBSS *, double, double);
 
 	// Function: CalcNurbsSCoords
 	// 指定したu,v群でのNURBS曲面の座標値群を求める
-	void CalcNurbsSCoords(NURBSS *,int,ACoord&,ACoord&);		
+	VCoord CalcNurbsSCoords(NURBSS *, const VCoord&);		
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
-	int GenNurbsC(NURBSC *,int,int,int,ublasVector&,ublasVector&,ACoord&,A2double&,int[],int);
+	int GenNurbsC(NURBSC *,int,int,int, const ublasVector&, const ublasVector&, const ACoord&, const A2double&, const A4int&, int);
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-	int GenNurbsC(NURBSC *,NURBSC *);	// Update by K.Magara								
+	int GenNurbsC(NURBSC *, const NURBSC*);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
-	int GenNurbsS(NURBSS *,int,int,int,int,ublasVector&,ublasVector&,ublasMatrix&,AACoord&,double,double,double,double);
+	int GenNurbsS(NURBSS *,int,int,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const AACoord&,double,double,double,double);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
-	int GenNurbsS(NURBSS *,NURBSS);								
+	int GenNurbsS(NURBSS *, const NURBSS*);								
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
@@ -254,7 +254,7 @@ public:
 
 	// Function: CalcIntersecPtsNurbsCNurbsCParam
     // 2次元NURBS曲線同士の交点を求める
-	int CalcIntersecPtsNurbsCNurbsCParam(NURBSC *,NURBSC *,int,Coord *,int);	
+	VCoord CalcIntersecPtsNurbsCNurbsCParam(NURBSC *,NURBSC *,int);
 
     // Function: CalcIntersecPtsNurbsCLine
     // 2次元NURBS曲線と直線との交点を求める
