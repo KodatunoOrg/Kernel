@@ -122,7 +122,7 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 		ACoord cp(boost::extents[2]);
 
 		for(int i=0;i<body->TypeNum[_COMPOSITE_CURVE];i++){
-			 NFunc.GenNurbsC(&body->CompC[i].DegeNurbs,2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
+			 body->CompC[i].DegeNurbs = NFunc.GenNurbsC(2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
 
 			// 各複合曲線がNURBS曲線のみで構成されておりかつ2Dパラメトリック要素であるかのチェック
 			flag = 0;

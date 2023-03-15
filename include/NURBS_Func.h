@@ -62,11 +62,11 @@ public:
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
-	int GenNurbsC(NURBSC *,int,int,int, const ublasVector&, const ublasVector&, const ACoord&, const A2double&, const A4int&, int);
+	NURBSC* GenNurbsC(int,int,int, const ublasVector&, const ublasVector&, const ACoord&, const A2double&, const A4int&, int);
 
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-	int GenNurbsC(NURBSC *, const NURBSC*);
+	NURBSC* GenNurbsC(const NURBSC*);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
@@ -86,11 +86,11 @@ public:
 
 	// Function: GenIsoparamCurveU
 	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	int GenIsoparamCurveU(NURBSS *,double,NURBSC *);			
+	NURBSC* GenIsoparamCurveU(const NURBSS*, double);
 
 	// Function: GenIsoparamCurveV
 	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	int GenIsoparamCurveV(NURBSS *,double,NURBSC *);			
+	NURBSC* GenIsoparamCurveV(const NURBSS*, double);
 
 	// Function: GenTrimdNurbsS
 	// トリム面を生成する
@@ -310,23 +310,23 @@ public:
 
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する
-	int GenInterpolatedNurbsC1(NURBSC *,ACoord&,int,int);
+	NURBSC* GenInterpolatedNurbsC1(const ACoord&, int);
 
 	// Function: GenInterpolatedNurbsC2
 	// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
-	int GenInterpolatedNurbsC2(NURBSC *,ACoord&,int,int);
+	NURBSC* GenInterpolatedNurbsC2(const ACoord&, int);
 
 	// Function: GenApproximationNurbsC
 	// 与えられた点列を近似するn階のNURBS曲線を生成する
-	int GenApproximationNurbsC(NURBSC *,ACoord&,int,int);
+	NURBSC* GenApproximationNurbsC(const ACoord&, int);
 
 	// Function: GenNurbsCfromCP
 	// コントロールポイントからNURBS曲線を生成する
-	int GenNurbsCfromCP(NURBSC *,ACoord&,int,int);
+	NURBSC* GenNurbsCfromCP(const ACoord&, int);
 
 	// Function: GenPolygonalLine
 	// 折れ線を生成する
-	int GenPolygonalLine(NURBSC *,ACoord&,int);
+	NURBSC* GenPolygonalLine(const ACoord&);
 
 	// Function: GenInterpolatedNurbsS1
 	// 与えられた点列を補間するn階NURBS曲面を生成する
@@ -394,7 +394,7 @@ public:
 
 	// Function: GetEqIntervalKont
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
-	void GetEqIntervalKont(int,int,ublasVector&);						
+	ublasVector GetEqIntervalKont(int, int);
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルのパラメータ定義域を変更する
@@ -486,11 +486,11 @@ public:
 
 	// Function: DivNurbsCParam
 	// NURBS曲線を指定したパラメータ値で分割する
-	int DivNurbsCParam(NURBSC *, NURBSC *, NURBSC *, double);	
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsCParam(const NURBSC*, double);
 
 	// Function: DivNurbsC
 	// NURBS曲線を指定した位置（端からの距離）で分割する
-	int DivNurbsC(NURBSC *, NURBSC *, NURBSC *, double);		
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsC(const NURBSC*, double);
 
 	// Function: ConnectNurbsC
 	// NURBS曲線の連結
@@ -572,11 +572,11 @@ private:
 
 	// Function: GetCurveKnotParam1
 	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
-	void GetCurveKnotParam1(ACoord&,int,ublasVector&);
+	ublasVector GetCurveKnotParam1(const ACoord&);
 
 	// Function: GetCurveKnotParam2
 	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
-	void GetCurveKnotParam2(ACoord&,int,ublasVector&);
+	ublasVector GetCurveKnotParam2(const ACoord&);
 
 	// Function: GetSurfaceKnotParam
 	// (private)各通過点の曲面パラメータを算出
@@ -584,11 +584,11 @@ private:
 
 	// Function: GetInterpolatedKnot
 	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
-	void GetInterpolatedKnot(ublasVector&,int,int,int,ublasVector&);			
+	ublasVector GetInterpolatedKnot(const ublasVector&, int, int, int);
 
 	// Function: GetApproximatedKnot
 	// (private)曲線/曲面パラメータから近似用ノットベクトルを算出
-	void GetApproximatedKnot(ublasVector&,int,int,int,ublasVector&);			
+	ublasVector GetApproximatedKnot(const ublasVector&, int, int, int);
 
 	// Function: SetApproximationCPnum
 	// (private)点列数から生成するコントロールポイント数を算定する
@@ -596,7 +596,7 @@ private:
 
 	// Function: CalcApproximationCP_LSM
 	// (private)最小2乗法で近似コントロールポイントを求める
-	void CalcApproximationCP_LSM(ACoord&,ublasVector&,ublasVector&,int,int,int,int,ACoord&);
+	void CalcApproximationCP_LSM(const ACoord&,ublasVector&,ublasVector&,int,int,int,int,ACoord&);
 
 	// Function: RemoveTheSamePoints
 	// (private)NURBS曲面上の同一点を除去する
@@ -652,7 +652,7 @@ private:
 
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する
-	int InsertNewKnotOnNurbsC(NURBSC *,NURBSC *,double,int);		
+	int InsertNewKnotOnNurbsC(const NURBSC*, NURBSC*, double, int);
 
 	// Function: SetKnotVecC_ConnectC
 	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)
