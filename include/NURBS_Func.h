@@ -110,19 +110,19 @@ public:
 
 	// Function: CalcBSbasis
 	// Bスプライン基底関数を計算し、計算結果を返す
-	double CalcBSbasis(double,ublasVector&,int,int,int);
+	double CalcBSbasis(double, const ublasVector&, int, int, int);
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
-	double CalcDiffBSbasis(double,ublasVector&,int,int,int);		
+	double CalcDiffBSbasis(double, const ublasVector&, int, int, int);
 
 	// Function: CalcDiffBSbasisN
 	// Bスプライン基底関数のN階微分係数を求める
-	double CalcDiffBSbasisN(double,ublasVector&,int,int,int,int);	
+	double CalcDiffBSbasisN(double, const ublasVector&, int, int, int, int);
 
 	// Function: CalcDiffNurbsC
 	// NURBS曲線の1階微分係数を求める
-	Coord CalcDiffNurbsC(NURBSC *,double);						
+	Coord CalcDiffNurbsC(const NURBSC*, double);
 
 	// Function: CalcDiff2NurbsC
 	// NURBS曲線の2階微分係数を求める
@@ -374,11 +374,11 @@ public:
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の線分長を求める
-	double CalcNurbsCLength(NURBSC *);							
+	double CalcNurbsCLength(const NURBSC*);
 
 	// Function: CalcNurbsCLength
 	// NURBS曲線の指定区間の線分長を求める
-	double CalcNurbsCLength(NURBSC *,double,double);			
+	double CalcNurbsCLength(const NURBSC*, double, double);
 
 	// Function: CalcDeltaPtsOnNurbsC
 	// 指定した分割数でNURBS曲線上の座標値を求める
@@ -502,7 +502,7 @@ public:
 
 	// Function: CalcParamLengthOnNurbsC
 	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
-	double CalcParamLengthOnNurbsC(NURBSC *,double,double);		
+	double CalcParamLengthOnNurbsC(const NURBSC*, double, double);
 
 
 	//int CalcDeltaParamsOnNurbsC(NURBSC *,double,Coord *);		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する

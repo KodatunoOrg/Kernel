@@ -616,7 +616,7 @@ public:
 
     // Funciton: CopyBody
     // Bodyのコピー
-    void CopyBody(BODY *);
+    void CopyBody(BODY*);
 	
 	// Function: RotBody
 	// BODYの回転

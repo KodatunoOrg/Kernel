@@ -758,7 +758,7 @@ VCoord NURBS_Func::CalcNurbsSCoords(NURBSS *NurbsS, const VCoord& UV)
 //
 // Return:
 // 計算結果
-double NURBS_Func::CalcBSbasis(double t, ublasVector& knot,int N,int I,int M)
+double NURBS_Func::CalcBSbasis(double t, const ublasVector& knot, int N, int I, int M)
 {
 	// 階数(order)が1の時
 	if(M == 1){
@@ -806,7 +806,7 @@ double NURBS_Func::CalcBSbasis(double t, ublasVector& knot,int N,int I,int M)
 //
 // Return:
 // 計算結果
-double NURBS_Func::CalcDiffBSbasis(double t,ublasVector& knot,int N,int I,int M)
+double NURBS_Func::CalcDiffBSbasis(double t, const ublasVector& knot, int N, int I, int M)
 {
 	double n1 = knot[I+M-1]-knot[I];
 	double n2 = knot[I+M]-knot[I+1];
@@ -831,7 +831,7 @@ double NURBS_Func::CalcDiffBSbasis(double t,ublasVector& knot,int N,int I,int M)
 //
 // Return:
 // 計算結果
-double NURBS_Func::CalcDiffBSbasisN(double t,ublasVector& knot,int N,int I,int M, int Dn)
+double NURBS_Func::CalcDiffBSbasisN(double t, const ublasVector& knot, int N, int I, int M, int Dn)
 {
 	double n1 = knot[I+M-1]-knot[I];
 	double n2 = knot[I+M]-knot[I+1];
@@ -857,7 +857,7 @@ double NURBS_Func::CalcDiffBSbasisN(double t,ublasVector& knot,int N,int I,int M
 //
 // Return:
 // 計算結果
-Coord NURBS_Func::CalcDiffNurbsC(NURBSC *NurbsC,double t)
+Coord NURBS_Func::CalcDiffNurbsC(const NURBSC* NurbsC, double t)
 {
 	Coord Ft,diff_Ft;		// NURBS曲線の分子
 	double Gt,diff_Gt;		// NURBS曲線の分母
@@ -4471,12 +4471,10 @@ int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v,i
 	int prop[5] = {0,0,1,0,0};			// パラメータ
 	double U[2] = {0,1};				// u方向ノットベクトルの開始値、終了値
 	double V[2] = {0,1};				// v方向ノットベクトルの開始値、終了値
-	ublasVector S(N[0]);				// u方向のノットベクトル
-	ublasVector T(N[1]);				// v方向のノットベクトル
 	ublasMatrix W(K[0],K[1]);			// 重み
 
-	GetEqIntervalKont(K[0],Mu,S);		// u方向ノットベクトルを得る
-	GetEqIntervalKont(K[1],Mv,T);		// v方向ノットベクトルを得る
+	ublasVector S = GetEqIntervalKont(K[0],Mu);		// u方向ノットベクトルを得る
+	ublasVector T = GetEqIntervalKont(K[1],Mv);		// v方向ノットベクトルを得る
 
 	// 重みを得る
 	for(int i=0;i<K[0];i++){
@@ -5465,7 +5463,7 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,double D,ACoord& Pts)
 //
 // Return:
 // 指定距離におけるパラメータ値
-double NURBS_Func::CalcParamLengthOnNurbsC(NURBSC *C,double L,double Init_t)
+double NURBS_Func::CalcParamLengthOnNurbsC(const NURBSC* C, double L, double Init_t)
 {
 	double dt = 1E+12;			// ステップサイズパラメータの初期値
 	double t = Init_t;
@@ -6235,7 +6233,7 @@ void NURBS_Func::DebugForNurbsS(NURBSS *nurbs)
 //
 // Return:
 // 線分長
-double NURBS_Func::CalcNurbsCLength(NURBSC *Nurb,double a,double b)
+double NURBS_Func::CalcNurbsCLength(const NURBSC* Nurb, double a, double b)
 {
     if(a == b) return 0;
 
@@ -6425,7 +6423,7 @@ double NURBS_Func::CalcNurbsCLength(NURBSC *Nurb,double a,double b)
 //
 // Return:
 // 線分長
-double NURBS_Func::CalcNurbsCLength(NURBSC *Nurb)
+double NURBS_Func::CalcNurbsCLength(const NURBSC* Nurb)
 {
 	double g[80] = {-0.9995538226516306298800804990945671849917
 		,-0.997649864398237688899494208183122985331
@@ -6665,7 +6663,8 @@ boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, doub
 	// tパラメータが適正範囲か
 	if(t <= C0->T[0] || t >= C0->T[C0->N-1]){
 //		GuiIFB.SetMessage("NURBS_Func ERROR: Wrong Curve Parameter is set.");
-		return boost::make_tuple(NULL, NULL);
+		NURBSC* N = NULL;
+		return boost::make_tuple(N, N);
 	}
 
 	int deg = C0->M - 1;		// 多重度

@@ -202,7 +202,7 @@ void BODY::DelBodyElem(int TypeNum_[])
 //
 // Parameters:
 // *body - コピー元のBODYポインタ
-void BODY::CopyBody(BODY *body)
+void BODY::CopyBody(BODY* body)
 {
     NURBS_Func NFunc;
 
@@ -214,7 +214,7 @@ void BODY::CopyBody(BODY *body)
     this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
     for(int n=0;n<TypeNum[_NURBSC];n++)
-        NurbsC[n] = NFunc.GenNurbsC(body->NurbsC[n]);
+        NurbsC[n] = NFunc.GenNurbsC(&body->NurbsC[n]);
 
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 
