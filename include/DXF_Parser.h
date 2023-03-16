@@ -117,7 +117,7 @@ private:
 	
 	// Function: InitDisplayStat
 	// (private)各エンティティの表示属性を設定
-	void InitDisplayStat(DispStat *);
+	void InitDisplayStat(DispStat&);
 	
 	// Function: ChangeEntityforNurbs
 	// (private)NURBS曲線以外のエンティティをNURBS曲線に変換

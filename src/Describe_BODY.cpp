@@ -338,11 +338,11 @@ void Describe_BODY::Draw_CircleArcs(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_NurbsCurves(const BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_NURBSC];i++){
-		glColor3f(Body->NurbsC[i].Dstat.Color[0],Body->NurbsC[i].Dstat.Color[1],Body->NurbsC[i].Dstat.Color[2]);
+	BOOST_FOREACH(NURBSC* x, Body->vNurbsC) {
+		glColor3f(x->Dstat.Color[0], x->Dstat.Color[1], x->Dstat.Color[2]);
         // IGESディレクトリ部の"Entity Use Flag"が0かつ，"Blank Status"が0の場合は実際のモデル要素として描画する
-        if(Body->NurbsC[i].EntUseFlag == GEOMTRYELEM && Body->NurbsC[i].BlankStat == DISPLAY){
-			DrawNurbsCurve(&Body->NurbsC[i]);						// 描画
+        if(x->EntUseFlag == GEOMTRYELEM && x->BlankStat == DISPLAY){
+			DrawNurbsCurve(x);						// 描画
 		}
 	}
 }

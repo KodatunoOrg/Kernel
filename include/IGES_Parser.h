@@ -307,7 +307,7 @@ private:
 
 	// Function: InitDisplayStat
 	// 各エンティティの表示属性を設定
-	void InitDisplayStat(DispStat *);	
+	void InitDisplayStat(DispStat&);	
 
 	// Function: TransformNurbsC
 	// NURBS曲線を座標変換する
@@ -315,7 +315,7 @@ private:
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルの正規化sub1
-	int ChangeKnotVecRange(A2double&,ublasVector&,int,int,int,double);
+	int ChangeKnotVecRange(A2double&, ublasVector&, int, int, double);
 
 	// Function: ChangeKnot
 	// ノットベクトルの正規化sub2

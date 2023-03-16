@@ -48,10 +48,10 @@ try {
 		flag = _TRANSFORMATION_MATRIX+1;
 	}
 
-	if(TypeNum[_NURBSC]){
-		NewNurbsC(TypeNum[_NURBSC]);
-		flag = _NURBSC+1;
-	}
+//	if(TypeNum[_NURBSC]){
+//		NewNurbsC(TypeNum[_NURBSC]);
+//		flag = _NURBSC+1;
+//	}
 
 	if(TypeNum[_NURBSS]){
 		NewNurbsS(TypeNum[_NURBSS]);
@@ -80,9 +80,9 @@ catch (std::bad_alloc& e) {	// e.what();
 		else if(flag == _NURBSS+1 && TypeNum[_NURBSS]){
 			delete[] NurbsS;
 		}
-		else if(flag == _NURBSC+1 && TypeNum[_NURBSC]){
-			delete[] NurbsC;
-		}
+//		else if(flag == _NURBSC+1 && TypeNum[_NURBSC]){
+//			delete[] NurbsC;
+//		}
 		else if(flag == _TRANSFORMATION_MATRIX+1 && TypeNum[_TRANSFORMATION_MATRIX]){
 			delete[] TMat;
 		}
@@ -125,10 +125,13 @@ void BODY::DelBodyElem()
 		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum[_NURBSS]);
 		delete[] NurbsS;
 	}
-	if(TypeNum[_NURBSC]){
-		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum[_NURBSC]);
-		delete[] NurbsC;
-	}
+//	if(TypeNum[_NURBSC]){
+//		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum[_NURBSC]);
+//		delete[] NurbsC;
+//	}
+	BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
+	vNurbsC.clear();
+
 	if(TypeNum[_TRANSFORMATION_MATRIX]){
 		delete[] TMat;
 	}
@@ -172,10 +175,13 @@ void BODY::DelBodyElem(int TypeNum_[])
 		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum_[_NURBSS]);
 		delete[] NurbsS;
 	}
-	if(TypeNum_[_NURBSC]){
-		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum_[_NURBSC]);
-		delete[] NurbsC;
-	}
+//	if(TypeNum_[_NURBSC]){
+//		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum_[_NURBSC]);
+//		delete[] NurbsC;
+//	}
+	BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
+	vNurbsC.clear();
+
 	if(TypeNum_[_TRANSFORMATION_MATRIX]){
 		delete[] TMat;
 	}
@@ -209,12 +215,12 @@ void BODY::CopyBody(BODY* body)
     for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++)
         this->TypeNum[i] = body->TypeNum[i];
 
-    this->NewNurbsC(TypeNum[_NURBSC]);
+//	this->NewNurbsC(TypeNum[_NURBSC]);
     this->NewNurbsS(TypeNum[_NURBSS]);
     this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
-    for(int n=0;n<TypeNum[_NURBSC];n++)
-        NurbsC[n] = NFunc.GenNurbsC(&body->NurbsC[n]);
+	BOOST_FOREACH(NURBSC* x, body->vNurbsC)
+        vNurbsC.push_back( NFunc.GenNurbsC(x) );
 
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 
@@ -242,7 +248,7 @@ void BODY::CopyBody(BODY* body)
         this->TrmS[n].pTO = conps_o;
         NFunc.New_CompC(compc_o,body->TrmS[n].pTO->pB.CompC->N);
         for(int i=0;i<body->TrmS[n].pTO->pB.CompC->N;i++){
-            nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
+            nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
             compc_o->pDE[i].NurbsC = nurbsC;
             compc_o->DEType[i] = body->TrmS[n].pTO->pB.CompC->DEType[i];
         }
@@ -257,7 +263,7 @@ void BODY::CopyBody(BODY* body)
             this->TrmS[n].pTI[i] = &(conps_i[i]);
             NFunc.New_CompC(&compc_i[i],body->TrmS[n].pTI[i]->pB.CompC->N);
             for(int j=0;j<body->TrmS[n].pTI[i]->pB.CompC->N;j++){
-                nurbsC = CheckTheSameNurbsC(this->NurbsC,TypeNum[_NURBSC],body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
+                nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
                 compc_i[i].pDE[j].NurbsC = nurbsC;
                 compc_i[i].DEType[j] = body->TrmS[n].pTI[i]->pB.CompC->DEType[j];
                 curve_num++;
@@ -288,9 +294,10 @@ void BODY::RotBody(Coord Axis,double deg)
 
 	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面の回転
 		NFunc.RotNurbsS(&NurbsS[i],Axis,deg);
-	for(int i=0;i<TypeNum[_NURBSC];i++){		// NURBS曲線の回転
-		if(NurbsC[i].EntUseFlag == GEOMTRYELEM)	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-			NFunc.RotNurbsC(&NurbsC[i],Axis,deg);
+
+	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線の回転
+		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
+			NFunc.RotNurbsC(x,Axis,deg);
 	}
 }
 
@@ -306,9 +313,10 @@ void BODY::ShiftBody(Coord d)
 
 	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面のシフト
 		NFunc.ShiftNurbsS(&NurbsS[i],d);
-	for(int i=0;i<TypeNum[_NURBSC];i++){		// NURBS曲線のシフト
-		if(NurbsC[i].EntUseFlag == GEOMTRYELEM)	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-			NFunc.ShiftNurbsC(&NurbsC[i],d);
+
+	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
+		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
+			NFunc.ShiftNurbsC(x,d);
 	}
 }
 
@@ -323,9 +331,10 @@ void BODY::ExpandBody(Coord r)
 
 	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面のシフト
 		NFunc.ChRatioNurbsS(&NurbsS[i],r);
-	for(int i=0;i<TypeNum[_NURBSC];i++){		// NURBS曲線のシフト
-		if(NurbsC[i].EntUseFlag == GEOMTRYELEM)	// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-		NFunc.ChRatioNurbsC(&NurbsC[i],r);		// NURBS曲線の拡大
+
+	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
+		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
+		NFunc.ChRatioNurbsC(x,r);				// NURBS曲線の拡大
 	}
 }
 // Function: RegistBody
@@ -348,12 +357,12 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 //	*BodyList - 登録先リスト
 //	Nurb - 登録するNURBS曲線の実体
 //  BodyName[] - 登録するBODY名
-void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char BodyName[])
+void BODY::RegistNurbsCtoBody(BODYList* BodyList, NURBSC* Nurb, const char* BodyName)
 {
-	NurbsC = new NURBSC;
-	NurbsC[0] = Nurb;												// NURBS曲面の実体を代入
-	TypeNum[_NURBSC] = 1;											// NURBS曲面の数1にする
-	ChangeStatColor(this->NurbsC[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+//	NurbsC = new NURBSC(Nurb);		// ここでnewすべきか悩む K.Magara
+	vNurbsC.push_back(Nurb);
+//	TypeNum[_NURBSC] = 1;											// NURBS曲面の数1にする
+	ChangeStatColor(Nurb->Dstat.Color,0.2,0.2,1.0,0.5);				// 青色
 	BodyList->add(this);											// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	Name = BodyName;												// 新しいBODY名を登録
@@ -367,14 +376,13 @@ void BODY::RegistNurbsCtoBody(BODYList *BodyList,const NURBSC& Nurb,const char B
 //	Nurb[] - 登録するNURBS曲線の実体
 //  BodyName[] - 登録するBODY名
 //	N - 登録するNURBS曲線の数
-void BODY::RegistNurbsCtoBodyN(BODYList *BodyList,const NURBSC* Nurb,const char BodyName[],int N)
+void BODY::RegistNurbsCtoBodyN(BODYList* BodyList, VNURBSC& vNurb, const char* BodyName)
 {
-	NurbsC = new NURBSC[N];
-	for(int i=0;i<N;i++){
-		NurbsC[i] = Nurb[i];										// NURBS曲面の実体を代入
-		TypeNum[_NURBSC] = N;										// NURBS曲面の数1にする
-		ChangeStatColor(this->NurbsC[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+	BOOST_FOREACH(NURBSC* x, vNurb) {
+		vNurbsC.push_back(x);
+		ChangeStatColor(x->Dstat.Color,0.2,0.2,1.0,0.5);			// 青色
 	}
+//	TypeNum[_NURBSC] = N;											// NURBS曲面の数1にする
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	Name = BodyName;												// 新しいBODY名を登録
@@ -554,7 +562,7 @@ TMAT *BODY::NewTMat(int N)
 
 	return TMat;
 }
-
+/*
 // Function: NewNurbsC
 // NURBS曲線NURBSCを指定した数だけメモリー確保し，初期化する
 //
@@ -581,7 +589,7 @@ NURBSC *BODY::NewNurbsC(int N)
 
 	return NurbsC;
 }
-
+*/
 // Function: NewNurbsS
 // NURBS曲線NURBSSを指定した数だけメモリー確保し，初期化する
 //
@@ -660,56 +668,38 @@ TRMS *BODY::NewTrmS(int N)
 // Parameters:
 // NurbsCount - NURBS曲線への変換後のNURBSCのインデックス番号
 // LineCount - 変換したいLINEのインデックス番号
-int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)	
+NURBSC* BODY::GenNurbsCFromLine(int LineCount)	
 {
-	int i=0;
-	int KOD_ERRflag=0;
-
-	NurbsC[NurbsCount].K = 2;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 2;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
-
-	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
+	int		K=2,					// 総和記号の上側添字（コントロールポイント-1）の値
+			M=2,					// 基底関数の階数
+			N=K+M;					// ノットベクトルの数
+	A4int	prop = {0, 0, 1, 0};	// ブーリアン型プロパティ4つ
+    A2double V = {0.0, 1.0};		// パラメータの値
+    ublasVector T(N);
+    ublasVector W(K);
+    ACoord		cp(boost::extents[K]);
 
 	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 1.;
-	NurbsC[NurbsCount].T[3] = 1.;
+	T[0] = 0.;	T[1] = 0.;	T[2] = 1.;	T[3] = 1.;
 	
-	for(i=0;i<NurbsC[NurbsCount].K;i++){				// Weightの値
-		NurbsC[NurbsCount].W[i] = 1.;
+	// Weightの値, コントロールポイントの座標値
+	for(int i=0;i<K;i++) {
+		W[i]  = 1.;
+		cp[i].x = Line[LineCount].cp[i].x;
+		cp[i].y = Line[LineCount].cp[i].y;
+		cp[i].z = Line[LineCount].cp[i].z;
 	}
-	for(i=0;i<NurbsC[NurbsCount].K;i++){				// コントロールポイントの座標値
-		NurbsC[NurbsCount].cp[i].x = Line[LineCount].cp[i].x;
-		NurbsC[NurbsCount].cp[i].y = Line[LineCount].cp[i].y;
-		NurbsC[NurbsCount].cp[i].z = Line[LineCount].cp[i].z;
-	}
-	
-	// パラメータの値
-	NurbsC[NurbsCount].V[0] = 0.;
-	NurbsC[NurbsCount].V[1] = 1.;
 
-    NurbsC[NurbsCount].BlankStat = Line[LineCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
-	NurbsC[NurbsCount].EntUseFlag = Line[LineCount].EntUseFlag;	// ディレクトリ部の情報"Entity Use Flag"を得る(NURBSC)
-	NurbsC[NurbsCount].OriginEnt = LINE;						// 元は線分要素であったことを記憶
-	NurbsC[NurbsCount].pOriginEnt = &Line[LineCount];			// 元は線分要素であったことを記憶
+	NURBSC* n = new NURBSC(K, M, N, T, W, cp, V, prop, Line[LineCount].EntUseFlag);
+
+	// --- クラスの外からメンバ変数さわりたくない ---
+ 	n->BlankStat = Line[LineCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
+	n->OriginEnt = LINE;				// 元は線分要素であったことを記憶
+	n->pOriginEnt = &Line[LineCount];	// 元は線分要素であったことを記憶
 	for(int i=0;i<4;i++)
-		NurbsC[NurbsCount].Dstat.Color[i] = Line[LineCount].Dstat.Color[i];
+		n->Dstat.Color[i] = Line[LineCount].Dstat.Color[i];
 
-	return KOD_TRUE;
+	return n;
 }
 
 // Function: GetNurbsCFromCirA
@@ -718,7 +708,7 @@ int BODY::GetNurbsCFromLine(int NurbsCount,int LineCount)
 // Parameters:
 // NurbsCount - NURBS曲線への変換後のNURBSCのインデックス番号
 // CirCount - 変換したいCIRAのインデックス番号
-int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)	
+NURBSC* BODY::GenNurbsCFromCirA(int CirCount)
 {
 	int	 flag=KOD_TRUE;
 	double	angle_deg = 0.0,
@@ -735,140 +725,97 @@ int BODY::GetNurbsCFromCirA(int NurbsCount,int CirCount)
 	angle_deg = RadToDeg(angle_rad);				// 円/円弧を成す中心角の大きさ(radian)を求める
 
 	// 中心角(degree)の大きさごとにセグメント数を変更する
-	if( angle_deg > 0 && angle_deg <= 90 ){								// 0°<θ<=90°
-		flag = CirAToNurbsC_seg1(NurbsCount ,CirCount ,vec, angle_rad);		// 1セグメント
+	NURBSC* n = NULL;
+	if( angle_deg > 0 && angle_deg <= 90 ){						// 0°<θ<=90°
+		n = CirAToNurbsC_seg1(CirCount ,vec, angle_rad);		// 1セグメント
 	}
-	else if( angle_deg > 90 && angle_deg <= 270 ){						// 90°<θ<=270°
-		flag = CirAToNurbsC_seg2(NurbsCount ,CirCount ,vec, angle_rad);		// 2セグメント
+	else if( angle_deg > 90 && angle_deg <= 270 ){				// 90°<θ<=270°
+		n = CirAToNurbsC_seg2(CirCount ,vec, angle_rad);		// 2セグメント
 	}
-	else if( angle_deg > 270 && angle_deg < 360 ){						// 270°<θ<360°
-		flag = CirAToNurbsC_seg3(NurbsCount ,CirCount ,vec, angle_rad);		// 3セグメント
+	else if( angle_deg > 270 && angle_deg < 360 ){				// 270°<θ<360°
+		n = CirAToNurbsC_seg3(CirCount ,vec, angle_rad);		// 3セグメント
 	}
-	else if( angle_deg == 0 ){											// θ=0°(360°)
-		flag = CirAToNurbsC_seg4(NurbsCount ,CirCount ,vec, radius);			//　4セグメント
+	else if( angle_deg == 0 ){									// θ=0°(360°)
+		n = CirAToNurbsC_seg4(CirCount ,vec, radius);			//　4セグメント
 	}
-	else{
+	if ( !n ) {
 //		GuiIFB.SetMessage("Center angle of a circle or circular arc is not calculated normally");
-		return KOD_ERR;
+		return n;
 	}
 
-    NurbsC[NurbsCount].BlankStat = CirA[CirCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
-	NurbsC[NurbsCount].EntUseFlag = CirA[CirCount].EntUseFlag;	// ディレクトリ部の情報"Entity Use Flag"を得る(NURBSC)
-	NurbsC[NurbsCount].OriginEnt = CIRCLE_ARC;					// 元は円・円弧要素であったことを記憶
-	NurbsC[NurbsCount].pOriginEnt = &CirA[CirCount];		// その円・円弧要素へのポインタ
+	// --- クラスの外からメンバ変数さわりたくない ---
+    n->BlankStat = CirA[CirCount].BlankStat;	// ディレクトリ部の情報"Blank Status"を得る(NURBSC)
+	n->OriginEnt = CIRCLE_ARC;					// 元は円・円弧要素であったことを記憶
+	n->pOriginEnt = &CirA[CirCount];			// その円・円弧要素へのポインタ
 
-	return KOD_TRUE;
+	return n;
 }
 
 // 1セグメントの円弧(中心角が0°<θ<=90°の時)
-int BODY::CirAToNurbsC_seg1(int NurbsCount,int CirCount,Coord vec[], double angle_rad)
+NURBSC* BODY::CirAToNurbsC_seg1(int CirCount, const Coord vec[], double angle_rad)
 {
-	int i=0;
-	int KOD_ERRflag=0;
-	
 	Coord	vec_cp;
 	
-	NurbsC[NurbsCount].K = 3;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
-
-	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
+	int		K = 3,					// 総和記号の上側添字（コントロールポイント-1）の値
+			M = 3,					// 基底関数の階数
+			N = K+M;				// ノットベクトルの数
+	A4int	prop = {0, 0, 1, 0};	// ブーリアン型プロパティ4つ
+    A2double V = {0.0, 1.0};		// パラメータの値
+	ublasVector	T(N);
+	ublasVector	W(K);
+    ACoord		cp(boost::extents[K]);
 	
 	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 1.;
-	NurbsC[NurbsCount].T[4] = 1.;
-	NurbsC[NurbsCount].T[5] = 1.;
+	T[0] = 0.;	T[1] = 0.;	T[2] = 0.;
+	T[3] = 1.;	T[4] = 1.;	T[5] = 1.;
 		
 	// Weightの値
-	for(i=0; i<3; i++){
-		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
-		}	
-		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = cos(angle_rad/2);
-		}
+	for(int i=0; i<K; i++){
+		if(i % 2 == 0)	W[i] = 1.;
+		else			W[i] = cos(angle_rad/2);
 	}
 		
 	vec_cp = vec[0].Arc_CP(vec[1], cos(angle_rad));	//　円の中心点からコントロールポイントP1へのベクトルを求める
 	
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[1].y;		
-	NurbsC[NurbsCount].cp[1].x = vec_cp.x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[1].y = vec_cp.y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[2].x = CirA[CirCount].cp[2].x;
-	NurbsC[NurbsCount].cp[2].y = CirA[CirCount].cp[2].y;
-
-	for(i=0; i<3; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
+	cp[0].x = CirA[CirCount].cp[1].x;
+	cp[0].y = CirA[CirCount].cp[1].y;		
+	cp[1].x = vec_cp.x + CirA[CirCount].cp[0].x;
+	cp[1].y = vec_cp.y + CirA[CirCount].cp[0].y;
+	cp[2].x = CirA[CirCount].cp[2].x;
+	cp[2].y = CirA[CirCount].cp[2].y;
+	for(int i=0; i<K; i++){
+		cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
 	}
-		
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
 
-	return KOD_TRUE;
+	return new NURBSC(K, M, N, T, W, cp, V, prop, CirA[CirCount].EntUseFlag);
 }
 
 // private
 // 2セグメントの円弧(中心角が90°<θ<=270°の時)
-int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angle_rad)
+NURBSC* BODY::CirAToNurbsC_seg2(int CirCount, const Coord vec[], double angle_rad)
 {
-	int	i = 0,
-		KOD_ERRflag = 0;
 	double	angle_rad2 = 0.0;
+	Coord	vec_cp[3];
 	
-	Coord vec_cp[3];
-	
-	NurbsC[NurbsCount].K = 5;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
-	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
-	KOD_ERRflag++;	// 3
-    NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
+	int		K = 5,					// 総和記号の上側添字（コントロールポイント-1）の値
+			M = 3,					// 基底関数の階数
+			N = K+M;				// ノットベクトルの数		
+	A4int	prop = {0, 0, 1, 0};	// ブーリアン型プロパティ4つ
+	A2double V = {0.0, 1.0};		// パラメータの値
+	ublasVector	T(N);
+	ublasVector	W(K);
+    ACoord		cp(boost::extents[K]);
 	
 	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 2./4.;
-	NurbsC[NurbsCount].T[4] = 2./4.;
-	NurbsC[NurbsCount].T[5] = 1.;
-	NurbsC[NurbsCount].T[6] = 1.;
-	NurbsC[NurbsCount].T[7] = 1.;
+	T[0] = 0.;		T[1] = 0.;		T[2] = 0.;
+	T[3] = 2./4.;	T[4] = 2./4.;	T[5] = 1.;
+	T[6] = 1.;		T[7] = 1.;
 		
 	// Weightの値
-	for(i=0; i<5; i++){
-		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
-		}	
-		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = cos(angle_rad/4);
-		}
+	for(int i=0; i<K; i++){
+		if(i % 2 == 0)	W[i] = 1.;
+		else			W[i] = cos(angle_rad/4);
 	}
 		
 	angle_rad2 = angle_rad/2;	// (中心角)÷2
@@ -878,74 +825,49 @@ int BODY::CirAToNurbsC_seg2(int NurbsCount,int CirCount,Coord vec[], double angl
 	vec_cp[2] = vec_cp[1].Arc_CP(vec[1], cos(angle_rad2));	// 円の中心点からコントロールポイントP3へのベクトルを求める
 	
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[1].y;		
- 	NurbsC[NurbsCount].cp[1].x = vec_cp[0].x + CirA[CirCount].cp[0].x;
- 	NurbsC[NurbsCount].cp[1].y = vec_cp[0].y + CirA[CirCount].cp[0].y;
- 	NurbsC[NurbsCount].cp[2].x = vec_cp[1].x + CirA[CirCount].cp[0].x;
- 	NurbsC[NurbsCount].cp[2].y = vec_cp[1].y + CirA[CirCount].cp[0].y;
- 	NurbsC[NurbsCount].cp[3].x = vec_cp[2].x + CirA[CirCount].cp[0].x;
- 	NurbsC[NurbsCount].cp[3].y = vec_cp[2].y + CirA[CirCount].cp[0].y;
- 	NurbsC[NurbsCount].cp[4].x = CirA[CirCount].cp[2].x;
- 	NurbsC[NurbsCount].cp[4].y = CirA[CirCount].cp[2].y;
-	for(i=0; i<5; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
+	cp[0].x = CirA[CirCount].cp[1].x;
+	cp[0].y = CirA[CirCount].cp[1].y;		
+ 	cp[1].x = vec_cp[0].x + CirA[CirCount].cp[0].x;
+ 	cp[1].y = vec_cp[0].y + CirA[CirCount].cp[0].y;
+ 	cp[2].x = vec_cp[1].x + CirA[CirCount].cp[0].x;
+ 	cp[2].y = vec_cp[1].y + CirA[CirCount].cp[0].y;
+ 	cp[3].x = vec_cp[2].x + CirA[CirCount].cp[0].x;
+ 	cp[3].y = vec_cp[2].y + CirA[CirCount].cp[0].y;
+ 	cp[4].x = CirA[CirCount].cp[2].x;
+ 	cp[4].y = CirA[CirCount].cp[2].y;
+	for(int i=0; i<K; i++){
+		cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
 	}
-	
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
 
-	return KOD_TRUE;
+	return new NURBSC(K, M, N, T, W, cp, V, prop, CirA[CirCount].EntUseFlag);
 }
 
 // private
 // 3セグメントの円弧(中心角が270°<θ<360°の時)
-int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angle_rad)
+NURBSC* BODY::CirAToNurbsC_seg3(int CirCount, const Coord vec[], double angle_rad)
 {
-	int	i=0,
-		KOD_ERRflag=0;
 	double	angle_rad3 = 0.0;
-	
 	Coord	vec_cp[5];
 	
-	NurbsC[NurbsCount].K = 7;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
-	
-	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
+	int		K = 7,		// 総和記号の上側添字（コントロールポイント-1）の値
+			M = 3,		// 基底関数の階数
+			N = K+M;	// ノットベクトルの数
+	A4int	prop = {0, 0, 1, 0};	// ブーリアン型プロパティ4つ
+	A2double V = {0.0, 1.0};		// パラメータの値
+	ublasVector	T(N);
+	ublasVector	W(K);
+    ACoord		cp(boost::extents[K]);
 	
 	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 1./3.;
-	NurbsC[NurbsCount].T[4] = 1./3.;
-	NurbsC[NurbsCount].T[5] = 2./3.;
-	NurbsC[NurbsCount].T[6] = 2./3.;
-	NurbsC[NurbsCount].T[7] = 1.;
-	NurbsC[NurbsCount].T[8] = 1.;
-	NurbsC[NurbsCount].T[9] = 1.;
+	T[0] = 0.;		T[1] = 0.;		T[2] = 0.;
+	T[3] = 1./3.;	T[4] = 1./3.;	T[5] = 2./3.;
+	T[6] = 2./3.;	T[7] = 1.;		T[8] = 1.;
+	T[9] = 1.;
 	
 	// Weightの値
-	for(i=0; i<7; i++){
-		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
-		}	
-		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = cos(angle_rad/6);
-		}
+	for(int i=0; i<K; i++){
+		if(i % 2 == 0)	W[i] = 1.;
+		else			W[i] = cos(angle_rad/6);
 	}
 
 	angle_rad3 = angle_rad/3;	// (中心角)÷3
@@ -957,108 +879,76 @@ int BODY::CirAToNurbsC_seg3(int NurbsCount,int CirCount,Coord vec[], double angl
 	vec_cp[4] = vec_cp[3].Arc_CP(vec[1], cos(angle_rad3));		// 円の中心点からコントロールポイントP4へのベクトルを求める
 		
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[1].x;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[1].y;		
-	NurbsC[NurbsCount].cp[1].x = vec_cp[0].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[1].y = vec_cp[0].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[2].x = vec_cp[1].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[2].y = vec_cp[1].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[3].x = vec_cp[2].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[3].y = vec_cp[2].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[4].x = vec_cp[3].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[4].y = vec_cp[3].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[5].x = vec_cp[4].x + CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[5].y = vec_cp[4].y + CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[6].x = CirA[CirCount].cp[2].x;
-	NurbsC[NurbsCount].cp[6].y = CirA[CirCount].cp[2].y;
-
-	for(i=0; i<7; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
+	cp[0].x = CirA[CirCount].cp[1].x;
+	cp[0].y = CirA[CirCount].cp[1].y;		
+	cp[1].x = vec_cp[0].x + CirA[CirCount].cp[0].x;
+	cp[1].y = vec_cp[0].y + CirA[CirCount].cp[0].y;
+	cp[2].x = vec_cp[1].x + CirA[CirCount].cp[0].x;
+	cp[2].y = vec_cp[1].y + CirA[CirCount].cp[0].y;
+	cp[3].x = vec_cp[2].x + CirA[CirCount].cp[0].x;
+	cp[3].y = vec_cp[2].y + CirA[CirCount].cp[0].y;
+	cp[4].x = vec_cp[3].x + CirA[CirCount].cp[0].x;
+	cp[4].y = vec_cp[3].y + CirA[CirCount].cp[0].y;
+	cp[5].x = vec_cp[4].x + CirA[CirCount].cp[0].x;
+	cp[5].y = vec_cp[4].y + CirA[CirCount].cp[0].y;
+	cp[6].x = CirA[CirCount].cp[2].x;
+	cp[6].y = CirA[CirCount].cp[2].y;
+	for(int i=0; i<K; i++){
+		cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
 	}
-		
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
 
-	return KOD_TRUE;
+	return new NURBSC(K, M, N, T, W, cp, V, prop, CirA[CirCount].EntUseFlag);
 }
 
 // private
 // 4セグメントの円弧(円)
-int BODY::CirAToNurbsC_seg4(int NurbsCount,int CirCount,Coord vec[], double radius)
+NURBSC* BODY::CirAToNurbsC_seg4(int CirCount, const Coord vec[], double radius)
 {
-	int i=0;
-	int KOD_ERRflag=0;
-
-	NurbsC[NurbsCount].K = 9;		// 総和記号の上側添字（コントロールポイント-1）の値
-	NurbsC[NurbsCount].M = 3;		// 基底関数の階数
-	NurbsC[NurbsCount].N = NurbsC[NurbsCount].K + NurbsC[NurbsCount].M;	// ノットベクトルの数
-	
-	// ブーリアン型プロパティ4つ
-	NurbsC[NurbsCount].prop[0] = 0;
-	NurbsC[NurbsCount].prop[1] = 0;
-	NurbsC[NurbsCount].prop[2] = 1;
-	NurbsC[NurbsCount].prop[3] = 0;
-
-	// メモリー確保
-	KOD_ERRflag++;	// 1
-	NurbsC[NurbsCount].T.resize(NurbsC[NurbsCount].N);
-	KOD_ERRflag++;	// 2
-	NurbsC[NurbsCount].W.resize(NurbsC[NurbsCount].K);
-	KOD_ERRflag++;	// 3
-	NurbsC[NurbsCount].cp.resize(boost::extents[NurbsC[NurbsCount].K]);
+	int		K = 9,		// 総和記号の上側添字（コントロールポイント-1）の値
+			M = 3,		// 基底関数の階数
+			N = K+M;	// ノットベクトルの数
+	A4int	prop = {0, 0, 1, 0};	// ブーリアン型プロパティ4つ
+	A2double V = {0.0, 1.0};		// パラメータの値
+	ublasVector	T(N);
+	ublasVector	W(K);
+    ACoord		cp(boost::extents[K]);
 	
 	// ノットベクトルの値	
-	NurbsC[NurbsCount].T[0] = 0.;
-	NurbsC[NurbsCount].T[1] = 0.;
-	NurbsC[NurbsCount].T[2] = 0.;
-	NurbsC[NurbsCount].T[3] = 1./4.;
-	NurbsC[NurbsCount].T[4] = 1./4.;
-	NurbsC[NurbsCount].T[5] = 2./4.;
-	NurbsC[NurbsCount].T[6] = 2./4.;
-	NurbsC[NurbsCount].T[7] = 3./4.;
-	NurbsC[NurbsCount].T[8] = 3./4.;
-	NurbsC[NurbsCount].T[9] = 1.;
-	NurbsC[NurbsCount].T[10] = 1.;
-	NurbsC[NurbsCount].T[11] = 1.;
+	T[0] = 0.;		T[1] = 0.;		T[2] = 0.;
+	T[3] = 1./4.;	T[4] = 1./4.;	T[5] = 2./4.;
+	T[6] = 2./4.;	T[7] = 3./4.;	T[8] = 3./4.;
+	T[9] = 1.;		T[10] = 1.;		T[11] = 1.;
 		
 	// Weightの値
-	for(i=0; i<9; i++){
-		if(i % 2 == 0){
-			NurbsC[NurbsCount].W[i] = 1.;
-		}	
-		else if(i % 2 == 1){	
-			NurbsC[NurbsCount].W[i] = sqrt(2.0)/2;
-		}
+	for(int i=0; i<K; i++){
+		if(i % 2 == 0)	W[i] = 1.;
+		else			W[i] = sqrt(2.0)/2;
 	}
 
 	// コントロールポイントの座標値
-	NurbsC[NurbsCount].cp[0].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[0].y = CirA[CirCount].cp[0].y;		
-	NurbsC[NurbsCount].cp[1].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[1].y = CirA[CirCount].cp[0].y + radius;
-	NurbsC[NurbsCount].cp[2].x = CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[2].y = CirA[CirCount].cp[0].y + radius;
-	NurbsC[NurbsCount].cp[3].x = CirA[CirCount].cp[0].x - radius;
-	NurbsC[NurbsCount].cp[3].y = CirA[CirCount].cp[0].y + radius;
-	NurbsC[NurbsCount].cp[4].x = CirA[CirCount].cp[0].x - radius;
-	NurbsC[NurbsCount].cp[4].y = CirA[CirCount].cp[0].y;
-	NurbsC[NurbsCount].cp[5].x = CirA[CirCount].cp[0].x - radius;
-	NurbsC[NurbsCount].cp[5].y = CirA[CirCount].cp[0].y - radius;
-	NurbsC[NurbsCount].cp[6].x = CirA[CirCount].cp[0].x;
-	NurbsC[NurbsCount].cp[6].y = CirA[CirCount].cp[0].y - radius;
-	NurbsC[NurbsCount].cp[7].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[7].y = CirA[CirCount].cp[0].y - radius;
-	NurbsC[NurbsCount].cp[8].x = CirA[CirCount].cp[0].x + radius;
-	NurbsC[NurbsCount].cp[8].y = CirA[CirCount].cp[0].y;
-
-	for(i=0; i<9; i++){
-		NurbsC[NurbsCount].cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
+	cp[0].x = CirA[CirCount].cp[0].x + radius;
+	cp[0].y = CirA[CirCount].cp[0].y;		
+	cp[1].x = CirA[CirCount].cp[0].x + radius;
+	cp[1].y = CirA[CirCount].cp[0].y + radius;
+	cp[2].x = CirA[CirCount].cp[0].x;
+	cp[2].y = CirA[CirCount].cp[0].y + radius;
+	cp[3].x = CirA[CirCount].cp[0].x - radius;
+	cp[3].y = CirA[CirCount].cp[0].y + radius;
+	cp[4].x = CirA[CirCount].cp[0].x - radius;
+	cp[4].y = CirA[CirCount].cp[0].y;
+	cp[5].x = CirA[CirCount].cp[0].x - radius;
+	cp[5].y = CirA[CirCount].cp[0].y - radius;
+	cp[6].x = CirA[CirCount].cp[0].x;
+	cp[6].y = CirA[CirCount].cp[0].y - radius;
+	cp[7].x = CirA[CirCount].cp[0].x + radius;
+	cp[7].y = CirA[CirCount].cp[0].y - radius;
+	cp[8].x = CirA[CirCount].cp[0].x + radius;
+	cp[8].y = CirA[CirCount].cp[0].y;
+	for(int i=0; i<K; i++){
+		cp[i].z = CirA[CirCount].zt;	// Z方向の大きさは一定
 	}
-		
-	NurbsC[NurbsCount].V[0] = 0.;		// パラメータの値
-	NurbsC[NurbsCount].V[1] = 1.;
 
-	return KOD_TRUE;
+	return new NURBSC(K, M, N, T, W, cp, V, prop, CirA[CirCount].EntUseFlag);
 }
 
 // Function: GetOuterEdgeNum
@@ -1139,25 +1029,24 @@ NURBSS *TRMS::GetNurbsS()
 //
 // Return:
 // Tnurbsのポインタ
-NURBSC *BODY::CheckTheSameNurbsC(NURBSC *Tnurbs, int N, NURBSC *Inurbs)
+NURBSC* BODY::CheckTheSameNurbsC(const NURBSC* Inurbs)
 {
     NURBSC *nurb;
     bool flag = false;
 
-
-    for(int i=0;i<N;i++){
-        if(Tnurbs[i].K == Inurbs->K){
+	BOOST_FOREACH(NURBSC* x, vNurbsC) {
+        if(x->K == Inurbs->K){
             flag = true;
             for(int j=0;j<Inurbs->K;j++){
-                if(Tnurbs[i].cp[j].DiffCoord(Inurbs->cp[j]) == KOD_FALSE){
+                if(x->cp[j].DiffCoord(Inurbs->cp[j]) == KOD_FALSE){
                     flag = false;
                     break;
                 }
             }
         }
         if(flag == true)
-            return &Tnurbs[i];
-    }
+            return x;
+	}
 
     return NULL;
 }

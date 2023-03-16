@@ -124,16 +124,19 @@ int DXF_PARSER::ReadEntitiesSection(FILE *fp,int Line,BODY *body)
 // メモリー確保に失敗：KOD_ERR
 int DXF_PARSER::ChangeEntityforNurbs(BODY *body)
 {
-	int ncount = 0;
 	for(int i=0;i<body->TypeNum[_LINE];i++){
-		if(body->GetNurbsCFromLine(ncount,i) == KOD_ERR) return KOD_ERR;	// 円/円弧パラメータからNURBS曲線パラメータを得る
-		InitDisplayStat(&body->NurbsC[ncount].Dstat);						// 表示属性の初期化
-		ncount++;
+		NURBSC* n = body->GenNurbsCFromLine(i);		// 円/円弧パラメータからNURBS曲線パラメータを得る
+		if ( n ) {
+			InitDisplayStat(n->Dstat);				// 表示属性の初期化
+			body->vNurbsC.push_back(n);
+		}
 	}
 	for(int i=0;i<body->TypeNum[_CIRCLE_ARC];i++){
-		if(body->GetNurbsCFromCirA(ncount,i) == KOD_ERR) return KOD_ERR;	// 線分パラメータからNURBS曲線パラメータを得る
-		InitDisplayStat(&body->NurbsC[ncount].Dstat);								// 表示属性の初期化
-		ncount++;
+		NURBSC* n = body->GenNurbsCFromCirA(i);		// 線分パラメータからNURBS曲線パラメータを得る
+		if ( n ) {
+			InitDisplayStat(n->Dstat);				// 表示属性の初期化
+			body->vNurbsC.push_back(n);
+		}
 	}
 }
 
@@ -184,7 +187,7 @@ int DXF_PARSER::GetArcData(FILE *fp,BODY *body)
 	SetStartEndPtArc(&body->CirA[Count[_CIRCLE_ARC]]);			// 円弧の始点，終点をセット
 	CalcUVvec(&body->CirA[Count[_CIRCLE_ARC]]);					// CIRAのUV直交座標を設定する
 
-	InitDisplayStat(&body->CirA[Count[_CIRCLE_ARC]].Dstat);		// 色指定
+	InitDisplayStat(body->CirA[Count[_CIRCLE_ARC]].Dstat);		// 色指定
     body->CirA[Count[_CIRCLE_ARC]].BlankStat = DISPLAY;         // 描画対象であることを宣言
 	body->CirA[Count[_CIRCLE_ARC]].EntUseFlag = GEOMTRYELEM;	// 幾何要素であることを宣言
 	body->CirA[Count[_CIRCLE_ARC]].pD = NULL;					// IGESでないので関係なし
@@ -276,7 +279,7 @@ int DXF_PARSER::GetCircleData(FILE *fp,BODY *body)
 	SetStartEndPtArc(&body->CirA[Count[_CIRCLE_ARC]]);			// 円弧の始点，終点をセット
 	CalcUVvec(&body->CirA[Count[_CIRCLE_ARC]]);					// CIRAのUV直交座標を設定する
 
-	InitDisplayStat(&body->CirA[Count[_CIRCLE_ARC]].Dstat);
+	InitDisplayStat(body->CirA[Count[_CIRCLE_ARC]].Dstat);
     body->CirA[Count[_CIRCLE_ARC]].BlankStat = DISPLAY;         // 描画対象であることを宣言
 	body->CirA[Count[_CIRCLE_ARC]].EntUseFlag = GEOMTRYELEM;
 	body->CirA[Count[_CIRCLE_ARC]].pD = NULL;
@@ -330,7 +333,7 @@ int DXF_PARSER::GetLineData(FILE *fp,BODY *body)
 	//	body->Line[Count[_LINE]].cp[1].y,
 	//	body->Line[Count[_LINE]].cp[1].z);
 
-	InitDisplayStat(&body->Line[Count[_LINE]].Dstat);
+	InitDisplayStat(body->Line[Count[_LINE]].Dstat);
     body->Line[Count[_LINE]].BlankStat = DISPLAY;
 	body->Line[Count[_LINE]].EntUseFlag = GEOMTRYELEM;
 	body->Line[Count[_LINE]].pD = NULL;
@@ -364,7 +367,7 @@ int DXF_PARSER::ResearchEntNum(FILE *fp,BODY *body)
 		}
 	}while(strcmp(Label,"ENDSEC"));
 
-	body->TypeNum[_NURBSC] = body->TypeNum[_CIRCLE_ARC] + body->TypeNum[_LINE];
+//	body->TypeNum[_NURBSC] = body->TypeNum[_CIRCLE_ARC] + body->TypeNum[_LINE];
 
 	fprintf(stderr,"%d,%d\n",body->TypeNum[_CIRCLE_ARC],body->TypeNum[_LINE]);	// for debug
 
@@ -491,13 +494,13 @@ int DXF_PARSER::CheckSection(char *str)
 //
 // Parameter:
 // *Dstat - 表示属性
-void DXF_PARSER::InitDisplayStat(DispStat *Dstat)
+void DXF_PARSER::InitDisplayStat(DispStat& Dstat)
 {
 	// 白色を設定
-	Dstat->Color[0] = 1.0;
-	Dstat->Color[1] = 1.0;
-	Dstat->Color[2] = 1.0;
-	Dstat->Color[3] = 0.5;
+	Dstat.Color[0] = 1.0;
+	Dstat.Color[1] = 1.0;
+	Dstat.Color[2] = 1.0;
+	Dstat.Color[3] = 0.5;
 
 	// 表示属性を追加する場合は以下に追加のコードを記述
 }

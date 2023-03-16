@@ -318,6 +318,7 @@ public:
 		this->pOriginEnt = NULL;
 	}
 };
+typedef std::vector<NURBSC*>	VNURBSC;
 
 // Structure: NURBSS
 // 有理Bスプライン(NURBS)曲面を表わす構造体
@@ -565,7 +566,9 @@ public:
 	// Constructor: BODY
 	// BODYクラスのコンストラクタ．各種初期化
 	BODY();
-
+	~BODY() {
+		BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
+	}
 	// Function: NewBodyElem
 	// BODYを構成する全要素のメモリー確保
 	void NewBodyElem();				
@@ -600,7 +603,7 @@ public:
 
 	// Function: NewNurbsC
 	// NURBSCを指定した数だけメモリー確保し，初期化する
-	NURBSC *NewNurbsC(int);			
+//	NURBSC *NewNurbsC(int);			
 
 	// Function: NewNurbsS
 	// NURBSSを指定した数だけメモリー確保し，初期化する
@@ -640,11 +643,11 @@ public:
 
 	// Function: RegistNurbsCtoBody
 	// 1つのNURBS曲線を新たなBODYとして登録する
-	void RegistNurbsCtoBody(BODYList *,const NURBSC&,const char []);	
+	void RegistNurbsCtoBody(BODYList*, NURBSC*, const char*);
 
 	// Function: RegistNurbsCtoBodyN
 	// N個のNURBS曲線を新たなBODYとして登録する
-	void RegistNurbsCtoBodyN(BODYList *,const NURBSC*,const char [],int);	
+	void RegistNurbsCtoBodyN(BODYList*, VNURBSC&, const char*);
 
 	// Function: RegistNurbsStoBody
 	// 1つのNURBS曲面を新たなBODYとして登録する
@@ -668,33 +671,33 @@ public:
 
 	// Function: GetNurbsCFromLine
 	// 直線エンティティをNURBS曲線エンティティへと変換する
-	int GetNurbsCFromLine(int,int);					
+	NURBSC* GenNurbsCFromLine(int);		// GetNurbsCFromLine()
 
 	// Function: GetNurbsCFromCirA
 	// 円・円弧エンティティをNURBS曲線エンティティへと変換する
-	int GetNurbsCFromCirA(int,int);							
+	NURBSC* GenNurbsCFromCirA(int);		// GetNurbsCFromCirA()
 
 private:
 
     // Function: CheckTheSameNurbsC
     // (private)同一のNURBS曲線を探索
-    NURBSC *CheckTheSameNurbsC(NURBSC *,int,NURBSC *);
+    NURBSC* CheckTheSameNurbsC(const NURBSC*);
 
 	// Function: CirAToNurbsC_seg1
 	// (private)円・円弧エンティティが1セグメントの場合
-	int CirAToNurbsC_seg1(int,int,Coord [],double);
+	NURBSC* CirAToNurbsC_seg1(int, const Coord[], double);
 
 	// Function: CirAToNurbsC_seg2
 	// (private)円・円弧エンティティが2セグメントの場合
-	int CirAToNurbsC_seg2(int,int,Coord [],double);	
+	NURBSC* CirAToNurbsC_seg2(int, const Coord[], double);
 
 	// Function: CirAToNurbsC_seg3
 	// (private)円・円弧エンティティが3セグメントの場合
-	int CirAToNurbsC_seg3(int,int,Coord [],double);	
+	NURBSC* CirAToNurbsC_seg3(int, const Coord[], double);
 
 	// Function: CirAToNurbsC_seg4
 	// (private)円・円弧エンティティが4セグメントの場合
-	int CirAToNurbsC_seg4(int,int,Coord [],double);			
+	NURBSC* CirAToNurbsC_seg4(int, const Coord[], double);
 
 public:
 	// Variable: *CirA
@@ -719,7 +722,8 @@ public:
 
 	// Variable: *NurbsC
 	// NURBS曲線
-	NURBSC *NurbsC;		
+//	NURBSC *NurbsC;		
+	VNURBSC	vNurbsC;
 
 	// Variable: *NurbsS
 	// NURBS曲面

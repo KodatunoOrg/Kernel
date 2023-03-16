@@ -203,8 +203,9 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 //
 // Return:
 // KOD_TRUE
-int IGES_PARSER::ChangeKnotVecRange(A2double& Range,ublasVector& Knot,int N,int M,int K,double val)
+int IGES_PARSER::ChangeKnotVecRange(A2double& Range, ublasVector& Knot, int M, int K, double val)
 {
+	int N = Knot.size();
 	double _t[KNOTNUMMAX];
 	for(int i=0;i<N;i++){
 		_t[i] = ChangeKnot(Knot[i],Knot[M-1],Knot[K],val);
@@ -262,7 +263,7 @@ int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 				nc->cp[k].x = ChangeKnot(nc->cp[k].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],val);
 				nc->cp[k].y = ChangeKnot(nc->cp[k].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],val);
 			}
-			ChangeKnotVecRange(nc->V,nc->T,nc->N,nc->M,nc->K,val);
+			ChangeKnotVecRange(nc->V,nc->T,nc->M,nc->K,val);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
 		for(int j=0;j<body->TrmS[i].n2;j++){
@@ -272,18 +273,18 @@ int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 					nc->cp[l].x = ChangeKnot(nc->cp[l].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],val);
 					nc->cp[l].y = ChangeKnot(nc->cp[l].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],val);
 				}
-				ChangeKnotVecRange(nc->V,nc->T,nc->N,nc->M,nc->K,val);
+				ChangeKnotVecRange(nc->V,nc->T,nc->M,nc->K,val);
 			}
 		}
 		// ノットベクトルの範囲を変更する
-		ChangeKnotVecRange(body->TrmS[i].pts->U,body->TrmS[i].pts->S,body->TrmS[i].pts->N[0],M0,K0,val);
-		ChangeKnotVecRange(body->TrmS[i].pts->V,body->TrmS[i].pts->T,body->TrmS[i].pts->N[1],M1,K1,val);
+		ChangeKnotVecRange(body->TrmS[i].pts->U,body->TrmS[i].pts->S,M0,K0,val);
+		ChangeKnotVecRange(body->TrmS[i].pts->V,body->TrmS[i].pts->T,M1,K1,val);
 	}
 
 	// NURBS曲線
-	for(int i=0;i<body->TypeNum[_NURBSC];i++){
-		if(body->NurbsC[i].EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
-		ChangeKnotVecRange(body->NurbsC[i].V,body->NurbsC[i].T,body->NurbsC[i].N,body->NurbsC[i].M,body->NurbsC[i].K,val);
+	BOOST_FOREACH(NURBSC* x, body->vNurbsC) {
+		if(x->EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
+		ChangeKnotVecRange(x->V, x->T, x->M, x->K, val);
 	}
 
 	return KOD_TRUE;
@@ -352,7 +353,7 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 				nc->cp[k].x = ChangeKnot(nc->cp[k].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],uval);
 				nc->cp[k].y = ChangeKnot(nc->cp[k].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],vval);
 			}
-			ChangeKnotVecRange(nc->V,nc->T,nc->N,nc->M,nc->K,NORM_KNOT_VAL);
+			ChangeKnotVecRange(nc->V,nc->T,nc->M,nc->K,NORM_KNOT_VAL);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
 		for(int j=0;j<body->TrmS[i].n2;j++){
@@ -362,18 +363,18 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 					nc->cp[l].x = ChangeKnot(nc->cp[l].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],uval);
 					nc->cp[l].y = ChangeKnot(nc->cp[l].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],vval);
 				}
-				ChangeKnotVecRange(nc->V,nc->T,nc->N,nc->M,nc->K,NORM_KNOT_VAL);
+				ChangeKnotVecRange(nc->V,nc->T,nc->M,nc->K,NORM_KNOT_VAL);
 			}
 		}
 		// ノットベクトルの範囲を変更する
-		ChangeKnotVecRange(body->TrmS[i].pts->U,body->TrmS[i].pts->S,body->TrmS[i].pts->N[0],M0,K0,uval);
-		ChangeKnotVecRange(body->TrmS[i].pts->V,body->TrmS[i].pts->T,body->TrmS[i].pts->N[1],M1,K1,vval);
+		ChangeKnotVecRange(body->TrmS[i].pts->U,body->TrmS[i].pts->S,M0,K0,uval);
+		ChangeKnotVecRange(body->TrmS[i].pts->V,body->TrmS[i].pts->T,M1,K1,vval);
 	}
 
 	// NURBS曲線
-	for(int i=0;i<body->TypeNum[_NURBSC];i++){
-		if(body->NurbsC[i].EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
-		ChangeKnotVecRange(body->NurbsC[i].V,body->NurbsC[i].T,body->NurbsC[i].N,body->NurbsC[i].M,body->NurbsC[i].K,NORM_KNOT_VAL);
+	BOOST_FOREACH(NURBSC* x, body->vNurbsC) {
+		if(x->EntUseFlag == 5) continue;	// 実空間上の曲線のみ変更
+		ChangeKnotVecRange(x->V, x->T, x->M, x->K, NORM_KNOT_VAL);
 	}
 
 	return KOD_TRUE;
@@ -499,14 +500,20 @@ int IGES_PARSER::ChangeEntityforNurbs(DirectoryParam *dpara,BODY body,int dline)
 		flag = KOD_FALSE;
 		// 円/円弧->NURBS曲線
 		if(dpara[i].entity_type == CIRCLE_ARC){
-			if(body.GetNurbsCFromCirA(TypeCount[_NURBSC],dpara[i].entity_count) == KOD_ERR) return KOD_ERR;		// 円/円弧パラメータからNURBS曲線パラメータを得る
-			InitDisplayStat(&body.NurbsC[TypeCount[_NURBSC]].Dstat);			// 表示属性の初期化
+			NURBSC* n = body.GenNurbsCFromCirA(dpara[i].entity_count);		// 円/円弧パラメータからNURBS曲線パラメータを得る
+			if ( n ) {
+				InitDisplayStat(n->Dstat);			// 表示属性の初期化
+				body.vNurbsC.push_back(n);
+			}
 			flag = KOD_TRUE;
 		}
 		// 線分->NURBS曲線
 		else if(dpara[i].entity_type == LINE){
-			if(body.GetNurbsCFromLine(TypeCount[_NURBSC],dpara[i].entity_count) == KOD_ERR) return KOD_ERR;		// 線分パラメータからNURBS曲線パラメータを得る
-			InitDisplayStat(&body.NurbsC[TypeCount[_NURBSC]].Dstat);			// 表示属性の初期化
+			NURBSC* n = body.GenNurbsCFromLine(dpara[i].entity_count);		// 線分パラメータからNURBS曲線パラメータを得る
+			if ( n ) {
+				InitDisplayStat(n->Dstat);			// 表示属性の初期化
+				body.vNurbsC.push_back(n);
+			}
 			flag = KOD_TRUE;
 		}
 		// 円/円弧、直線以外の曲線エンティティが存在する場合は、新規に処理を追加してください
@@ -520,7 +527,7 @@ int IGES_PARSER::ChangeEntityforNurbs(DirectoryParam *dpara,BODY body,int dline)
 					}
 				}
 			}
-			TypeCount[_NURBSC]++;											// NURBSCの数をインクリメント
+//			TypeCount[_NURBSC]++;											// NURBSCの数をインクリメント
 		}
 	}
 
@@ -679,7 +686,7 @@ int IGES_PARSER::GetCirAPara(char str[],int pD,DirectoryParam *dpara,BODY body)
 
 	body.CirA[TypeCount[_CIRCLE_ARC]].pD = pD;		// ディレクトリ部への逆ポインタの値
 
-	InitDisplayStat(&body.CirA[TypeCount[_CIRCLE_ARC]].Dstat);	// 表示属性の初期化
+	InitDisplayStat(body.CirA[TypeCount[_CIRCLE_ARC]].Dstat);	// 表示属性の初期化
 
 	return KOD_TRUE;
 }
@@ -727,7 +734,7 @@ int IGES_PARSER::GetLinePara(char str[],int pD,DirectoryParam *dpara,BODY body)
 
 	body.Line[TypeCount[_LINE]].pD = pD;		// ディレクトリ部への逆ポインタの値
 
-	InitDisplayStat(&body.Line[TypeCount[_LINE]].Dstat);	// 表示属性の初期化
+	InitDisplayStat(body.Line[TypeCount[_LINE]].Dstat);	// 表示属性の初期化
 
 	return KOD_TRUE;
 }
@@ -818,7 +825,7 @@ int IGES_PARSER::GetNurbsCPara(char str[],int pD,DirectoryParam *dpara,BODY body
 
 	body.NurbsC[TypeCount[_NURBSC]].pD = pD;		// DE部への逆ポインタの値
 
-	InitDisplayStat(&body.NurbsC[TypeCount[_NURBSC]].Dstat);	// 表示属性の初期化
+	InitDisplayStat(body.NurbsC[TypeCount[_NURBSC]].Dstat);	// 表示属性の初期化
 
 	return KOD_TRUE;
 }
@@ -1479,13 +1486,13 @@ IGES_PARSER::IGES_PARSER()
 //
 // Parameters:
 // *Dstat - エンティティの表示属性 
-void IGES_PARSER::InitDisplayStat(DispStat *Dstat)
+void IGES_PARSER::InitDisplayStat(DispStat& Dstat)
 {
 	// 白色を設定
-	Dstat->Color[0] = 1.0;
-	Dstat->Color[1] = 1.0;
-	Dstat->Color[2] = 1.0;
-	Dstat->Color[3] = 0.5;
+	Dstat.Color[0] = 1.0;
+	Dstat.Color[1] = 1.0;
+	Dstat.Color[2] = 1.0;
+	Dstat.Color[3] = 0.5;
 
 	// 表示属性を追加する場合は以下に追加のコードを記述
 }
