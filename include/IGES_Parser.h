@@ -235,7 +235,7 @@ private:
 
 	// Function: GetParameterSection
 	// パラメータ部の読み込み
-	int GetParameterSection(FILE *,DirectoryParam *,BODY,int);		
+	int GetParameterSection(FILE*, DirectoryParam*, BODY*, int);
 
 	// Function: GetTerminateSection
 	// ターミネート部の読み込み（スケルトン）
@@ -247,39 +247,39 @@ private:
 
 	// Function: GetCirAPara
 	// Type100 円・円弧の読み込み
-	int GetCirAPara(char [],int,DirectoryParam *,BODY);				
+	int GetCirAPara(char [],int,DirectoryParam *,BODY*);
 
 	// Function: GetCompCPara
 	// Type102 複合曲線の読み込み
-	int GetCompCPara(char [],int,DirectoryParam *,int,BODY);		
+	int GetCompCPara(char [],int,DirectoryParam *,int,BODY*);		
 
 	// Function: GetConAPara
 	// Type104 円錐曲線の読み込み
-	int GetConAPara(char [],int,DirectoryParam *,BODY);				
+	int GetConAPara(char [],int,DirectoryParam *,BODY*);				
 
 	// Function: GetLinePara
 	// Type110 線分の読み込み
-	int GetLinePara(char [],int,DirectoryParam *,BODY);				
+	int GetLinePara(char [],int,DirectoryParam *,BODY*);				
 
 	// Function: GetTMatPara
 	// Type124 変換行列の読み込み
-	int GetTMatPara(char [],int,DirectoryParam *,BODY);				
+	int GetTMatPara(char [],int,DirectoryParam *,BODY*);				
 
 	// Function: GetNurbsCPara
 	// Type126 NRBS曲線の読み込み
-	int GetNurbsCPara(char [],int,DirectoryParam *,BODY);			
+	NURBSC* GetNurbsCPara(char [], int);
 
 	// Function: GetNurbsSPara
 	// Type128 NRBS曲面の読み込み
-	int GetNurbsSPara(char [],int,DirectoryParam *,BODY);			
+	int GetNurbsSPara(char [],int,DirectoryParam *,BODY*);			
 
 	// Function: GeConpSPara
 	// Type142 面上線の読み込み
-	int GeConpSPara(char [],int,DirectoryParam *,int,BODY);			
+	int GeConpSPara(char [],int,DirectoryParam *,int,BODY*);			
 
 	// Function: GetTrmSPara
 	// Type144 トリム面の読み込み
-	int GetTrmSPara(char [],int,DirectoryParam *,BODY);				
+	int GetTrmSPara(char [],int,DirectoryParam *,BODY*);				
 
 	// Function: CatchStringI
 	// カンマまでの数値を読み込んで返す(int)
@@ -291,15 +291,15 @@ private:
 
 	// Function: ChangeEntityforNurbs
 	// エンティティを全てNURBSへ変更する
-	int ChangeEntityforNurbs(DirectoryParam *,BODY,int);			
+	int ChangeEntityforNurbs(DirectoryParam*, BODY*, int);
 
 	// Function: SearchMaxCoord
 	// 全てのエンティティにおける座標値の最大値を調べる
-	int SearchMaxCoord(BODY *,int []);	
+	int SearchMaxCoord(BODY *);	
 
 	// Function: GetDEPointer
 	// DE部へのポインタが示す実際の構造体へのポインタを返す
-	void *GetDEPointer(int ,BODY);		
+	void *GetDEPointer(int ,BODY*);
 
 	// Function: SearchEntType
 	// DE部へのポインタの値からエンティティのタイプを調べて返す
@@ -311,7 +311,7 @@ private:
 
 	// Function: TransformNurbsC
 	// NURBS曲線を座標変換する
-	int TransformNurbsC(int,int,BODY);
+	int TransformNurbsC(NURBSC*,int,BODY*);
 
 	// Function: ChangeKnotVecRange
 	// ノットベクトルの正規化sub1
