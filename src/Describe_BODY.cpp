@@ -222,7 +222,7 @@ void Describe_BODY::DrawCompositeCurve(const COMPC *CompC)
 	}
 
 	if(CompC->DegeFlag == KOD_FALSE)
-		DrawNurbsCurve_Param(&CompC->DegeNurbs);		// 縮退がある場合、縮退用Nurbs曲線をトリムエンティティとして追加
+		DrawNurbsCurve_Param(CompC->DegeNurbs);		// 縮退がある場合、縮退用Nurbs曲線をトリムエンティティとして追加
 }
 
 // Function: DrawCurveOnParamSurfe

@@ -401,7 +401,7 @@ struct COMPC{
 	int *DEType;
 	COMPELEM*	pDE;	// COMPELEM定義変更に伴う修正 by K.Magara
 	int DegeFlag;
-	NURBSC DegeNurbs;
+	NURBSC* DegeNurbs;
 	int pD;
 
 	COMPC() {

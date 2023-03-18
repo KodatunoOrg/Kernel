@@ -640,13 +640,13 @@ int NURBS_Func::DelTrimdNurbsS(TRIMD_NURBSS *TNurbs)
 	hbody.Free_NurbsS(TNurbs->pts);						// トリム面を構成するNURBS曲面パラメータのメモリー解放
 	free(TNurbs->pts);								// トリム面を構成するNURBS曲面のメモリー解放
 
-	hbody.Free_NurbsC(&TNurbs->pTO->pB.CompC->DegeNurbs);	// トリム面外周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
+	hbody.Free_NurbsC(TNurbs->pTO->pB.CompC->DegeNurbs);	// トリム面外周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
 	hbody.Free_CompC(TNurbs->pTO->pB.CompC);			// トリム面外周を構成する複合曲線を構成するNURBS曲線のメモリー解放
 	free(TNurbs->pTO->pB.CompC);							// トリム面外周を構成する複合曲線のメモリー解放
 	free(TNurbs->pTO);								// トリム面外周を構成する面上線のメモリー解放
 
 	for(int i=0;i<TNurbs->n2;i++){
-		hbody.Free_NurbsC(&TNurbs->pTI[i]->pB.CompC->DegeNurbs);	// トリム面内周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
+		hbody.Free_NurbsC(TNurbs->pTI[i]->pB.CompC->DegeNurbs);	// トリム面内周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
 		hbody.Free_CompC(TNurbs->pTI[i]->pB.CompC);	// トリム面内周を構成する複合曲線を構成するNURBS曲線のメモリー解放
 		free(TNurbs->pTI[i]->pB.CompC);					// トリム面内周を構成する複合曲線のメモリー解放
 	}
