@@ -78,11 +78,11 @@ public:
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
-	int GenRotNurbsS(NURBSS *,NURBSC,Coord,double);				
+	int GenRotNurbsS(NURBSS *,NURBSC*,Coord,double);				
 
 	// Function: GenSweepNurbsS
 	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
-	int GenSweepNurbsS(NURBSS *,NURBSC,Coord,double);			
+	int GenSweepNurbsS(NURBSS *,NURBSC*,Coord,double);			
 
 	// Function: GenIsoparamCurveU
 	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成

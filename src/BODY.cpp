@@ -225,7 +225,6 @@ void BODY::CopyBody(BODY* body)
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 
         NURBSS *nurbsS;
-        NURBSC *nurbsC;
         CONPS *conps_o,*conps_i;
         COMPC *compc_o,*compc_i;
         int curve_num=0;
@@ -248,8 +247,8 @@ void BODY::CopyBody(BODY* body)
         this->TrmS[n].pTO = conps_o;
         NFunc.New_CompC(compc_o,body->TrmS[n].pTO->pB.CompC->N);
         for(int i=0;i<body->TrmS[n].pTO->pB.CompC->N;i++){
-            nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
-            compc_o->pDE[i].NurbsC = nurbsC;
+			NURBSC* nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
+            compc_o->pDE[i].NurbsC = new NURBSC(nurbsC);
             compc_o->DEType[i] = body->TrmS[n].pTO->pB.CompC->DEType[i];
         }
         this->TrmS[n].pTO->pB.substitution = compc_o;
@@ -263,8 +262,8 @@ void BODY::CopyBody(BODY* body)
             this->TrmS[n].pTI[i] = &(conps_i[i]);
             NFunc.New_CompC(&compc_i[i],body->TrmS[n].pTI[i]->pB.CompC->N);
             for(int j=0;j<body->TrmS[n].pTI[i]->pB.CompC->N;j++){
-                nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
-                compc_i[i].pDE[j].NurbsC = nurbsC;
+                NURBSC* nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
+                compc_i[i].pDE[j].NurbsC = new NURBSC(nurbsC);
                 compc_i[i].DEType[j] = body->TrmS[n].pTI[i]->pB.CompC->DEType[j];
                 curve_num++;
             }
