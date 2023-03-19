@@ -342,10 +342,11 @@ typedef std::vector<NURBSC*>	VNURBSC;
 // int pD -			ディレクトリ部への逆ポインタ
 // int TrmdSurfFlag - このNURBS曲面がトリム面として呼ばれているのか、独立して存在するのかを示すフラグ(トリム面:KOD_TRUE  独立面:KOD_FALSE)
 // DispStat Dstat - 表示属性（色r,g,b,）
-struct NURBSS{
-	int K[2];
-	int M[2];
-	int N[2];
+class NURBSS{
+public:
+	A2int K[2];
+	A2int M[2];
+	A2int N[2];
 	A5int prop;
 	ublasVector S;
 	ublasVector T;
@@ -367,9 +368,45 @@ struct NURBSS{
 		pD = 0;
 		TrmdSurfFlag = 0;
 	}
+	NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double U_s,double U_e,double V_s,double V_e) {
+		this->K[0] = Ku;
+		this->K[1] = Kv;
+		this->M[0] = Mu;
+		this->M[1] = Mv;
+		this->U[0] = U_s;
+		this->U[1] = U_e;
+		this->V[0] = V_s;
+		this->V[1] = V_e;
+		this->N[0] = Mu+Ku;
+		this->N[1] = Mv+Kv;
+		for(int i=0;i<5;i++)
+			this->prop[i] = 0;
+		this->Dstat.Color[0] = this->Dstat.Color[1] = this->Dstat.Color[2] = 0.2;
+		this->Dstat.Color[3] = 0.5;
+		this->S = S;
+		this->T = T;
+		this->W = W;
+		this->cp.resize(boost::extents[K[0]][K[1]]);
+		this->cp = Cp;
+	}
+	NURBSS(const NURBSS* nurb) {
+		this->K = nurb->K;
+		this->M = nurb->M;
+		this->N = nurb->N;
+		this->U = nurb->U;
+		this->V = nurb->V;
+		this->prop = nurb->prop;
+		this->Dstat = nurb->Dstat;
+		this->S = nurb->S;
+		this->T = nurb->T;
+		this->W = nurb->W;
+		this->cp.resize(boost::extents[nurb->K[0]][nurb->K[1]]);
+		this->cp = nurb->cp;
+	}
 	~NURBSS() {
 	}
 };
+typedef std::vector<NURBSS*>	VNURBSS;
 
 // Structure: COMPELEM
 // 複合曲線を構成できる曲線群を共用体で宣言
@@ -452,8 +489,8 @@ struct CONPS
 	int SType;
 	int BType;
 	int CType;
-	NURBSS *pS;
-	CURVE pB;			// CURVE定義変更に伴う修正 by K.Magara
+	NURBSS* pS;
+	CURVE pB;
 	CURVE pC;
 	int pref;
 	int pD;
@@ -568,6 +605,7 @@ public:
 	BODY();
 	~BODY() {
 		BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
+		BOOST_FOREACH(NURBSS* x, vNurbsS) delete x;
 	}
 	// Function: NewBodyElem
 	// BODYを構成する全要素のメモリー確保
@@ -607,7 +645,7 @@ public:
 
 	// Function: NewNurbsS
 	// NURBSSを指定した数だけメモリー確保し，初期化する
-	NURBSS *NewNurbsS(int);			
+//	NURBSS *NewNurbsS(int);			
 	
 	// Function: NewConpS
 	// CONPSを指定した数だけメモリー確保し，初期化する
@@ -651,11 +689,11 @@ public:
 
 	// Function: RegistNurbsStoBody
 	// 1つのNURBS曲面を新たなBODYとして登録する
-	void RegistNurbsStoBody(BODYList *,const NURBSS&,const char []);	
+	void RegistNurbsStoBody(BODYList*, NURBSS*, const char*);
 
 	// Function: RegistNurbsStoBodyN
 	// N個のNURBS曲面を新たなBODYとして登録する
-	void RegistNurbsStoBodyN(BODYList *,const NURBSS*,const char [],int);	
+	void RegistNurbsStoBodyN(BODYList*, VNURBSS&, const char*);
 
 	// Function: ChangeStatColor
 	// エンティティのステータスで定義されている色を変更
@@ -727,7 +765,8 @@ public:
 
 	// Variable: *NurbsS
 	// NURBS曲面
-	NURBSS *NurbsS;		
+//	NURBSS *NurbsS;		
+	VNURBSS vNurbsS;
 
 	// Variable: *ConpS
 	// 面上線

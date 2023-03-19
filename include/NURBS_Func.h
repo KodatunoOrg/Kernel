@@ -70,11 +70,11 @@ public:
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
-	int GenNurbsS(NURBSS *,int,int,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const AACoord&,double,double,double,double);
+	NURBSS* GenNurbsS(int,int,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const AACoord&,double,double,double,double);
 
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
-	int GenNurbsS(NURBSS *, const NURBSS*);								
+	NURBSS* GenNurbsS(const NURBSS*);								
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する

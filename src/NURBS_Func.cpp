@@ -226,36 +226,9 @@ void NURBS_Func::DelNurbsC(NURBSC *Nurbs)
 // 
 // return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double U_s,double U_e,double V_s,double V_e)
+NURBSS* NURBS_Func::GenNurbsS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double Us,double Ue,double Vs,double Ve)
 {
-	Nurbs->K[0] = Ku;
-	Nurbs->K[1] = Kv;
-	Nurbs->M[0] = Mu;
-	Nurbs->M[1] = Mv;
-	Nurbs->U[0] = U_s;
-	Nurbs->U[1] = U_e;
-	Nurbs->V[0] = V_s;
-	Nurbs->V[1] = V_e;
-	Nurbs->N[0] = Mu+Ku;
-	Nurbs->N[1] = Mv+Kv;
-
-	for(int i=0;i<5;i++)
-		Nurbs->prop[i] = 0;
-
-	Nurbs->Dstat.Color[0] = Nurbs->Dstat.Color[1] = Nurbs->Dstat.Color[2] = 0.2;
-	Nurbs->Dstat.Color[3] = 0.5;
-
-	if(New_NurbsS(Nurbs,Nurbs->K,Nurbs->N) == KOD_ERR){
-//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
-	}
-
-	Nurbs->S = S;
-	Nurbs->T = T;
-	Nurbs->W = W;
-	Nurbs->cp = Cp;		// New_NurbsS()でresize()
-
-	return KOD_TRUE;
+	return new NURBSS(Mu,Mv,Ku,Kv,S,T,W,Cp,Us,Ue,Vs,Ve);
 }
 
 // Function: GenNurbsS
@@ -267,41 +240,9 @@ int NURBS_Func::GenNurbsS(NURBSS *Nurbs,int Mu,int Mv,int Ku,int Kv,const ublasV
 // 
 // return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenNurbsS(NURBSS *Nurbs, const NURBSS* nurb)
+NURBSS* NURBS_Func::GenNurbsS(const NURBSS* nurb)
 {
-	NURBS_Func hbody;
-	int i,j;
-
-	for(i=0;i<2;i++){
-		Nurbs->K[i] = nurb->K[i];
-		Nurbs->M[i] = nurb->M[i];
-		Nurbs->N[i] = nurb->N[i];
-		Nurbs->U[i] = nurb->U[i];
-		Nurbs->V[i] = nurb->V[i];
-	}
-	for(i=0;i<5;i++)
-		Nurbs->prop[i] = nurb->prop[i];
-
-	Nurbs->Dstat = nurb->Dstat;
-
-	// メモリー確保
-	if(hbody.New_NurbsS(Nurbs,Nurbs->K,Nurbs->N) == KOD_ERR){
-//		GuiIFB.SetMessage("NURBS_Func KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
-	}
-
-	for(i=0;i<Nurbs->N[0];i++)
-		Nurbs->S[i] = nurb->S[i];
-	for(i=0;i<Nurbs->N[1];i++)
-		Nurbs->T[i] = nurb->T[i];
-	for(i=0;i<Nurbs->K[0];i++){
-		for(j=0;j<Nurbs->K[1];j++){
-			Nurbs->W(i,j) = nurb->W(i,j);
-			Nurbs->cp[i][j] = nurb->cp[i][j];
-		}
-	}
-
-	return KOD_TRUE;
+	return new NURBSS(nurb);
 }
 
 // Function: GenRotNurbsS

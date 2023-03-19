@@ -53,10 +53,10 @@ try {
 //		flag = _NURBSC+1;
 //	}
 
-	if(TypeNum[_NURBSS]){
-		NewNurbsS(TypeNum[_NURBSS]);
-		flag = _NURBSS+1;
-	}
+//	if(TypeNum[_NURBSS]){
+//		NewNurbsS(TypeNum[_NURBSS]);
+//		flag = _NURBSS+1;
+//	}
 
 	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
 		NewConpS(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]);
@@ -77,9 +77,9 @@ catch (std::bad_alloc& e) {	// e.what();
 		if(flag == _CURVE_ON_PARAMETRIC_SURFACE+1 && TypeNum[_TRIMMED_SURFACE]){
 			delete[] ConpS;
 		}
-		else if(flag == _NURBSS+1 && TypeNum[_NURBSS]){
-			delete[] NurbsS;
-		}
+//		else if(flag == _NURBSS+1 && TypeNum[_NURBSS]){
+//			delete[] NurbsS;
+//		}
 //		else if(flag == _NURBSC+1 && TypeNum[_NURBSC]){
 //			delete[] NurbsC;
 //		}
@@ -121,16 +121,18 @@ void BODY::DelBodyElem()
 	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
 		delete[] ConpS;
 	}
-	if(TypeNum[_NURBSS]){
-		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum[_NURBSS]);
-		delete[] NurbsS;
-	}
+//	if(TypeNum[_NURBSS]){
+//		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum[_NURBSS]);
+//		delete[] NurbsS;
+//	}
 //	if(TypeNum[_NURBSC]){
 //		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum[_NURBSC]);
 //		delete[] NurbsC;
 //	}
 	BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
 	vNurbsC.clear();
+	BOOST_FOREACH(NURBSS* x, vNurbsS) delete x;
+	vNurbsS.clear();
 
 	if(TypeNum[_TRANSFORMATION_MATRIX]){
 		delete[] TMat;
@@ -171,10 +173,10 @@ void BODY::DelBodyElem(int TypeNum_[])
 	if(TypeNum_[_CURVE_ON_PARAMETRIC_SURFACE]){
 		delete[] ConpS;
 	}
-	if(TypeNum_[_NURBSS]){
-		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum_[_NURBSS]);
-		delete[] NurbsS;
-	}
+//	if(TypeNum_[_NURBSS]){
+//		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum_[_NURBSS]);
+//		delete[] NurbsS;
+//	}
 //	if(TypeNum_[_NURBSC]){
 //		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum_[_NURBSC]);
 //		delete[] NurbsC;
@@ -216,7 +218,7 @@ void BODY::CopyBody(BODY* body)
         this->TypeNum[i] = body->TypeNum[i];
 
 //	this->NewNurbsC(TypeNum[_NURBSC]);
-    this->NewNurbsS(TypeNum[_NURBSS]);
+//	this->NewNurbsS(TypeNum[_NURBSS]);
     this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
 	BOOST_FOREACH(NURBSC* x, body->vNurbsC)
@@ -224,17 +226,15 @@ void BODY::CopyBody(BODY* body)
 
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 
-        NURBSS *nurbsS;
         CONPS *conps_o,*conps_i;
         COMPC *compc_o,*compc_i;
         int curve_num=0;
 
-        nurbsS = &this->NurbsS[n];
         conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
         compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
-        NFunc.GenNurbsS(nurbsS, body->TrmS[n].pts);		// 新たなNURBS曲面を1つ得る
-        this->TrmS[n].pts = nurbsS;						// NURBS曲面をトリム面に関連付ける
+        NURBSS* nurbsS = NFunc.GenNurbsS(body->TrmS[n].pts);		// 新たなNURBS曲面を1つ得る
+        this->TrmS[n].pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
         nurbsS->TrmdSurfFlag = KOD_TRUE;
 
         NFunc.New_TrmS(&this->TrmS[n],body->TrmS[n].n2);				// トリム面のメモリー確保
@@ -291,8 +291,9 @@ void BODY::RotBody(Coord Axis,double deg)
 {
 	NURBS_Func NFunc;
 
-	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面の回転
-		NFunc.RotNurbsS(&NurbsS[i],Axis,deg);
+	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面の回転
+		NFunc.RotNurbsS(x,Axis,deg);
+	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線の回転
 		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
@@ -310,8 +311,9 @@ void BODY::ShiftBody(Coord d)
 {
 	NURBS_Func NFunc;
 
-	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面のシフト
-		NFunc.ShiftNurbsS(&NurbsS[i],d);
+	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面のシフト
+		NFunc.ShiftNurbsS(x,d);
+	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
 		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
@@ -328,8 +330,10 @@ void BODY::ExpandBody(Coord r)
 {
 	NURBS_Func NFunc;
 
-	for(int i=0;i<TypeNum[_NURBSS];i++)			// NURBS曲面のシフト
-		NFunc.ChRatioNurbsS(&NurbsS[i],r);
+
+	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面のシフト
+		NFunc.ChRatioNurbsS(x,r);
+	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
 		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
@@ -359,9 +363,9 @@ void BODY::RegistBody(BODYList *BodyList,const char BodyName[])
 void BODY::RegistNurbsCtoBody(BODYList* BodyList, NURBSC* Nurb, const char* BodyName)
 {
 //	NurbsC = new NURBSC(Nurb);		// ここでnewすべきか悩む K.Magara
-	vNurbsC.push_back(Nurb);
 //	TypeNum[_NURBSC] = 1;											// NURBS曲面の数1にする
 	ChangeStatColor(Nurb->Dstat.Color,0.2,0.2,1.0,0.5);				// 青色
+	vNurbsC.push_back(Nurb);
 	BodyList->add(this);											// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	Name = BodyName;												// 新しいBODY名を登録
@@ -378,8 +382,8 @@ void BODY::RegistNurbsCtoBody(BODYList* BodyList, NURBSC* Nurb, const char* Body
 void BODY::RegistNurbsCtoBodyN(BODYList* BodyList, VNURBSC& vNurb, const char* BodyName)
 {
 	BOOST_FOREACH(NURBSC* x, vNurb) {
-		vNurbsC.push_back(x);
 		ChangeStatColor(x->Dstat.Color,0.2,0.2,1.0,0.5);			// 青色
+		vNurbsC.push_back(x);
 	}
 //	TypeNum[_NURBSC] = N;											// NURBS曲面の数1にする
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
@@ -394,13 +398,13 @@ void BODY::RegistNurbsCtoBodyN(BODYList* BodyList, VNURBSC& vNurb, const char* B
 //	*BodyList - 登録先リスト
 //	Nurb - 登録するNURBS曲面の実体
 //  BodyName[] - 登録するBODY名
-void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char BodyName[])
+void BODY::RegistNurbsStoBody(BODYList* BodyList, NURBSS* Nurb, const char* BodyName)
 {
-	NurbsS = new NURBSS;
-	NurbsS[0] = Nurb;												// NURBS曲面の実体を代入
-	NurbsS[0].TrmdSurfFlag = KOD_FALSE;								// トリムのない単純なNURBS曲面であることを明示
-	TypeNum[_NURBSS] = 1;											// NURBS曲面の数1にする
-	ChangeStatColor(this->NurbsS[0].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+//	NurbsS = new NURBSS;
+	Nurb->TrmdSurfFlag = KOD_FALSE;									// トリムのない単純なNURBS曲面であることを明示
+	ChangeStatColor(Nurb->Dstat.Color,0.2,0.2,1.0,0.5);				// 青色
+	vNurbsS.push_back(Nurb);
+//	TypeNum[_NURBSS] = 1;											// NURBS曲面の数1にする
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	Name = BodyName;												// 新しいBODY名を登録
@@ -414,15 +418,14 @@ void BODY::RegistNurbsStoBody(BODYList *BodyList,const NURBSS& Nurb,const char B
 //	Nurb[] - 登録するNURBS曲面の実体
 //  BodyName[] - 登録するBODY名
 //	N - 登録するNURBS曲面の数
-void BODY::RegistNurbsStoBodyN(BODYList *BodyList,const NURBSS* Nurb,const char BodyName[],int N)
+void BODY::RegistNurbsStoBodyN(BODYList* BodyList, VNURBSS& vNurb, const char* BodyName)
 {
-	NurbsS = new NURBSS[N];
-	for(int i=0;i<N;i++){
-		NurbsS[i] = Nurb[i];										// NURBS曲面の実体を代入
-		NurbsS[i].TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
-		TypeNum[_NURBSS] = N;										// NURBS曲面の数1にする
-		ChangeStatColor(this->NurbsS[i].Dstat.Color,0.2,0.2,1.0,0.5);	// 青色
+	BOOST_FOREACH(NURBSS* x, vNurb) {
+		x->TrmdSurfFlag = KOD_FALSE;								// トリムのない単純なNURBS曲面であることを明示
+		ChangeStatColor(x->Dstat.Color,0.2,0.2,1.0,0.5);			// 青色
+		vNurbsS.push_back(x);
 	}
+//	TypeNum[_NURBSS] = N;											// NURBS曲面の数1にする
 	BodyList->add((void *)this);									// リストに新しいBODYを登録
 //	GuiIFB.AddBodyNameToWin(BodyName);								// BodyリストウィンドウにBODY名を登録
 	Name = BodyName;												// 新しいBODY名を登録
@@ -588,7 +591,7 @@ NURBSC *BODY::NewNurbsC(int N)
 
 	return NurbsC;
 }
-*/
+
 // Function: NewNurbsS
 // NURBS曲線NURBSSを指定した数だけメモリー確保し，初期化する
 //
@@ -613,7 +616,7 @@ NURBSS *BODY::NewNurbsS(int N)
 
 	return NurbsS;
 }
-
+*/
 // Function: NewConpS
 // 面上線CONPSを指定した数だけメモリー確保し，初期化する
 //
