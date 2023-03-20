@@ -256,9 +256,10 @@ NURBSS* NURBS_Func::GenNurbsS(const NURBSS* nurb)
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double deg)
+NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC* NurbsC, const Coord& a, double deg)
 {
-    Axis.NormalizeVec();		// 正規化
+	NURBSS* NurbsS = NULL;
+	Coord Axis = a.NormalizeVec();		// 正規化
 
     // 回転角度によって，いくつのセグメントで円弧を生成するか判断する
     // 回転角度が180度未満の場合，1セグメントで円弧を表現する
@@ -283,7 +284,7 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double deg
                 }
             }
         }
-        GenNurbsS(NurbsS,3,NurbsC->M,3,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = GenNurbsS(3,NurbsC->M,3,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
 
     // 回転角度が270未満の場合，2セグメントで円弧を表現する
@@ -308,7 +309,7 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double deg
                 }
             }
         }
-        GenNurbsS(NurbsS,3,NurbsC->M,5,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = GenNurbsS(3,NurbsC->M,5,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
 
     // 回転角度が360度未満の場合，3セグメントで円弧を表現する
@@ -333,7 +334,7 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double deg
                 }
             }
         }
-        GenNurbsS(NurbsS,3,NurbsC->M,7,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = GenNurbsS(3,NurbsC->M,7,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
         DebugForNurbsS(NurbsS);
     }
     // 360度以上
@@ -358,10 +359,10 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double deg
                 }
             }
         }
-
-        GenNurbsS(NurbsS,3,NurbsC->M,9,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = GenNurbsS(3,NurbsC->M,9,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
-    return KOD_TRUE;
+
+    return NurbsS;
 }
 
 // Function: GenSweepNurbsS
@@ -375,9 +376,9 @@ int NURBS_Func::GenRotNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double deg
 //
 // Return:
 // 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::GenSweepNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double Len)
+NURBSS* NURBS_Func::GenSweepNurbsS(const NURBSC* NurbsC, const Coord& a, double Len)
 {
-	Axis.NormalizeVec();		// 正規化
+	Coord Axis = a.NormalizeVec();		// 正規化
 
 	// NurbsSを生成
 	ublasVector T(4);	// v方向ノットベクトル
@@ -395,9 +396,7 @@ int NURBS_Func::GenSweepNurbsS(NURBSS *NurbsS,NURBSC* NurbsC,Coord Axis,double L
 		}
 	}
 
-	GenNurbsS(NurbsS,NurbsC->M,2,NurbsC->K,2,NurbsC->T,T,W,Cp,0,1,NurbsC->V[0],NurbsC->V[1]);	// NURBS曲面生成
-
-	return KOD_TRUE;
+	return GenNurbsS(NurbsC->M,2,NurbsC->K,2,NurbsC->T,T,W,Cp,0,1,NurbsC->V[0],NurbsC->V[1]);	// NURBS曲面生成
 }
 
 // Function: GenIsoparamCurveU
@@ -490,12 +489,12 @@ void NURBS_Func::DelNurbsS(NURBSS *Nurbs)
 // KOD_TRUE
 int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 {
-	NURBSS *nurbsS;
+//	NURBSS *nurbsS;
 	CONPS *conps_o,*conps_i;
 	COMPC *compc_o,*compc_i;
 	int curve_num=0;
 
-	nurbsS = new NURBSS;		// NURBS曲面のメモリー確保
+//	nurbsS = new NURBSS;		// NURBS曲面のメモリー確保
 	conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
 	compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
@@ -507,7 +506,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	}
 	curve_num += tnurb.pTO->pB.CompC->N;
 
-	GenNurbsS(nurbsS, tnurb.pts);							// 新たなNURBS曲面を1つ得る
+	NURBSS* nurbsS = GenNurbsS(tnurb.pts);					// 新たなNURBS曲面を1つ得る
 	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
 
 	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
@@ -4204,11 +4203,11 @@ NURBSC* NURBS_Func::GenPolygonalLine(const ACoord& P)
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v,int Mu,int Mv)
+NURBSS* NURBS_Func::GenInterpolatedNurbsS1(AACoord& P,int PNum_u,int PNum_v,int Mu,int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
 	if(PNum_v == 2 || PNum_v == 3)	Mv = PNum_v;	// v方向に与えられた点が2個か3個の場合は、v方向の階数を強制的に2か3にする
@@ -4286,12 +4285,13 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	}
 
 	// NURBS曲面を生成する
+	NURBSS* Nurbs;
 	if(Mu == 2 && Mv == 2)
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
 	else
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,Q,U[0],U[1],V[0],V[1]);
+		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,Q,U[0],U[1],V[0],V[1]);
 
-	return KOD_TRUE;
+	return Nurbs;
 }
 
 // Function: GenApproximationNurbsS
@@ -4305,11 +4305,11 @@ int NURBS_Func::GenInterpolatedNurbsS1(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v,int Mu,int Mv)
+NURBSS* NURBS_Func::GenApproximationNurbsS(AACoord& P,int PNum_u,int PNum_v,int Mu,int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
 	if(PNum_v == 2 || PNum_v == 3)	Mv = PNum_v;	// v方向に与えられた点が2個か3個の場合は、v方向の階数を強制的に2か3にする
@@ -4368,12 +4368,13 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 	}
 
 	// NURBS曲面を生成する
+	NURBSS* Nurbs;
 	if(Mu == 2 && Mv == 2)
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
 	else
-		GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,Q4,U[0],U[1],V[0],V[1]);
+		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,Q4,U[0],U[1],V[0],V[1]);
 
-	return KOD_TRUE;
+	return Nurbs;
 }
 
 // Function: GenNurbsSfromCP
@@ -4391,11 +4392,11 @@ int NURBS_Func::GenApproximationNurbsS(NURBSS *Nurbs,AACoord& P,int PNum_u,int P
 //
 // Return:
 // 正常終了：KOD_TRUE, 与えられた点が1個未満：KOD_ERR
-int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v,int Mu,int Mv)
+NURBSS* NURBS_Func::GenNurbsSfromCP(AACoord& P,int PNum_u,int PNum_v,int Mu,int Mv)
 {
 	if(PNum_u <= 1 || PNum_v <= 1){			// 与えられた点が各方向で1個未満の場合は、NURBS曲面を生成できない
 //		GuiIFB.SetMessage("NURBS ERROR:Few Point. You should set over 2 points at least");
-		return KOD_ERR;
+		return NULL;
 	}
 	if(PNum_u == 2 || PNum_u == 3)	Mu = PNum_u;	// u方向に与えられた点が2個か3個の場合は、u方向の階数を強制的に2か3にする
 	if(PNum_v == 2 || PNum_v == 3)	Mv = PNum_v;	// v方向に与えられた点が2個か3個の場合は、v方向の階数を強制的に2か3にする
@@ -4417,9 +4418,7 @@ int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v,i
 		}
 	}
 
-	GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
-
-	return KOD_TRUE;
+	return GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
 }
 
 // Function: 
@@ -4432,7 +4431,7 @@ int NURBS_Func::GenNurbsSfromCP(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v,i
 //
 // Return:
 // KOD_TRUE
-int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum_v)
+NURBSS* NURBS_Func::GenPolygonalSurface(AACoord& P,int PNum_u,int PNum_v)
 {
 	int Mu=2;						// 階数2
 	int Mv=2;
@@ -4489,9 +4488,7 @@ int NURBS_Func::GenPolygonalSurface(NURBSS *Nurbs,AACoord& P,int PNum_u,int PNum
 	}
 
 	// NURBS曲面を生成する
-	GenNurbsS(Nurbs,Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
-
-	return KOD_TRUE;
+	return GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
 }
 
 // Function: ConnectNurbsSU

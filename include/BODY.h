@@ -344,9 +344,9 @@ typedef std::vector<NURBSC*>	VNURBSC;
 // DispStat Dstat - 表示属性（色r,g,b,）
 class NURBSS{
 public:
-	A2int K[2];
-	A2int M[2];
-	A2int N[2];
+	A2int K;
+	A2int M;
+	A2int N;
 	A5int prop;
 	ublasVector S;
 	ublasVector T;
@@ -368,15 +368,15 @@ public:
 		pD = 0;
 		TrmdSurfFlag = 0;
 	}
-	NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double U_s,double U_e,double V_s,double V_e) {
+	NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double Us,double Ue,double Vs,double Ve) {
 		this->K[0] = Ku;
 		this->K[1] = Kv;
 		this->M[0] = Mu;
 		this->M[1] = Mv;
-		this->U[0] = U_s;
-		this->U[1] = U_e;
-		this->V[0] = V_s;
-		this->V[1] = V_e;
+		this->U[0] = Us;
+		this->U[1] = Ue;
+		this->V[0] = Vs;
+		this->V[1] = Ve;
 		this->N[0] = Mu+Ku;
 		this->N[1] = Mv+Kv;
 		for(int i=0;i<5;i++)
@@ -520,9 +520,9 @@ struct TRMS{
 		pD = 0;
 	}
 	~TRMS() {
-		if ( pts )		delete[]	pts;
-		if ( pTO )		delete[]	pTO;
-		if ( pTI )		delete[]	pTI;
+		if ( pts )		delete	pts;
+		if ( pTO )		delete	pTO;
+		if ( pTI )		delete	pTI;
 	}
 
     // Function: GetOuterEdgeNum

@@ -354,11 +354,11 @@ void Describe_BODY::Draw_NurbsCurves(const BODY *Body)
 // *Body - BODYへのポインタ
 void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 {
-	for(int i=0;i<Body->TypeNum[_NURBSS];i++){
-		if(Body->NurbsS[i].TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
+	BOOST_FOREACH(NURBSS* x, Body->vNurbsS) {
+		if(x->TrmdSurfFlag == KOD_TRUE)	// トリム面としてNURBS曲面が登録されているなら
 			continue;		// 描画しない
 		else{
-			DrawNurbsSurfe(&Body->NurbsS[i]);	// NURBS曲面描画
+			DrawNurbsSurfe(x);	// NURBS曲面描画
 		}
 	}
 }

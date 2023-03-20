@@ -78,11 +78,11 @@ public:
 
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
-	int GenRotNurbsS(NURBSS *,NURBSC*,Coord,double);				
+	NURBSS* GenRotNurbsS(const NURBSC*, const Coord&, double);
 
 	// Function: GenSweepNurbsS
 	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
-	int GenSweepNurbsS(NURBSS *,NURBSC*,Coord,double);			
+	NURBSS* GenSweepNurbsS(const NURBSC*, const Coord&, double);
 
 	// Function: GenIsoparamCurveU
 	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
@@ -330,19 +330,19 @@ public:
 
 	// Function: GenInterpolatedNurbsS1
 	// 与えられた点列を補間するn階NURBS曲面を生成する
-	int GenInterpolatedNurbsS1(NURBSS *,AACoord&,int,int,int,int);	
+	NURBSS* GenInterpolatedNurbsS1(AACoord&,int,int,int,int);
 
 	// Function: GenPolygonalSurface
 	// 折れ面を生成する
-	int GenPolygonalSurface(NURBSS *,AACoord&,int,int);				
+	NURBSS* GenPolygonalSurface(AACoord&,int,int);
 
 	// Function: GenApproximationNurbsS
 	// 与えられた点列を近似するn階のNURBS曲面を生成する
-	int GenApproximationNurbsS(NURBSS *,AACoord&,int,int,int,int);	
+	NURBSS* GenApproximationNurbsS(AACoord&,int,int,int,int);
 
 	// Function: GenNurbsSfromCP
 	// 与えられたコントロールポイントからn階のNURBS曲面を生成する
-	int GenNurbsSfromCP(NURBSS *,AACoord&,int,int,int,int);			
+	NURBSS* GenNurbsSfromCP(AACoord&,int,int,int,int);
 
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する

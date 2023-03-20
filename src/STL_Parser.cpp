@@ -57,11 +57,7 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 
 	fseek(fp,0L,SEEK_SET);		// ファイル先頭に戻る
 
-	body->NurbsS = new NURBSS[facet_num];	// ファセット数分NURBS曲面をメモリー確保
-	body->TypeNum[_NURBSS] = facet_num;
-
 	// 座標値読み込み
-	int j=0;
 	while(fgets(buf,sizeof(buf),fp) != NULL){
 		sscanf(buf,"%s",label);
 		if(!strncmp(label,"outer",LABEL_OUTER_SIZE)){
@@ -80,10 +76,10 @@ int STL_PARSER::STL_Parser_Main(BODY *body, const char *STL_fname)
 			// NURBS曲面で平面を表現する場合、点が4つ必要だが、三角パッチの場合は3点しかないため、もう一点追加しなければならない。
 			// とりあえず三角パッチの3点目と同じ座標値を4点目としてみた。--> 表示が微妙。
 			facet[UVCPNUM-1][UVCPNUM-1] = facet[UVCPNUM-1][0];
-			nfunc.GenNurbsS(&body->NurbsS[j],M[0],M[1],K[0],K[1],S,T,W,facet,U[0],U[1],V[0],V[1]);			// NURBSファセット生成
-			body->NurbsS[j].TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
-			body->ChangeStatColor(body->NurbsS[j].Dstat.Color,0.2,0.2,1,0.5);		// 初期色を青にセット
-			j++;
+			NURBSS* nurbs = nfunc.GenNurbsS(M[0],M[1],K[0],K[1],S,T,W,facet,U[0],U[1],V[0],V[1]);			// NURBSファセット生成
+			nurbs->TrmdSurfFlag = KOD_FALSE;							// トリムのない単純なNURBS曲面であることを明示
+			body->ChangeStatColor(nurbs->Dstat.Color,0.2,0.2,1,0.5);		// 初期色を青にセット
+			body->vNurbsS.push_back(nurbs);
 		}
 	}
 

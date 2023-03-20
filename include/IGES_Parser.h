@@ -271,7 +271,7 @@ private:
 
 	// Function: GetNurbsSPara
 	// Type128 NRBS曲面の読み込み
-	int GetNurbsSPara(char [],int,DirectoryParam *,BODY*);			
+	NURBSS* GetNurbsSPara(char [], int, BODY*);
 
 	// Function: GeConpSPara
 	// Type142 面上線の読み込み

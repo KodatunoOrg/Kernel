@@ -624,9 +624,12 @@ int IGES_PARSER::GetParameterSection(FILE* fp, DirectoryParam* dpara, BODY* body
 		}
 		// NURBS曲面
 		else if(dpara[i].entity_type == NURBS_SURFACE){		
-			if(GetNurbsSPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_NURBSS];							// dparaとbodyを関連付ける
-			TypeCount[_NURBSS]++;		// NURBS曲面タイプの数をインクリメント
+			NURBSS* n = GetNurbsSPara(str,pD,body);
+			if ( !n ) return KOD_ERR;
+//			dpara[i].entity_count = TypeCount[_NURBSS];							// dparaとbodyを関連付ける
+//			TypeCount[_NURBSS]++;		// NURBS曲面タイプの数をインクリメント
+			dpara[i].entity_count = body->vNurbsC.size();						// dparaとbodyを関連付ける
+			body->vNurbsS.push_back(n);
 		}
 		// 面上線
 		else if(dpara[i].entity_type == CURVE_ON_PARAMETRIC_SURFACE){	
@@ -794,8 +797,8 @@ NURBSC* IGES_PARSER::GetNurbsCPara(char str[], int pD)
 	int		K = CatchStringI(&p) + 1;		// 総和記号の上側添字（コントロールポイント-1）の値
 	int		M = CatchStringI(&p) + 1;		// 基底関数の階数
 	int		N = K+M;						// ノットベクトルの数
-	A4int	prop;
-	for(i=0;i<4;i++){	// ブーリアン型プロパティ4つ
+	A4int	prop;							// ブーリアン型プロパティ4つ
+	for(i=0;i<4;i++){
 		prop[i] = CatchStringI(&p);
 	}
 
@@ -845,59 +848,59 @@ NURBSC* IGES_PARSER::GetNurbsCPara(char str[], int pD)
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-int IGES_PARSER::GetNurbsSPara(char str[],int pD,DirectoryParam *dpara,BODY* body)
+NURBSS* IGES_PARSER::GetNurbsSPara(char str[], int pD, BODY* body)
 {
-	char *p;
+	char* p = str;
 	int i=0,j=0;
 
-	p = str;
-
-	body->NurbsS[TypeCount[_NURBSS]].K[0] = CatchStringI(&p) + 1;	// u方向コントロールポイントの数
-	body->NurbsS[TypeCount[_NURBSS]].K[1] = CatchStringI(&p) + 1;	// v方向コントロールポイントの数
-	body->NurbsS[TypeCount[_NURBSS]].M[0] = CatchStringI(&p) + 1;	// 基底関数のu方向階数
-	body->NurbsS[TypeCount[_NURBSS]].M[1] = CatchStringI(&p) + 1;	// 基底関数のv方向階数
-	body->NurbsS[TypeCount[_NURBSS]].N[0] = body->NurbsS[TypeCount[_NURBSS]].K[0] + body->NurbsS[TypeCount[_NURBSS]].M[0];	// u方向ノットベクトルの数
-	body->NurbsS[TypeCount[_NURBSS]].N[1] = body->NurbsS[TypeCount[_NURBSS]].K[1] + body->NurbsS[TypeCount[_NURBSS]].M[1];	// v方向ノットベクトルの数
+	int		Ku = CatchStringI(&p) + 1;	// u方向コントロールポイントの数
+	int		Kv = CatchStringI(&p) + 1;	// v方向コントロールポイントの数
+	int		Mu = CatchStringI(&p) + 1;	// 基底関数のu方向階数
+	int		Mv = CatchStringI(&p) + 1;	// 基底関数のv方向階数
+	int		Nu = Ku+Mu;					// u方向ノットベクトルの数
+	int		Nv = Kv+Mv;					// v方向ノットベクトルの数
+	A5int	prop;						// ブーリアン型プロパティ5つ
 	for(i=0;i<5;i++){
-		body->NurbsS[TypeCount[_NURBSS]].prop[i] = CatchStringI(&p);	// ブーリアン型プロパティ5つ
+		prop[i] = CatchStringI(&p);
 	}
 
-	// メモリー確保
-	if(NFunc.New_NurbsS(&body->NurbsS[TypeCount[_NURBSS]],body->NurbsS[TypeCount[_NURBSS]].K,body->NurbsS[TypeCount[_NURBSS]].N) == KOD_ERR){
-//		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
+	ublasVector	S(Nu), T(Nv);
+	for(i=0;i<Nu;i++){
+		S[i] = CatchStringD(&p);		// u方向ノットベクトル
 	}
-	
-	for(i=0;i<body->NurbsS[TypeCount[_NURBSS]].N[0];i++){
-		body->NurbsS[TypeCount[_NURBSS]].S[i] = CatchStringD(&p);	// u方向ノットベクトル
+	for(i=0;i<Nv;i++){
+		T[i] = CatchStringD(&p);		// v方向ノットベクトル
 	}
-	for(i=0;i<body->NurbsS[TypeCount[_NURBSS]].N[1];i++){
-		body->NurbsS[TypeCount[_NURBSS]].T[i] = CatchStringD(&p);	// v方向ノットベクトル
-	}
-	for(i=0;i<body->NurbsS[TypeCount[_NURBSS]].K[1];i++){
-		for(j=0;j<body->NurbsS[TypeCount[_NURBSS]].K[0];j++){
-			body->NurbsS[TypeCount[_NURBSS]].W(j,i) = CatchStringD(&p);	//  u方向Weight
+	ublasMatrix W(Ku, Kv);
+	for(i=0;i<Kv;i++){
+		for(j=0;j<Ku;j++){
+			W(j,i) = CatchStringD(&p);	//  u方向Weight
 		}
 	}
-	for(i=0;i<body->NurbsS[TypeCount[_NURBSS]].K[1];i++){
-		for(j=0;j<body->NurbsS[TypeCount[_NURBSS]].K[0];j++){
-			body->NurbsS[TypeCount[_NURBSS]].cp[j][i].x = CatchStringD(&p);	// コントロールポイントX
-			body->NurbsS[TypeCount[_NURBSS]].cp[j][i].y = CatchStringD(&p);	// コントロールポイントY
-			body->NurbsS[TypeCount[_NURBSS]].cp[j][i].z = CatchStringD(&p);	// コントロールポイントZ
+	AACoord		cp(boost::extents[Ku][Kv]);
+	for(i=0;i<Kv;i++){
+		for(j=0;j<Ku;j++){
+			cp[j][i].x = CatchStringD(&p);	// コントロールポイントX
+			cp[j][i].y = CatchStringD(&p);	// コントロールポイントY
+			cp[j][i].z = CatchStringD(&p);	// コントロールポイントZ
 		}
 	}
-	body->NurbsS[TypeCount[_NURBSS]].U[0] = CatchStringD(&p);			// u方向の開始値
-	body->NurbsS[TypeCount[_NURBSS]].U[1] = CatchStringD(&p);			// u方向の終了値
-	body->NurbsS[TypeCount[_NURBSS]].V[0] = CatchStringD(&p);			// v方向の開始値
-	body->NurbsS[TypeCount[_NURBSS]].V[1] = CatchStringD(&p);			// v方向の終了値
+	A2double	U, V;
+	U[0] = CatchStringD(&p);				// u方向の開始値
+	U[1] = CatchStringD(&p);				// u方向の終了値
+	V[0] = CatchStringD(&p);				// v方向の開始値
+	V[1] = CatchStringD(&p);				// v方向の終了値
 
-	body->NurbsS[TypeCount[_NURBSS]].pD = pD;		// DE部への逆ポインタの値
+	// NURBSS生成
+	NURBSS* n = new NURBSS(Mu,Mv,Ku,Kv,S,T,W,cp,U[0],U[1],V[0],V[1]);
 
-	body->NurbsS[TypeCount[_NURBSS]].TrmdSurfFlag = KOD_FALSE;	// とりあえずトリムされていない独立面としておく(Type144を読みに言ったときに変更される)
+	n->pD = pD;		// DE部への逆ポインタの値
 
-	body->ChangeStatColor(body->NurbsS[TypeCount[_NURBSS]].Dstat.Color,0.2,0.2,0.2,0.5);	// 曲面の色を設定
+	n->TrmdSurfFlag = KOD_FALSE;	// とりあえずトリムされていない独立面としておく(Type144を読みに言ったときに変更される)
 
-	return KOD_TRUE;
+	body->ChangeStatColor(n->Dstat.Color,0.2,0.2,0.2,0.5);	// 曲面の色を設定
+
+	return n;
 }
 
 // Function: GetCompCPara
@@ -1384,9 +1387,9 @@ void *IGES_PARSER::GetDEPointer(int TypeNum,BODY* body)
 //			else if(i==_NURBSC && body->NurbsC[j].pD == TypeNum){
 //				return &body->NurbsC[j];
 //			}
-			else if(i==_NURBSS && body->NurbsS[j].pD == TypeNum){
-				return &body->NurbsS[j];
-			}
+//			else if(i==_NURBSS && body->NurbsS[j].pD == TypeNum){
+//				return &body->NurbsS[j];
+//			}
 			else if(i==_CURVE_ON_PARAMETRIC_SURFACE && body->ConpS[j].pD == TypeNum){
 				return &body->ConpS[j];
 			}
@@ -1398,6 +1401,9 @@ void *IGES_PARSER::GetDEPointer(int TypeNum,BODY* body)
 
 	// こんなコード書きたくない一時的なコード...
 	BOOST_FOREACH(NURBSC* n, body->vNurbsC) {
+		if ( n->pD == TypeNum ) return n;
+	}
+	BOOST_FOREACH(NURBSS* n, body->vNurbsS) {
 		if ( n->pD == TypeNum ) return n;
 	}
 
