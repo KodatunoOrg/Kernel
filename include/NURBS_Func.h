@@ -7,18 +7,6 @@ class NURBS_Func
 {
 public:
 
-	// Function: CalcNurbsCCoords
-	// 指定したt群でのNURBS曲線の座標値群を求める
-	VCoord CalcNurbsCCoords(NURBSC *, const Vdouble&);
-
-	// Function: CalcNurbsSCoord
-	// 指定したu,vでのNURBS曲面の座標点を求める
-	Coord CalcNurbsSCoord(NURBSS *, double, double);
-
-	// Function: CalcNurbsSCoords
-	// 指定したu,v群でのNURBS曲面の座標値群を求める
-	VCoord CalcNurbsSCoords(NURBSS *, const VCoord&);		
-
 	// Function: GenNurbsC
 	// 1つのNURBS曲線を生成する
 	NURBSC* GenNurbsC(int,int,int, const ublasVector&, const ublasVector&, const ACoord&, const A2double&, const A4int&, int);

@@ -49,6 +49,10 @@ public:
 	// Function: CalcNurbsCCoord
 	// 指定したtでのNURBS曲線の座標値を求める
 	Coord CalcNurbsCCoord(double);
+
+	// Function: CalcNurbsCCoords
+	// 指定したt群でのNURBS曲線の座標値群を求める
+	VCoord CalcNurbsCCoords(const Vdouble&);
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 

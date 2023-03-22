@@ -39,53 +39,17 @@ public:
 	int TrmdSurfFlag;
 	DispStat Dstat;
 
-	NURBSS() {
-		K[0] = K[1] = 0;
-		M[0] = M[1] = 0;
-		N[0] = N[0] = 0;
-		prop[0] = prop[1] = prop[2] = prop[3] = prop[4] = 0;
-		U[0] = U[1] = 0;
-		V[0] = V[1] = 0;
-		pD = 0;
-		TrmdSurfFlag = 0;
-	}
-	NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double Us,double Ue,double Vs,double Ve) {
-		this->K[0] = Ku;
-		this->K[1] = Kv;
-		this->M[0] = Mu;
-		this->M[1] = Mv;
-		this->U[0] = Us;
-		this->U[1] = Ue;
-		this->V[0] = Vs;
-		this->V[1] = Ve;
-		this->N[0] = Mu+Ku;
-		this->N[1] = Mv+Kv;
-		for(int i=0;i<5;i++)
-			this->prop[i] = 0;
-		this->Dstat.Color[0] = this->Dstat.Color[1] = this->Dstat.Color[2] = 0.2;
-		this->Dstat.Color[3] = 0.5;
-		this->S = S;
-		this->T = T;
-		this->W = W;
-		this->cp.resize(boost::extents[K[0]][K[1]]);
-		this->cp = Cp;
-	}
-	NURBSS(const NURBSS* nurb) {
-		this->K = nurb->K;
-		this->M = nurb->M;
-		this->N = nurb->N;
-		this->U = nurb->U;
-		this->V = nurb->V;
-		this->prop = nurb->prop;
-		this->Dstat = nurb->Dstat;
-		this->S = nurb->S;
-		this->T = nurb->T;
-		this->W = nurb->W;
-		this->cp.resize(boost::extents[nurb->K[0]][nurb->K[1]]);
-		this->cp = nurb->cp;
-	}
-	~NURBSS() {
-	}
+	NURBSS();
+	NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double Us,double Ue,double Vs,double Ve);
+	NURBSS(const NURBSS* nurb);
+
+	// Function: CalcNurbsSCoord
+	// 指定したu,vでのNURBS曲面の座標点を求める
+	Coord CalcNurbsSCoord(double, double);
+
+	// Function: CalcNurbsSCoords
+	// 指定したu,v群でのNURBS曲面の座標値群を求める
+	VCoord CalcNurbsSCoords(const VCoord&);
 };
 typedef std::vector<NURBSS*>	VNURBSS;
 

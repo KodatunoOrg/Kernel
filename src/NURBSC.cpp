@@ -3,6 +3,7 @@
 
 ///////////////////////////////////////////////////////////
 // コンストラクタ
+
 NURBSC::NURBSC()
 {
     K = 0;
@@ -83,4 +84,21 @@ Coord NURBSC::CalcNurbsCCoord(double t)
 	p = bscpw / bsw;	// 座標値を求める
 
 	return p;
+}
+
+// Function: CalcNurbsCCoords
+// 指定したノットt群でのNURBS曲線の座標値を求める
+//
+// Parameters:
+// *NurbsS - NURBS曲面へのポインタ   
+// Ptnum - 求める点群の数   
+// *T - tパラメータ群を格納した配列
+// *Pt - 実座標値を格納
+VCoord NURBSC::CalcNurbsCCoords(const Vdouble& V)
+{
+	VCoord Pt;
+	BOOST_FOREACH(double t, V) {
+		Pt.push_back(CalcNurbsCCoord(t));
+	}
+	return Pt;
 }
