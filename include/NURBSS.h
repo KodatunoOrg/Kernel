@@ -45,11 +45,23 @@ public:
 
 	// Function: CalcNurbsSCoord
 	// 指定したu,vでのNURBS曲面の座標点を求める
-	Coord CalcNurbsSCoord(double, double);
+	Coord CalcNurbsSCoord(double, double) const;
 
 	// Function: CalcNurbsSCoords
 	// 指定したu,v群でのNURBS曲面の座標値群を求める
-	VCoord CalcNurbsSCoords(const VCoord&);
+	VCoord CalcNurbsSCoords(const VCoord&) const;
+
+	// Function: GenIsoparamCurveU
+	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
+	NURBSC* GenIsoparamCurveU(double) const;
+
+	// Function: GenIsoparamCurveV
+	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
+	NURBSC* GenIsoparamCurveV(double) const;
+
+	// Function: DebugForNurbsS
+	// NURBS曲面情報をデバッグプリント
+	void DebugForNurbsS(void) const;
 };
 typedef std::vector<NURBSS*>	VNURBSS;
 

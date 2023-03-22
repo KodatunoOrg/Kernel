@@ -7,22 +7,6 @@ class NURBS_Func
 {
 public:
 
-	// Function: GenRotNurbsS
-	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
-	NURBSS* GenRotNurbsS(const NURBSC*, const Coord&, double);
-
-	// Function: GenSweepNurbsS
-	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
-	NURBSS* GenSweepNurbsS(const NURBSC*, const Coord&, double);
-
-	// Function: GenIsoparamCurveU
-	// NURBS曲面上のu方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	NURBSC* GenIsoparamCurveU(const NURBSS*, double);
-
-	// Function: GenIsoparamCurveV
-	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
-	NURBSC* GenIsoparamCurveV(const NURBSS*, double);
-
 	// Function: GenTrimdNurbsS
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
@@ -355,10 +339,6 @@ public:
 	// Function: DebugForNurbsC
 	// NURBS曲線情報をデバッグプリント
 	void DebugForNurbsC(NURBSC *);				
-
-	// Function: DebugForNurbsS
-	// NURBS曲面情報をデバッグプリント
-	void DebugForNurbsS(NURBSS *);				
 
 	// Function: CalcIntersecPtsOffsetPlaneGeom
 	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)

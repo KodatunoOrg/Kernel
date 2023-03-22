@@ -39,9 +39,10 @@
 #define CALC_OFFSET			2
 #define BS_DIV				11
 
+class NURBSC;
+class NURBSS;
 #include "NURBSC.h"
 #include "NURBSS.h"
-
 
 // Function: CalcBSbasis
 // Bスプライン基底関数を計算し、計算結果を返す

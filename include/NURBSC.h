@@ -48,11 +48,19 @@ public:
 
 	// Function: CalcNurbsCCoord
 	// 指定したtでのNURBS曲線の座標値を求める
-	Coord CalcNurbsCCoord(double);
+	Coord CalcNurbsCCoord(double) const;
 
 	// Function: CalcNurbsCCoords
 	// 指定したt群でのNURBS曲線の座標値群を求める
-	VCoord CalcNurbsCCoords(const Vdouble&);
+	VCoord CalcNurbsCCoords(const Vdouble&) const;
+
+	// Function: GenRotNurbsS
+	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
+	NURBSS* GenRotNurbsS(const Coord&, double) const;
+
+	// Function: GenSweepNurbsS
+	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
+	NURBSS* GenSweepNurbsS(const Coord&, double) const;
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 
