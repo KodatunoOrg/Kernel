@@ -61,6 +61,18 @@ public:
 	// Function: GenSweepNurbsS
 	// 1つのNURBS曲線からある軸方向にある距離だけスイープさせたスイープサーフェスを生成する
 	NURBSS* GenSweepNurbsS(const Coord&, double) const;
+
+	// Function: CalcDiffNurbsC
+	// NURBS曲線の1階微分係数を求める
+	Coord CalcDiffNurbsC(double) const;
+
+	// Function: CalcDiff2NurbsC
+	// NURBS曲線の2階微分係数を求める
+	Coord CalcDiff2NurbsC(double) const;
+
+	// Function: CalcDiffNNurbsC
+	// NURBS曲線のr階微分係数を求める
+	Coord CalcDiffNNurbsC(int, double) const;
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 

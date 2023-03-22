@@ -256,3 +256,113 @@ NURBSS* NURBSC::GenSweepNurbsS(const Coord& a, double Len) const
 
 	return new NURBSS(M,2,K,2,T,T,W,Cp,0,1,V[0],V[1]);	// NURBS曲面生成
 }
+
+// Fucntion:CalcDiffNurbsC
+// NURBS曲線の1階微分係数を求める
+// 
+// Paramters:
+// *NurbsC - NURBS曲線へのポインタ
+// t - ノット値
+//
+// Return:
+// 計算結果
+Coord NURBSC::CalcDiffNurbsC(double t) const
+{
+	Coord Ft,diff_Ft;		// NURBS曲線の分子
+	double Gt,diff_Gt;		// NURBS曲線の分母
+	double bs,diff_bs;		// Bスプライン基底関数
+//	Coord p;
+	int i;
+
+	Gt = 0;
+	diff_Gt = 0;
+
+	// 各係数算出
+	for(i=0;i<K;i++){
+		bs = CalcBSbasis(t,T,i,M);
+		diff_bs = CalcDiffBSbasis(t,T,i,M);
+
+		Ft += cp[i] * (bs*W[i]);
+		diff_Ft += cp[i] * (diff_bs*W[i]);
+
+		Gt += bs*W[i];
+		diff_Gt += diff_bs*W[i];
+	}
+	if(fabs(Gt) < APPROX_ZERO)	return(Coord());
+
+	// 1階微分を求める
+//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
+	return (diff_Ft / Gt) - ((Ft*diff_Gt)/(Gt*Gt));
+}
+
+// Function: CalcDiff2NurbsC
+// NURBS曲線の2階微分係数を求める
+// 
+// Paramters:
+// *NurbsC - NURBS曲線へのポインタ
+// t - ノット値
+//
+// Return:
+// 計算結果
+Coord NURBSC::CalcDiff2NurbsC(double t) const
+{
+	double w0=0;
+	double w1=0;
+	double w2=0;
+	Coord  A2;
+	Coord  P0;
+	Coord  P1;
+
+	P0 = CalcNurbsCCoord(t);
+	P1 = CalcDiffNurbsC(t);
+
+	for(int i=0;i<K;i++){
+		w0 += CalcBSbasis(t,T,i,M) * W[i];
+		w1 += CalcDiffBSbasis(t,T,i,M) * W[i];
+		w2 += CalcDiffBSbasisN(t,T,i,M,2) * W[i];
+		A2 += cp[i] * (CalcDiffBSbasisN(t,T,i,M,2) * W[i]);
+	}
+
+//	return DivCoord(SubCoord(A2,AddCoord(MulCoord(P1,2*w1),MulCoord(P0,2*w2))),w0);
+	return (A2-((P1*2*w1)+(P0*2*w2)))/w0;
+}
+
+// Function: CalcDiffNNurbsC
+// NURBS曲線のr階微分係数を求める
+// 
+// Paramters:
+// *NurbsC - NURBS曲線へのポインタ
+// r - 微分階数
+// t - ノット値
+//
+// Return:
+// 計算結果
+Coord NURBSC::CalcDiffNNurbsC(int r, double t) const
+{
+	if(!r)
+		return CalcNurbsCCoord(t);
+
+	Coord Ar;
+	double W = 0;
+
+	for(int i=0;i<K;i++){
+		double bsr = CalcDiffBSbasisN(t,T,i,M,r);
+		Ar += cp[i] * (bsr*this->W[i]);
+		W  += this->W[i]*CalcBSbasis(t,T,i,M);
+	}
+
+	Coord Br;
+	for(int i=1;i<=r;i++){
+		double Wi = 0;
+		for(int j=0;j<K;j++){
+			double bsi = CalcDiffBSbasisN(t,T,j,M,i);
+			Wi += bsi*this->W[j];
+		}
+		if(Wi == 0.0)  return(Coord());
+//		Br = AddCoord(Br,MulCoord(CalcDiffNNurbsC(r-i,t),(double)nCr(r,i)*Wi));	// 回帰
+		Br += CalcDiffNNurbsC(r-i,t) * ((double)nCr(r,i)*Wi);	// 回帰
+	}
+
+//	return (DivCoord(SubCoord(Ar,Br),W));
+	return (Ar-Br)/W;
+}

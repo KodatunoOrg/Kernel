@@ -192,115 +192,6 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	return KOD_TRUE;
 }
 
-// Fucntion:CalcDiffNurbsC
-// NURBS曲線の1階微分係数を求める
-// 
-// Paramters:
-// *NurbsC - NURBS曲線へのポインタ
-// t - ノット値
-//
-// Return:
-// 計算結果
-Coord NURBS_Func::CalcDiffNurbsC(const NURBSC* NurbsC, double t)
-{
-	Coord Ft,diff_Ft;		// NURBS曲線の分子
-	double Gt,diff_Gt;		// NURBS曲線の分母
-	double bs,diff_bs;		// Bスプライン基底関数
-//	Coord p;
-	int i;
-
-	Gt = 0;
-	diff_Gt = 0;
-
-	// 各係数算出
-	for(i=0;i<NurbsC->K;i++){
-		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
-		diff_bs = CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M);
-
-		Ft += NurbsC->cp[i] * (bs*NurbsC->W[i]);
-		diff_Ft += NurbsC->cp[i] * (diff_bs*NurbsC->W[i]);
-
-		Gt += bs*NurbsC->W[i];
-		diff_Gt += diff_bs*NurbsC->W[i];
-	}
-	if(fabs(Gt) < APPROX_ZERO)	return(Coord());
-
-	// 1階微分を求める
-//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
-	return (diff_Ft / Gt) - ((Ft*diff_Gt)/(Gt*Gt));
-}
-
-// Function: CalcDiff2NurbsC
-// NURBS曲線の2階微分係数を求める
-// 
-// Paramters:
-// *NurbsC - NURBS曲線へのポインタ
-// t - ノット値
-//
-// Return:
-// 計算結果
-Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
-{
-	double w0=0;
-	double w1=0;
-	double w2=0;
-	Coord  A2;
-	Coord  P0;
-	Coord  P1;
-
-	P0 = NurbsC->CalcNurbsCCoord(t);
-	P1 = CalcDiffNurbsC(NurbsC,t);
-
-	for(int i=0;i<NurbsC->K;i++){
-		w0 += CalcBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
-		w1 += CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
-		w2 += CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i];
-		A2 += NurbsC->cp[i] * (CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i]);
-	}
-
-//	return DivCoord(SubCoord(A2,AddCoord(MulCoord(P1,2*w1),MulCoord(P0,2*w2))),w0);
-	return (A2-((P1*2*w1)+(P0*2*w2)))/w0;
-}
-
-// Function: CalcDiffNNurbsC
-// NURBS曲線のr階微分係数を求める
-// 
-// Paramters:
-// *NurbsC - NURBS曲線へのポインタ
-// r - 微分階数
-// t - ノット値
-//
-// Return:
-// 計算結果
-Coord NURBS_Func::CalcDiffNNurbsC(NURBSC *NurbsC,int r,double t)
-{
-	if(!r)
-		return NurbsC->CalcNurbsCCoord(t);
-
-	Coord Ar;
-	double W = 0;
-	for(int i=0;i<NurbsC->K;i++){
-		double bsr = CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,r);
-		Ar += NurbsC->cp[i] * (bsr*NurbsC->W[i]);
-		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
-	}
-
-	Coord Br;
-	for(int i=1;i<=r;i++){
-		double Wi = 0;
-		for(int j=0;j<NurbsC->K;j++){
-			double bsi = CalcDiffBSbasisN(t,NurbsC->T,j,NurbsC->M,i);
-			Wi += bsi*NurbsC->W[j];
-		}
-		if(Wi == 0.0)  return(Coord());
-//		Br = AddCoord(Br,MulCoord(CalcDiffNNurbsC(NurbsC,r-i,t),(double)nCr(r,i)*Wi));	// 回帰
-		Br += CalcDiffNNurbsC(NurbsC,r-i,t) * ((double)nCr(r,i)*Wi);	// 回帰
-	}
-
-//	return (DivCoord(SubCoord(Ar,Br),W));
-	return (Ar-Br)/W;
-}
-
 // Function: CalcDiffuNurbsS
 // NURBS曲面のu方向の1階微分係数を得る
 //
@@ -498,7 +389,7 @@ Coord NURBS_Func::CalcNormVecOnNurbsS(NURBSS *nurb,double u,double v)
 Coord NURBS_Func::CalcTanVecOnNurbsC(NURBSC *C,double t)
 {
 //	return NormalizeVec(CalcDiffNurbsC(C,t));
-    return CalcDiffNurbsC(C,t).NormalizeVec();
+    return C->CalcDiffNurbsC(t).NormalizeVec();
 }
 
 // Function: CalcDiffuNormVecOnNurbsS
@@ -674,8 +565,8 @@ Coord NURBS_Func::CalcGaussCurvatureNormVec(NURBSS *nurb,double u,double v)
 // 計算結果
 double NURBS_Func::CalcCurvatureNurbsC(NURBSC *C,double t)
 {
-	Coord p_ = CalcDiffNurbsC(C,t);
-	Coord p__ = CalcDiff2NurbsC(C,t);
+	Coord p_ = C->CalcDiffNurbsC(t);
+	Coord p__ = C->CalcDiff2NurbsC(t);
 
 //	return(CalcEuclid(CalcOuterProduct(p_,p__))/pow(CalcEuclid(p_),3));
 	return (p_&&p__).CalcEuclid()/pow(p_.CalcEuclid(),3);
@@ -1948,7 +1839,7 @@ int NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Di
 			F  = NurbsS->CalcNurbsSCoord(u,v) - NurbsC->CalcNurbsCCoord(t);	// F(u,v,t) = S(u,v) - C(t)
 			Fu = CalcDiffuNurbsS(NurbsS,u,v);			// Fu = dF/du = dS/du
 			Fv = CalcDiffvNurbsS(NurbsS,u,v);			// Fv = dF/dv = dS/dv
-			Ft = CalcDiffNurbsC(NurbsC,t);				// Ft = dF/dt = dC/dt
+			Ft = NurbsC->CalcDiffNurbsC(t);				// Ft = dF/dt = dC/dt
 			A(0,0) = Fu.x;				// Fu,Fv,Ftを3x3行列Aに代入
 			A(0,1) = Fv.x;				//     |Fu.x Fv.x Ft.x|       |du|       |F.x|
 			A(0,2) = Ft.x;				// A = |Fu.y Fv.y Ft.y| , d = |dv| , F = |F.y|
@@ -2561,8 +2452,8 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,
         u = NurbB->V[0];
 		while(loopcount < LOOPCOUNTMAX){
 			F  = NurbA->CalcNurbsCCoord(t) - NurbB->CalcNurbsCCoord(u);
-			Ft = CalcDiffNurbsC(NurbA,t);
-			Fu = CalcDiffNurbsC(NurbB,u);
+			Ft = NurbA->CalcDiffNurbsC(t);
+			Fu = NurbB->CalcDiffNurbsC(u);
 			A(0,0) = Ft.x;
             A(0,1) = -Fu.x;
 			A(1,0) = Ft.y;
@@ -2616,7 +2507,7 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
     *t2 = 0;
 
     while(1){
-        Coord Ct = CalcDiffNurbsC(C,*t1);
+        Coord Ct = C->CalcDiffNurbsC(*t1);
         Coord Lt = r;
         Coord B = (P+(r*(*t2))) - C->CalcNurbsCCoord(*t1);
         A(0,0) = Ct.x;
@@ -2713,7 +2604,7 @@ int NURBS_Func::CalcIntersecCurve(NURBSC *nurb,Coord pt,Coord nvec,int Divnum,ub
 		t = nurb->V[0] + (double)i*dt;		// 初期値更新
 		while(loopcount < LOOPCOUNTMAX){
 			F  = nvec & (nurb->CalcNurbsCCoord(t)-pt);
-			Ft = nvec &  CalcDiffNurbsC(nurb,t);
+			Ft = nvec &  nurb->CalcDiffNurbsC(t);
 			d = -F/Ft;		// 更新値
 			//fprintf(stderr,"   %d:%.14lf,%lf\n",i,d,t);	// for debug
 			if(CheckZero(d,HIGH_ACCURACY) == KOD_TRUE){		// 更新値が閾値以下になったら、whileを抜け、解として登録
@@ -4361,8 +4252,8 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSC *C,Coord P,int Divnum,int LoD,doubl
 		int loopcount = 0;
 		while(loopcount < LOOPCOUNTMAX){
 			Coord Ct = C->CalcNurbsCCoord(t);
-			Coord C_ = CalcDiffNurbsC(C,t);
-			Coord C__ = CalcDiff2NurbsC(C,t);
+			Coord C_ = C->CalcDiffNurbsC(t);
+			Coord C__ = C->CalcDiff2NurbsC(t);
 			double a = P  & C_;
 			double b = Ct & C_;
 			double c = C_ & C_;
@@ -4810,7 +4701,7 @@ double NURBS_Func::CalcParamLengthOnNurbsC(const NURBSC* C, double L, double Ini
 	int count = 0;
 
 	while(fabs(dt) > APPROX_ZERO){
-		dt = (L - CalcNurbsCLength(C,0,t))/CalcDiffNurbsC(C,t).CalcEuclid()/2;		// ニュートン法による収束計算
+		dt = (L - CalcNurbsCLength(C,0,t))/C->CalcDiffNurbsC(t).CalcEuclid()/2;		// ニュートン法による収束計算
 		t += dt;
 		if(count > LOOPCOUNTMAX || t > C->V[1]){
 //			GuiIFB.SetMessage("NURBS_Func ERROR: Cannot find a anser");
@@ -4912,8 +4803,8 @@ int NURBS_Func::CalcExtremumNurbsC(NURBSC *C,Coord nf,ublasVector& pt,int ptnum)
 
 		// 収束計算
 		while(lpcount < LOOPCOUNTMAX){
-			double f_  = nf & CalcDiffNurbsC(C,t);
-			double f__ = nf & CalcDiff2NurbsC(C,t);
+			double f_  = nf & C->CalcDiffNurbsC(t);
+			double f__ = nf & C->CalcDiff2NurbsC(t);
 			if(f__ == 0.0)	break;
 			dt = f_/f__;
 
@@ -5702,7 +5593,7 @@ double NURBS_Func::CalcNurbsCLength(const NURBSC* Nurb, double a, double b)
 
 	for(int i=0;i<80;i++){
 		double xi = A+B*g[i];
-		len += w[i]*(CalcDiffNurbsC(Nurb,xi).CalcEuclid());
+		len += w[i]*(Nurb->CalcDiffNurbsC(xi).CalcEuclid());
 	}
 	return(B*len);
 }
@@ -5890,7 +5781,7 @@ double NURBS_Func::CalcNurbsCLength(const NURBSC* Nurb)
 
 	for(int i=0;i<80;i++){
 		double xi = A+B*g[i];
-		len += w[i]*(CalcDiffNurbsC(Nurb,xi).CalcEuclid());
+		len += w[i]*(Nurb->CalcDiffNurbsC(xi).CalcEuclid());
 	}
 	return(B*len);
 }
@@ -6275,7 +6166,7 @@ int NURBS_Func::CalcConstScallop(NURBSS *S, NURBSC *C, double t, double g, doubl
     double g_ = (direct > KOD_FALSE) ? g : -g;
 
     Coord C_ = C->CalcNurbsCCoord(t);
-    Coord Ct = CalcDiffNurbsC(C,t);
+    Coord Ct = C->CalcDiffNurbsC(t);
 
     double u0 = *u = C_.x;
     double v0 = *v = C_.y;
@@ -6340,7 +6231,7 @@ int NURBS_Func::CalcConstPitch(NURBSS *S,NURBSC *C, double t0, double ds, double
         Coord P = C->CalcNurbsCCoord(*t);
         Coord Su = CalcDiffuNurbsS(S,P.x,P.y);
         Coord Sv = CalcDiffvNurbsS(S,P.x,P.y);
-        Coord Ct = CalcDiffNurbsC(C,*t);
+        Coord Ct = C->CalcDiffNurbsC(*t);
         double denom = ((Sv*Ct.y)+(Su*Ct.x)).CalcEuclid();
         double g = Ct.x/denom;
         double h = Ct.y/denom;

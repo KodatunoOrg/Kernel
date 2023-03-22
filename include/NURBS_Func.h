@@ -11,18 +11,6 @@ public:
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
 
-	// Function: CalcDiffNurbsC
-	// NURBS曲線の1階微分係数を求める
-	Coord CalcDiffNurbsC(const NURBSC*, double);
-
-	// Function: CalcDiff2NurbsC
-	// NURBS曲線の2階微分係数を求める
-	Coord CalcDiff2NurbsC(NURBSC *,double);						
-
-	// Function: CalcDiffNNurbsC
-	// NURBS曲線のr階微分係数を求める
-	Coord CalcDiffNNurbsC(NURBSC *,int,double);					
-
 	// Function: CalcDiffuNurbsS
 	// NURBS曲面のu方向1階微分係数を求める
 	Coord CalcDiffuNurbsS(NURBSS *,double,double);				
