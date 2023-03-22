@@ -48,4 +48,12 @@ class NURBSS;
 // Bスプライン基底関数を計算し、計算結果を返す
 double CalcBSbasis(double, const ublasVector&, int, int);
 
+// Function: CalcDiffBSbasis
+// Bスプライン基底関数の1階微分係数を求める
+double CalcDiffBSbasis(double, const ublasVector&, int, int);
+
+// Function: CalcDiffBSbasisN
+// Bスプライン基底関数のN階微分係数を求める
+double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
+
 #endif

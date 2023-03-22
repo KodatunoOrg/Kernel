@@ -192,60 +192,6 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	return KOD_TRUE;
 }
 
-// Function: CalcDiffBSbasis
-// Bスプライン基底関数の1階微分係数を求める
-//
-// Parameters:
-// t - ノット　
-// knot[] - ノットベクトル  
-// N - ノットベクトルの数  
-// I - 注目中のコントロールポイント  
-// M - 階数
-//
-// Return:
-// 計算結果
-double NURBS_Func::CalcDiffBSbasis(double t, const ublasVector& knot, int N, int I, int M)
-{
-	double n1 = knot[I+M-1]-knot[I];
-	double n2 = knot[I+M]-knot[I+1];
-
-	if(n1 != 0.0) n1 = (M-1)/n1*CalcBSbasis(t,knot,I,M-1);
-	
-	if(n2 != 0.0) n2 = (M-1)/n2*CalcBSbasis(t,knot,I+1,M-1);
-	
-	return(n1-n2);
-}
-
-// Function: CalcDiffBSbasisN
-// Bスプライン基底関数のN階微分係数を求める
-//
-// Parameters:
-// t - ノット　
-// knot[] - ノットベクトル  
-// N - ノットベクトルの数  
-// I - 注目中のコントロールポイント  
-// M - 階数  
-// Dn - 微分階数
-//
-// Return:
-// 計算結果
-double NURBS_Func::CalcDiffBSbasisN(double t, const ublasVector& knot, int N, int I, int M, int Dn)
-{
-	double n1 = knot[I+M-1]-knot[I];
-	double n2 = knot[I+M]-knot[I+1];
-
-	if(Dn==0){
-		return(CalcBSbasis(t,knot,I,M));
-	}
-	if(Dn==1){
-		return(CalcDiffBSbasis(t,knot,N,I,M));
-	}
-	if(n1 != 0) n1 = (M-1)/n1*CalcDiffBSbasisN(t,knot,N,I,M-1,Dn-1);
-	if(n2 != 0) n2 = (M-1)/n2*CalcDiffBSbasisN(t,knot,N,I+1,M-1,Dn-1);
-
-	return(n1-n2);
-}
-
 // Fucntion:CalcDiffNurbsC
 // NURBS曲線の1階微分係数を求める
 // 
@@ -269,7 +215,7 @@ Coord NURBS_Func::CalcDiffNurbsC(const NURBSC* NurbsC, double t)
 	// 各係数算出
 	for(i=0;i<NurbsC->K;i++){
 		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
-		diff_bs = CalcDiffBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
+		diff_bs = CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M);
 
 		Ft += NurbsC->cp[i] * (bs*NurbsC->W[i]);
 		diff_Ft += NurbsC->cp[i] * (diff_bs*NurbsC->W[i]);
@@ -307,9 +253,9 @@ Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
 
 	for(int i=0;i<NurbsC->K;i++){
 		w0 += CalcBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
-		w1 += CalcDiffBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M) * NurbsC->W[i];
-		w2 += CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,2) * NurbsC->W[i];
-		A2 += NurbsC->cp[i] * (CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,2) * NurbsC->W[i]);
+		w1 += CalcDiffBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
+		w2 += CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i];
+		A2 += NurbsC->cp[i] * (CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,2) * NurbsC->W[i]);
 	}
 
 //	return DivCoord(SubCoord(A2,AddCoord(MulCoord(P1,2*w1),MulCoord(P0,2*w2))),w0);
@@ -334,7 +280,7 @@ Coord NURBS_Func::CalcDiffNNurbsC(NURBSC *NurbsC,int r,double t)
 	Coord Ar;
 	double W = 0;
 	for(int i=0;i<NurbsC->K;i++){
-		double bsr = CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,r);
+		double bsr = CalcDiffBSbasisN(t,NurbsC->T,i,NurbsC->M,r);
 		Ar += NurbsC->cp[i] * (bsr*NurbsC->W[i]);
 		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
 	}
@@ -343,7 +289,7 @@ Coord NURBS_Func::CalcDiffNNurbsC(NURBSC *NurbsC,int r,double t)
 	for(int i=1;i<=r;i++){
 		double Wi = 0;
 		for(int j=0;j<NurbsC->K;j++){
-			double bsi = CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,j,NurbsC->M,i);
+			double bsi = CalcDiffBSbasisN(t,NurbsC->T,j,NurbsC->M,i);
 			Wi += bsi*NurbsC->W[j];
 		}
 		if(Wi == 0.0)  return(Coord());
@@ -379,7 +325,7 @@ Coord NURBS_Func::CalcDiffuNurbsS(NURBSS *NurbsS,double div_u,double div_v)
 
 	for(i=0;i<NurbsS->K[0];i++){
 		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
-		diff_bs_u = CalcDiffBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);	// u方向Bスプライン基底関数の1階微分を求める
+		diff_bs_u = CalcDiffBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);	// u方向Bスプライン基底関数の1階微分を求める
 		for(j=0;j<NurbsS->K[1];j++){
 			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);			// v方向Bスプライン基底関数を求める
 			Ft += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W(i,j));
@@ -422,7 +368,7 @@ Coord NURBS_Func::CalcDiffvNurbsS(NURBSS *NurbsS,double div_u,double div_v)
 		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
 		for(j=0;j<NurbsS->K[1];j++){
 			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);				// v方向Bスプライン基底関数を求める
-			diff_bs_v = CalcDiffBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);	// v方向Bスプライン基底関数の1階微分を求める
+			diff_bs_v = CalcDiffBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);	// v方向Bスプライン基底関数の1階微分を求める
 			Ft += NurbsS->cp[i][j]*(bs_u*bs_v*NurbsS->W(i,j));
 			diff_Ft += NurbsS->cp[i][j]*(bs_u*diff_bs_v*NurbsS->W(i,j));
 			Gt += bs_u*bs_v*NurbsS->W(i,j);
@@ -488,9 +434,9 @@ double NURBS_Func::CalcDiffNurbsSDenom(NURBSS *S,int k,int l,double u,double v)
 {
 	double w=0;
 	for(int i=0;i<S->K[0];i++){
-		double Nk = CalcDiffBSbasisN(u,S->S,S->N[0],i,S->M[0],k);		// u方向のk階微分
+		double Nk = CalcDiffBSbasisN(u,S->S,i,S->M[0],k);		// u方向のk階微分
 		for(int j=0;j<S->K[1];j++){
-			double Nl = CalcDiffBSbasisN(v,S->T,S->N[1],j,S->M[1],l);	// v方向のl階微分
+			double Nl = CalcDiffBSbasisN(v,S->T,j,S->M[1],l);	// v方向のl階微分
 			w += Nk*Nl*S->W(i,j);
 		}
 	}
@@ -512,9 +458,9 @@ Coord NURBS_Func::CalcDiffNurbsSNumer(NURBSS *S,int k,int l,double u,double v)
 {
 	Coord A;
 	for(int i=0;i<S->K[0];i++){
-		double Nk = CalcDiffBSbasisN(u,S->S,S->N[0],i,S->M[0],k);		// u方向のk階微分
+		double Nk = CalcDiffBSbasisN(u,S->S,i,S->M[0],k);		// u方向のk階微分
 		for(int j=0;j<S->K[1];j++){
-			double Nl = CalcDiffBSbasisN(v,S->T,S->N[1],j,S->M[1],l);	// v方向のl階微分
+			double Nl = CalcDiffBSbasisN(v,S->T,j,S->M[1],l);	// v方向のl階微分
 			A += S->cp[i][j]*(Nk*Nl*S->W(i,j));
 		}
 	}
@@ -3503,16 +3449,16 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const ACoord& P_, int M)
 				B(i,j) = CalcBSbasis(T_[i],T,j,M);
 		}
 	}
-	B(K-2,0) = CalcDiffBSbasis(T_[0],T,N,0,M);
-	B(K-2,1) = CalcDiffBSbasis(T_[0],T,N,1,M);
-	B(K-2,K-2) = -CalcDiffBSbasis(T_[PNum-1],T,N,K-2,M);
-	B(K-2,K-1) = -CalcDiffBSbasis(T_[PNum-1],T,N,K-1,M);
-	B(K-1,0) = CalcDiffBSbasisN(T_[0],T,N,0,M,2);
-	B(K-1,1) = CalcDiffBSbasisN(T_[0],T,N,1,M,2);
-	B(K-1,2) = CalcDiffBSbasisN(T_[0],T,N,2,M,2);
-	B(K-1,K-3) = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-3,M,2);
-	B(K-1,K-2) = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-2,M,2);
-	B(K-1,K-1) = -CalcDiffBSbasisN(T_[PNum-1],T,N,K-1,M,2);
+	B(K-2,0) = CalcDiffBSbasis(T_[0],T,0,M);
+	B(K-2,1) = CalcDiffBSbasis(T_[0],T,1,M);
+	B(K-2,K-2) = -CalcDiffBSbasis(T_[PNum-1],T,K-2,M);
+	B(K-2,K-1) = -CalcDiffBSbasis(T_[PNum-1],T,K-1,M);
+	B(K-1,0) = CalcDiffBSbasisN(T_[0],T,0,M,2);
+	B(K-1,1) = CalcDiffBSbasisN(T_[0],T,1,M,2);
+	B(K-1,2) = CalcDiffBSbasisN(T_[0],T,2,M,2);
+	B(K-1,K-3) = -CalcDiffBSbasisN(T_[PNum-1],T,K-3,M,2);
+	B(K-1,K-2) = -CalcDiffBSbasisN(T_[PNum-1],T,K-2,M,2);
+	B(K-1,K-1) = -CalcDiffBSbasisN(T_[PNum-1],T,K-1,M,2);
 
 	// コントロールポイントを得る
 	Gauss(B,P,Q);

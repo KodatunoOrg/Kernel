@@ -50,3 +50,57 @@ double CalcBSbasis(double t, const ublasVector& knot, int I, int M)
 		return(n1+n2);
 	}
 }
+
+// Function: CalcDiffBSbasis
+// Bスプライン基底関数の1階微分係数を求める
+//
+// Parameters:
+// t - ノット　
+// knot[] - ノットベクトル  
+// N - ノットベクトルの数  
+// I - 注目中のコントロールポイント  
+// M - 階数
+//
+// Return:
+// 計算結果
+double CalcDiffBSbasis(double t, const ublasVector& knot, int I, int M)
+{
+	double n1 = knot[I+M-1]-knot[I];
+	double n2 = knot[I+M]-knot[I+1];
+
+	if(n1 != 0.0) n1 = (M-1)/n1*CalcBSbasis(t,knot,I,M-1);
+	
+	if(n2 != 0.0) n2 = (M-1)/n2*CalcBSbasis(t,knot,I+1,M-1);
+	
+	return(n1-n2);
+}
+
+// Function: CalcDiffBSbasisN
+// Bスプライン基底関数のN階微分係数を求める
+//
+// Parameters:
+// t - ノット　
+// knot[] - ノットベクトル  
+// N - ノットベクトルの数  
+// I - 注目中のコントロールポイント  
+// M - 階数  
+// Dn - 微分階数
+//
+// Return:
+// 計算結果
+double CalcDiffBSbasisN(double t, const ublasVector& knot, int I, int M, int Dn)
+{
+	double n1 = knot[I+M-1]-knot[I];
+	double n2 = knot[I+M]-knot[I+1];
+
+	if(Dn==0){
+		return(CalcBSbasis(t,knot,I,M));
+	}
+	if(Dn==1){
+		return(CalcDiffBSbasis(t,knot,I,M));
+	}
+	if(n1 != 0) n1 = (M-1)/n1*CalcDiffBSbasisN(t,knot,I,M-1,Dn-1);
+	if(n2 != 0) n2 = (M-1)/n2*CalcDiffBSbasisN(t,knot,I+1,M-1,Dn-1);
+
+	return(n1-n2);
+}
