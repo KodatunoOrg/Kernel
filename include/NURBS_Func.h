@@ -7,14 +7,6 @@ class NURBS_Func
 {
 public:
 
-	// Function: GenNurbsS
-	// 1つのNURBS曲面を生成する
-	NURBSS* GenNurbsS(int,int,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const AACoord&,double,double,double,double);
-
-	// Function: GenNurbsS
-	// 1つのNURBS曲面を生成する(NURBS曲面のコピー)(オーバーロード)
-	NURBSS* GenNurbsS(const NURBSS*);								
-
 	// Function: GenRotNurbsS
 	// 1つのNURBS曲線をある軸回りにある角度だけ回転させた回転サーフェスを生成する
 	NURBSS* GenRotNurbsS(const NURBSC*, const Coord&, double);
@@ -34,10 +26,6 @@ public:
 	// Function: GenTrimdNurbsS
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
-
-	// Function: DelNurbsS
-	// NURBS曲面を削除する
-	void DelNurbsS(NURBSS *);									
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
@@ -339,14 +327,6 @@ public:
 	// Function: New_NurbsS
 	// NURBS曲面のメモリー確保
 	int New_NurbsS(NURBSS *,int [],int []);		
-
-	// Function: Free_NurbsS_1DArray
-	// NURBS曲面配列のメモリー解放
-	void Free_NurbsS_1DArray(NURBSS *,int);		
-
-	// Function: Free_NurbsS
-	// NURBS曲面のメモリー解放
-	void Free_NurbsS(NURBSS *);					
 
 	// Function: New_TrmS
 	// トリム面のメモリー確保

@@ -233,7 +233,7 @@ void BODY::CopyBody(BODY* body)
         conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
         compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
-        NURBSS* nurbsS = NFunc.GenNurbsS(body->TrmS[n].pts);		// 新たなNURBS曲面を1つ得る
+        NURBSS* nurbsS = new NURBSS(body->TrmS[n].pts);				// 新たなNURBS曲面を1つ得る
         this->TrmS[n].pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
         nurbsS->TrmdSurfFlag = KOD_TRUE;
 

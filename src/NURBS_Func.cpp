@@ -40,28 +40,6 @@ int NURBS_Func::New_NurbsS(NURBSS *nurb,int K[2],int N[2])
 	return KOD_TRUE;
 }
 
-// Function: Free_NurbsS_1DArray
-// NURBS曲面配列のメモリー解放
-// 
-// Parameters:
-// *a - メモリーを解放するNurbs曲面へのポインタ
-// num - メモリーを解放するNURBS曲面の数
-void NURBS_Func::Free_NurbsS_1DArray(NURBSS *a,int num)
-{
-	for(int i=0;i<num;i++)
-		Free_NurbsS(&a[i]);
-}
-
-
-// Function: Free_NurbsS
-// 1つのNURBS曲面のメモリー解放
-//
-// Parameters: 
-// *a - メモリーを解放するNurbs曲面へのポインタ
-void NURBS_Func::Free_NurbsS(NURBSS *a)
-{
-}
-
 // Function: New_TrmS
 // トリム面のメモリー確保
 //
@@ -145,38 +123,6 @@ void NURBS_Func::Free_CompC(COMPC *a)
 	delete[] a->pDE;
 }
 
-// Function: GenNurbsS
-// 1つのNURBS曲面を生成する
-//
-// Parameters:
-// Mu,Mv - 階数
-// Ku,Kv - コントロールポイントの数  
-// *S,*T - u,v方向ノットベクトル列
-// **W - ウエイト
-// **Cp - コントロールポイント  
-// U_s,U_e,V_s,V_e - u方向ノットベクトルの開始値,終了値
-// 
-// return:
-// 成功：KOD_TRUE, 失敗：KOD_ERR
-NURBSS* NURBS_Func::GenNurbsS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double Us,double Ue,double Vs,double Ve)
-{
-	return new NURBSS(Mu,Mv,Ku,Kv,S,T,W,Cp,Us,Ue,Vs,Ve);
-}
-
-// Function: GenNurbsS
-// 1つのNurbs曲面を生成する(NURBS曲面のコピー)
-//
-// Parameters:
-// *Nurbs - 新たに生成するNURBS曲面へのポインタ
-// nurb - 代入元
-// 
-// return:
-// 成功：KOD_TRUE, 失敗：KOD_ERR
-NURBSS* NURBS_Func::GenNurbsS(const NURBSS* nurb)
-{
-	return new NURBSS(nurb);
-}
-
 // Function: GenRotNurbsS
 // NurbsCを原点を通るAxis回りにdegだけ回転させた回転サーフェスNurbsSを生成する
 //
@@ -216,7 +162,7 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC* NurbsC, const Coord& a, double de
                 }
             }
         }
-        NurbsS = GenNurbsS(3,NurbsC->M,3,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = new NURBSS(3,NurbsC->M,3,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
 
     // 回転角度が270未満の場合，2セグメントで円弧を表現する
@@ -241,7 +187,7 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC* NurbsC, const Coord& a, double de
                 }
             }
         }
-        NurbsS = GenNurbsS(3,NurbsC->M,5,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = new NURBSS(3,NurbsC->M,5,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
 
     // 回転角度が360度未満の場合，3セグメントで円弧を表現する
@@ -266,7 +212,7 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC* NurbsC, const Coord& a, double de
                 }
             }
         }
-        NurbsS = GenNurbsS(3,NurbsC->M,7,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = new NURBSS(3,NurbsC->M,7,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
         DebugForNurbsS(NurbsS);
     }
     // 360度以上
@@ -291,7 +237,7 @@ NURBSS* NURBS_Func::GenRotNurbsS(const NURBSC* NurbsC, const Coord& a, double de
                 }
             }
         }
-        NurbsS = GenNurbsS(3,NurbsC->M,9,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
+        NurbsS = new NURBSS(3,NurbsC->M,9,NurbsC->K,S,NurbsC->T,W,Cp,0,1,0,1);		// NURBS曲面生成
     }
 
     return NurbsS;
@@ -328,7 +274,7 @@ NURBSS* NURBS_Func::GenSweepNurbsS(const NURBSC* NurbsC, const Coord& a, double 
 		}
 	}
 
-	return GenNurbsS(NurbsC->M,2,NurbsC->K,2,NurbsC->T,T,W,Cp,0,1,NurbsC->V[0],NurbsC->V[1]);	// NURBS曲面生成
+	return new NURBSS(NurbsC->M,2,NurbsC->K,2,NurbsC->T,T,W,Cp,0,1,NurbsC->V[0],NurbsC->V[1]);	// NURBS曲面生成
 }
 
 // Function: GenIsoparamCurveU
@@ -399,17 +345,6 @@ NURBSC* NURBS_Func::GenIsoparamCurveV(const NURBSS* P, double v)
     return new NURBSC(P->K[0],P->M[0],P->N[0],P->S,W,Q,U,prop,0);
 }
 
-// Function: DelNurbsS
-// GenNurbsS()によって生成されたNURBS曲面を削除する
-// 
-// Parameters:
-// *Nurbs - 削除するNURBS曲面へのポインタ
-void NURBS_Func::DelNurbsS(NURBSS *Nurbs)
-{
-	NURBS_Func hbody;
-	hbody.Free_NurbsS(Nurbs);
-}
-
 // Function: GenTrimdNurbsS
 // トリム面を有するNURBS曲面をコピーする
 //
@@ -421,12 +356,10 @@ void NURBS_Func::DelNurbsS(NURBSS *Nurbs)
 // KOD_TRUE
 int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 {
-//	NURBSS *nurbsS;
 	CONPS *conps_o,*conps_i;
 	COMPC *compc_o,*compc_i;
 	int curve_num=0;
 
-//	nurbsS = new NURBSS;		// NURBS曲面のメモリー確保
 	conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
 	compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
@@ -438,7 +371,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	}
 	curve_num += tnurb.pTO->pB.CompC->N;
 
-	NURBSS* nurbsS = GenNurbsS(tnurb.pts);					// 新たなNURBS曲面を1つ得る
+	NURBSS* nurbsS = new NURBSS(tnurb.pts);					// 新たなNURBS曲面を1つ得る
 	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
 
 	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
@@ -4039,9 +3972,9 @@ NURBSS* NURBS_Func::GenInterpolatedNurbsS1(AACoord& P,int PNum_u,int PNum_v,int 
 	// NURBS曲面を生成する
 	NURBSS* Nurbs;
 	if(Mu == 2 && Mv == 2)
-		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
 	else
-		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,Q,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,K[0],K[1],S,T,W,Q,U[0],U[1],V[0],V[1]);
 
 	return Nurbs;
 }
@@ -4122,9 +4055,9 @@ NURBSS* NURBS_Func::GenApproximationNurbsS(AACoord& P,int PNum_u,int PNum_v,int 
 	// NURBS曲面を生成する
 	NURBSS* Nurbs;
 	if(Mu == 2 && Mv == 2)
-		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
 	else
-		Nurbs = GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,Q4,U[0],U[1],V[0],V[1]);
+		Nurbs = new NURBSS(Mu,Mv,K[0],K[1],S,T,W,Q4,U[0],U[1],V[0],V[1]);
 
 	return Nurbs;
 }
@@ -4170,7 +4103,7 @@ NURBSS* NURBS_Func::GenNurbsSfromCP(AACoord& P,int PNum_u,int PNum_v,int Mu,int 
 		}
 	}
 
-	return GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
+	return new NURBSS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);		// NURBS曲面を生成する
 }
 
 // Function: 
@@ -4240,7 +4173,7 @@ NURBSS* NURBS_Func::GenPolygonalSurface(AACoord& P,int PNum_u,int PNum_v)
 	}
 
 	// NURBS曲面を生成する
-	return GenNurbsS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
+	return new NURBSS(Mu,Mv,K[0],K[1],S,T,W,P,U[0],U[1],V[0],V[1]);
 }
 
 // Function: ConnectNurbsSU
