@@ -135,8 +135,8 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 			// NURBS曲線で構成されている複合曲線に対して、始点と終点の座標値を比較
 			if(flag == body->CompC[i].N){
 				Coord s,e;
-				s = NFunc.CalcNurbsCCoord(body->CompC[i].pDE[0].NurbsC,body->CompC[i].pDE[0].NurbsC->V[0]);					// 始点
-				e = NFunc.CalcNurbsCCoord(body->CompC[i].pDE[body->CompC[i].N-1].NurbsC,body->CompC[i].pDE[body->CompC[i].N-1].NurbsC->V[1]);	// 終点
+				s = body->CompC[i].pDE[0].NurbsC->CalcNurbsCCoord(body->CompC[i].pDE[0].NurbsC->V[0]);					// 始点
+				e = body->CompC[i].pDE[body->CompC[i].N-1].NurbsC->CalcNurbsCCoord(body->CompC[i].pDE[body->CompC[i].N-1].NurbsC->V[1]);	// 終点
 				if(s.DiffCoord(e,1.0E-5) == KOD_FALSE){				// 始点≠終点
 					body->CompC[i].DegeNurbs->cp[0] = e;
 					body->CompC[i].DegeNurbs->cp[1] = s;

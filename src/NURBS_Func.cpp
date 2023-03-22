@@ -423,7 +423,7 @@ NURBSC* NURBS_Func::GenIsoparamCurveU(const NURBSS* P, double u)
         Q[i] = 0;
         W[i] = 0;
         for(int j=0;j<P->K[0];j++){
-            double bs = CalcBSbasis(u,P->S,P->N[0],j,P->M[0]);
+            double bs = CalcBSbasis(u,P->S,j,P->M[0]);
             Q[i] = Q[i] + (P->cp[j][i] * (bs*P->W(j,i)));
             W[i] += bs*P->W(j,i);
         }
@@ -457,7 +457,7 @@ NURBSC* NURBS_Func::GenIsoparamCurveV(const NURBSS* P, double v)
         Q[i] = 0;
         W[i] = 0;
         for(int j=0;j<P->K[1];j++){
-            double bs = CalcBSbasis(v,P->T,P->N[1],j,P->M[1]);
+            double bs = CalcBSbasis(v,P->T,j,P->M[1]);
             Q[i] = Q[i] + (P->cp[i][j] * (bs*P->W(i,j)));
             W[i] += bs*P->W(i,j);
         }
@@ -590,34 +590,6 @@ int NURBS_Func::DelTrimdNurbsS(TRIMD_NURBSS *TNurbs)
 	return KOD_TRUE;
 }
 
-// Function: CalcNurbsCCoord
-// 指定したノットtでのNURBS曲線の座標値を求める
-//
-// Parameters:
-// *NurbsC - 対象とするNURBS曲線へのポインタ
-// t - ノット値
-//
-// Return:
-// 座標値
-Coord NURBS_Func::CalcNurbsCCoord(NURBSC *NurbsC,double t)
-{
-	Coord p;
-	Coord bscpw;
-	double bsw=0;
-	double bs=0;
-	int i;
-
-	for(i=0;i<NurbsC->K;i++){
-		bs = CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);	// Bスプライン基底関数を求める
-		bsw += bs*NurbsC->W[i];									// 分母
-		bscpw += NurbsC->cp[i] * (bs*NurbsC->W[i]);				// 分子
-	}
-	
-	p = bscpw / bsw;	// 座標値を求める
-
-	return p;
-}
-
 // Function: CalcNurbsCCoords
 // 指定したノットt群でのNURBS曲線の座標値を求める
 //
@@ -630,7 +602,7 @@ VCoord NURBS_Func::CalcNurbsCCoords(NURBSC *NurbsC, const Vdouble& V)
 {
 	VCoord Pt;
 	BOOST_FOREACH(double t, V) {
-		Pt.push_back(CalcNurbsCCoord(NurbsC, t));
+		Pt.push_back(NurbsC->CalcNurbsCCoord(t));
 	}
 	return Pt;
 }
@@ -653,9 +625,9 @@ Coord NURBS_Func::CalcNurbsSCoord(NURBSS *NurbsS,double div_u,double div_v)
 	Coord bscpw;			// 分子
 
 	for(i=0;i<NurbsS->K[0];i++){
-		bs_u = CalcBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);			// u方向Bスプライン基底関数を求める
+		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);			// u方向Bスプライン基底関数を求める
 		for(j=0;j<NurbsS->K[1];j++){
-			bs_v = CalcBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);		// v方向Bスプライン基底関数を求める
+			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);		// v方向Bスプライン基底関数を求める
 			bsw += bs_u*bs_v*NurbsS->W(i,j);
 			bscpw += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W(i,j));
 		}
@@ -681,54 +653,6 @@ VCoord NURBS_Func::CalcNurbsSCoords(NURBSS *NurbsS, const VCoord& UV)
 	return Pt;
 }
 
-// Function: CalcBSbasis
-// Bスプライン基底関数を計算し、計算結果を返す
-//
-// Parameters:
-// t - ノット　
-// knot[] - ノットベクトル  
-// N - ノットベクトルの数  
-// I - Bspl基底関数下添字の1つ目(0～)  
-// M - 階数(Bspl基底関数下添字の2つ目)  
-//
-// Return:
-// 計算結果
-double NURBS_Func::CalcBSbasis(double t, const ublasVector& knot, int N, int I, int M)
-{
-	// 階数(order)が1の時
-	if(M == 1){
-		// 注目中のノットの値がノットベクトルの終端値と同じ場合、基底関数が1を取りうる範囲をknot[I+1]も含むようにする
-		// こうしないと、このときだけ全ての基底関数値が0になってしまう。
-		if(t==knot[N-1]){
-			if(knot[I] <= t && t <= knot[I+1])	return 1.0;
-			else		return 0.0;
-		}
-		else{
-			if(knot[I] <= t && t < knot[I+1])	return 1.0;
-			else	return 0.0;
-		}
-	}
-
-	// それ以外の時
-	else{
-		double n1=0.0;
-		double n2=0.0;
-		double denom;
-
-		denom = knot[I+M-1] - knot[I];	// 分母
-		if(denom > 0.0){
-			n1 = (t-knot[I])/denom * CalcBSbasis(t,knot,N,I,M-1);		// 1項目
-		}
-
-		denom = knot[I+M] - knot[I+1];
-		if(denom > 0.0){
-			n2 = (knot[I+M]-t)/denom * CalcBSbasis(t,knot,N,I+1,M-1);	// 2項目
-		}
-
-		return(n1+n2);
-	}
-}
-
 // Function: CalcDiffBSbasis
 // Bスプライン基底関数の1階微分係数を求める
 //
@@ -746,9 +670,9 @@ double NURBS_Func::CalcDiffBSbasis(double t, const ublasVector& knot, int N, int
 	double n1 = knot[I+M-1]-knot[I];
 	double n2 = knot[I+M]-knot[I+1];
 
-	if(n1 != 0.0) n1 = (M-1)/n1*CalcBSbasis(t,knot,N,I,M-1);
+	if(n1 != 0.0) n1 = (M-1)/n1*CalcBSbasis(t,knot,I,M-1);
 	
-	if(n2 != 0.0) n2 = (M-1)/n2*CalcBSbasis(t,knot,N,I+1,M-1);
+	if(n2 != 0.0) n2 = (M-1)/n2*CalcBSbasis(t,knot,I+1,M-1);
 	
 	return(n1-n2);
 }
@@ -772,7 +696,7 @@ double NURBS_Func::CalcDiffBSbasisN(double t, const ublasVector& knot, int N, in
 	double n2 = knot[I+M]-knot[I+1];
 
 	if(Dn==0){
-		return(CalcBSbasis(t,knot,N,I,M));
+		return(CalcBSbasis(t,knot,I,M));
 	}
 	if(Dn==1){
 		return(CalcDiffBSbasis(t,knot,N,I,M));
@@ -805,7 +729,7 @@ Coord NURBS_Func::CalcDiffNurbsC(const NURBSC* NurbsC, double t)
 
 	// 各係数算出
 	for(i=0;i<NurbsC->K;i++){
-		bs = CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
+		bs = CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
 		diff_bs = CalcDiffBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
 
 		Ft += NurbsC->cp[i] * (bs*NurbsC->W[i]);
@@ -839,11 +763,11 @@ Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
 	Coord  P0;
 	Coord  P1;
 
-	P0 = CalcNurbsCCoord(NurbsC,t);
+	P0 = NurbsC->CalcNurbsCCoord(t);
 	P1 = CalcDiffNurbsC(NurbsC,t);
 
 	for(int i=0;i<NurbsC->K;i++){
-		w0 += CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M) * NurbsC->W[i];
+		w0 += CalcBSbasis(t,NurbsC->T,i,NurbsC->M) * NurbsC->W[i];
 		w1 += CalcDiffBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M) * NurbsC->W[i];
 		w2 += CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,2) * NurbsC->W[i];
 		A2 += NurbsC->cp[i] * (CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,2) * NurbsC->W[i]);
@@ -866,14 +790,14 @@ Coord NURBS_Func::CalcDiff2NurbsC(NURBSC *NurbsC,double t)
 Coord NURBS_Func::CalcDiffNNurbsC(NURBSC *NurbsC,int r,double t)
 {
 	if(!r)
-		return CalcNurbsCCoord(NurbsC,t);
+		return NurbsC->CalcNurbsCCoord(t);
 
 	Coord Ar;
 	double W = 0;
 	for(int i=0;i<NurbsC->K;i++){
 		double bsr = CalcDiffBSbasisN(t,NurbsC->T,NurbsC->N,i,NurbsC->M,r);
 		Ar += NurbsC->cp[i] * (bsr*NurbsC->W[i]);
-		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,NurbsC->N,i,NurbsC->M);
+		W  += NurbsC->W[i]*CalcBSbasis(t,NurbsC->T,i,NurbsC->M);
 	}
 
 	Coord Br;
@@ -915,10 +839,10 @@ Coord NURBS_Func::CalcDiffuNurbsS(NURBSS *NurbsS,double div_u,double div_v)
 	diff_Gt = 0;
 
 	for(i=0;i<NurbsS->K[0];i++){
-		bs_u = CalcBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
+		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
 		diff_bs_u = CalcDiffBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);	// u方向Bスプライン基底関数の1階微分を求める
 		for(j=0;j<NurbsS->K[1];j++){
-			bs_v = CalcBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);			// v方向Bスプライン基底関数を求める
+			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);			// v方向Bスプライン基底関数を求める
 			Ft += NurbsS->cp[i][j] * (bs_u*bs_v*NurbsS->W(i,j));
 			diff_Ft += NurbsS->cp[i][j] * (diff_bs_u*bs_v*NurbsS->W(i,j));
 			Gt += bs_u*bs_v*NurbsS->W(i,j);
@@ -956,9 +880,9 @@ Coord NURBS_Func::CalcDiffvNurbsS(NURBSS *NurbsS,double div_u,double div_v)
 	diff_Gt = 0;
 
 	for(i=0;i<NurbsS->K[0];i++){
-		bs_u = CalcBSbasis(div_u,NurbsS->S,NurbsS->N[0],i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
+		bs_u = CalcBSbasis(div_u,NurbsS->S,i,NurbsS->M[0]);				// u方向Bスプライン基底関数を求める
 		for(j=0;j<NurbsS->K[1];j++){
-			bs_v = CalcBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);				// v方向Bスプライン基底関数を求める
+			bs_v = CalcBSbasis(div_v,NurbsS->T,j,NurbsS->M[1]);				// v方向Bスプライン基底関数を求める
 			diff_bs_v = CalcDiffBSbasis(div_v,NurbsS->T,NurbsS->N[1],j,NurbsS->M[1]);	// v方向Bスプライン基底関数の1階微分を求める
 			Ft += NurbsS->cp[i][j]*(bs_u*bs_v*NurbsS->W(i,j));
 			diff_Ft += NurbsS->cp[i][j]*(bs_u*diff_bs_v*NurbsS->W(i,j));
@@ -1490,7 +1414,7 @@ int NURBS_Func::CalcIntersecPtsPlaneV3(NURBSS *nurb,Coord pt,Coord nvec,int v_di
 	for(int v=0;v<=v_divnum;v++){
 		v_const = (nurb->V[1] - nurb->V[0])*(double)v/(double)v_divnum;		// 適当なv方向パラメータを設定
 		for(int i=0;i<nurb->K[1];i++){
-			N[i] = CalcBSbasis(v_const,nurb->T,nurb->N[0],i,nurb->M[1]);		// v_const時のBスプライン基底関数を求める
+			N[i] = CalcBSbasis(v_const,nurb->T,i,nurb->M[1]);		// v_const時のBスプライン基底関数を求める
 		}
 		for(int i=0;i<nurb->K[0];i++){
 			A[i] = 0;
@@ -1574,7 +1498,7 @@ int NURBS_Func::CalcIntersecPtsPlaneU3(NURBSS *nurb,Coord pt,Coord nvec,int u_di
 	for(int u=0;u<=u_divnum;u++){
 		u_const = (nurb->U[1] - nurb->U[0])*(double)u/(double)u_divnum;		// 適当なu方向パラメータを設定
 		for(int i=0;i<nurb->K[0];i++){
-			N[i] = CalcBSbasis(u_const,nurb->S,nurb->N[0],i,nurb->M[0]);		// u_const時のBスプライン基底関数を求める
+			N[i] = CalcBSbasis(u_const,nurb->S,i,nurb->M[0]);		// u_const時のBスプライン基底関数を求める
 		}
 		for(int j=0;j<nurb->K[1];j++){
 			A[j] = 0;
@@ -2536,7 +2460,7 @@ int NURBS_Func::CalcIntersecPtsNurbsSNurbsC(NURBSS *NurbsS,NURBSC *NurbsC,int Di
 		loopcount = 0;						// ループカウント初期化
 		// 直線の微小変化量dt(=d.z)がAPPROX_ZEROを下回るまでニュートン法による収束計算を行う
 		while(loopcount < LOOPCOUNTMAX){
-			F  = CalcNurbsSCoord(NurbsS,u,v) - CalcNurbsCCoord(NurbsC,t);	// F(u,v,t) = S(u,v) - C(t)
+			F  = CalcNurbsSCoord(NurbsS,u,v) - NurbsC->CalcNurbsCCoord(t);	// F(u,v,t) = S(u,v) - C(t)
 			Fu = CalcDiffuNurbsS(NurbsS,u,v);			// Fu = dF/du = dS/du
 			Fv = CalcDiffvNurbsS(NurbsS,u,v);			// Fv = dF/dv = dS/dv
 			Ft = CalcDiffNurbsC(NurbsC,t);				// Ft = dF/dt = dC/dt
@@ -3151,7 +3075,7 @@ VCoord NURBS_Func::CalcIntersecPtsNurbsCNurbsCParam(NURBSC *NurbA,NURBSC *NurbB,
 		t = NurbA->V[0] + (double)i*d;		// 初期値更新
         u = NurbB->V[0];
 		while(loopcount < LOOPCOUNTMAX){
-			F  = CalcNurbsCCoord(NurbA,t) - CalcNurbsCCoord(NurbB,u);
+			F  = NurbA->CalcNurbsCCoord(t) - NurbB->CalcNurbsCCoord(u);
 			Ft = CalcDiffNurbsC(NurbA,t);
 			Fu = CalcDiffNurbsC(NurbB,u);
 			A(0,0) = Ft.x;
@@ -3209,7 +3133,7 @@ int NURBS_Func::ClacIntersecPtsNurbsCLine(NURBSC *C, Coord P, Coord r, double *t
     while(1){
         Coord Ct = CalcDiffNurbsC(C,*t1);
         Coord Lt = r;
-        Coord B = (P+(r*(*t2))) - CalcNurbsCCoord(C,*t1);
+        Coord B = (P+(r*(*t2))) - C->CalcNurbsCCoord(*t1);
         A(0,0) = Ct.x;
         A(1,0) = Ct.y;
         A(0,1) = -Lt.x;
@@ -3303,7 +3227,7 @@ int NURBS_Func::CalcIntersecCurve(NURBSC *nurb,Coord pt,Coord nvec,int Divnum,ub
 		loopcount = 0;
 		t = nurb->V[0] + (double)i*dt;		// 初期値更新
 		while(loopcount < LOOPCOUNTMAX){
-			F  = nvec & (CalcNurbsCCoord(nurb,t)-pt);
+			F  = nvec & (nurb->CalcNurbsCCoord(t)-pt);
 			Ft = nvec &  CalcDiffNurbsC(nurb,t);
 			d = -F/Ft;		// 更新値
 			//fprintf(stderr,"   %d:%.14lf,%lf\n",i,d,t);	// for debug
@@ -3952,7 +3876,7 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC1(const ACoord& P, int M)
 	// Bスプライン基底関数行列を生成
 	for(int i=0;i<K;i++){
 		for(int j=0;j<K;j++){
-			B(i,j) = CalcBSbasis(T_[i],T,N,j,M);
+			B(i,j) = CalcBSbasis(T_[i],T,j,M);
 		}
 	}
 
@@ -4037,7 +3961,7 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const ACoord& P_, int M)
 		for(int j=0;j<K;j++){
 			B(i,j) = 0;
 			if(i<K-2 && (j==i || j==i+1 || j==i+2))
-				B(i,j) = CalcBSbasis(T_[i],T,N,j,M);
+				B(i,j) = CalcBSbasis(T_[i],T,j,M);
 		}
 	}
 	B(K-2,0) = CalcDiffBSbasis(T_[0],T,N,0,M);
@@ -4239,14 +4163,14 @@ NURBSS* NURBS_Func::GenInterpolatedNurbsS1(AACoord& P,int PNum_u,int PNum_v,int 
 	// u方向のBスプライン基底関数行列を生成
 	for(int i=0;i<K[0];i++){
 		for(int j=0;j<K[0];j++){
-			Bu(i,j) = CalcBSbasis(S_[i],S,N[0],j,Mu);
+			Bu(i,j) = CalcBSbasis(S_[i],S,j,Mu);
 		}
 	}
 
 	// v方向のBスプライン基底関数行列を生成
 	for(int i=0;i<K[1];i++){
 		for(int j=0;j<K[1];j++){
-			Bv(i,j) = CalcBSbasis(T_[i],T,N[1],j,Mv);
+			Bv(i,j) = CalcBSbasis(T_[i],T,j,Mv);
 		}
 	}
 
@@ -4951,7 +4875,7 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSC *C,Coord P,int Divnum,int LoD,doubl
 		double t = C->V[0] + (double)i*delta;	// tの初期値をセット
 		int loopcount = 0;
 		while(loopcount < LOOPCOUNTMAX){
-			Coord Ct = CalcNurbsCCoord(C,t);
+			Coord Ct = C->CalcNurbsCCoord(t);
 			Coord C_ = CalcDiffNurbsC(C,t);
 			Coord C__ = CalcDiff2NurbsC(C,t);
 			double a = P  & C_;
@@ -4963,7 +4887,7 @@ int NURBS_Func::CalcIntersecPtNurbsPt(NURBSC *C,Coord P,int Divnum,int LoD,doubl
 			t += dt/(double)LoD;				// t更新
 			if(fabs(dt) <= APPROX_ZERO_L){	// 収束していたら解を保持し次のtへ
 				t_buf[i] = t;
-				dist_buf[i] = CalcNurbsCCoord(C,t).CalcDistance(P);	// PQ間距離を得る
+				dist_buf[i] = C->CalcNurbsCCoord(t).CalcDistance(P);	// PQ間距離を得る
 				break;
 			}
 			loopcount++;
@@ -5080,7 +5004,7 @@ void NURBS_Func::CalcIntersecPtNurbsPtDescrete(NURBSC *C,Coord P,int Divnum,int 
     for(int i=0;i<=Divnum;i++){
         double t = Ts + (double)i*dt;
         if(t < C->V[0] || t > C->V[1]) continue;
-        Coord p  = CalcNurbsCCoord(C,t);
+        Coord p  = C->CalcNurbsCCoord(t);
         double d = p.CalcDistance(P);
         if(d < mind){
             mind = d;
@@ -5312,7 +5236,7 @@ int NURBS_Func::ApproxTrimBorder(COMPC *CompC,ACoord& P)
 			else divnum = TRM_BORDERDIVNUM;
 			for(int j=0;j<divnum-1;j++){
 				ent_dev = NurbsC->T[NurbsC->M-1]+(NurbsC->T[NurbsC->K]-NurbsC->T[NurbsC->M-1])*(double)j/((double)divnum-1);	// 分割点tを求める
-				P[ptnum] = CalcNurbsCCoord(NurbsC,ent_dev);	// NURBS曲面のパラメータ空間内のNURBS曲線の分割点tの座標値(u,v)を得る
+				P[ptnum] = NurbsC->CalcNurbsCCoord(ent_dev);	// NURBS曲面のパラメータ空間内のNURBS曲線の分割点tの座標値(u,v)を得る
 				ptnum++;
 			}
 		}
@@ -5341,7 +5265,7 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,int D,ACoord& Pts)
 	double T = (Nurb->V[1] - Nurb->V[0])/D;	// パラメトリック空間内での線分長を得る
 
 	for(int i=0;i<=D;i++){
-		Pts[i] = CalcNurbsCCoord(Nurb, Nurb->V[0] + T*(double)i);
+		Pts[i] = Nurb->CalcNurbsCCoord(Nurb->V[0] + T*(double)i);
 	}
 
     return D+1;
@@ -5376,7 +5300,7 @@ int NURBS_Func::CalcDeltaPtsOnNurbsC(NURBSC *Nurb,double D,ACoord& Pts)
 
 	while(t <= Nurb->V[1]){
 		t = CalcParamLengthOnNurbsC(Nurb,(double)k*D,t);	// 解を探索
-		Pts[k-1] = CalcNurbsCCoord(Nurb,t);		// 解を登録
+		Pts[k-1] = Nurb->CalcNurbsCCoord(t);		// 解を登録
 		k++;
 		t = k*(Nurb->V[1] - Nurb->V[0])/(L/D);	// 次のtの初期値をセット
 	}
@@ -6024,7 +5948,7 @@ void NURBS_Func::CalcApproximationCP_LSM(const ACoord& P,ublasVector& T_,ublasVe
 	ublasMatrix N(Pnum-2,K-2);
 	for(int i=0;i<Pnum-2;i++){
 		for(int j=0;j<K-2;j++){
-			N(i,j) =  CalcBSbasis(T_[i+1],T,Nnum,j+1,M);
+			N(i,j) =  CalcBSbasis(T_[i+1],T,j+1,M);
 		}
 	}
 	
@@ -6032,8 +5956,8 @@ void NURBS_Func::CalcApproximationCP_LSM(const ACoord& P,ublasVector& T_,ublasVe
 	for(int i=0;i<K-2;i++){
 		R[i] = 0;
 		for(int j=0;j<Pnum-2;j++){
-			Coord NP0 = P[0]      * CalcBSbasis(T_[j+1],T,Nnum,0,M);
-			Coord NPN = P[Pnum-1] * CalcBSbasis(T_[j+1],T,Nnum,K-1,M);
+			Coord NP0 = P[0]      * CalcBSbasis(T_[j+1],T,0,M);
+			Coord NPN = P[Pnum-1] * CalcBSbasis(T_[j+1],T,K-1,M);
 			Coord R_ = P[j+1]-(NP0+NPN);
 			R[i] += R_*N(j,i);
 		}
@@ -6764,9 +6688,9 @@ void NURBS_Func::SetKnotVecC_ConnectC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
 	double s=0,e=NORM_KNOT_VAL,c=0;			// 開始，終了，連結部ノットベクトル
 	double l1=0,l2=0;						// 各曲線のノットベクトルのコード長
 	for(int i=0;i<C1->N-1;i++)
-		l1 += CalcNurbsCCoord(C1,C1->T[i+1]).CalcDistance(CalcNurbsCCoord(C1,C1->T[i]));	// C1のコード長
+		l1 += C1->CalcNurbsCCoord(C1->T[i+1]).CalcDistance(C1->CalcNurbsCCoord(C1->T[i]));	// C1のコード長
 	for(int i=0;i<C2->N-1;i++)
-		l2 += CalcNurbsCCoord(C2,C2->T[i+1]).CalcDistance(CalcNurbsCCoord(C2,C2->T[i]));	// C2のコード長
+		l2 += C2->CalcNurbsCCoord(C2->T[i+1]).CalcDistance(C2->CalcNurbsCCoord(C2->T[i]));	// C2のコード長
 	c = l1/(l1+l2);	// 結合点のノットベクトル値
 
 	// C_のノットベクトル範囲を得る
@@ -6909,7 +6833,7 @@ int NURBS_Func::CalcConstScallop(NURBSS *S, NURBSC *C, double t, double g, doubl
 
     double g_ = (direct > KOD_FALSE) ? g : -g;
 
-    Coord C_ = CalcNurbsCCoord(C,t);
+    Coord C_ = C->CalcNurbsCCoord(t);
     Coord Ct = CalcDiffNurbsC(C,t);
 
     double u0 = *u = C_.x;
@@ -6972,7 +6896,7 @@ int NURBS_Func::CalcConstPitch(NURBSS *S,NURBSC *C, double t0, double ds, double
         if(*t > C->V[1]){
             return KOD_FALSE;
         }
-        Coord P = CalcNurbsCCoord(C,*t);
+        Coord P = C->CalcNurbsCCoord(*t);
         Coord Su = CalcDiffuNurbsS(S,P.x,P.y);
         Coord Sv = CalcDiffvNurbsS(S,P.x,P.y);
         Coord Ct = CalcDiffNurbsC(C,*t);

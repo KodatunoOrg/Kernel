@@ -6,9 +6,6 @@
 class NURBS_Func
 {
 public:
-	// Function: CalcNurbsCCoord
-	// 指定したtでのNURBS曲線の座標値を求める
-	Coord CalcNurbsCCoord(NURBSC *,double);
 
 	// Function: CalcNurbsCCoords
 	// 指定したt群でのNURBS曲線の座標値群を求める
@@ -69,10 +66,6 @@ public:
 	// Function: DelNurbsS
 	// NURBS曲面を削除する
 	void DelNurbsS(NURBSS *);									
-
-	// Function: CalcBSbasis
-	// Bスプライン基底関数を計算し、計算結果を返す
-	double CalcBSbasis(double, const ublasVector&, int, int, int);
 
 	// Function: CalcDiffBSbasis
 	// Bスプライン基底関数の1階微分係数を求める
