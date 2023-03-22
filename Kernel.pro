@@ -15,6 +15,9 @@ INCLUDEPATH += \
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/NURBS.cpp \
+    src/NURBSC.cpp \
+    src/NURBSS.cpp \
     src/BODY.cpp \
     src/DXF_Parser.cpp \
     src/Describe_BODY.cpp \
@@ -29,6 +32,9 @@ SOURCES += \
     src/KodatunoKernel.cpp
 
 HEADERS += \
+    include/NURBS.h \
+    include/NURBSC.h \
+    include/NURBSS.h \
     include/BODY.h \
     include/DXF_Parser.h \
     include/Describe_BODY.h \
