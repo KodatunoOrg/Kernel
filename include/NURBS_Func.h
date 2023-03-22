@@ -7,14 +7,6 @@ class NURBS_Func
 {
 public:
 
-	// Function: GenNurbsC
-	// 1つのNURBS曲線を生成する
-	NURBSC* GenNurbsC(int,int,int, const ublasVector&, const ublasVector&, const ACoord&, const A2double&, const A4int&, int);
-
-	// Function: GenNurbsC
-	// 1つのNURBS曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-	NURBSC* GenNurbsC(const NURBSC*);
-
 	// Function: GenNurbsS
 	// 1つのNURBS曲面を生成する
 	NURBSS* GenNurbsS(int,int,int,int, const ublasVector&, const ublasVector&, const ublasMatrix&, const AACoord&,double,double,double,double);
@@ -42,14 +34,6 @@ public:
 	// Function: GenTrimdNurbsS
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
-
-	// Function: DelTrimdNurbsS
-	// トリム面を削除(メモリー解放)する
-	int DelTrimdNurbsS(TRIMD_NURBSS *);							
-
-	// Function: DelNurbsC
-	// NURBS曲線を削除する
-	void DelNurbsC(NURBSC *);									
 
 	// Function: DelNurbsS
 	// NURBS曲面を削除する
@@ -351,14 +335,6 @@ public:
 	// Function: New_NurbsC
 	// NURBS曲線のメモリー確保
 	int New_NurbsC(NURBSC *,int,int);			
-
-	// Function: Free_NurbsC_1DArray
-	// NURBS曲線配列のメモリー解放
-	void Free_NurbsC_1DArray(NURBSC *,int);		
-
-	// Function: Free_NurbsC
-	// NURBS曲線のメモリー解放
-	void Free_NurbsC(NURBSC *);					
 
 	// Function: New_NurbsS
 	// NURBS曲面のメモリー確保

@@ -222,7 +222,7 @@ void BODY::CopyBody(BODY* body)
     this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
 	BOOST_FOREACH(NURBSC* x, body->vNurbsC)
-        vNurbsC.push_back( NFunc.GenNurbsC(x) );
+        vNurbsC.push_back( new NURBSC(x) );
 
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 

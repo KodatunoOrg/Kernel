@@ -109,7 +109,6 @@ int IGES_PARSER::Optimize4OpenGL(BODY *body)
 int IGES_PARSER::CheckDegenracy(BODY *body)
 {
 	int flag;
-	NURBS_Func NFunc;
 
 	// 縮退用Nurbs曲線を複合曲線の数だけ生成
 	if(body->TypeNum[_COMPOSITE_CURVE]){
@@ -122,7 +121,7 @@ int IGES_PARSER::CheckDegenracy(BODY *body)
 		ACoord cp(boost::extents[2]);
 
 		for(int i=0;i<body->TypeNum[_COMPOSITE_CURVE];i++){
-			 body->CompC[i].DegeNurbs = NFunc.GenNurbsC(2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
+			 body->CompC[i].DegeNurbs = new NURBSC(2,2,4,T,W,cp,V,prop,1);	// 縮退用Nurbs曲線を複合曲線のエンティティ数だけ生成する
 
 			// 各複合曲線がNURBS曲線のみで構成されておりかつ2Dパラメトリック要素であるかのチェック
 			flag = 0;

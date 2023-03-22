@@ -20,27 +20,6 @@ int NURBS_Func::New_NurbsC(NURBSC *nurb,int K, int N)
 	return KOD_TRUE;
 }
 
-// Function: Free_NurbsC_1DArray
-// NURBS曲線配列のメモリー解放
-//
-// Parameters: 
-// *a - メモリーを解放するNurbs曲線へのポインタ
-// num - メモリーを解放するNURBS曲線の数
-void NURBS_Func::Free_NurbsC_1DArray(NURBSC *a,int num)
-{
-	for(int i=0;i<num;i++)
-		Free_NurbsC(&a[i]);
-}
-
-// Function: Free_NurbsC
-// 1本のNURBS曲線のメモリー解放
-//
-// Parameters: 
-// *a - メモリーを解放するNurbs曲線へのポインタ
-void NURBS_Func::Free_NurbsC(NURBSC *a)
-{
-}
-
 // Function: New_NurbsS
 // NURBS曲面のメモリー確保
 //
@@ -164,53 +143,6 @@ void NURBS_Func::Free_CompC(COMPC *a)
 {
 	delete[] a->DEType;
 	delete[] a->pDE;
-}
-
-// Function: GenNurbsC
-// 1つのNurbs曲線を生成する
-//
-// Parameters:
-// *Nurbs - 生成するNURBS曲線へのポインタ
-// K - コントロールポイントの数
-// M - 階数
-// N - ノットベクトルの数
-// T[] - ノットベクトル列
-// W[] - ウェイト列
-// cp[] - コントロールポイント列
-// V[2] - ノットベクトルの範囲
-// prop[4] - プロパティ(BODY.h参照)
-// euflag - ディレクトリ部 Entity Use Flag の値(0:幾何要素 5:2Dパラメトリック要素)
-// 
-// return:
-// KOD_TRUE
-NURBSC* NURBS_Func::GenNurbsC(int K,int M,int N,const ublasVector& T, const ublasVector& W, const ACoord& cp, const A2double& V, const A4int& prop, int euflag)
-{
-	return new NURBSC(K, M, N, T, W, cp, V, prop, euflag);
-}
-
-// Function: GenNurbsC
-// 1つのNurbs曲線を生成する(NURBS曲線のコピー)(オーバーロード)
-//
-// Parameters:
-// *Nurbs - 新たに生成するNURBS曲線
-// nurb - 代入元
-// 
-// return:
-// KOD_TRUE
-NURBSC* NURBS_Func::GenNurbsC(const NURBSC* nurb)
-{
-	return new NURBSC(nurb);
-}
-
-// Function: DelNurbsC
-// GenNurbsC()によって生成されたNURBS曲線を削除する
-// 
-// Parameters:
-// *Nurbs - 新たに生成するNURBS曲線へのポインタ
-void NURBS_Func::DelNurbsC(NURBSC *Nurbs)
-{
-	NURBS_Func hbody;
-	hbody.Free_NurbsC(Nurbs);
 }
 
 // Function: GenNurbsS
@@ -430,7 +362,7 @@ NURBSC* NURBS_Func::GenIsoparamCurveU(const NURBSS* P, double u)
         Q[i] /= W[i];
     }
 
-    return GenNurbsC(P->K[1],P->M[1],P->N[1],P->T,W,Q,V,prop,0);
+    return new NURBSC(P->K[1],P->M[1],P->N[1],P->T,W,Q,V,prop,0);
 }
 
 // Function: GenIsoparamCurveV
@@ -464,7 +396,7 @@ NURBSC* NURBS_Func::GenIsoparamCurveV(const NURBSS* P, double v)
         Q[i] /= W[i];
     }
 
-    return GenNurbsC(P->K[0],P->M[0],P->N[0],P->S,W,Q,U,prop,0);
+    return new NURBSC(P->K[0],P->M[0],P->N[0],P->S,W,Q,U,prop,0);
 }
 
 // Function: DelNurbsS
@@ -519,7 +451,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	TNurbs->pTO = conps_o;
 	New_CompC(compc_o,tnurb.pTO->pB.CompC->N);
 	for(int i=0;i<tnurb.pTO->pB.CompC->N;i++){
-		compc_o->pDE[i].NurbsC = GenNurbsC(tnurb.pTO->pB.CompC->pDE[i].NurbsC);
+		compc_o->pDE[i].NurbsC = new NURBSC(tnurb.pTO->pB.CompC->pDE[i].NurbsC);
 		compc_o->DEType[i] = tnurb.pTO->pB.CompC->DEType[i];
 	}
 	TNurbs->pTO->pB.substitution = compc_o;
@@ -533,7 +465,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 		TNurbs->pTI[i] = &(conps_i[i]);
 		New_CompC(&compc_i[i],tnurb.pTI[i]->pB.CompC->N);
 		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
-			compc_i[i].pDE[j].NurbsC = GenNurbsC(tnurb.pTI[i]->pB.CompC->pDE[j].NurbsC);
+			compc_i[i].pDE[j].NurbsC = new NURBSC(tnurb.pTI[i]->pB.CompC->pDE[j].NurbsC);
 			compc_i[i].DEType[j] = tnurb.pTI[i]->pB.CompC->DEType[j];
 			curve_num++;
 		}
@@ -545,47 +477,6 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 
 	TNurbs->n1 = tnurb.n1;
 	TNurbs->n2 = tnurb.n2;
-
-	return KOD_TRUE;
-}
-
-// Function: DelTrimdNurbsS
-// GenTrimdNurbsS()によって生成されたトリム面を削除する
-//
-// Parameters:
-// *TNurbs - 削除するトリム面へのポインタ
-//
-// Return:
-// KOD_TRUE
-int NURBS_Func::DelTrimdNurbsS(TRIMD_NURBSS *TNurbs)
-{
-	NURBS_Func hbody;
-	int curve_num = 0;
-
-	// トリム面を構成する全てのNURBS曲線の本数を調べる
-	for(int i=0;i<TNurbs->n2;i++){
-		for(int j=0;j<TNurbs->pTI[i]->pB.CompC->N;j++){
-			curve_num++;
-		}
-	}
-	curve_num += TNurbs->pTO->pB.CompC->N;
-
-	hbody.Free_NurbsC_1DArray(TNurbs->pTO->pB.CompC->pDE[0].NurbsC,curve_num);		// トリム面を構成する全てのNURBS曲線パラメータのメモリー解放
-
-	hbody.Free_NurbsS(TNurbs->pts);						// トリム面を構成するNURBS曲面パラメータのメモリー解放
-	free(TNurbs->pts);								// トリム面を構成するNURBS曲面のメモリー解放
-
-	hbody.Free_NurbsC(TNurbs->pTO->pB.CompC->DegeNurbs);	// トリム面外周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
-	hbody.Free_CompC(TNurbs->pTO->pB.CompC);			// トリム面外周を構成する複合曲線を構成するNURBS曲線のメモリー解放
-	free(TNurbs->pTO->pB.CompC);							// トリム面外周を構成する複合曲線のメモリー解放
-	free(TNurbs->pTO);								// トリム面外周を構成する面上線のメモリー解放
-
-	for(int i=0;i<TNurbs->n2;i++){
-		hbody.Free_NurbsC(TNurbs->pTI[i]->pB.CompC->DegeNurbs);	// トリム面内周を構成する複合曲線を構成する縮退用NURBS曲線のメモリー解放
-		hbody.Free_CompC(TNurbs->pTI[i]->pB.CompC);	// トリム面内周を構成する複合曲線を構成するNURBS曲線のメモリー解放
-		free(TNurbs->pTI[i]->pB.CompC);					// トリム面内周を構成する複合曲線のメモリー解放
-	}
-	hbody.Free_TrmS(TNurbs);								// トリム面パラメータのメモリー解放
 
 	return KOD_TRUE;
 }
@@ -3832,9 +3723,9 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC1(const ACoord& P, int M)
 
 	// NURBS曲線を生成する
 	if(M == 2)
-		return GenNurbsC(K,M,N,T,W,P,V,prop,0);
+		return new NURBSC(K,M,N,T,W,P,V,prop,0);
 	else
-		return GenNurbsC(K,M,N,T,W,Q,V,prop,0);
+		return new NURBSC(K,M,N,T,W,Q,V,prop,0);
 }
 
 // Function: GenInterpolatedNurbsC2
@@ -3925,9 +3816,9 @@ NURBSC* NURBS_Func::GenInterpolatedNurbsC2(const ACoord& P_, int M)
 
 	// NURBS曲線を生成する
 	if(M == 2)
-		return GenNurbsC(K,M,N,T,W,P,V,prop,0);
+		return new NURBSC(K,M,N,T,W,P,V,prop,0);
 	else
-		return GenNurbsC(K,M,N,T,W,Q,V,prop,0);
+		return new NURBSC(K,M,N,T,W,Q,V,prop,0);
 }
 
 // Function: GenApproximationNurbsC
@@ -3967,7 +3858,7 @@ NURBSC* NURBS_Func::GenApproximationNurbsC(const ACoord& P, int M)
 		W[i] = 1;
 	}
 
-	return GenNurbsC(K,M,Nnum,T,W,Q,V,prop,0);	// NURBS曲線生成
+	return new NURBSC(K,M,Nnum,T,W,Q,V,prop,0);	// NURBS曲線生成
 }
 
 // Function: GenNurbsCfromCP
@@ -4002,7 +3893,7 @@ NURBSC* NURBS_Func::GenNurbsCfromCP(const ACoord& P, int M)
 		W[i] = 1;
 	}
 
-	return GenNurbsC(PNum,M,Nnum,T,W,P,V,prop,0);	// NURBS曲線生成
+	return new NURBSC(PNum,M,Nnum,T,W,P,V,prop,0);	// NURBS曲線生成
 }
 
 // Function: GenPolygonalLine
@@ -4049,7 +3940,7 @@ NURBSC* NURBS_Func::GenPolygonalLine(const ACoord& P)
 	}
 
 	// NURBS曲線を生成する
-	return GenNurbsC(K,M,N,T,W,P,V,prop,0);
+	return new NURBSC(K,M,N,T,W,P,V,prop,0);
 }
 
 // Function: GenInterpolatedNurbsS1
@@ -6526,8 +6417,8 @@ boost::tuple<NURBSC*, NURBSC*> NURBS_Func::DivNurbsCParam(const NURBSC* C0, doub
 	ChangeKnotVecRange(T2,N2,C0->M,K2,0,1);
 
 	// C1,C2生成
-	NURBSC* C1 = GenNurbsC(K1,C0->M,N1,T1,W1,cp1,C0->V,C0->prop,0);
-	NURBSC* C2 = GenNurbsC(K2,C0->M,N2,T2,W2,cp2,C0->V,C0->prop,0);
+	NURBSC* C1 = new NURBSC(K1,C0->M,N1,T1,W1,cp1,C0->V,C0->prop,0);
+	NURBSC* C2 = new NURBSC(K2,C0->M,N2,T2,W2,cp2,C0->V,C0->prop,0);
 
 	return boost::make_tuple(C1, C2);
 }
