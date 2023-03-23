@@ -41,6 +41,7 @@
 
 class NURBSC;
 class NURBSS;
+class SFQuant;
 #include "NURBSC.h"
 #include "NURBSS.h"
 
@@ -55,5 +56,41 @@ double CalcDiffBSbasis(double, const ublasVector&, int, int);
 // Function: CalcDiffBSbasisN
 // Bスプライン基底関数のN階微分係数を求める
 double CalcDiffBSbasisN(double, const ublasVector&, int, int, int);
+
+// Function: CalcMeanCurvature
+// オーバーロード
+double CalcMeanCurvature(const SFQuant&);
+
+// Function: CalcGaussCurvature
+// オーバーロード
+double CalcGaussCurvature(const SFQuant&);
+
+// Function: GetBSplCoef3
+// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
+int GetBSplCoef3(int, int, int, const ublasVector&, ublasMatrix&);
+
+// Function: GetBSplCoef2
+// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
+int GetBSplCoef2(int, int, int, const ublasVector&, ublasMatrix&);
+
+// Function: GetBSplCoef1
+// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
+int GetBSplCoef1(int, int, int, const ublasVector&, ublasMatrix&);
+
+// Function: GetIntersecEquation
+// (private)NURBS曲線と平面の交線導出用3次方程式を得る
+void GetIntersecEquation(int, const ACoord&, const ublasVector&, const Coord&, const Coord&, ublasVector&);
+
+// Function: CalcEquation
+// (private)3次方程式までを判別して解く
+int CalcEquation(const ublasVector&, ublasVector&, int);
+
+// Function: GetMinDistance
+// (private)最小距離を持つ座標値を返す
+Coord GetMinDistance(const Coord&, const VCoord&);
+
+// Function: CheckClossedPoints
+// (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる
+int CheckClossedPoints(const Coord&, const Coord&, const Coord&);
 
 #endif

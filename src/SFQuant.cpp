@@ -15,17 +15,16 @@ SFQuant::SFQuant()
 // Parameters:
 // *S - NURBS曲面へのポインタ
 // u,v - (u, v)パラメータ
-SFQuant::SFQuant(NURBSS *S,double u,double v)
+SFQuant::SFQuant(const NURBSS* S,double u,double v)
 {
-	NURBS_Func nf;
 	U = u;
 	V = v;
 	Coord du = S->CalcDiffuNurbsS(u,v);			// u方向1階微分
 	Coord dv = S->CalcDiffvNurbsS(u,v);			// v方向1階微分
-	Coord duu = nf.CalcDiffNNurbsS(S,2,0,u,v);		// u方向2階微分
-	Coord dvv = nf.CalcDiffNNurbsS(S,0,2,u,v);		// v方向2階微分
-	Coord duv = nf.CalcDiffNNurbsS(S,1,1,u,v);		// u,v方向各1階微分
-	n = nf.CalcNormVecOnNurbsS(S,u,v);				// 法線ベクトル
+	Coord duu = S->CalcDiffNNurbsS(2,0,u,v);		// u方向2階微分
+	Coord dvv = S->CalcDiffNNurbsS(0,2,u,v);		// v方向2階微分
+	Coord duv = S->CalcDiffNNurbsS(1,1,u,v);		// u,v方向各1階微分
+	n = S->CalcNormVecOnNurbsS(u,v);				// 法線ベクトル
 	E = du.CalcInnerProduct(du);				// 第1基本量
 	F = du.CalcInnerProduct(dv);				// 第1基本量
 	G = dv.CalcInnerProduct(dv);				// 第1基本量
@@ -41,17 +40,16 @@ SFQuant::SFQuant(NURBSS *S,double u,double v)
 // Parameters:
 // *S - NURBS曲面へのポインタ
 // u,v - (u, v)パラメータ
-int SFQuant::SetSFQ(NURBSS *S,double u,double v)
+int SFQuant::SetSFQ(const NURBSS* S,double u,double v)
 {	
-	NURBS_Func nf;
 	U = u;
 	V = v;
 	Coord du = S->CalcDiffuNurbsS(u,v);			// u方向1階微分
 	Coord dv = S->CalcDiffvNurbsS(u,v);			// v方向1階微分
-	Coord duu = nf.CalcDiffNNurbsS(S,2,0,u,v);		// u方向2階微分
-	Coord dvv = nf.CalcDiffNNurbsS(S,0,2,u,v);		// v方向2階微分
-	Coord duv = nf.CalcDiffNNurbsS(S,1,1,u,v);		// u,v方向各1階微分
-	n = nf.CalcNormVecOnNurbsS(S,u,v);				// 法線ベクトル
+	Coord duu = S->CalcDiffNNurbsS(2,0,u,v);		// u方向2階微分
+	Coord dvv = S->CalcDiffNNurbsS(0,2,u,v);		// v方向2階微分
+	Coord duv = S->CalcDiffNNurbsS(1,1,u,v);		// u,v方向各1階微分
+	n = S->CalcNormVecOnNurbsS(u,v);				// 法線ベクトル
 	E = du.CalcInnerProduct(du);				// 第1基本量
 	F = du.CalcInnerProduct(dv);				// 第1基本量
 	G = dv.CalcInnerProduct(dv);				// 第1基本量
@@ -68,7 +66,7 @@ int SFQuant::SetSFQ(NURBSS *S,double u,double v)
 // Parameters:
 // *S - NURBS曲面へのポインタ
 // u,v - (u, v)パラメータ
-int SFQuant::SetSFQ1(NURBSS *S,double u,double v)
+int SFQuant::SetSFQ1(const NURBSS* S,double u,double v)
 {
     U = u;
     V = v;

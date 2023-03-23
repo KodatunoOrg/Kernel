@@ -11,74 +11,6 @@ public:
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
 
-	// Function: CalcDiffNNurbsS
-	// NURBS曲面の各方向を任意階微分したときの微分係数を求める
-	Coord CalcDiffNNurbsS(NURBSS *,int,int,double,double);		
-
-	// Function: CalcNormVecOnNurbsS
-	// NURBS曲面上の(u,v)における法線ベクトルをもとめる
-	Coord CalcNormVecOnNurbsS(NURBSS *,double,double);			
-
-	// Function: CalcDiffuNormVecOnNurbsS
-	// NURBS曲面上の(u,v)における法線ベクトルのu方向1階微分をもとめる
-	Coord CalcDiffuNormVecOnNurbsS(NURBSS *,double,double);		
-
-	// Function: CalcDiffvNormVecOnNurbsS
-	// NURBS曲面上の(u,v)における法線ベクトルのv方向1階微分をもとめる
-	Coord CalcDiffvNormVecOnNurbsS(NURBSS *,double,double);		
-
-	// Function: CalcMeanCurvature
-	// NURBS曲面上の(u,v)における平均曲率を求める
-	double CalcMeanCurvature(NURBSS *,double,double);			
-
-	// Function: CalcMeanCurvature
-	// オーバーロード
-	double CalcMeanCurvature(SFQuant);							
-
-	// Function: CalcMeanCurvatureNormVec
-	// NURBS曲面上の(u,v)における平均曲率法線ベクトルを求める
-	Coord CalcMeanCurvatureNormVec(NURBSS *,double,double);		
-
-	// Function: CalcGaussCurvature
-	// NURBS曲面上の(u,v)におけるガウス曲率を求める
-	double CalcGaussCurvature(NURBSS *,double,double);			
-
-	// Function: CalcGaussCurvature
-	// オーバーロード
-	double CalcGaussCurvature(SFQuant);							
-
-	// Function: CalcGaussCurvatureNormVec
-	// NURBS曲面上の(u,v)におけるガウス曲率法線ベクトルを求める
-	Coord CalcGaussCurvatureNormVec(NURBSS *,double,double);	
-
-	// Function: CalcuIntersecPtNurbsLine
-	// NURBS曲面と直線の交点を算出
-	int CalcuIntersecPtNurbsLine(NURBSS *,Coord,Coord,int,ACoord&,int,int);	
-
-	// Function: CalcIntersecPtNurbsPt
-	// 空間上の1点からNURBS曲面上の最近傍点を求める(ニュートン法)
-	int CalcIntersecPtNurbsPt(NURBSS *,Coord,int,int,Coord*);		
-
-	// Function: CalcIntersecPtNurbsPt
-	// 空間上の1点からNURBS曲線上の最近傍点を求める(ニュートン法)(オーバーロード)
-	int CalcIntersecPtNurbsPt(NURBSC *,Coord,int,int,double *);			
-
-    // Function: CalcIntersecPtNurbsPtDescrete
-    // 空間上の1点からNURBS曲面上の最近傍点を求める(離散的)
-    void CalcIntersecPtNurbsPtDescrete(NURBSS *,Coord ,int ,int ,double ,double ,double ,double , Coord *);
-
-    // Function: CalcIntersecPtNurbsPtDescrete
-    // 空間上の1点からNURBS曲線上の最近傍点を求める(離散的)
-    void CalcIntersecPtNurbsPtDescrete(NURBSC *,Coord ,int ,int ,double ,double ,double *);
-
-	// Function: CalcIntersecIsparaCurveU
-	// u方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	Vdouble CalcIntersecIsparaCurveU(NURBSS *,double, const Coord&, const Coord&, int);
-
-	// Function: CalcIntersecIsparaCurveV
-	// v方向アイソパラ曲線と平面との交点を求める(ニュートン法)
-	Vdouble CalcIntersecIsparaCurveV(NURBSS *,double, const Coord&, const Coord&, int);
-
 	// Function: CalcIntersecCurve
 	// NURBS曲線と平面との交点を求める(ニュートン法)
 	int CalcIntersecCurve(NURBSC *,Coord,Coord,int,ublasVector&,int,int);	
@@ -86,42 +18,6 @@ public:
 	// Function: CalcIntersecCurve3
 	// 3次以下のNURBS曲線と平面との交点を求める
 	int CalcIntersecCurve3(NURBSC *,Coord,Coord,double *,int);	
-
-	// Function: CalcIntersecPtsPlaneV3
-	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
-	int CalcIntersecPtsPlaneV3(NURBSS *,Coord,Coord,int,Coord *,int);	
-
-	// Function: CalcIntersecPtsPlaneU3
-	// V方向のアイソパラ曲線を指定した分割数で生成し，各3次以下の曲線とNURBS曲面との交点を代数計算で算出する
-	int CalcIntersecPtsPlaneU3(NURBSS *,Coord,Coord,int,Coord *,int);	
-
-	// Function: CalcIntersecPtsPlaneV
-	// V方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	VCoord CalcIntersecPtsPlaneV(NURBSS *, const Coord&, const Coord&, int);
-
-	// Function: CalcIntersecPtsPlaneU
-	// U方向のアイソパラ曲線を指定した分割数で生成し，各曲線とNURBS曲面との交点を算出する
-	VCoord CalcIntersecPtsPlaneU(NURBSS *, const Coord&, const Coord&, int);
-
-	// Function: CalcIntersecPtsPlaneSearch
-	// NURBS曲面と平面との交点群を交線追跡法で求める
-	VCoord CalcIntersecPtsPlaneSearch(NURBSS*, const Coord&, const Coord&, double, int, int);
-
-	// Function: CalcIntersecPtsOffsetPlaneSearch
-	// オフセットNURBS曲面と平面との交点群を交線追跡法で求める(準備中)
-	VCoord CalcIntersecPtsOffsetPlaneSearch(NURBSS *,double, const Coord&, const Coord&, double,int);
-
-	// Function: CalcIntersecPtsNurbsSNurbsC
-	// NURBS曲面とNURBS曲線との交点を求める(ニュートン法)
-	int CalcIntersecPtsNurbsSNurbsC(NURBSS *,NURBSC *,int,ACoord&,int);	
-
-	// Function: CalcIntersecPtsNurbsSGeom
-	// NURBS曲面同士の交線上の点を幾何学的にいくつか求める
-	int CalcIntersecPtsNurbsSGeom(NURBSS *,NURBSS *,int,int,ACoord&,ACoord&,int);		
-
-	// Function: CalcIntersecPtsNurbsSSearch
-	// NURBS曲面同士の交線(交点群)を交線追跡法で求める
-	int CalcIntersecPtsNurbsSSearch(NURBSS *,NURBSS *,int,double,ACoord&,ACoord&,int);	
 
 	// Function: CalcIntersecPtsNurbsCNurbsCParam
     // 2次元NURBS曲線同士の交点を求める
@@ -134,22 +30,6 @@ public:
     // Function: CalcIntersecPtsNurbsCLineSeg
     // 2次元NURBS曲線と線分との交点を求める
     int ClacIntersecPtsNurbsCLineSeg(NURBSC *, Coord, Coord, double, double, double *, double *);
-
-	// Function: SearchExtremum_BS
-	// Bulirsch-Stoer法により極地探索を行う
-	int SearchExtremum_BS(NURBSS *,Coord,double,double,double,int,int,Coord *);	
-
-	// Function: GetBSplCoef3
-	// 3次のBスプライン曲線の各係数を求める　(at^3 + bt^2 + ct + dの係数a,b,c,dを返す)
-	int GetBSplCoef3(int,int,int,ublasVector&,ublasMatrix&);
-
-	// Function: GetBSplCoef2
-	// 2次のBスプライン曲線の各係数を求める　(at^2 + bt + cの係数a,b,cを返す)
-	int GetBSplCoef2(int,int,int,ublasVector&,ublasMatrix&);			
-
-	// Function: GetBSplCoef1
-	// 1次のBスプライン曲線の各係数を求める　(at + bの係数a,bを返す)
-	int GetBSplCoef1(int,int,int,ublasVector&,ublasMatrix&);
 
 	// Function: ShiftNurbsS
 	// NURBS曲面のシフト
@@ -239,10 +119,6 @@ public:
 	// NURBS曲面(トリム有)同士の干渉検出
 	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);		
 
-	// Function: CalcIntersecPtsPlaneGeom
-	// NURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)
-	VCoord CalcIntersecPtsPlaneGeom(NURBSS *, const Coord&, const Coord&, int,int);
-
 	// Function: CalcNurbsCLength
 	// NURBS曲線の線分長を求める
 	double CalcNurbsCLength(const NURBSC*);
@@ -312,10 +188,6 @@ public:
 	// NURBS曲線情報をデバッグプリント
 	void DebugForNurbsC(NURBSC *);				
 
-	// Function: CalcIntersecPtsOffsetPlaneGeom
-	// オフセットNURBS曲面と平面と交点追跡用初期点を得る(補助平面を用いた方法)(準備中)
-	VCoord CalcIntersecPtsOffsetPlaneGeom(NURBSS *,double, const Coord&, const Coord&, int);
-
 	// Function: CalcTanVecOnNurbsC
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる
 	Coord CalcTanVecOnNurbsC(NURBSC *,double);					
@@ -377,42 +249,6 @@ private:
 	// (private)NURBS曲線の係数を求める(最高3次)
 	int GetNurbsCCoef(NURBSC *,ublasMatrix&,int,ACoord&,ublasVector&);	
 
-	// Function: CalcEquation
-	// (private)3次方程式までを判別して解く
-	int CalcEquation(const ublasVector&, ublasVector&, int);
-
-	// Function: GetNurbsSCoef
-	// (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める
-	void GetNurbsSCoef(int,ublasMatrix&,double *,ACoord&,int,ACoord&,ublasVector&);
-
-	// Function: GetIntersecEquation
-	// (private)NURBS曲線と平面の交線導出用3次方程式を得る
-	void GetIntersecEquation(int,ACoord&,ublasVector&,Coord,Coord,ublasVector&);
-
-	// Function: SearchIntersectPt
-	// (private)ニュートン法により交点を収束させる(NURBS曲面と平面)
-	int SearchIntersectPt(NURBSS *,Coord,Coord,double,double *,double *,int);	
-
-	// Function: SearchIntersectPt_RKM
-	// (private)4次のルンゲクッタ法により交点を収束させる(NURBS曲面と平面)
-	int SearchIntersectPt_RKM(NURBSS *,Coord,Coord,double,double *,double *,int);	
-
-	// Function: SearchIntersectPt_BS
-	// (private)Bulirsch-Stoer法により交点を収束させる(NURBS曲面と平面)
-	int SearchIntersectPt_BS(NURBSS *,Coord,Coord,double,double *,double *,int);	
-
-	// Function: SearchIntersectPt_OS
-	// (private)4次のルンゲクッタ法により交点を収束させる(オフセットNURBS曲面と平面)
-	int SearchIntersectPt_OS(NURBSS *,Coord,Coord,double,double *,double *,int);		
-
-	// Function: GetSIPParam1
-	// (private)NURBS曲面と平面の交点を表す微分方程式の右辺の値を得る
-	int GetSIPParam1(NURBSS *,double ,double ,Coord ,Coord ,int ,Coord *);		
-
-	// Function: SearchIntersectPt
-	// (private)ニュートン法により交点を収束させる(NURBS曲面同士)
-	int SearchIntersectPt(NURBSS *,NURBSS *,double,double *,double *,double *,double *,int);		
-
 	// Function: DetermPtOnTRMSurf_sub
 	// (private)トリム境界線が複合曲線の場合のトリミング領域内外判定
 	int DetermPtOnTRMSurf_sub(CONPS *,double,double);				
@@ -449,41 +285,9 @@ private:
 	// (private)最小2乗法で近似コントロールポイントを求める
 	void CalcApproximationCP_LSM(const ACoord&,ublasVector&,ublasVector&,int,int,int,int,ACoord&);
 
-	// Function: RemoveTheSamePoints
-	// (private)NURBS曲面上の同一点を除去する
-	VCoord RemoveTheSamePoints(NURBSS *, const VCoord&);					
-
-	// Function: CalcDiffNurbsSDenom
-	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める
-	double CalcDiffNurbsSDenom(NURBSS *,int,int,double,double);		
-
-	// Function: CalcDiffNurbsSNumer
-	// (private)NURBS曲面分子の各方向を任意階微分したときの微分係数を求める
-	Coord CalcDiffNurbsSNumer(NURBSS *,int,int,double,double);		
-
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
 	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double); 
-
-	// Function: CalcIntersecPtsPlaneSearch_Sub
-	// (private)面から飛び出した(u,v)を参考に面のエッジ部(new_u,new_v)を得る
-	Coord CalcIntersecPtsPlaneSearch_Sub(NURBSS *,double,double, const Coord&, const Coord&);
-
-	// Function: GetMinDistance
-	// (private)最小距離を持つ座標値を返す
-	Coord GetMinDistance(const Coord&, const VCoord&);
-
-	// Function: CheckClossedPoints
-	// (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる
-	int CheckClossedPoints(Coord,Coord,Coord);				
-
-	// Function: GetSECParam1
-	// (private)極値探索線Sub関数1
-	int GetSECParam1(NURBSS *,double,double,Coord,int,int,Coord *);	
-
-	// Function: GetMinDist
-	// (private)最小距離を調べる
-	int GetMinDist(NURBSS *,Coord ,ACoord&,int ,Coord *);			
 
 	// Function: SetKnotVecSU_ConnectS
 	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)

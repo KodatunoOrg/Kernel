@@ -73,6 +73,14 @@ public:
 	// Function: CalcDiffNNurbsC
 	// NURBS曲線のr階微分係数を求める
 	Coord CalcDiffNNurbsC(int, double) const;
+
+	// Function: CalcIntersecPtNurbsPt
+	// 空間上の1点からNURBS曲線上の最近傍点を求める(ニュートン法)(オーバーロード)
+	int CalcIntersecPtNurbsPt(const Coord&, int, int, double *) const;
+
+    // Function: CalcIntersecPtNurbsPtDescrete
+    // 空間上の1点からNURBS曲線上の最近傍点を求める(離散的)
+    void CalcIntersecPtNurbsPtDescrete(const Coord&, int, int, double, double, double *) const;
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 

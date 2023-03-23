@@ -15,15 +15,15 @@ public:
 
 	// Constructor: SFQuant
 	// S(u,v)での基本量を得る
-	SFQuant(NURBSS *S,double u, double v);
+	SFQuant(const NURBSS* S,double u, double v);
 
 	// Function: SetSFQ
 	// S(u,v)での基本量を得る
-	int SetSFQ(NURBSS *S,double u, double v);
+	int SetSFQ(const NURBSS* S,double u, double v);
 
     // Function: SetSFQ1
     // S(u,v)での第一基本量を得る
-    int SetSFQ1(NURBSS *S,double u, double v);
+    int SetSFQ1(const NURBSS* S,double u, double v);
 
 public:
 

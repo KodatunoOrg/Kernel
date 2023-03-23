@@ -366,3 +366,96 @@ Coord NURBSC::CalcDiffNNurbsC(int r, double t) const
 //	return (DivCoord(SubCoord(Ar,Br),W));
 	return (Ar-Br)/W;
 }
+
+// Function: CalcIntersecPtNurbsPt
+// 空間上の1点PからNURBS曲線C上の最近傍点Q(曲線パラメータ)を求める(ニュートン法)
+// 
+// >F(t) = (P-C'(t))･C'(t) = 0
+// >F'(t)dt = -F(t)
+// >F'(t) = -|C'(t)|^2 + (P+C(t))･C"(t)
+//
+// Parameters:
+// *C - NURBS曲線
+// P - 空間上の1点
+// Divnum - ニュートン法初期値指定用の曲線分割数
+// LoD - ニュートンパラメータ更新時のステップサイズ(1～)
+// Q - 解（C上の点をtパラメータで格納）
+// 
+// Return:
+// KOD_TRUE：収束した    KOD_FALSE:収束しなかった
+int NURBSC::CalcIntersecPtNurbsPt(const Coord& P, int Divnum, int LoD, double *Q) const
+{
+	ublasVector t_buf(Divnum);					// 収束解格納用バッファ
+	ublasVector dist_buf(Divnum);				// 各tでの距離格納用バッファ
+	double delta = (V[1] - V[0])/(double)Divnum;	// 収束演算用のtパラメータのインターバル値
+
+	for(int i=0;i<Divnum;i++){
+		double t = V[0] + (double)i*delta;	// tの初期値をセット
+		int loopcount = 0;
+		while(loopcount < LOOPCOUNTMAX){
+			Coord Ct = CalcNurbsCCoord(t);
+			Coord C_ = CalcDiffNurbsC(t);
+			Coord C__ = CalcDiff2NurbsC(t);
+			double a = P  & C_;
+			double b = Ct & C_;
+			double c = C_ & C_;
+			double d = (P-Ct) & C__;
+			if(fabs(d-c) <= APPROX_ZERO)	break;			// 分母がゼロなら次の初期点へ
+			double dt = (b-a)/(d-c);
+			t += dt/(double)LoD;				// t更新
+			if(fabs(dt) <= APPROX_ZERO_L){	// 収束していたら解を保持し次のtへ
+				t_buf[i] = t;
+				dist_buf[i] = CalcNurbsCCoord(t).CalcDistance(P);	// PQ間距離を得る
+				break;
+			}
+			loopcount++;
+			t_buf[i] = dist_buf[i] = -1;		// 収束していなかったら，エラーフラグとして-1を代入
+		}
+	}
+
+	// 得られた解から，PQ間の距離が最も短いものを選択
+	bool flag = false;
+	double min = 1E+308;
+	for(int i=0;i<Divnum;i++){
+		if(dist_buf[i] > 0 && dist_buf[i] < min){
+			min = dist_buf[i];
+			*Q = t_buf[i];
+			flag = true;
+		}
+	}
+	
+	return flag == true ? KOD_TRUE : KOD_FALSE;
+}
+
+// Function: CalcIntersecPtNurbsPtDescrete
+// 空間上の1点PからNURBS曲線C上の最近傍点Qを求める(離散的)
+//
+// Parameters:
+// *C - NURBS曲線
+// P - 空間上の1点
+// Divnum - 曲面分割数
+// LoD - 詳細度
+// Ts - t方向パラメータの探索開始値
+// Te - t方向パラメータの探索終了値
+// *Q - 解（C上の点をtパラメータで格納）
+void NURBSC::CalcIntersecPtNurbsPtDescrete(const Coord& P, int Divnum, int LoD, double Ts, double Te, double *Q) const
+{
+    if(!LoD)    return;
+
+    double mind = 1E+38;
+    Coord minp;
+    double dt = (Te-Ts)/(double)Divnum;
+
+    for(int i=0;i<=Divnum;i++){
+        double t = Ts + (double)i*dt;
+        if(t < V[0] || t > V[1]) continue;
+        Coord p  = CalcNurbsCCoord(t);
+        double d = p.CalcDistance(P);
+        if(d < mind){
+            mind = d;
+            *Q = t;
+        }
+    }
+
+    CalcIntersecPtNurbsPtDescrete(P,Divnum,LoD-1,*Q-dt,*Q+dt,Q);
+}
