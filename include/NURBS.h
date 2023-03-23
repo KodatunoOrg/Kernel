@@ -45,6 +45,8 @@ class SFQuant;
 #include "NURBSC.h"
 #include "NURBSS.h"
 
+// memo: 元private関数はstatic関数に移行 K.Magara
+
 // Function: CalcBSbasis
 // Bスプライン基底関数を計算し、計算結果を返す
 double CalcBSbasis(double, const ublasVector&, int, int);
@@ -96,5 +98,57 @@ int CheckClossedPoints(const Coord&, const Coord&, const Coord&);
 // Function: ChangeKnotVecRange
 // ノットベクトルのパラメータ定義域を変更する
 void ChangeKnotVecRange(ublasVector&, int, int, int, double, double);
+
+// Function: GetSurfaceKnotParam
+// (private)各通過点の曲面パラメータを算出
+void GetSurfaceKnotParam(ublasVector&, ublasVector&, const AACoord&, int, int);
+
+// Function: GetInterpolatedKnot
+// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
+ublasVector GetInterpolatedKnot(const ublasVector&, int, int, int);
+
+// Function: GetApproximatedKnot
+// (private)曲線/曲面パラメータから近似用ノットベクトルを算出
+ublasVector GetApproximatedKnot(const ublasVector&, int, int, int);
+
+// Function: CalcApproximationCP_LSM
+// (private)最小2乗法で近似コントロールポイントを求める
+void CalcApproximationCP_LSM(const ACoord&, const ublasVector&, const ublasVector&, int, int, int, int, ACoord&);
+
+// Function: GenNurbsCfromCP
+// コントロールポイントからNURBS曲線を生成する
+NURBSC* GenNurbsCfromCP(const ACoord&, int);
+
+// Function: GenInterpolatedNurbsC1
+// 与えられた点列を補間するn階のNURBS曲線を生成する
+NURBSC* GenInterpolatedNurbsC1(const ACoord&, int);
+
+// Function: GenInterpolatedNurbsC2
+// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
+NURBSC* GenInterpolatedNurbsC2(const ACoord&, int);
+
+// Function: GenPolygonalLine
+// 折れ線を生成する
+NURBSC* GenPolygonalLine(const ACoord&);
+
+// Function: GenApproximationNurbsC
+// 与えられた点列を近似するn階のNURBS曲線を生成する
+NURBSC* GenApproximationNurbsC(const ACoord&, int);
+
+// Function: GenInterpolatedNurbsS1
+// 与えられた点列を補間するn階NURBS曲面を生成する
+NURBSS* GenInterpolatedNurbsS1(const AACoord&, int, int, int, int);
+
+// Function: GenPolygonalSurface
+// 折れ面を生成する
+NURBSS* GenPolygonalSurface(const AACoord&, int, int);
+
+// Function: GenApproximationNurbsS
+// 与えられた点列を近似するn階のNURBS曲面を生成する
+NURBSS* GenApproximationNurbsS(const AACoord&, int, int, int, int);
+
+// Function: GenNurbsSfromCP
+// 与えられたコントロールポイントからn階のNURBS曲面を生成する
+NURBSS* GenNurbsSfromCP(const AACoord&, int, int, int, int);
 
 #endif

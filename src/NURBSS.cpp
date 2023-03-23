@@ -6,7 +6,7 @@
 
 // Function: GetNurbsSCoef
 // (private)NURBS曲面においてuまたはvを固定した場合に得られるNURBS曲線C(u) or C(v)の分母分子の係数を求める
-void GetNurbsSCoef(int, const ublasMatrix&, const double*, const ACoord&, int, ACoord&, ublasVector&);
+static void GetNurbsSCoef(int, const ublasMatrix&, const double*, const ACoord&, int, ACoord&, ublasVector&);
 
 ///////////////////////////////////////////////////////////
 // コンストラクタ

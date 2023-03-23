@@ -43,42 +43,6 @@ public:
 	// NURBS曲線を回転
 	void RotNurbsC(NURBSC *,Coord,double);						
 
-	// Function: GenInterpolatedNurbsC1
-	// 与えられた点列を補間するn階のNURBS曲線を生成する
-	NURBSC* GenInterpolatedNurbsC1(const ACoord&, int);
-
-	// Function: GenInterpolatedNurbsC2
-	// 与えられた点列を補間するn階のNURBS曲線を生成する(閉じた曲線)
-	NURBSC* GenInterpolatedNurbsC2(const ACoord&, int);
-
-	// Function: GenApproximationNurbsC
-	// 与えられた点列を近似するn階のNURBS曲線を生成する
-	NURBSC* GenApproximationNurbsC(const ACoord&, int);
-
-	// Function: GenNurbsCfromCP
-	// コントロールポイントからNURBS曲線を生成する
-	NURBSC* GenNurbsCfromCP(const ACoord&, int);
-
-	// Function: GenPolygonalLine
-	// 折れ線を生成する
-	NURBSC* GenPolygonalLine(const ACoord&);
-
-	// Function: GenInterpolatedNurbsS1
-	// 与えられた点列を補間するn階NURBS曲面を生成する
-	NURBSS* GenInterpolatedNurbsS1(AACoord&,int,int,int,int);
-
-	// Function: GenPolygonalSurface
-	// 折れ面を生成する
-	NURBSS* GenPolygonalSurface(AACoord&,int,int);
-
-	// Function: GenApproximationNurbsS
-	// 与えられた点列を近似するn階のNURBS曲面を生成する
-	NURBSS* GenApproximationNurbsS(AACoord&,int,int,int,int);
-
-	// Function: GenNurbsSfromCP
-	// 与えられたコントロールポイントからn階のNURBS曲面を生成する
-	NURBSS* GenNurbsSfromCP(AACoord&,int,int,int,int);
-
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
 	int DetermPtOnTRMSurf(TRMS *,double,double);					
@@ -114,10 +78,6 @@ public:
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
 	int CalcExtremumNurbsC(NURBSC *,Coord,ublasVector&,int);		
-
-	// Function: GetEqIntervalKont
-	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
-	ublasVector GetEqIntervalKont(int, int);
 
 
 	int TrimNurbsSPlane(TRMS *,Coord,Coord);										// NURBS曲面を平面でトリムする(準備中)
@@ -206,34 +166,6 @@ private:
 	// Function: ApproxTrimBorder
 	// (private)トリム境界線を点群で近似する
 	int ApproxTrimBorder(COMPC *,ACoord&);
-
-	// Function: GetCurveKnotParam1
-	// (private)各通過点の曲線パラメータを算出(コード長の比から算出)
-	ublasVector GetCurveKnotParam1(const ACoord&);
-
-	// Function: GetCurveKnotParam2
-	// (private)各通過点の曲線パラメータを算出(コード長の平方根の比から算出)
-	ublasVector GetCurveKnotParam2(const ACoord&);
-
-	// Function: GetSurfaceKnotParam
-	// (private)各通過点の曲面パラメータを算出
-	void GetSurfaceKnotParam(ublasVector&,ublasVector&,AACoord&,int,int);		
-
-	// Function: GetInterpolatedKnot
-	// (private)曲線/曲面パラメータから補間用ノットベクトルを算出
-	ublasVector GetInterpolatedKnot(const ublasVector&, int, int, int);
-
-	// Function: GetApproximatedKnot
-	// (private)曲線/曲面パラメータから近似用ノットベクトルを算出
-	ublasVector GetApproximatedKnot(const ublasVector&, int, int, int);
-
-	// Function: SetApproximationCPnum
-	// (private)点列数から生成するコントロールポイント数を算定する
-	int SetApproximationCPnum(int);									
-
-	// Function: CalcApproximationCP_LSM
-	// (private)最小2乗法で近似コントロールポイントを求める
-	void CalcApproximationCP_LSM(const ACoord&,ublasVector&,ublasVector&,int,int,int,int,ACoord&);
 
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
