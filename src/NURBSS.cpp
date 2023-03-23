@@ -1797,6 +1797,89 @@ int NURBSS::SearchExtremum_BS(const Coord& nf, double u0, double v0, double H, i
 	return conv_flag;
 }
 
+// Function: ShiftNurbsS
+// NURBS曲面のシフト
+//
+// Parameters:
+// *nurbs - 変更されるNURBS曲面  
+// shift - シフト量
+void NURBSS::ShiftNurbsS(const Coord& shift)
+{
+	for(int i=0;i<K[0];i++){
+		for(int j=0;j<K[1];j++){
+			cp[i][j] += shift;
+		}
+	}
+}
+
+// Function: ChRatioNurbsS
+// NURBS曲面の倍率を変更する
+//
+// Parameters:
+// *nurbs - 変更されるNURBS曲面  
+// ratio - 倍率
+void NURBSS::ChRatioNurbsS(const Coord& ratio)
+{
+	for(int i=0;i<K[0];i++){
+		for(int j=0;j<K[1];j++){
+			cp[i][j] *= ratio;
+		}
+	}
+}
+
+// Function: RotNurbsS
+// NURBS曲面をDベクトル回りにdeg(°)だけ回転させる
+//
+// Parameters:
+// *nurbs - 変更されるNURBS曲面　
+// axis - 回転軸の単位ベクトル　
+// deg - 角度(degree)
+void NURBSS::RotNurbsS(const Coord& axis, double deg)
+{
+	double rad;			// ラジアン格納用
+	QUATERNION QFunc;	// クォータニオン関連の関数を集めたクラスのオブジェクトを生成
+	Quat StartQ;		// 回転前の座標を格納するクォータニオン
+	Quat RotQ;			// 回転クォータニオン
+	Quat ConjuQ;		// 共役クォータニオン
+	Quat TargetQ;		// 回転後の座標を格納するクォータニオン
+	
+	for(int i=0;i<K[0];i++){			// u方向のコントロールポイント分ループ
+		for(int j=0;j<K[1];j++){		// v方向のコントロールポイント分ループ
+			StartQ = QFunc.QInit(1,cp[i][j].x,cp[i][j].y,cp[i][j].z);		// NURBS曲面を構成するcpの座標を登録
+			rad = DegToRad(deg);										// degreeからradianに変換
+			RotQ = QFunc.QGenRot(rad,axis.x,axis.y,axis.z);				// 回転クォータニオンに回転量を登録(ここの数字をいじれば任意に回転できる)
+			ConjuQ = QFunc.QConjugation(RotQ);							// RotQの共役クォータニオンを登録
+			TargetQ = QFunc.QMult(QFunc.QMult(RotQ,StartQ),ConjuQ);		// 回転させる
+			cp[i][j].SetCoord(TargetQ.x,TargetQ.y,TargetQ.z);	// 回転後の座標を登録
+		}
+	}
+}
+
+// Function: SetCPNurbsS
+// NURBS曲面nurbsのコントロールポイントを，NURBS曲面Nurbsのコントロールポイントに置き換える
+//
+// Parameters:
+// *nurbs - 置換されるNURBS曲面  
+// Nurbs - 代入元のNURBS曲面
+//
+// Return:
+// 正常終了：KOD_TRUE, 両曲面のコントロールポイント数が一致していない：KOD_ERR
+int NURBSS::SetCPNurbsS(const NURBSS* Nurbs)
+{
+	if(K[0] != Nurbs->K[0] || K[1] != Nurbs->K[1]){
+//		GuiIFB.SetMessage("NURBS KOD_ERROR:Control point count is different");
+		return KOD_ERR;
+	}
+
+	for(int i=0;i<Nurbs->K[0];i++){
+		for(int j=0;j<Nurbs->K[1];j++){
+			cp[i][j] = Nurbs->cp[i][j];
+		}
+	}
+
+	return KOD_TRUE;
+}
+
 ///////////////////////////////////////////////////////////
 // privateメンバ関数
 

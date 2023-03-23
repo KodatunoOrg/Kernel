@@ -718,21 +718,6 @@ int NURBS_Func::GetNurbsCCoef(NURBSC *nurb,ublasMatrix& coef,int i,ACoord& P,ubl
 	return KOD_TRUE;
 }
 
-// Function: ShiftNurbsS
-// NURBS曲面のシフト
-//
-// Parameters:
-// *nurbs - 変更されるNURBS曲面  
-// shift - シフト量
-void NURBS_Func::ShiftNurbsS(NURBSS *nurbs,Coord shift)
-{
-	for(int i=0;i<nurbs->K[0];i++){
-		for(int j=0;j<nurbs->K[1];j++){
-			nurbs->cp[i][j] = nurbs->cp[i][j] + shift;
-		}
-	}
-}
-
 // Function: ShiftNurbsC
 // NURBS曲線のシフト
 // 
@@ -743,34 +728,6 @@ void NURBS_Func::ShiftNurbsC(NURBSC *nurbs,Coord shift)
 {
 	for(int i=0;i<nurbs->K;i++){
 		nurbs->cp[i] = nurbs->cp[i] + shift;
-	}
-}
-
-// Function: RotNurbsS
-// NURBS曲面をDベクトル回りにdeg(°)だけ回転させる
-//
-// Parameters:
-// *nurbs - 変更されるNURBS曲面　
-// axis - 回転軸の単位ベクトル　
-// deg - 角度(degree)
-void NURBS_Func::RotNurbsS(NURBSS *nurbs,Coord axis,double deg)
-{
-	double rad;			// ラジアン格納用
-	QUATERNION QFunc;	// クォータニオン関連の関数を集めたクラスのオブジェクトを生成
-	Quat StartQ;		// 回転前の座標を格納するクォータニオン
-	Quat RotQ;			// 回転クォータニオン
-	Quat ConjuQ;		// 共役クォータニオン
-	Quat TargetQ;		// 回転後の座標を格納するクォータニオン
-	
-	for(int i=0;i<nurbs->K[0];i++){			// u方向のコントロールポイント分ループ
-		for(int j=0;j<nurbs->K[1];j++){		// v方向のコントロールポイント分ループ
-			StartQ = QFunc.QInit(1,nurbs->cp[i][j].x,nurbs->cp[i][j].y,nurbs->cp[i][j].z);		// NURBS曲面を構成するcpの座標を登録
-			rad = DegToRad(deg);										// degreeからradianに変換
-			RotQ = QFunc.QGenRot(rad,axis.x,axis.y,axis.z);				// 回転クォータニオンに回転量を登録(ここの数字をいじれば任意に回転できる)
-			ConjuQ = QFunc.QConjugation(RotQ);							// RotQの共役クォータニオンを登録
-			TargetQ = QFunc.QMult(QFunc.QMult(RotQ,StartQ),ConjuQ);		// 回転させる
-			nurbs->cp[i][j].SetCoord(TargetQ.x,TargetQ.y,TargetQ.z);	// 回転後の座標を登録
-		}
 	}
 }
 
@@ -800,21 +757,6 @@ void NURBS_Func::RotNurbsC(NURBSC *nurbs,Coord axis,double deg)
 	}
 }
 
-// Function: ChRatioNurbsS
-// NURBS曲面の倍率を変更する
-//
-// Parameters:
-// *nurbs - 変更されるNURBS曲面  
-// ratio - 倍率
-void NURBS_Func::ChRatioNurbsS(NURBSS *nurbs,Coord ratio)
-{
-	for(int i=0;i<nurbs->K[0];i++){
-		for(int j=0;j<nurbs->K[1];j++){
-			nurbs->cp[i][j] = nurbs->cp[i][j] * ratio;
-		}
-	}
-}
-
 // Function: ChRatioNurbsC
 // NURBS曲線の倍率を変更する
 //
@@ -826,31 +768,6 @@ void NURBS_Func::ChRatioNurbsC(NURBSC *nurbs,Coord ratio)
 	for(int i=0;i<nurbs->K;i++){
 		nurbs->cp[i] = nurbs->cp[i] * ratio;
 	}
-}
-
-// Function: SetCPNurbsS
-// NURBS曲面nurbsのコントロールポイントを，NURBS曲面Nurbsのコントロールポイントに置き換える
-//
-// Parameters:
-// *nurbs - 置換されるNURBS曲面  
-// Nurbs - 代入元のNURBS曲面
-//
-// Return:
-// 正常終了：KOD_TRUE, 両曲面のコントロールポイント数が一致していない：KOD_ERR
-int NURBS_Func::SetCPNurbsS(NURBSS *nurbs,NURBSS Nurbs)
-{
-	if(nurbs->K[0] != Nurbs.K[0] || nurbs->K[1] != Nurbs.K[1]){
-//		GuiIFB.SetMessage("NURBS KOD_ERROR:Control point count is different");
-		return KOD_ERR;
-	}
-
-	for(int i=0;i<Nurbs.K[0];i++){
-		for(int j=0;j<Nurbs.K[1];j++){
-			nurbs->cp[i][j] = Nurbs.cp[i][j];
-		}
-	}
-
-	return KOD_TRUE;
 }
 
 // Function: GenInterpolatedNurbsC1

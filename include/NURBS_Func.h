@@ -31,33 +31,17 @@ public:
     // 2次元NURBS曲線と線分との交点を求める
     int ClacIntersecPtsNurbsCLineSeg(NURBSC *, Coord, Coord, double, double, double *, double *);
 
-	// Function: ShiftNurbsS
-	// NURBS曲面のシフト
-	void ShiftNurbsS(NURBSS *,Coord);							
-
 	// Function: ShiftNurbsC
 	// NURBS曲線のシフト
 	void ShiftNurbsC(NURBSC *,Coord);							
-
-	// Function: ChRatioNurbsS
-	// NURBS曲面の倍率を変更する
-	void ChRatioNurbsS(NURBSS *,Coord);							
 
 	// Function: ChRatioNurbsC
 	// NURBS曲線の倍率を変更する
 	void ChRatioNurbsC(NURBSC *,Coord);							
 
-	// Function: RotNurbsS
-	// NURBS曲面を回転
-	void RotNurbsS(NURBSS *,Coord,double);						
-
 	// Function: RotNurbsC
 	// NURBS曲線を回転
 	void RotNurbsC(NURBSC *,Coord,double);						
-
-	// Function: SetCPNurbsS
-	// コントロールポイントを代入する
-	int SetCPNurbsS(NURBSS *,NURBSS);							
 
 	// Function: GenInterpolatedNurbsC1
 	// 与えられた点列を補間するn階のNURBS曲線を生成する

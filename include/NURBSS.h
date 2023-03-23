@@ -171,6 +171,24 @@ public:
 	// NURBS曲面情報をデバッグプリント
 	void DebugForNurbsS(void) const;
 
+	//
+	
+	// Function: ShiftNurbsS
+	// NURBS曲面のシフト
+	void ShiftNurbsS(const Coord&);
+
+	// Function: ChRatioNurbsS
+	// NURBS曲面の倍率を変更する
+	void ChRatioNurbsS(const Coord&);
+
+	// Function: RotNurbsS
+	// NURBS曲面を回転
+	void RotNurbsS(const Coord&, double);
+
+	// Function: SetCPNurbsS
+	// コントロールポイントを代入する
+	int SetCPNurbsS(const NURBSS*);
+
 private:
 	// Function: CalcDiffNurbsSDenom
 	// (private)NURBS曲面分母の各方向を任意階微分したときの微分係数を求める

@@ -292,7 +292,7 @@ void BODY::RotBody(Coord Axis,double deg)
 	NURBS_Func NFunc;
 
 	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面の回転
-		NFunc.RotNurbsS(x,Axis,deg);
+		x->RotNurbsS(Axis,deg);
 	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線の回転
@@ -312,7 +312,7 @@ void BODY::ShiftBody(Coord d)
 	NURBS_Func NFunc;
 
 	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面のシフト
-		NFunc.ShiftNurbsS(x,d);
+		x->ShiftNurbsS(d);
 	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
@@ -332,7 +332,7 @@ void BODY::ExpandBody(Coord r)
 
 
 	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面のシフト
-		NFunc.ChRatioNurbsS(x,r);
+		x->ChRatioNurbsS(r);
 	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
