@@ -172,6 +172,88 @@ NURBSC* NURBSS::GenIsoparamCurveV(double v) const
     return new NURBSC(K[0],M[0],N[0],S,W,Q,U,prop,0);
 }
 
+// Function: CalcDiffuNurbsS
+// NURBS曲面のu方向の1階微分係数を得る
+//
+// Parameters:
+// *NurbsS - NURBS曲面へのポインタ
+// div_u - u方向ノット値
+// div_v - v方向ノット値
+// 
+// Return:
+// 計算結果
+Coord NURBSS::CalcDiffuNurbsS(double div_u, double div_v) const
+{
+	int i,j;
+	Coord Ft,diff_Ft;
+	double Gt,diff_Gt;
+	double bs_u,bs_v;		// u,v方向Bスプライン基底関数
+	double diff_bs_u;
+//	Coord p;
+
+	Gt = 0;
+	diff_Gt = 0;
+
+	for(i=0;i<K[0];i++){
+		bs_u = CalcBSbasis(div_u,S,i,M[0]);				// u方向Bスプライン基底関数を求める
+		diff_bs_u = CalcDiffBSbasis(div_u,S,i,M[0]);	// u方向Bスプライン基底関数の1階微分を求める
+		for(j=0;j<K[1];j++){
+			bs_v = CalcBSbasis(div_v,T,j,M[1]);			// v方向Bスプライン基底関数を求める
+			Ft += cp[i][j] * (bs_u*bs_v*W(i,j));
+			diff_Ft += cp[i][j] * (diff_bs_u*bs_v*W(i,j));
+			Gt += bs_u*bs_v*W(i,j);
+			diff_Gt += diff_bs_u*bs_v*W(i,j);
+		}
+	}
+
+	if(fabs(Gt) < APPROX_ZERO_H)	return(Coord());
+
+	// 1階微分を求める
+//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
+	return (diff_Ft/Gt)-((Ft*diff_Gt)/(Gt*Gt));
+}
+
+// Function: CalcDiffvNurbsS
+// NURBS曲面のv方向の1階微分係数を得る
+//
+// Parameters:
+// *NurbsS - NURBS曲面へのポインタ
+// div_u - u方向ノット値
+// div_v - v方向ノット値
+// 
+// Return:
+// 計算結果
+Coord NURBSS::CalcDiffvNurbsS(double div_u, double div_v) const
+{
+	int i,j;
+	Coord Ft,diff_Ft;
+	double Gt,diff_Gt;
+	double bs_u,bs_v;		// u,v方向Bスプライン基底関数
+	double diff_bs_v;
+//	Coord p;
+
+	Gt = 0;
+	diff_Gt = 0;
+
+	for(i=0;i<K[0];i++){
+		bs_u = CalcBSbasis(div_u,S,i,M[0]);				// u方向Bスプライン基底関数を求める
+		for(j=0;j<K[1];j++){
+			bs_v = CalcBSbasis(div_v,T,j,M[1]);				// v方向Bスプライン基底関数を求める
+			diff_bs_v = CalcDiffBSbasis(div_v,T,j,M[1]);	// v方向Bスプライン基底関数の1階微分を求める
+			Ft += cp[i][j]*(bs_u*bs_v*W(i,j));
+			diff_Ft += cp[i][j]*(bs_u*diff_bs_v*W(i,j));
+			Gt += bs_u*bs_v*W(i,j);
+			diff_Gt += bs_u*diff_bs_v*W(i,j);
+		}
+	}
+
+	if(fabs(Gt) < APPROX_ZERO_H)	return(Coord());
+
+	// 1階微分を求める
+//	p = SubCoord(DivCoord(diff_Ft,Gt),DivCoord(MulCoord(Ft,diff_Gt),Gt*Gt));
+	return (diff_Ft/Gt)-((Ft*diff_Gt)/(Gt*Gt));
+}
+
 // Function: DebugForNurbsS
 // NURBS曲面情報をデバッグプリント
 //

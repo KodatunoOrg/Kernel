@@ -59,6 +59,14 @@ public:
 	// NURBS曲面上のv方向パラメータ値を固定したときのアイソパラメトリックNURBS曲線を生成
 	NURBSC* GenIsoparamCurveV(double) const;
 
+	// Function: CalcDiffuNurbsS
+	// NURBS曲面のu方向1階微分係数を求める
+	Coord CalcDiffuNurbsS(double, double) const;
+
+	// Function: CalcDiffvNurbsS
+	// NURBS曲面のv方向1階微分係数を求める
+	Coord CalcDiffvNurbsS(double, double) const;
+
 	// Function: DebugForNurbsS
 	// NURBS曲面情報をデバッグプリント
 	void DebugForNurbsS(void) const;
