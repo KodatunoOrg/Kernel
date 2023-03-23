@@ -167,9 +167,32 @@ public:
 	// Bulirsch-Stoer法により極地探索を行う
 	int SearchExtremum_BS(const Coord&, double, double, double, int, int, Coord *) const;
 
-	// Function: DebugForNurbsS
-	// NURBS曲面情報をデバッグプリント
-	void DebugForNurbsS(void) const;
+	// Function: DetectInterfereNurbsS
+	// NURBS曲面(トリム無)同士の干渉検出
+	int DetectInterfereNurbsS(const NURBSS*, int) const;
+
+	// Function: CalcDeltaPtsOnNurbsS
+	// 指定した分割数でNURBS曲面上の座標値を求める
+	int CalcDeltaPtsOnNurbsS(int, int, AACoord&) const;
+
+	// Function: ConnectNurbsSU
+	// 2枚のNURBS曲面を連結する(U方向に長くなる)(S1_U1とS2_U0を連結)
+	int ConnectNurbsSU(const NURBSS*, NURBSS*) const;
+
+	// Function: ConnectNurbsSV
+	// 2枚のNURBS曲面を連結する(V方向に長くなる)(S1_V1とS2_V0を連結)
+	int ConnectNurbsSV(const NURBSS*, NURBSS*) const;
+
+    // Function: CalcConstScallop
+    // 等スキャロップ点を算出
+    int CalcConstScallop(const NURBSC*, double, double, double*, double*, int) const;
+
+    // Function: CalcConstPitch
+    // 等ピッチ点を算出
+    int CalcConstPitch(const NURBSC*, double, double, double*, int) const;
+
+	int CalcExtSearchCurve(const Coord&, const Coord&, double, NURBSC*, NURBSC*) const;		// 極地探索線を得る(準備中)
+	int CalcExtGradCurve(const Coord&, const Coord&, double, NURBSC*, NURBSC*) const;		// 極地傾斜線を得る(準備中)
 
 	//
 	
@@ -188,6 +211,12 @@ public:
 	// Function: SetCPNurbsS
 	// コントロールポイントを代入する
 	int SetCPNurbsS(const NURBSS*);
+
+	//
+
+	// Function: DebugForNurbsS
+	// NURBS曲面情報をデバッグプリント
+	void DebugForNurbsS(void) const;
 
 private:
 	// Function: CalcDiffNurbsSDenom
@@ -237,6 +266,22 @@ private:
 	// Function: GetSECParam1
 	// (private)極値探索線Sub関数1
 	int GetSECParam1(double, double, const Coord&, int, int, Coord *) const;
+
+	// Function: SetKnotVecSU_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
+	void SetKnotVecSU_ConnectS(const NURBSS*, NURBSS*) const;
+
+	// Function: SetKnotVecSV_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向ノット定義域を設定する)
+	void SetKnotVecSV_ConnectS(const NURBSS*, NURBSS*) const;
+
+	// Function: SetCPSU_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向コントロールポイントとウェイトを設定する)
+	void SetCPSU_ConnectS(const NURBSS*, NURBSS*) const;
+
+	// Function: SetCPSV_ConnectS
+	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向コントロールポイントとウェイトを設定する)
+	void SetCPSV_ConnectS(const NURBSS*, NURBSS*) const;
 
 };
 typedef std::vector<NURBSS*>	VNURBSS;

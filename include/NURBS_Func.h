@@ -95,10 +95,6 @@ public:
 	// 内外周トリム面内の点のみ残す
 	int GetPtsOnInnerOuterTRMSurf(TRMS *,ACoord&,int);				
 
-	// Function: DetectInterfereNurbsS
-	// NURBS曲面(トリム無)同士の干渉検出
-	int DetectInterfereNurbsS(NURBSS *,NURBSS *,int);				
-
 	// Function: DetectInterfereTrmS
 	// NURBS曲面(トリム有)同士の干渉検出
 	int DetectInterfereTrmS(TRIMD_NURBSS *,TRIMD_NURBSS *,int);		
@@ -115,10 +111,6 @@ public:
 	// 指定した分割数でNURBS曲線上の座標値を求める
 	int CalcDeltaPtsOnNurbsC(NURBSC *,int,ACoord&);				
 
-	// Function: CalcDeltaPtsOnNurbsS
-	// 指定した分割数でNURBS曲面上の座標値を求める
-	int CalcDeltaPtsOnNurbsS(NURBSS *,int,int,AACoord&);		
-
 	// Function: CalcExtremumNurbsC
 	// NURBS曲線の指定した方向における極値の座標値を得る
 	int CalcExtremumNurbsC(NURBSC *,Coord,ublasVector&,int);		
@@ -127,22 +119,12 @@ public:
 	// 曲線/曲面パラメータから等間隔なノットベクトルを算出
 	ublasVector GetEqIntervalKont(int, int);
 
-	// Function: ChangeKnotVecRange
-	// ノットベクトルのパラメータ定義域を変更する
-	void ChangeKnotVecRange(ublasVector&,int,int,int,double,double);	
 
-
-	int CalcExtSearchCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地探索線を得る(準備中)
-	int CalcExtGradCurve(NURBSS *,Coord,Coord,double,NURBSC *,NURBSC *);			// 極地傾斜線を得る(準備中)
 	int TrimNurbsSPlane(TRMS *,Coord,Coord);										// NURBS曲面を平面でトリムする(準備中)
 
 	// Function: New_NurbsC
 	// NURBS曲線のメモリー確保
 	int New_NurbsC(NURBSC *,int,int);			
-
-	// Function: New_NurbsS
-	// NURBS曲面のメモリー確保
-	int New_NurbsS(NURBSS *,int [],int []);		
 
 	// Function: New_TrmS
 	// トリム面のメモリー確保
@@ -175,14 +157,6 @@ public:
 	// Function: CalcTanVecOnNurbsC
 	// NURBS曲線上のtにおける単位接ベクトルをもとめる
 	Coord CalcTanVecOnNurbsC(NURBSC *,double);					
-
-	// Function: ConnectNurbsSU
-	// 2枚のNURBS曲面を連結する(U方向に長くなる)(S1_U1とS2_U0を連結)
-	int ConnectNurbsSU(NURBSS *,NURBSS *,NURBSS *);				
-
-	// Function: ConnectNurbsSV
-	// 2枚のNURBS曲面を連結する(V方向に長くなる)(S1_V1とS2_V0を連結)
-	int ConnectNurbsSV(NURBSS *,NURBSS *,NURBSS *);				
 
 	// Function: CalcCurvatureNurbsC
 	// NURBS曲線の曲率を求める
@@ -217,14 +191,6 @@ public:
 	// Function: CalcDeltaPtsOnNurbsC
 	// 指定した間隔でNURBS曲線上の座標値を求める
 	int CalcDeltaPtsOnNurbsC(NURBSC *,double,ACoord&);			
-
-    // Function: CalcConstScallop
-    // 等スキャロップ点を算出
-    int CalcConstScallop(NURBSS *, NURBSC *, double, double, double *, double *, int);
-
-    // Function: CalcConstPitch
-    // 等ピッチ点を算出
-    int CalcConstPitch(NURBSS *,NURBSC *, double, double, double *, int);
 
 private:
 
@@ -272,22 +238,6 @@ private:
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
 	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double); 
-
-	// Function: SetKnotVecSU_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向ノット定義域を設定する)
-	void SetKnotVecSU_ConnectS(NURBSS *,NURBSS *,NURBSS *);			
-
-	// Function: SetKnotVecSV_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向ノット定義域を設定する)
-	void SetKnotVecSV_ConnectS(NURBSS *,NURBSS *,NURBSS *);			
-
-	// Function: SetCPSU_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のU方向コントロールポイントとウェイトを設定する)
-	void SetCPSU_ConnectS(NURBSS *,NURBSS *,NURBSS *);				
-
-	// Function: SetCPSV_ConnectS
-	// (private)NURBS曲面連結用SUB関数(連結後の曲面のV方向コントロールポイントとウェイトを設定する)
-	void SetCPSV_ConnectS(NURBSS *,NURBSS *,NURBSS *);				
 
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する

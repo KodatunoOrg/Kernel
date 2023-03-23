@@ -93,4 +93,8 @@ Coord GetMinDistance(const Coord&, const VCoord&);
 // (private)指定した点が他の2点を対角とする立方体の中に存在するかを調べる
 int CheckClossedPoints(const Coord&, const Coord&, const Coord&);
 
+// Function: ChangeKnotVecRange
+// ノットベクトルのパラメータ定義域を変更する
+void ChangeKnotVecRange(ublasVector&, int, int, int, double, double);
+
 #endif
