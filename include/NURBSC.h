@@ -102,6 +102,53 @@ public:
     // 2次元NURBS曲線と線分との交点を求める
     int ClacIntersecPtsNurbsCLineSeg(const Coord&, const Coord&, double, double, double*, double*) const;
 
+	// Function: CalcDeltaPtsOnNurbsC
+	// 指定した分割数でNURBS曲線上の座標値を求める
+	int CalcDeltaPtsOnNurbsC(int, ACoord&) const;
+
+	// Function: CalcExtremumNurbsC
+	// NURBS曲線の指定した方向における極値の座標値を得る
+	int CalcExtremumNurbsC(const Coord&, ublasVector&, int) const;
+
+	// Function: CalcNurbsCLength
+	// NURBS曲線の線分長を求める
+	double CalcNurbsCLength(void) const;
+
+	// Function: CalcNurbsCLength
+	// NURBS曲線の指定区間の線分長を求める
+	double CalcNurbsCLength(double, double) const;
+
+	// Function: CalcTanVecOnNurbsC
+	// NURBS曲線上のtにおける単位接ベクトルをもとめる
+	Coord CalcTanVecOnNurbsC(double) const;
+
+	// Function: CalcCurvatureNurbsC
+	// NURBS曲線の曲率を求める
+	double CalcCurvatureNurbsC(double) const;
+
+	// Function: DivNurbsC
+	// NURBS曲線を指定した位置（端からの距離）で分割する
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsC(double) const;
+
+	// Function: DivNurbsCParam
+	// NURBS曲線を指定したパラメータ値で分割する
+	boost::tuple<NURBSC*, NURBSC*> DivNurbsCParam(double) const;
+
+	// Function: ConnectNurbsC
+	// NURBS曲線の連結
+	int ConnectNurbsC(const NURBSC*, NURBSC*) const;
+
+	// Function: CalcParamLengthOnNurbsC
+	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
+	double CalcParamLengthOnNurbsC(double, double) const;
+
+	// Function: CalcDeltaPtsOnNurbsC
+	// 指定した間隔でNURBS曲線上の座標値を求める
+	int CalcDeltaPtsOnNurbsC(double, ACoord&) const;
+
+//	double CalcTorsionNurbsC(double) const;					// NURBS曲線の捩率を求める（未実装）
+//	int CalcDeltaParamsOnNurbsC(double, Coord *) const;		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する（未実装）
+
 	//
 
 	// Function: ShiftNurbsC
@@ -116,10 +163,24 @@ public:
 	// NURBS曲線を回転
 	void RotNurbsC(const Coord&, double);
 
+	// Function: ReverseNurbsC
+	// NURBS曲線のノットベクトル向きを反転する
+	void ReverseNurbsC(void);
+
+	//
+
+	// Function: DebugForNurbsC
+	// NURBS曲線情報をデバッグプリント
+	void DebugForNurbsC(void) const;
+
 private:
 	// Function: GetNurbsCCoef
 	// (private)NURBS曲線の係数を求める(最高3次)
 	int GetNurbsCCoef(const ublasMatrix&, int, ACoord&, ublasVector&) const;
+
+	// Function: InsertNewKnotOnNurbsC
+	// (private)NURBS曲線に新たなノットを挿入する
+	int InsertNewKnotOnNurbsC(NURBSC*, double, int) const;
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 
