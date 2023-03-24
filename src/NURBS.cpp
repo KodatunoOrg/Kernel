@@ -9,10 +9,6 @@
 // (private)点列数から生成するコントロールポイント数を算定する
 static int SetApproximationCPnum(int);
 
-// Function: GetEqIntervalKont
-// 曲線/曲面パラメータから等間隔なノットベクトルを算出
-static ublasVector GetEqIntervalKont(int, int);
-
 // Function: GetCurveKnotParam1
 // (private)各通過点の曲線パラメータを算出(コード長の比から算出)
 static ublasVector GetCurveKnotParam1(const ACoord&);

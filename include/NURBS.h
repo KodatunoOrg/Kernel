@@ -115,6 +115,10 @@ ublasVector GetApproximatedKnot(const ublasVector&, int, int, int);
 // (private)最小2乗法で近似コントロールポイントを求める
 void CalcApproximationCP_LSM(const ACoord&, const ublasVector&, const ublasVector&, int, int, int, int, ACoord&);
 
+// Function: GetEqIntervalKont
+// 曲線/曲面パラメータから等間隔なノットベクトルを算出
+ublasVector GetEqIntervalKont(int, int);
+
 // Function: GenNurbsCfromCP
 // コントロールポイントからNURBS曲線を生成する
 NURBSC* GenNurbsCfromCP(const ACoord&, int);
