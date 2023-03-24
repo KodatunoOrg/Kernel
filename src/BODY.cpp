@@ -289,15 +289,13 @@ void BODY::CopyBody(BODY* body)
 //	deg - 回転角度
 void BODY::RotBody(Coord Axis,double deg)
 {
-	NURBS_Func NFunc;
-
 	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面の回転
 		x->RotNurbsS(Axis,deg);
 	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線の回転
 		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-			NFunc.RotNurbsC(x,Axis,deg);
+			x->RotNurbsC(Axis,deg);
 	}
 }
 
@@ -309,15 +307,13 @@ void BODY::RotBody(Coord Axis,double deg)
 //	d - 移動量
 void BODY::ShiftBody(Coord d)
 {
-	NURBS_Func NFunc;
-
 	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面のシフト
 		x->ShiftNurbsS(d);
 	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
 		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-			NFunc.ShiftNurbsC(x,d);
+			x->ShiftNurbsC(d);
 	}
 }
 
@@ -328,16 +324,13 @@ void BODY::ShiftBody(Coord d)
 //		  r - X, Y, Z各方向それぞれの拡大(縮小)率(1を基準)
 void BODY::ExpandBody(Coord r)
 {
-	NURBS_Func NFunc;
-
-
 	BOOST_FOREACH(NURBSS* x, vNurbsS) {			// NURBS曲面のシフト
 		x->ChRatioNurbsS(r);
 	}
 
 	BOOST_FOREACH(NURBSC* x, vNurbsC) {			// NURBS曲線のシフト
 		if(x->EntUseFlag == GEOMTRYELEM)		// NURBS曲面のパラメトリック要素としてのNURBS曲線に関しては何もしない
-		NFunc.ChRatioNurbsC(x,r);				// NURBS曲線の拡大
+			x->ChRatioNurbsC(r);				// NURBS曲線の拡大
 	}
 }
 // Function: RegistBody

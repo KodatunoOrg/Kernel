@@ -11,38 +11,6 @@ public:
 	// トリム面を生成する
 	int GenTrimdNurbsS(TRIMD_NURBSS *,TRIMD_NURBSS);			
 
-	// Function: CalcIntersecCurve
-	// NURBS曲線と平面との交点を求める(ニュートン法)
-	int CalcIntersecCurve(NURBSC *,Coord,Coord,int,ublasVector&,int,int);	
-
-	// Function: CalcIntersecCurve3
-	// 3次以下のNURBS曲線と平面との交点を求める
-	int CalcIntersecCurve3(NURBSC *,Coord,Coord,double *,int);	
-
-	// Function: CalcIntersecPtsNurbsCNurbsCParam
-    // 2次元NURBS曲線同士の交点を求める
-	VCoord CalcIntersecPtsNurbsCNurbsCParam(NURBSC *,NURBSC *,int);
-
-    // Function: CalcIntersecPtsNurbsCLine
-    // 2次元NURBS曲線と直線との交点を求める
-    int ClacIntersecPtsNurbsCLine(NURBSC *, Coord, Coord, double *, double *);
-
-    // Function: CalcIntersecPtsNurbsCLineSeg
-    // 2次元NURBS曲線と線分との交点を求める
-    int ClacIntersecPtsNurbsCLineSeg(NURBSC *, Coord, Coord, double, double, double *, double *);
-
-	// Function: ShiftNurbsC
-	// NURBS曲線のシフト
-	void ShiftNurbsC(NURBSC *,Coord);							
-
-	// Function: ChRatioNurbsC
-	// NURBS曲線の倍率を変更する
-	void ChRatioNurbsC(NURBSC *,Coord);							
-
-	// Function: RotNurbsC
-	// NURBS曲線を回転
-	void RotNurbsC(NURBSC *,Coord,double);						
-
 	// Function: DetermPtOnTRMSurf
 	// 注目中のNURBS曲面上の1点(u,v)がトリミング領域内にあるのかを判定する
 	int DetermPtOnTRMSurf(TRMS *,double,double);					
@@ -154,10 +122,6 @@ public:
 
 private:
 
-
-	// Function: GetNurbsCCoef
-	// (private)NURBS曲線の係数を求める(最高3次)
-	int GetNurbsCCoef(NURBSC *,ublasMatrix&,int,ACoord&,ublasVector&);	
 
 	// Function: DetermPtOnTRMSurf_sub
 	// (private)トリム境界線が複合曲線の場合のトリミング領域内外判定

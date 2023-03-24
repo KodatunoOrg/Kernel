@@ -81,6 +81,45 @@ public:
     // Function: CalcIntersecPtNurbsPtDescrete
     // 空間上の1点からNURBS曲線上の最近傍点を求める(離散的)
     void CalcIntersecPtNurbsPtDescrete(const Coord&, int, int, double, double, double *) const;
+
+	// Function: CalcIntersecCurve
+	// NURBS曲線と平面との交点を求める(ニュートン法)
+	int CalcIntersecCurve(const Coord&, const Coord&, int, ublasVector&, int, int) const;
+
+	// Function: CalcIntersecCurve3
+	// 3次以下のNURBS曲線と平面との交点を求める
+	int CalcIntersecCurve3(const Coord&, const Coord&, double*, int) const;
+
+	// Function: CalcIntersecPtsNurbsCNurbsCParam
+    // 2次元NURBS曲線同士の交点を求める
+	VCoord CalcIntersecPtsNurbsCNurbsCParam(const NURBSC*, int) const ;
+
+    // Function: CalcIntersecPtsNurbsCLine
+    // 2次元NURBS曲線と直線との交点を求める
+    int ClacIntersecPtsNurbsCLine(const Coord&, const Coord&, double*, double*) const;
+
+    // Function: CalcIntersecPtsNurbsCLineSeg
+    // 2次元NURBS曲線と線分との交点を求める
+    int ClacIntersecPtsNurbsCLineSeg(const Coord&, const Coord&, double, double, double*, double*) const;
+
+	//
+
+	// Function: ShiftNurbsC
+	// NURBS曲線のシフト
+	void ShiftNurbsC(const Coord&);
+
+	// Function: ChRatioNurbsC
+	// NURBS曲線の倍率を変更する
+	void ChRatioNurbsC(const Coord&);
+
+	// Function: RotNurbsC
+	// NURBS曲線を回転
+	void RotNurbsC(const Coord&, double);
+
+private:
+	// Function: GetNurbsCCoef
+	// (private)NURBS曲線の係数を求める(最高3次)
+	int GetNurbsCCoef(const ublasMatrix&, int, ACoord&, ublasVector&) const;
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 
