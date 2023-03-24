@@ -1,25 +1,7 @@
 ﻿#include <stdexcept>	// throw
 #include <algorithm>	// reverse ほか
 #include "KodatunoKernel.h"
-/*
-// Function: New_NurbsC
-// Nurbs曲線のメモリー確保
-//
-// Parameters: 
-// *nurb - メモリー確保するNurbs曲線へのポインタ
-// K - コントロールポイントの数
-// N - ノットベクトルの数
-//
-// Return:
-// 成功：KOD_TRUE, 失敗：KOD_ERR
-int NURBS_Func::New_NurbsC(NURBSC *nurb,int K, int N)
-{
-	nurb->T.resize(N);
-	nurb->W.resize(K);
-	nurb->cp.resize(boost::extents[K]);
-	return KOD_TRUE;
-}
-*/
+
 // Function: New_TrmS
 // トリム面のメモリー確保
 //
@@ -597,60 +579,4 @@ Coord NURBS_Func::TrimNurbsSPlaneSub1(double a,double b,double x0,double y0,doub
 	c.y = (p*b-q*a)/(p-a);
 
 	return c;
-}
-
-// Function: SetKnotVecC_ConnectC
-// (private)2本の曲線を繋げたときのノットベクトルを設定する
-// 
-// Parameters:
-// *C1, *Cs - 連結する2つのNURBS曲線
-// *C_ - 連結後のNURBS曲線
-void NURBS_Func::SetKnotVecC_ConnectC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
-{
-	// コード長を調べる
-	double s=0,e=NORM_KNOT_VAL,c=0;			// 開始，終了，連結部ノットベクトル
-	double l1=0,l2=0;						// 各曲線のノットベクトルのコード長
-	for(int i=0;i<C1->N-1;i++)
-		l1 += C1->CalcNurbsCCoord(C1->T[i+1]).CalcDistance(C1->CalcNurbsCCoord(C1->T[i]));	// C1のコード長
-	for(int i=0;i<C2->N-1;i++)
-		l2 += C2->CalcNurbsCCoord(C2->T[i+1]).CalcDistance(C2->CalcNurbsCCoord(C2->T[i]));	// C2のコード長
-	c = l1/(l1+l2);	// 結合点のノットベクトル値
-
-	// C_のノットベクトル範囲を得る
-	ublasVector T1(C1->N);	
-	ublasVector T2(C2->N);	
-	T1 = C1->T;		// C1のノットベクトルをT1にコピー
-	T2 = C2->T;		// C2のノットベクトルをT2にコピー
-	ChangeKnotVecRange(T1,C1->N,C1->M,C1->K,s,c);	// C1(T1)のノットベクトルの範囲を変更
-	ChangeKnotVecRange(T2,C2->N,C2->M,C2->K,c,e);	// C2(U2)のノットベクトルの範囲を変更
-	C_->V[0] = s;						// C_のノットベクトルの範囲
-	C_->V[1] = e;
-	C_->N = C1->N + C2->N - C2->M - 1;	// C_のノットベクトル数
-
-	// C_のノットベクトルを得る
-	for(int i=0;i<C1->K;i++)
-		C_->T[i] = T1[i];
-	for(int i=1;i<C2->N;i++)
-		C_->T[C1->K+i-1] = T2[i];
-
-}
-
-// Function: SetCPC_ConnectC
-// (private)2本の曲線を繋げたときのコントロールポイントとウェイトを設定する
-// 
-// Parameters:
-// *C1, *C2 - 連結する2つのNURBS曲線
-// *C_ - 連結後のNURBS曲線
-void NURBS_Func::SetCPC_ConnectC(NURBSC *C1,NURBSC *C2,NURBSC *C_)
-{
-	C_->K = C1->K + C2->K - 1;
-
-	for(int i=0;i<C1->K;i++){
-		C_->cp[i] = C1->cp[i];
-		C_->W[i] = C1->W[i];
-	}
-	for(int i=1;i<C2->K;i++){
-		C_->cp[C1->K+i-1] = C2->cp[i];
-		C_->W[C1->K+i-1] = C2->W[i];
-	}
 }

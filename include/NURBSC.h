@@ -134,10 +134,6 @@ public:
 	// NURBS曲線を指定したパラメータ値で分割する
 	boost::tuple<NURBSC*, NURBSC*> DivNurbsCParam(double) const;
 
-	// Function: ConnectNurbsC
-	// NURBS曲線の連結
-	int ConnectNurbsC(const NURBSC*, NURBSC*) const;
-
 	// Function: CalcParamLengthOnNurbsC
 	// NURBS曲線において一端からの指定距離におけるパラメータ値を返す
 	double CalcParamLengthOnNurbsC(double, double) const;
@@ -145,6 +141,10 @@ public:
 	// Function: CalcDeltaPtsOnNurbsC
 	// 指定した間隔でNURBS曲線上の座標値を求める
 	int CalcDeltaPtsOnNurbsC(double, ACoord&) const;
+
+    // Function: ConnectNurbsC
+    // NURBS曲線の連結
+    int ConnectNurbsC(const NURBSC*, NURBSC*) const;
 
 //	double CalcTorsionNurbsC(double) const;					// NURBS曲線の捩率を求める（未実装）
 //	int CalcDeltaParamsOnNurbsC(double, Coord *) const;		// 指定したパラメータの間隔でNURBS曲線上の座標値を出力する（未実装）
@@ -181,6 +181,14 @@ private:
 	// Function: InsertNewKnotOnNurbsC
 	// (private)NURBS曲線に新たなノットを挿入する
 	int InsertNewKnotOnNurbsC(NURBSC*, double, int) const;
+
+	// Function: SetKnotVecC_ConnectC
+	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)
+	void SetKnotVecC_ConnectC(const NURBSC*, NURBSC*) const;
+
+	// Function: SetCPC_ConnectC
+	// (private)NURBS曲線連結用SUB関数(連結後の曲線のコントロールポイントとウェイトを設定する)
+	void SetCPC_ConnectC(const NURBSC*, NURBSC*) const;
 };
 typedef std::vector<NURBSC*>	VNURBSC;
 

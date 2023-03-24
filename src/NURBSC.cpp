@@ -1348,72 +1348,6 @@ boost::tuple<NURBSC*, NURBSC*> NURBSC::DivNurbsCParam(double t) const
 	return boost::make_tuple(C1, C2);
 }
 
-// Function: ConnectNurbsC
-// 2本のNURBS曲線を連結する
-//
-// Parameter:
-// *C1 - 曲線1
-// *C2 - 曲線2
-// *C_ - 連結後の曲線を格納
-//
-// Return:
-// 成功：KOD_TRUE,  失敗：KOD_FALSE
-int NURBSC::ConnectNurbsC(const NURBSC *C2, NURBSC* C_) const
-{
-	int flag = -1;		// 連結位置判別用フラグ
-
-	// 2曲線の連結位置を調べ，連結点がC1(1), C2(0)となるようどちらかの曲線を調整する
-	if(C1->cp[0].DiffCoord(C2->cp[0]) == KOD_TRUE){
-		ReverseNurbsC(C1);				// C1の向きを反転する
-	}
-	else if(C1->cp[0].DiffCoord(C2->cp[C2->K-1]) == KOD_TRUE){
-		NURBSC *C;
-		C = C2;
-		C2 = C1;
-		C1 = C;
-	}
-	else if(C1->cp[C1->K-1].DiffCoord(C2->cp[0]) == KOD_TRUE){
-		// このケースはOK．特に調整必要なし
-	}
-	else if(C1->cp[C1->K-1].DiffCoord(C2->cp[C2->K-1]) == KOD_TRUE){
-		ReverseNurbsC(C2);				// C2の向きを反転する
-	}
-	else{
-//		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't share the same coordinate value.");
-		return KOD_ERR;
-	}
-
-	// 2曲線の階数が等しいこと
-	if(C1->M != C2->M){
-//		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't have the same rank.");
-		return KOD_ERR;
-	}
-
-	int K = C1->K + C2->K - 1;				// C_のコントロールポイントの数
-	int N = C1->N + C2->N - C2->M - 1;		// C_のノットベクトルの数
-
-	New_NurbsC(C_,K,N);						// C_内のメモリー確保
-
-	SetKnotVecC_ConnectC(C1,C2,C_);			// C_のノット定義域を指定
-
-	SetCPC_ConnectC(C1,C2,C_);				// C_のコントロールポイントとウェイトを指定
-
-	//for(int i=0;i<C_->N;i++)
-	//	fprintf(stderr,"%d,%lf\n",i+1,C_->T[i]);
-	//fprintf(stderr,"\n");
-	//for(int i=0;i<C_->K;i++)
-	//	fprintf(stderr,"%d,%lf,%lf,%lf,%lf\n",i+1,C_->cp[i].x,C_->cp[i].y,C_->cp[i].z,C_->W[i]);
-
-	C_->M = C1->M;							// C_の階数を指定
-
-	for(int i=0;i<4;i++)
-		C_->prop[i] = C1->prop[i];
-	C_->EntUseFlag = C1->EntUseFlag;
-    C_->BlankStat = C1->BlankStat;
-
-	return KOD_TRUE;
-}
-
 // Function: CalcParamLengthOnNurbsC
 // NURBS曲線において一端からの指定距離におけるパラメータ値を返す
 //
@@ -1478,6 +1412,71 @@ int NURBSC::CalcDeltaPtsOnNurbsC(double D, ACoord& Pts) const
 	}
 
 	return k-1;
+}
+
+// Function: ConnectNurbsC
+// 2本のNURBS曲線を連結する
+//
+// Parameter:
+// *C1 - 曲線1
+// *C2 - 曲線2
+// *C_ - 連結後の曲線を格納
+//
+// Return:
+// 成功：KOD_TRUE,  失敗：KOD_FALSE
+int NURBSC::ConnectNurbsC(const NURBSC* C2s, NURBSC* C_) const
+{
+	// 2曲線の階数が等しいこと
+	if(this->M != C2s->M){
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't have the same rank.");
+		return KOD_ERR;
+	}
+
+	int flag = -1;		// 連結位置判別用フラグ
+	NURBSC	C1 = *this,	// 自分と相手の複製（作業用）
+			C2 = *C2s;
+
+	// 2曲線の連結位置を調べ，連結点がC1(1), C2(0)となるようどちらかの曲線を調整する
+	if(C1.cp[0].DiffCoord(C2.cp[0]) == KOD_TRUE){
+		C1.ReverseNurbsC();				// C1の向きを反転する
+	}
+	else if(C1.cp[0].DiffCoord(C2.cp[C2.K-1]) == KOD_TRUE){
+		std::swap(C1, C2);
+	}
+	else if(C1.cp[C1.K-1].DiffCoord(C2.cp[0]) == KOD_TRUE){
+		// このケースはOK．特に調整必要なし
+	}
+	else if(C1.cp[C1.K-1].DiffCoord(C2.cp[C2.K-1]) == KOD_TRUE){
+		C2.ReverseNurbsC();				// C2の向きを反転する
+	}
+	else{
+//		GuiIFB.SetMessage("NURBS_Func ERROR: Two Curves don't share the same coordinate value.");
+		return KOD_ERR;
+	}
+
+	int K = C1.K + C2.K - 1;			// C_のコントロールポイントの数
+	int N = C1.N + C2.N - C2.M - 1;		// C_のノットベクトルの数
+
+	C_ = new NURBSC();					// C_内のメモリー確保
+	C_->T.resize(N);
+	C_->W.resize(K);
+	C_->cp.resize(boost::extents[K]);
+
+	SetKnotVecC_ConnectC(&C2,C_);			// C_のノット定義域を指定
+	SetCPC_ConnectC(&C2,C_);				// C_のコントロールポイントとウェイトを指定
+
+	//for(int i=0;i<C_->N;i++)
+	//	fprintf(stderr,"%d,%lf\n",i+1,C_->T[i]);
+	//fprintf(stderr,"\n");
+	//for(int i=0;i<C_->K;i++)
+	//	fprintf(stderr,"%d,%lf,%lf,%lf,%lf\n",i+1,C_->cp[i].x,C_->cp[i].y,C_->cp[i].z,C_->W[i]);
+
+	C_->M = C1.M;							// C_の階数を指定
+	C_->prop = C1.prop;
+	C_->EntUseFlag = C1.EntUseFlag;
+    C_->BlankStat = C1.BlankStat;
+
+	return KOD_TRUE;
 }
 
 // Function: ShiftNurbsC
@@ -1654,84 +1653,59 @@ int NURBSC::InsertNewKnotOnNurbsC(NURBSC* C_, double t, int deg) const
 	return k+2;
 }
 
-// Function: InsertNewKnotOnNurbsC
-// (private)NURBS曲線に新たなノットを挿入する
-//
+// Function: SetKnotVecC_ConnectC
+// (private)2本の曲線を繋げたときのノットベクトルを設定する
+// 
 // Parameters:
-// *C - 元のNURBS曲線  
-// *C_ - 挿入対象のNURBS曲線     
-// t - 挿入するノット     
-// deg - 多重度
-//
-// Return:
-// 新たなノットベクトル列におけるtの挿入位置
-int NURBSC::InsertNewKnotOnNurbsC(NURBSC* C_, double t, int deg) const
+// *C1, *Cs - 連結する2つのNURBS曲線
+// *C_ - 連結後のNURBS曲線
+void NURBSC::SetKnotVecC_ConnectC(const NURBSC* C2, NURBSC *C_) const
 {
-	int k=0;					// tの挿入位置
-	int m = M;				// 階数
-	int n = K;				// コントロールポイントの数
+	// コード長を調べる
+	double s=0,e=NORM_KNOT_VAL,c=0;			// 開始，終了，連結部ノットベクトル
+	double l1=0,l2=0;						// 各曲線のノットベクトルのコード長
+	for(int i=0;i<N-1;i++)
+		l1 +=     CalcNurbsCCoord(    T[i+1]).CalcDistance(    CalcNurbsCCoord(    T[i]));	// C1のコード長
+	for(int i=0;i<C2->N-1;i++)
+		l2 += C2->CalcNurbsCCoord(C2->T[i+1]).CalcDistance(C2->CalcNurbsCCoord(C2->T[i]));	// C2のコード長
+	c = l1/(l1+l2);	// 結合点のノットベクトル値
 
-	ublasVector T_buf(K+M+deg);		// ノットベクトル一時格納用バッファ
-	ACoord cp_buf(boost::extents[K+deg]);// コントロールポイント一時格納用バッファ
-	ublasVector W_buf(K+deg);			// ウェイト一時格納用バッファ
-	//double T_buf[K+M+deg];
-	//Coord  cp_buf[K+deg];
-	//double W_buf[K+deg];
+	// C_のノットベクトル範囲を得る
+	ublasVector T1(    N);	
+	ublasVector T2(C2->N);	
+	T1 =     T;		// C1のノットベクトルをT1にコピー
+	T2 = C2->T;		// C2のノットベクトルをT2にコピー
+	ChangeKnotVecRange(T1,    N,    M,    K,s,c);	// C1(T1)のノットベクトルの範囲を変更
+	ChangeKnotVecRange(T2,C2->N,C2->M,C2->K,c,e);	// C2(U2)のノットベクトルの範囲を変更
+	C_->V[0] = s;						// C_のノットベクトルの範囲
+	C_->V[1] = e;
+	C_->N = N + C2->N - C2->M - 1;	// C_のノットベクトル数
 
+	// C_のノットベクトルを得る
+	for(int i=0;i<K;i++)
+		C_->T[i] = T1[i];
+	for(int i=1;i<C2->N;i++)
+		C_->T[K+i-1] = T2[i];
+}
 
-	// C_に元のNURBS曲線のT,cp,Wを初期値として代入
-	for(int i=0;i<m+n;i++)
-		C_->T[i] = T[i];
-	for(int i=0;i<n;i++)
+// Function: SetCPC_ConnectC
+// (private)2本の曲線を繋げたときのコントロールポイントとウェイトを設定する
+// 
+// Parameters:
+// *C1, *C2 - 連結する2つのNURBS曲線
+// *C_ - 連結後のNURBS曲線
+void NURBSC::SetCPC_ConnectC(const NURBSC* C2, NURBSC* C_) const
+{
+	C_->K = K + C2->K - 1;
+
+	for(int i=0;i<K;i++){
 		C_->cp[i] = cp[i];
-	for(int i=0;i<n;i++)
-		C_->W[i] = W[i];
-
-	// 多重度分，tの挿入を繰り返す
-	for(int count=0;count<deg;count++){
-		// 各bufにC_のT,cp,Wを代入
-		for(int i=0;i<n+m;i++)
-			T_buf[i] = C_->T[i];
-		for(int i=0;i<n;i++)
-			cp_buf[i] = C_->cp[i];
-		for(int i=0;i<n;i++)
-			W_buf[i] = C_->W[i];
-
-		// tの挿入位置kを調べる
-		k=0;
-		for(int i=0;i<n+m-1;i++){
-			if(t >= T_buf[i] && t < T_buf[i+1]){
-				k = i;
-				break;
-			}
-		}
-
-		// C_のノットベクトルを更新
-		for(int i=0;i<=k;i++)
-			C_->T[i] = T_buf[i];
-		C_->T[k+1] = t;
-		for(int i=k+2;i<=n+m;i++)
-			C_->T[i] = T_buf[i-1];
-
-		// コントロールポイントとウェイトの更新
-		for(int i=0;i<=k-m+1;i++){
-			C_->cp[i] = cp_buf[i];
-			C_->W[i] = W_buf[i];
-		}
-		for(int i=k-m+2;i<=k;i++){
-			double a = (t-T_buf[i])/(T_buf[i+m-1]-T_buf[i]);
-			C_->cp[i] = (cp_buf[i-1]*(1-a))+(cp_buf[i]*a);
-			C_->W[i] = (1-a)*W_buf[i-1] + a*W_buf[i];
-		}
-		for(int i=k+1;i<=n;i++){
-			C_->cp[i] = cp_buf[i-1];
-			C_->W[i] = W_buf[i-1];
-		}
-
-		n++;
+		C_->W[i]  = W[i];
 	}
-
-	return k+2;
+	for(int i=1;i<C2->K;i++){
+		C_->cp[K+i-1] = C2->cp[i];
+		C_->W[K+i-1] = C2->W[i];
+	}
 }
 
 ///////////////////////////////////////////////////////////

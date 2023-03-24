@@ -34,10 +34,6 @@ public:
 
 	int TrimNurbsSPlane(TRMS *,Coord,Coord);										// NURBS曲面を平面でトリムする(準備中)
 
-	// Function: New_NurbsC
-	// NURBS曲線のメモリー確保
-//	int New_NurbsC(NURBSC *,int,int);			
-
 	// Function: New_TrmS
 	// トリム面のメモリー確保
 	int New_TrmS(TRMS *,int);					
@@ -79,14 +75,6 @@ private:
 	// Function: TrimNurbsSPlaneSub1
 	// (private)TrimNurbsSPlaneのサブ関数(2直線の交点をもとめる)
 	Coord TrimNurbsSPlaneSub1(double,double,double,double,double,double); 
-
-	// Function: SetKnotVecC_ConnectC
-	// (private)NURBS曲線連結用SUB関数(連結後の曲線のノット定義域を設定する)
-	void SetKnotVecC_ConnectC(NURBSC *,NURBSC *,NURBSC *);			
-
-	// Function: SetCPC_ConnectC
-	// (private)NURBS曲線連結用SUB関数(連結後の曲線のコントロールポイントとウェイトを設定する)
-	void SetCPC_ConnectC(NURBSC *,NURBSC *,NURBSC *);				
 
 };
 
