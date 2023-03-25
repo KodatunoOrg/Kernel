@@ -190,6 +190,5 @@ private:
 	// (private)NURBS曲線連結用SUB関数(連結後の曲線のコントロールポイントとウェイトを設定する)
 	void SetCPC_ConnectC(const NURBSC*, NURBSC*) const;
 };
-typedef std::vector<NURBSC*>	VNURBSC;
 
 #endif

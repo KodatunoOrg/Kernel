@@ -264,9 +264,9 @@ void Describe_BODY::DrawTrimdSurf(const TRMS* TrmS)
 	gluEndTrim(NurbsSurf);
 
 	// 内周トリム(時計回りであること)
-	for(int j=0;j<TrmS->n2;j++){
+	for(int j=0;j<TrmS->vTI.size();j++){
 		gluBeginTrim(NurbsSurf);
-		DrawCurveOnParamSurfe(TrmS->pTI[j]);		// 面上線
+		DrawCurveOnParamSurfe(TrmS->vTI[j]);		// 面上線
 		gluEndTrim(NurbsSurf);
 	}
 

@@ -39,9 +39,6 @@
 #define CALC_OFFSET			2
 #define BS_DIV				11
 
-class NURBSC;
-class NURBSS;
-class SFQuant;
 #include "NURBSC.h"
 #include "NURBSS.h"
 

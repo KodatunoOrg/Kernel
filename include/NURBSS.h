@@ -284,6 +284,5 @@ private:
 	void SetCPSV_ConnectS(const NURBSS*, NURBSS*) const;
 
 };
-typedef std::vector<NURBSS*>	VNURBSS;
 
 #endif

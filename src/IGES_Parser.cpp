@@ -176,10 +176,10 @@ int IGES_PARSER::ModifyParamConect(BODY *body)
 				nc->cp[0] = bc->cp[bc->K-1];
 		}
 		// 内側トリム
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			for(int k=1;k<body->TrmS[i].pTI[j]->pB.CompC->N;k++){
-				bc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k-1].NurbsC;
-				nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
+		for(int j=0;j<body->TrmS[i].vTI.size();j++){
+			for(int k=1;k<body->TrmS[i].vTI[j]->pB.CompC->N;k++){
+				bc = body->TrmS[i].vTI[j]->pB.CompC->pDE[k-1].NurbsC;
+				nc = body->TrmS[i].vTI[j]->pB.CompC->pDE[k].NurbsC;
 				if(bc->cp[bc->K-1].DiffCoord2D(nc->cp[0]) == KOD_FALSE)
 					nc->cp[0] = bc->cp[bc->K-1];
 			}
@@ -265,9 +265,9 @@ int IGES_PARSER::NormalizeKnotRange(BODY *body,double val)
 			ChangeKnotVecRange(nc->V,nc->T,nc->M,nc->K,val);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			for(int k=0;k<body->TrmS[i].pTI[j]->pB.CompC->N;k++){
-				NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
+		for(int j=0;j<body->TrmS[i].vTI.size();j++){
+			for(int k=0;k<body->TrmS[i].vTI[j]->pB.CompC->N;k++){
+				NURBSC *nc = body->TrmS[i].vTI[j]->pB.CompC->pDE[k].NurbsC;
 				for(int l=0;l<nc->K;l++){
 					nc->cp[l].x = ChangeKnot(nc->cp[l].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],val);
 					nc->cp[l].y = ChangeKnot(nc->cp[l].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],val);
@@ -355,9 +355,9 @@ int IGES_PARSER::ExpandKnotRange(BODY *body)
 			ChangeKnotVecRange(nc->V,nc->T,nc->M,nc->K,NORM_KNOT_VAL);
 		}
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			for(int k=0;k<body->TrmS[i].pTI[j]->pB.CompC->N;k++){
-				NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
+		for(int j=0;j<body->TrmS[i].vTI.size();j++){
+			for(int k=0;k<body->TrmS[i].vTI[j]->pB.CompC->N;k++){
+				NURBSC *nc = body->TrmS[i].vTI[j]->pB.CompC->pDE[k].NurbsC;
 				for(int l=0;l<nc->K;l++){
 					nc->cp[l].x = ChangeKnot(nc->cp[l].x,body->TrmS[i].pts->S[M0-1],body->TrmS[i].pts->S[K0],uval);
 					nc->cp[l].y = ChangeKnot(nc->cp[l].y,body->TrmS[i].pts->T[M1-1],body->TrmS[i].pts->T[K1],vval);
@@ -428,8 +428,8 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 		}
 
 		// トリム面のパラメトリック平面における内側トリム曲線の変更
-		for(int j=0;j<body->TrmS[i].n2;j++){
-			otrmnum = body->TrmS[i].pTI[j]->pB.CompC->N;
+		for(int j=0;j<body->TrmS[i].vTI.size();j++){
+			otrmnum = body->TrmS[i].vTI[j]->pB.CompC->N;
 
 			if(otrmnum > 2){
 				p.resize(boost::extents[otrmnum]);
@@ -437,7 +437,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 
 				// 内側トリムを構成する各NURBS曲線の始点を取り出す
 				for(int k=0;k<otrmnum;k++){
-					NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
+					NURBSC *nc = body->TrmS[i].vTI[j]->pB.CompC->pDE[k].NurbsC;
 					p[k] = nc->cp[0];
 				}
 				flag = DiscriminateCW2D(p);	// 時計・反時計周りを調べる
@@ -445,7 +445,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 				// 内側トリムが反時計回りだったら、時計回りに変更する
 				if(flag == KOD_TRUE){
 					for(int k=0;k<otrmnum;k++){
-						NURBSC *nc = body->TrmS[i].pTI[j]->pB.CompC->pDE[k].NurbsC;
+						NURBSC *nc = body->TrmS[i].vTI[j]->pB.CompC->pDE[k].NurbsC;
 						std::reverse(nc->cp.begin(), nc->cp.end());	// Reverse(nc->cp,nc->K);		// コントロールポイント列の反転
 						// ノットベクトル列を反転
 						for(int l=0;l<nc->N;l++){
@@ -455,7 +455,7 @@ int IGES_PARSER::CheckCWforTrim(BODY *body)
 						std::reverse(nc->T.begin(), nc->T.end());	// Reverse(nc->T,nc->N);
 					}
 					// COMPELEMを反転
-					ReverseCOMPELEM(body->TrmS[i].pTI[j]->pB.CompC);
+					ReverseCOMPELEM(body->TrmS[i].vTI[j]->pB.CompC);
 				}
 			}
 		}
@@ -1002,20 +1002,21 @@ int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY* body)
 	body->TrmS[TypeCount[_TRIMMED_SURFACE]].pts = (NURBSS *)GetDEPointer(pdnum,body);		// トリムされるSurface Entityへのポインタを取得
 	body->TrmS[TypeCount[_TRIMMED_SURFACE]].pts->TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
 	body->TrmS[TypeCount[_TRIMMED_SURFACE]].n1 = CatchStringI(&p);		// ０：外周がDの境界と一致している　１：それ以外
-	body->TrmS[TypeCount[_TRIMMED_SURFACE]].n2 = CatchStringI(&p);		// Trimmed Surfaceの内周の単純閉曲線の数
+//	body->TrmS[TypeCount[_TRIMMED_SURFACE]].n2 = CatchStringI(&p);		// Trimmed Surfaceの内周の単純閉曲線の数
+	int n2 = CatchStringI(&p);											// Trimmed Surfaceの内周の単純閉曲線の数（受けのみ）
 
 	pdnum = CatchStringI(&p);		// Trimmed Surfaceの外周の単純閉曲線の数
 	body->TrmS[TypeCount[_TRIMMED_SURFACE]].pTO = (CONPS *)GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得
 
 	// 単純閉曲線N2の数だけメモリー確保
-	if((NFunc.New_TrmS(&body->TrmS[TypeCount[_TRIMMED_SURFACE]],body->TrmS[TypeCount[_TRIMMED_SURFACE]].n2)) == KOD_ERR){
+//	if((NFunc.New_TrmS(&body->TrmS[TypeCount[_TRIMMED_SURFACE]],body->TrmS[TypeCount[_TRIMMED_SURFACE]].n2)) == KOD_ERR){
 //		GuiIFB.SetMessage("PARAMETER SECTION KOD_ERROR:fail to allocate memory");
-		return KOD_ERR;
-	}
+//		return KOD_ERR;
+//	}
 
-	for(i=0;i<body->TrmS[TypeCount[_TRIMMED_SURFACE]].n2;i++){
+	for(i=0;i<body->TrmS[TypeCount[_TRIMMED_SURFACE]].vTI.size();i++){
 		pdnum = CatchStringI(&p);	// Trimmed Surfaceの内周の単純閉曲線のDE部の値を取得
-		body->TrmS[TypeCount[_TRIMMED_SURFACE]].pTI[i] = (CONPS *)GetDEPointer(pdnum,body);	// 単純閉曲線構造体へのポインタを取得
+		body->TrmS[TypeCount[_TRIMMED_SURFACE]].vTI[i] = (CONPS *)GetDEPointer(pdnum,body);	// 単純閉曲線構造体へのポインタを取得
 	}
 
 	body->TrmS[TypeCount[_TRIMMED_SURFACE]].pD = pD;		// DE部のシーケンスナンバーを得る

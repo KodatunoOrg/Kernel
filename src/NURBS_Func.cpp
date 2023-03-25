@@ -1,7 +1,7 @@
 ﻿#include <stdexcept>	// throw
 #include <algorithm>	// reverse ほか
 #include "KodatunoKernel.h"
-
+/*
 // Function: New_TrmS
 // トリム面のメモリー確保
 //
@@ -39,7 +39,7 @@ void NURBS_Func::Free_TrmS(TRMS *a)
 {
 	delete[] a->pTI;
 }
-
+*/
 // Function: New_CompC
 // 複合曲線のメモリー確保
 //
@@ -104,8 +104,8 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
 	// トリム面を構成するNURBS曲線の総数をカウント
-	for(int i=0;i<tnurb.n2;i++){
-		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
+	for(int i=0;i<tnurb.vTI.size();i++){
+		for(int j=0;j<tnurb.vTI[i]->pB.CompC->N;j++){
 			curve_num++;
 		}
 	}
@@ -114,10 +114,10 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	NURBSS* nurbsS = new NURBSS(tnurb.pts);					// 新たなNURBS曲面を1つ得る
 	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
 
-	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
+//	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
 
-	conps_i = new CONPS[tnurb.n2];		// 内側を構成する面上線のメモリー確保
-	compc_i = new COMPC[tnurb.n2];		// 内側を構成する複合曲線のメモリー確保
+	conps_i = new CONPS[tnurb.vTI.size()];		// 内側を構成する面上線のメモリー確保
+	compc_i = new COMPC[tnurb.vTI.size()];		// 内側を構成する複合曲線のメモリー確保
 
 	// NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
 	// 外周トリム
@@ -134,22 +134,21 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 
 	// 内周トリム
 	curve_num = 0;
-	for(int i=0;i<tnurb.n2;i++){
-		TNurbs->pTI[i] = &(conps_i[i]);
-		New_CompC(&compc_i[i],tnurb.pTI[i]->pB.CompC->N);
-		for(int j=0;j<tnurb.pTI[i]->pB.CompC->N;j++){
-			compc_i[i].pDE[j].NurbsC = new NURBSC(tnurb.pTI[i]->pB.CompC->pDE[j].NurbsC);
-			compc_i[i].DEType[j] = tnurb.pTI[i]->pB.CompC->DEType[j];
+	for(int i=0;i<tnurb.vTI.size();i++){
+		TNurbs->vTI.push_back(&(conps_i[i]));
+		New_CompC(&compc_i[i],tnurb.vTI[i]->pB.CompC->N);
+		for(int j=0;j<tnurb.vTI[i]->pB.CompC->N;j++){
+			compc_i[i].pDE[j].NurbsC = new NURBSC(tnurb.vTI[i]->pB.CompC->pDE[j].NurbsC);
+			compc_i[i].DEType[j] = tnurb.vTI[i]->pB.CompC->DEType[j];
 			curve_num++;
 		}
-		TNurbs->pTI[i]->pB.CompC = &(compc_i[i]);
-		TNurbs->pTI[i]->BType = tnurb.pTI[i]->BType;
-		TNurbs->pTI[i]->pB.CompC->DegeFlag = tnurb.pTI[i]->pB.CompC->DegeFlag;
-		TNurbs->pTI[i]->pB.CompC->DegeNurbs = tnurb.pTI[i]->pB.CompC->DegeNurbs;
+		TNurbs->vTI[i]->pB.CompC = &(compc_i[i]);
+		TNurbs->vTI[i]->BType = tnurb.vTI[i]->BType;
+		TNurbs->vTI[i]->pB.CompC->DegeFlag = tnurb.vTI[i]->pB.CompC->DegeFlag;
+		TNurbs->vTI[i]->pB.CompC->DegeNurbs = tnurb.vTI[i]->pB.CompC->DegeNurbs;
 	}
 
 	TNurbs->n1 = tnurb.n1;
-	TNurbs->n2 = tnurb.n2;
 
 	return KOD_TRUE;
 }
@@ -274,14 +273,12 @@ int NURBS_Func::DetermPtOnTRMSurf(TRMS *Trim,double u,double v)
 	}
 
 	// 内周トリム
-	if(Trim->n2){
-		for(int i=0;i<Trim->n2;i++){		// 内周のトリミング領域全てに対して
-			flag = DetermPtOnTRMSurf_sub(Trim->pTI[i],u,v);
-			if(flag == KOD_ERR)
-				return KOD_ERR;
-			else if(flag == KOD_TRUE)	// 内
-				return KOD_FALSE;
-		}
+	for(int i=0;i<Trim->vTI.size();i++){		// 内周のトリミング領域全てに対して
+		flag = DetermPtOnTRMSurf_sub(Trim->vTI[i],u,v);
+		if(flag == KOD_ERR)
+			return KOD_ERR;
+		else if(flag == KOD_TRUE)	// 内
+			return KOD_FALSE;
 	}
 
 	return KOD_TRUE;
@@ -377,7 +374,7 @@ int NURBS_Func::GetPtsOnOuterTRMSurf(TRMS *Trm,ACoord& Pt,int N)
 int NURBS_Func::GetPtsOnInnerTRMSurf(TRMS *Trm,ACoord& Pt,int N)
 {
 	// 内周トリムが存在しない場合は0をリターン
-	if(!Trm->n2){
+	if(Trm->vTI.empty()){
 		return KOD_FALSE;
 	}
 
@@ -389,9 +386,9 @@ int NURBS_Func::GetPtsOnInnerTRMSurf(TRMS *Trm,ACoord& Pt,int N)
 	int N_ = N;
 
 	// 内周トリムの数だけループ
-	for(int k=0;k<Trm->n2;k++){
+	for(int k=0;k<Trm->vTI.size();k++){
 
-		CompC = Trm->pTI[k]->pB.CompC;	
+		CompC = Trm->vTI[k]->pB.CompC;	
 
 		// メモリ確保
 		P.resize(boost::extents[CompC->N*TRM_BORDERDIVNUM]);

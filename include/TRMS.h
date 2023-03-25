@@ -10,19 +10,8 @@ class NURBSS;
 class TRMS
 {
 public:
-	TRMS() {
-		pts = NULL;
-		n1 = 0;
-		n2 = 0;
-		pTO = NULL;
-		pTI = NULL;
-		pD = 0;
-	}
-	~TRMS() {
-		if ( pts )		delete	pts;
-		if ( pTO )		delete	pTO;
-		if ( pTI )		delete	pTI;
-	}
+	TRMS();
+	~TRMS();
 
     // Function: GetOuterEdgeNum
     // トリム面を構成する外側エッジの数を取得する
@@ -58,7 +47,7 @@ public:
 
     // Variable: n2
     // Trimmed Surfaceの内周にあたる単純閉曲線の数
-    int n2;
+//  int n2;     -> vTI.size()
 
     // Variable: *pTO
     // Trimmed Surfaceの外周にあたる単純閉曲線構造体へのポインタ
@@ -66,7 +55,7 @@ public:
 
     // Variable: **pTI
     // Trimmed Surfaceの内周にあたる単純閉曲線構造体へのポインタ
-    CONPS **pTI;
+    VCONPS vTI;
 
     // Variable: pD
     // ディレクトリ部への逆ポインタ

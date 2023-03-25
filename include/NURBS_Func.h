@@ -33,7 +33,7 @@ public:
 
 
 	int TrimNurbsSPlane(TRMS *,Coord,Coord);										// NURBS曲面を平面でトリムする(準備中)
-
+/*
 	// Function: New_TrmS
 	// トリム面のメモリー確保
 	int New_TrmS(TRMS *,int);					
@@ -45,7 +45,7 @@ public:
 	// Function: Free_TrmS
 	// トリム面のメモリー解放
 	void Free_TrmS(TRMS *);						
-
+*/
 	// Function: New_CompC
 	// 複合曲線のメモリー確保
 	int New_CompC(COMPC *,int);					

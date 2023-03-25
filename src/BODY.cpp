@@ -1,4 +1,5 @@
 ﻿#include "KodatunoKernel.h"
+#include "BODY.h"
 
 // Function: BODY
 // BODYクラスのコンストラクタ．各種初期化
@@ -105,7 +106,7 @@ void BODY::DelBodyElem()
 
 	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
 	if(TypeNum[_TRIMMED_SURFACE]){
-		NFunc.Free_TrmS_1DArray(TrmS,TypeNum[_TRIMMED_SURFACE]);
+//		NFunc.Free_TrmS_1DArray(TrmS,TypeNum[_TRIMMED_SURFACE]);
 		delete[] TrmS;
 	}
 	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
@@ -157,7 +158,7 @@ void BODY::DelBodyElem(int TypeNum_[])
 
 	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
 	if(TypeNum_[_TRIMMED_SURFACE]){
-		NFunc.Free_TrmS_1DArray(TrmS,TypeNum_[_TRIMMED_SURFACE]);
+//		NFunc.Free_TrmS_1DArray(TrmS,TypeNum_[_TRIMMED_SURFACE]);
 		delete[] TrmS;
 	}
 	if(TypeNum_[_CURVE_ON_PARAMETRIC_SURFACE]){
@@ -173,6 +174,8 @@ void BODY::DelBodyElem(int TypeNum_[])
 //	}
 	BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
 	vNurbsC.clear();
+	BOOST_FOREACH(NURBSS* x, vNurbsS) delete x;
+	vNurbsS.clear();
 
 	if(TypeNum_[_TRANSFORMATION_MATRIX]){
 		delete[] TMat;
@@ -225,10 +228,10 @@ void BODY::CopyBody(BODY* body)
         this->TrmS[n].pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
         nurbsS->TrmdSurfFlag = KOD_TRUE;
 
-        NFunc.New_TrmS(&this->TrmS[n],body->TrmS[n].n2);				// トリム面のメモリー確保
+//		NFunc.New_TrmS(&this->TrmS[n],body->TrmS[n].n2);				// トリム面のメモリー確保
 
-        conps_i = new CONPS[body->TrmS[n].n2];		// 内側を構成する面上線のメモリー確保
-        compc_i = new COMPC[body->TrmS[n].n2];		// 内側を構成する複合曲線のメモリー確保
+        conps_i = new CONPS[body->TrmS[n].vTI.size()];		// 内側を構成する面上線のメモリー確保
+        compc_i = new COMPC[body->TrmS[n].vTI.size()];		// 内側を構成する複合曲線のメモリー確保
 
         // NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
         // 外周トリム
@@ -246,24 +249,22 @@ void BODY::CopyBody(BODY* body)
 
         // 内周トリム
         curve_num = 0;
-        for(int i=0;i<body->TrmS[n].n2;i++){
-            this->TrmS[n].pTI[i] = &(conps_i[i]);
-            NFunc.New_CompC(&compc_i[i],body->TrmS[n].pTI[i]->pB.CompC->N);
-            for(int j=0;j<body->TrmS[n].pTI[i]->pB.CompC->N;j++){
-                NURBSC* nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTI[i]->pB.CompC->pDE[j].NurbsC);
+        for(int i=0;i<body->TrmS[n].vTI.size();i++){
+            this->TrmS[n].vTI.push_back(&(conps_i[i]));
+            NFunc.New_CompC(&compc_i[i],body->TrmS[n].vTI[i]->pB.CompC->N);
+            for(int j=0;j<body->TrmS[n].vTI[i]->pB.CompC->N;j++){
+                NURBSC* nurbsC = CheckTheSameNurbsC(body->TrmS[n].vTI[i]->pB.CompC->pDE[j].NurbsC);
                 compc_i[i].pDE[j].NurbsC = new NURBSC(nurbsC);
-                compc_i[i].DEType[j] = body->TrmS[n].pTI[i]->pB.CompC->DEType[j];
+                compc_i[i].DEType[j] = body->TrmS[n].vTI[i]->pB.CompC->DEType[j];
                 curve_num++;
             }
-            this->TrmS[n].pTI[i]->pB.substitution = &(compc_i[i]);
-            this->TrmS[n].pTI[i]->BType = body->TrmS[n].pTI[i]->BType;
-            this->TrmS[n].pTI[i]->pB.CompC->DegeFlag = body->TrmS[n].pTI[i]->pB.CompC->DegeFlag;
-            this->TrmS[n].pTI[i]->pB.CompC->DegeNurbs = body->TrmS[n].pTI[i]->pB.CompC->DegeNurbs;
+            this->TrmS[n].vTI[i]->pB.substitution = &(compc_i[i]);
+            this->TrmS[n].vTI[i]->BType = body->TrmS[n].vTI[i]->BType;
+            this->TrmS[n].vTI[i]->pB.CompC->DegeFlag = body->TrmS[n].vTI[i]->pB.CompC->DegeFlag;
+            this->TrmS[n].vTI[i]->pB.CompC->DegeNurbs = body->TrmS[n].vTI[i]->pB.CompC->DegeNurbs;
         }
 
         this->TrmS[n].n1 = body->TrmS[n].n1;
-        this->TrmS[n].n2 = body->TrmS[n].n2;
-
     }
 
 
@@ -582,9 +583,9 @@ TRMS *BODY::NewTrmS(int N)
 
 	for(int i=0;i<N;i++){
 		TrmS[i].n1 = 0;
-		TrmS[i].n2 = 0;
+//		TrmS[i].n2 = 0;
 		TrmS[i].pD = 0;
-		TrmS[i].pTI = NULL;
+//		TrmS[i].pTI = NULL;
 		TrmS[i].pTO = NULL;
 		TrmS[i].pts = NULL;
 	}

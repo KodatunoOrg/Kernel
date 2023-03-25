@@ -4,6 +4,17 @@
 #define _BODY_H_
 
 #include <string>		// std::string
+
+// prototype
+class SFQuant;
+class NURBSC;
+class NURBSS;
+class CONPS;
+class TRMS;
+typedef std::vector<NURBSC*>	VNURBSC;
+typedef std::vector<NURBSS*>	VNURBSS;
+typedef std::vector<CONPS*>		VCONPS;
+
 #include "NURBS.h"
 #include "TRMS.h"
 
@@ -510,12 +521,10 @@ public:
 
 	// Variable: *NurbsC
 	// NURBS曲線
-//	NURBSC *NurbsC;		
 	VNURBSC	vNurbsC;
 
 	// Variable: *NurbsS
 	// NURBS曲面
-//	NURBSS *NurbsS;		
 	VNURBSS vNurbsS;
 
 	// Variable: *ConpS

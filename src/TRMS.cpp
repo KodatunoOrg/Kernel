@@ -1,6 +1,27 @@
 #include "KodatunoKernel.h"
 #include "TRMS.h"
 
+///////////////////////////////////////////////////////////
+// コンストラクタ
+
+TRMS::TRMS()
+{
+	pts = NULL;
+	n1 = 0;
+	pTO = NULL;
+	pD = 0;
+}
+
+TRMS::~TRMS()
+{
+	if ( pts )		delete	pts;
+	if ( pTO )		delete	pTO;
+    BOOST_FOREACH(CONPS* x, vTI) delete x;
+}
+
+///////////////////////////////////////////////////////////
+// メンバ関数
+
 // Function: GetOuterEdgeNum
 // トリム面を構成する外側エッジの数を取得する
 //
@@ -19,7 +40,7 @@ int TRMS::GetOuterEdgeNum()
 // トリム面を構成する内側トリムの数
 int TRMS::GetInnerTrmNum()
 {
-    return n2;
+    return vTI.size();
 }
 
 // Function: GetInnerEdgeNum
@@ -32,7 +53,7 @@ int TRMS::GetInnerTrmNum()
 // トリム面を構成する内側エッジの数
 int TRMS::GetInnerEdgeNum(int N)
 {
-    COMPC *CompC = pTI[N]->pB.CompC;
+    COMPC *CompC = vTI[N]->pB.CompC;
     return CompC->N;
 }
 
@@ -56,7 +77,7 @@ COMPC* TRMS::GetOuterCompC()
 // トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
 COMPC* TRMS::GetInnerCompC(int N)
 {
-    return pTI[N]->pB.CompC;
+    return vTI[N]->pB.CompC;
 }
 
 // Funciton: GetNurbsS
