@@ -18,6 +18,7 @@ SOURCES += \
     src/NURBS.cpp \
     src/NURBSC.cpp \
     src/NURBSS.cpp \
+    src/TRMS.cpp \
     src/BODY.cpp \
     src/DXF_Parser.cpp \
     src/Describe_BODY.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     include/NURBS.h \
     include/NURBSC.h \
     include/NURBSS.h \
+    include/TRMS.h \
     include/BODY.h \
     include/DXF_Parser.h \
     include/Describe_BODY.h \

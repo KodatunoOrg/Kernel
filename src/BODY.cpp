@@ -48,16 +48,6 @@ try {
 		flag = _TRANSFORMATION_MATRIX+1;
 	}
 
-//	if(TypeNum[_NURBSC]){
-//		NewNurbsC(TypeNum[_NURBSC]);
-//		flag = _NURBSC+1;
-//	}
-
-//	if(TypeNum[_NURBSS]){
-//		NewNurbsS(TypeNum[_NURBSS]);
-//		flag = _NURBSS+1;
-//	}
-
 	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
 		NewConpS(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]);
 		flag = _CURVE_ON_PARAMETRIC_SURFACE+1;
@@ -217,8 +207,6 @@ void BODY::CopyBody(BODY* body)
     for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++)
         this->TypeNum[i] = body->TypeNum[i];
 
-//	this->NewNurbsC(TypeNum[_NURBSC]);
-//	this->NewNurbsS(TypeNum[_NURBSS]);
     this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
 	BOOST_FOREACH(NURBSC* x, body->vNurbsC)
@@ -557,59 +545,7 @@ TMAT *BODY::NewTMat(int N)
 
 	return TMat;
 }
-/*
-// Function: NewNurbsC
-// NURBS曲線NURBSCを指定した数だけメモリー確保し，初期化する
-//
-// Parameters:
-// N - メモリー確保するNURBSCの数
-NURBSC *BODY::NewNurbsC(int N)
-{
-	NurbsC = new NURBSC[N];
 
-	for(int i=0;i<N;i++){
-		NurbsC[i].Dstat.Color[0] = NurbsC[i].Dstat.Color[1] = NurbsC[i].Dstat.Color[2] = NurbsC[i].Dstat.Color[3] = 0;
-		NurbsC[i].EntUseFlag = 0;
-		NurbsC[i].K = 0;
-		NurbsC[i].M = 0;
-		NurbsC[i].N = 0;
-//		NurbsC[i].norm = SetCoord(0,0,0);
-		NurbsC[i].OriginEnt = 0;
-		NurbsC[i].pD = 0;
-		NurbsC[i].pOriginEnt = NULL;
-		NurbsC[i].prop[0] = NurbsC[i].prop[1] = NurbsC[i].prop[2] = NurbsC[i].prop[3] = 0;
-		NurbsC[i].V[0] = NurbsC[i].V[1] = 0;
-	}
-	TypeNum[_NURBSC] = N;
-
-	return NurbsC;
-}
-
-// Function: NewNurbsS
-// NURBS曲線NURBSSを指定した数だけメモリー確保し，初期化する
-//
-// Parameters:
-// N - メモリー確保するNURBSSの数
-NURBSS *BODY::NewNurbsS(int N)
-{
-	NurbsS = new NURBSS[N];
-
-	for(int i=0;i<N;i++){
-		NurbsS[i].Dstat.Color[0] = NurbsS[i].Dstat.Color[1] = NurbsS[i].Dstat.Color[2] = NurbsS[i].Dstat.Color[3] = 0;
-		NurbsS[i].K[0] = NurbsS[i].K[1] = 0;
-		NurbsS[i].M[0] = NurbsS[i].M[1] = 0;
-		NurbsS[i].N[0] = NurbsS[i].N[0] = 0;
-		NurbsS[i].pD = 0;
-		NurbsS[i].prop[0] = NurbsS[i].prop[1] = NurbsS[i].prop[2] = NurbsS[i].prop[3] = NurbsS[i].prop[4] = 0;
-		NurbsS[i].TrmdSurfFlag = 0;
-		NurbsS[i].U[0] = NurbsS[i].U[1] = 0;
-		NurbsS[i].V[0] = NurbsS[i].V[1] = 0;
-	}
-	TypeNum[_NURBSS] = N;
-
-	return NurbsS;
-}
-*/
 // Function: NewConpS
 // 面上線CONPSを指定した数だけメモリー確保し，初期化する
 //
@@ -944,74 +880,6 @@ NURBSC* BODY::CirAToNurbsC_seg4(int CirCount, const Coord vec[], double radius)
 	}
 
 	return new NURBSC(K, M, N, T, W, cp, V, prop, CirA[CirCount].EntUseFlag);
-}
-
-// Function: GetOuterEdgeNum
-// トリム面を構成する外側エッジの数を取得する
-//
-// Return:
-// トリム面を構成する外側エッジの数
-int TRMS::GetOuterEdgeNum()
-{
-    COMPC *CompC = pTO->pB.CompC;
-    return CompC->N;
-}
-
-// Function: GetInnerTrmNum
-// トリム面を構成する内側トリムの数を取得する
-//
-// Return:
-// トリム面を構成する内側トリムの数
-int TRMS::GetInnerTrmNum()
-{
-    return n2;
-}
-
-// Function: GetInnerEdgeNum
-// トリム面を構成する内側エッジの数を取得する
-//
-// Parameters:
-// N - 内側トリムのインデックス番号
-//
-// Return:
-// トリム面を構成する内側エッジの数
-int TRMS::GetInnerEdgeNum(int N)
-{
-    COMPC *CompC = pTI[N]->pB.CompC;
-    return CompC->N;
-}
-
-// Function: GetOuterCompC
-// トリム面を構成する外側トリム曲線(複合曲線)へのポインタを取得する
-//
-// Return:
-// トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
-COMPC *TRMS::GetOuterCompC()
-{
-    return pTO->pB.CompC;
-}
-
-// Function: GetInnerCompC
-// トリム面を構成する外側トリム曲線(複合曲線)へのポインタを取得する
-//
-// Parameters:
-// N - 内側トリムのインデックス番号
-//
-// Return:
-// トリム面を構成する外側トリム曲線(複合曲線)へのポインタ
-COMPC *TRMS::GetInnerCompC(int N)
-{
-    return pTI[N]->pB.CompC;
-}
-
-// Funciton: GetNurbsS
-// トリム面を構成するNURBS曲面へのポインタを得る
-//
-// Return:
-// トリム面を構成するNURBS曲面へのポインタ
-NURBSS *TRMS::GetNurbsS()
-{
-    return pts;
 }
 
 // Funciton: CheckTheSameNurbsC
