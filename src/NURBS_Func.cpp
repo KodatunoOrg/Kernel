@@ -111,7 +111,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	}
 	curve_num += tnurb.pTO->pB.CompC->N;
 
-	NURBSS* nurbsS = new NURBSS(tnurb.pts);					// 新たなNURBS曲面を1つ得る
+	NURBSS* nurbsS = new NURBSS(*tnurb.pts);				// 新たなNURBS曲面を1つ得る
 	TNurbs->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
 
 //	New_TrmS(TNurbs,tnurb.n2);						// トリム面のメモリー確保
@@ -124,7 +124,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 	TNurbs->pTO = conps_o;
 	New_CompC(compc_o,tnurb.pTO->pB.CompC->N);
 	for(int i=0;i<tnurb.pTO->pB.CompC->N;i++){
-		compc_o->pDE[i].NurbsC = new NURBSC(tnurb.pTO->pB.CompC->pDE[i].NurbsC);
+		compc_o->pDE[i].NurbsC = new NURBSC(*tnurb.pTO->pB.CompC->pDE[i].NurbsC);
 		compc_o->DEType[i] = tnurb.pTO->pB.CompC->DEType[i];
 	}
 	TNurbs->pTO->pB.substitution = compc_o;
@@ -138,7 +138,7 @@ int NURBS_Func::GenTrimdNurbsS(TRIMD_NURBSS *TNurbs,TRIMD_NURBSS  tnurb)
 		TNurbs->vTI.push_back(&(conps_i[i]));
 		New_CompC(&compc_i[i],tnurb.vTI[i]->pB.CompC->N);
 		for(int j=0;j<tnurb.vTI[i]->pB.CompC->N;j++){
-			compc_i[i].pDE[j].NurbsC = new NURBSC(tnurb.vTI[i]->pB.CompC->pDE[j].NurbsC);
+			compc_i[i].pDE[j].NurbsC = new NURBSC(*tnurb.vTI[i]->pB.CompC->pDE[j].NurbsC);
 			compc_i[i].DEType[j] = tnurb.vTI[i]->pB.CompC->DEType[j];
 			curve_num++;
 		}

@@ -44,7 +44,7 @@ public:
 
 	NURBSC();
 	NURBSC(int K,int M,int N,const ublasVector& T, const ublasVector& W, const ACoord& cp, const A2double& V, const A4int& prop, int euflag);
-	NURBSC(const NURBSC* nurb);
+//	NURBSC(const NURBSC* nurb);
 
 	// Function: CalcNurbsCCoord
 	// 指定したtでのNURBS曲線の座標値を求める

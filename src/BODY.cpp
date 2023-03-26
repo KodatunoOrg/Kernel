@@ -21,7 +21,6 @@ void BODY::NewBodyElem()
 {
 	int flag=0;
 
-try {
 	// エンティティを新たに追加する場合は以下に新たなmallocを記述してください。
 	// エンティティタイプの番号が若い順に記述
 	if(TypeNum[_CIRCLE_ARC]){
@@ -54,45 +53,7 @@ try {
 		flag = _CURVE_ON_PARAMETRIC_SURFACE+1;
 	}
 
-	if(TypeNum[_TRIMMED_SURFACE]){
-		NewTrmS(TypeNum[_TRIMMED_SURFACE]);
-		flag = _TRIMMED_SURFACE+1;
-	}
-
 	Mesh = NULL;		// メッシュはNULLに設定しておく
-}
-catch (std::bad_alloc& e) {	// e.what();
-	// メモリー確保に失敗した場合は、これまで確保した分を解放して終了
-//	GuiIFB.SetMessage("KOD_ERROR: malloc BODY");
-	while(flag){
-		if(flag == _CURVE_ON_PARAMETRIC_SURFACE+1 && TypeNum[_TRIMMED_SURFACE]){
-			delete[] ConpS;
-		}
-//		else if(flag == _NURBSS+1 && TypeNum[_NURBSS]){
-//			delete[] NurbsS;
-//		}
-//		else if(flag == _NURBSC+1 && TypeNum[_NURBSC]){
-//			delete[] NurbsC;
-//		}
-		else if(flag == _TRANSFORMATION_MATRIX+1 && TypeNum[_TRANSFORMATION_MATRIX]){
-			delete[] TMat;
-		}
-		else if(flag == _LINE+1 && TypeNum[_LINE]){
-			delete[] Line;
-		}
-		else if(flag == _CONIC_ARC+1 && TypeNum[_CONIC_ARC]){
-			delete[] ConA;
-		}
-		else if(flag == _COMPOSITE_CURVE+1 && TypeNum[_COMPOSITE_CURVE]){
-			delete[] CompC;
-		}
-		else if(flag == _CIRCLE_ARC+1 && TypeNum[_CIRCLE_ARC]){
-			delete[] CirA;
-		}
-		flag--;
-	}
-	exit(KOD_ERR);
-}
 
 	return;		// メモリーを正常に確保
 }
@@ -104,27 +65,17 @@ void BODY::DelBodyElem()
 {
 	NURBS_Func NFunc;
 
-	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
-	if(TypeNum[_TRIMMED_SURFACE]){
-//		NFunc.Free_TrmS_1DArray(TrmS,TypeNum[_TRIMMED_SURFACE]);
-		delete[] TrmS;
-	}
-	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
-		delete[] ConpS;
-	}
-//	if(TypeNum[_NURBSS]){
-//		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum[_NURBSS]);
-//		delete[] NurbsS;
-//	}
-//	if(TypeNum[_NURBSC]){
-//		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum[_NURBSC]);
-//		delete[] NurbsC;
-//	}
 	BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
 	vNurbsC.clear();
 	BOOST_FOREACH(NURBSS* x, vNurbsS) delete x;
 	vNurbsS.clear();
+	BOOST_FOREACH(TRMS* x,   vTrmS)   delete x;
+	vTrmS.clear();
 
+	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
+	if(TypeNum[_CURVE_ON_PARAMETRIC_SURFACE]){
+		delete[] ConpS;
+	}
 	if(TypeNum[_TRANSFORMATION_MATRIX]){
 		delete[] TMat;
 	}
@@ -156,27 +107,17 @@ void BODY::DelBodyElem(int TypeNum_[])
 {
 	NURBS_Func NFunc;
 
-	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
-	if(TypeNum_[_TRIMMED_SURFACE]){
-//		NFunc.Free_TrmS_1DArray(TrmS,TypeNum_[_TRIMMED_SURFACE]);
-		delete[] TrmS;
-	}
-	if(TypeNum_[_CURVE_ON_PARAMETRIC_SURFACE]){
-		delete[] ConpS;
-	}
-//	if(TypeNum_[_NURBSS]){
-//		NFunc.Free_NurbsS_1DArray(NurbsS,TypeNum_[_NURBSS]);
-//		delete[] NurbsS;
-//	}
-//	if(TypeNum_[_NURBSC]){
-//		NFunc.Free_NurbsC_1DArray(NurbsC,TypeNum_[_NURBSC]);
-//		delete[] NurbsC;
-//	}
 	BOOST_FOREACH(NURBSC* x, vNurbsC) delete x;
 	vNurbsC.clear();
 	BOOST_FOREACH(NURBSS* x, vNurbsS) delete x;
 	vNurbsS.clear();
+	BOOST_FOREACH(TRMS* x,   vTrmS)   delete x;
+	vTrmS.clear();
 
+	// エンティティを新たに追加する場合は以下に新たなfreeを追加する
+	if(TypeNum_[_CURVE_ON_PARAMETRIC_SURFACE]){
+		delete[] ConpS;
+	}
 	if(TypeNum_[_TRANSFORMATION_MATRIX]){
 		delete[] TMat;
 	}
@@ -210,10 +151,14 @@ void BODY::CopyBody(BODY* body)
     for(int i=0;i<ALL_ENTITY_TYPE_NUM;i++)
         this->TypeNum[i] = body->TypeNum[i];
 
-    this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
+//	this->NewTrmS(TypeNum[_TRIMMED_SURFACE]);
 
 	BOOST_FOREACH(NURBSC* x, body->vNurbsC)
-        vNurbsC.push_back( new NURBSC(x) );
+        vNurbsC.push_back( new NURBSC(*x) );
+	BOOST_FOREACH(NURBSS* x, body->vNurbsS)
+        vNurbsS.push_back( new NURBSS(*x) );
+	BOOST_FOREACH(TRMS* x,   body->vTrmS)
+        vTrmS.push_back( new TRMS(*x) );
 
     for(int n=0;n<TypeNum[_TRIMMED_SURFACE];n++){
 
@@ -224,47 +169,47 @@ void BODY::CopyBody(BODY* body)
         conps_o = new CONPS;		// 外側トリムを構成する面上線のメモリー確保
         compc_o = new COMPC;		// 外側トリムを構成する複合曲線のメモリー確保
 
-        NURBSS* nurbsS = new NURBSS(body->TrmS[n].pts);				// 新たなNURBS曲面を1つ得る
-        this->TrmS[n].pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
+        NURBSS* nurbsS = new NURBSS(*body->vTrmS[n]->pts);				// 新たなNURBS曲面を1つ得る
+        vTrmS[n]->pts = nurbsS;									// NURBS曲面をトリム面に関連付ける
         nurbsS->TrmdSurfFlag = KOD_TRUE;
 
 //		NFunc.New_TrmS(&this->TrmS[n],body->TrmS[n].n2);				// トリム面のメモリー確保
 
-        conps_i = new CONPS[body->TrmS[n].vTI.size()];		// 内側を構成する面上線のメモリー確保
-        compc_i = new COMPC[body->TrmS[n].vTI.size()];		// 内側を構成する複合曲線のメモリー確保
+        conps_i = new CONPS[body->vTrmS[n]->vTI.size()];		// 内側を構成する面上線のメモリー確保
+        compc_i = new COMPC[body->vTrmS[n]->vTI.size()];		// 内側を構成する複合曲線のメモリー確保
 
         // NURBS曲線をトリム部分を構成するNURBS曲線に関連付ける
         // 外周トリム
-        this->TrmS[n].pTO = conps_o;
-        NFunc.New_CompC(compc_o,body->TrmS[n].pTO->pB.CompC->N);
-        for(int i=0;i<body->TrmS[n].pTO->pB.CompC->N;i++){
-			NURBSC* nurbsC = CheckTheSameNurbsC(body->TrmS[n].pTO->pB.CompC->pDE[i].NurbsC);
-            compc_o->pDE[i].NurbsC = new NURBSC(nurbsC);
-            compc_o->DEType[i] = body->TrmS[n].pTO->pB.CompC->DEType[i];
+        vTrmS[n]->pTO = conps_o;
+        NFunc.New_CompC(compc_o,body->vTrmS[n]->pTO->pB.CompC->N);
+        for(int i=0;i<body->vTrmS[n]->pTO->pB.CompC->N;i++){
+			NURBSC* nurbsC = CheckTheSameNurbsC(body->vTrmS[n]->pTO->pB.CompC->pDE[i].NurbsC);
+            compc_o->pDE[i].NurbsC = new NURBSC(*nurbsC);
+            compc_o->DEType[i] = body->vTrmS[n]->pTO->pB.CompC->DEType[i];
         }
-        this->TrmS[n].pTO->pB.substitution = compc_o;
-        this->TrmS[n].pTO->BType = body->TrmS[n].pTO->BType;
-        this->TrmS[n].pTO->pB.CompC->DegeFlag = body->TrmS[n].pTO->pB.CompC->DegeFlag;
-        this->TrmS[n].pTO->pB.CompC->DegeNurbs = body->TrmS[n].pTO->pB.CompC->DegeNurbs;
+        vTrmS[n]->pTO->pB.substitution = compc_o;
+        vTrmS[n]->pTO->BType = body->vTrmS[n]->pTO->BType;
+        vTrmS[n]->pTO->pB.CompC->DegeFlag = body->vTrmS[n]->pTO->pB.CompC->DegeFlag;
+        vTrmS[n]->pTO->pB.CompC->DegeNurbs = body->vTrmS[n]->pTO->pB.CompC->DegeNurbs;
 
         // 内周トリム
         curve_num = 0;
-        for(int i=0;i<body->TrmS[n].vTI.size();i++){
-            this->TrmS[n].vTI.push_back(&(conps_i[i]));
-            NFunc.New_CompC(&compc_i[i],body->TrmS[n].vTI[i]->pB.CompC->N);
-            for(int j=0;j<body->TrmS[n].vTI[i]->pB.CompC->N;j++){
-                NURBSC* nurbsC = CheckTheSameNurbsC(body->TrmS[n].vTI[i]->pB.CompC->pDE[j].NurbsC);
-                compc_i[i].pDE[j].NurbsC = new NURBSC(nurbsC);
-                compc_i[i].DEType[j] = body->TrmS[n].vTI[i]->pB.CompC->DEType[j];
+        for(int i=0;i<body->vTrmS[n]->vTI.size();i++){
+            this->vTrmS[n]->vTI.push_back(&(conps_i[i]));
+            NFunc.New_CompC(&compc_i[i],body->vTrmS[n]->vTI[i]->pB.CompC->N);
+            for(int j=0;j<body->vTrmS[n]->vTI[i]->pB.CompC->N;j++){
+                NURBSC* nurbsC = CheckTheSameNurbsC(body->vTrmS[n]->vTI[i]->pB.CompC->pDE[j].NurbsC);
+                compc_i[i].pDE[j].NurbsC = new NURBSC(*nurbsC);
+                compc_i[i].DEType[j] = body->vTrmS[n]->vTI[i]->pB.CompC->DEType[j];
                 curve_num++;
             }
-            this->TrmS[n].vTI[i]->pB.substitution = &(compc_i[i]);
-            this->TrmS[n].vTI[i]->BType = body->TrmS[n].vTI[i]->BType;
-            this->TrmS[n].vTI[i]->pB.CompC->DegeFlag = body->TrmS[n].vTI[i]->pB.CompC->DegeFlag;
-            this->TrmS[n].vTI[i]->pB.CompC->DegeNurbs = body->TrmS[n].vTI[i]->pB.CompC->DegeNurbs;
+            vTrmS[n]->vTI[i]->pB.substitution = &(compc_i[i]);
+            vTrmS[n]->vTI[i]->BType = body->vTrmS[n]->vTI[i]->BType;
+            vTrmS[n]->vTI[i]->pB.CompC->DegeFlag = body->vTrmS[n]->vTI[i]->pB.CompC->DegeFlag;
+            vTrmS[n]->vTI[i]->pB.CompC->DegeNurbs = body->vTrmS[n]->vTI[i]->pB.CompC->DegeNurbs;
         }
 
-        this->TrmS[n].n1 = body->TrmS[n].n1;
+        vTrmS[n]->n1 = body->vTrmS[n]->n1;
     }
 
 
@@ -571,7 +516,7 @@ CONPS *BODY::NewConpS(int N)
 
 	return ConpS;
 }
-
+/*
 // Function: NewTrmS
 // トリム面TRMSを指定した数だけメモリー確保し，初期化する
 //
@@ -593,7 +538,7 @@ TRMS *BODY::NewTrmS(int N)
 
 	return TrmS;
 }
-
+*/
 // Function: GetNurbsCFromLine
 // 直線エンティティをNURBS曲線エンティティへと変換する
 //

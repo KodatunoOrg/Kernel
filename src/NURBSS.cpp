@@ -45,7 +45,7 @@ NURBSS::NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVecto
 	this->cp.resize(boost::extents[K[0]][K[1]]);
 	this->cp = Cp;
 }
-
+/*
 NURBSS::NURBSS(const NURBSS* nurb)
 {
 	this->K = nurb->K;
@@ -61,7 +61,7 @@ NURBSS::NURBSS(const NURBSS* nurb)
 	this->cp.resize(boost::extents[nurb->K[0]][nurb->K[1]]);
 	this->cp = nurb->cp;
 }
-
+*/
 ///////////////////////////////////////////////////////////
 // メンバ関数
 
@@ -1951,7 +1951,7 @@ int NURBSS::ConnectNurbsSU(const NURBSS* S2, NURBSS *S_) const
 	N[0] = N[0] + S2->N[0] - S2->M[0] - 1;	// S_のU方向ノットベクトルの数
 	N[1] = N[1];							// S_のV方向ノットベクトルの数
 
-	S_ = new NURBSS(this);					// S_内のメモリー確保
+	S_ = new NURBSS(*this);					// S_内のメモリー確保
 
 	SetKnotVecSU_ConnectS(S2,S_);			// S_のu方向ノット定義域を指定
 
@@ -2000,7 +2000,7 @@ int NURBSS::ConnectNurbsSV(const NURBSS* S2, NURBSS* S_) const
 	N[0] = N[0];							// S_のU方向ノットベクトルの数
 	N[1] = N[1] + S2->N[1] - S2->M[1] - 1;	// S_のV方向ノットベクトルの数
 
-	S_ = new NURBSS(this);					// S_内のメモリー確保
+	S_ = new NURBSS(*this);					// S_内のメモリー確保
 
 	SetKnotVecSV_ConnectS(S2,S_);			// S_のv方向ノット定義域を指定
 

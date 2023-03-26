@@ -37,7 +37,7 @@ NURBSC::NURBSC(int K,int M,int N,const ublasVector& T, const ublasVector& W, con
 	this->OriginEnt = 0;
 	this->pOriginEnt = NULL;
 }
-
+/*
 NURBSC::NURBSC(const NURBSC* nurb)
 {
 	this->K = nurb->K;
@@ -54,7 +54,7 @@ NURBSC::NURBSC(const NURBSC* nurb)
 	this->OriginEnt = 0;
 	this->pOriginEnt = NULL;
 }
-
+*/
 ///////////////////////////////////////////////////////////
 // メンバ関数
 

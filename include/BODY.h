@@ -13,6 +13,7 @@ class CONPS;
 class TRMS;
 typedef std::vector<NURBSC*>	VNURBSC;
 typedef std::vector<NURBSS*>	VNURBSS;
+typedef std::vector<TRMS*>		VTRMS;
 typedef std::vector<CONPS*>		VCONPS;
 
 #include "NURBS.h"
@@ -411,11 +412,11 @@ public:
 	// Function: NewConpS
 	// CONPSを指定した数だけメモリー確保し，初期化する
 	CONPS *NewConpS(int);			
-
+/*
 	// Function: NewTrmS
 	// TRMSを指定した数だけメモリー確保し，初期化する
 	TRMS *NewTrmS(int);				
-
+*/
     // Funciton: CopyBody
     // Bodyのコピー
     void CopyBody(BODY*);
@@ -533,7 +534,8 @@ public:
 
 	// Variable: *TrmS
 	// トリム面
-	TRMS  *TrmS;	
+//	TRMS  *TrmS;
+	VTRMS	vTrmS;
 
 	// Variable: TypeNum[ALL_ENTITY_TYPE_NUM]
 	// BODYを構成する各エンティティの数を格納した配列

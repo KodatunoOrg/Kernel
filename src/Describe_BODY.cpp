@@ -371,7 +371,7 @@ void Describe_BODY::Draw_NurbsSurfaces(const BODY *Body)
 void Describe_BODY::Draw_TrimSurfes(const BODY *Body)
 {
 	for(int i=0;i<Body->TypeNum[_TRIMMED_SURFACE];i++){
-		DrawTrimdSurf(&Body->TrmS[i]);
+		DrawTrimdSurf(Body->vTrmS[i]);
 	}
 }
 

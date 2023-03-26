@@ -41,7 +41,7 @@ public:
 
 	NURBSS();
 	NURBSS(int Mu,int Mv,int Ku,int Kv,const ublasVector& S,const ublasVector& T,const ublasMatrix& W,const AACoord& Cp,double Us,double Ue,double Vs,double Ve);
-	NURBSS(const NURBSS* nurb);
+//	NURBSS(const NURBSS* nurb);
 
 	// Function: CalcNurbsSCoord
 	// 指定したu,vでのNURBS曲面の座標点を求める
