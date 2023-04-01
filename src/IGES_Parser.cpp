@@ -638,9 +638,12 @@ int IGES_PARSER::GetParameterSection(FILE* fp, DirectoryParam* dpara, BODY* body
 		}
 		// トリム面	
 		else if(dpara[i].entity_type == TRIMMED_SURFACE){				
-			if(GetTrmSPara(str,pD,dpara,body) == KOD_ERR)  return KOD_ERR;
-			dpara[i].entity_count = TypeCount[_TRIMMED_SURFACE];				// dparaとbodyを関連付ける
-			TypeCount[_TRIMMED_SURFACE]++;				// トリム面タイプの数をインクリメント
+			TRMS* t = GetTrmSPara(str,pD,dpara,body);
+			if ( !t ) return KOD_ERR;
+//			dpara[i].entity_count = TypeCount[_TRIMMED_SURFACE];				// dparaとbodyを関連付ける
+//			TypeCount[_TRIMMED_SURFACE]++;				// トリム面タイプの数をインクリメント
+			dpara[i].entity_count = body->vTrmS.size();				// dparaとbodyを関連付ける
+			body->vTrmS.push_back(t);
 		}
 		// サポートしていないEntity Typeの場合
 		else{
@@ -990,31 +993,31 @@ int IGES_PARSER::GeConpSPara(char str[],int pD,DirectoryParam *dpara,int dline,B
 //
 // Return:
 // KOD_TRUE:成功	KOD_ERR:メモリー確保に失敗
-int IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY* body)
+TRMS* IGES_PARSER::GetTrmSPara(char str[],int pD,DirectoryParam *dpara,BODY* body)
 {
-	char *p;
+	char* p = str;
 	int  i;
 	int  pdnum;		// DE部のシーケンスナンバー取得用
 
-	p = str;
-	
+	TRMS* trms = new TRMS;
+
 	pdnum = CatchStringI(&p);		// トリムされるSurface EntityのDE部の値を取得
-	body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->pts = (NURBSS *)GetDEPointer(pdnum,body);		// トリムされるSurface Entityへのポインタを取得
-	body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->pts->TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
-	body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->n1 = CatchStringI(&p);		// ０：外周がDの境界と一致している　１：それ以外
-	int n2 = CatchStringI(&p);											// Trimmed Surfaceの内周の単純閉曲線の数（受けのみ）
+	trms->pts = (NURBSS *)GetDEPointer(pdnum,body);		// トリムされるSurface Entityへのポインタを取得
+	trms->pts->TrmdSurfFlag = KOD_TRUE;		// トリム面としてのNURBS曲面であることを示す
+	trms->n1 = CatchStringI(&p);			// ０：外周がDの境界と一致している　１：それ以外
+	int n2 = CatchStringI(&p);				// Trimmed Surfaceの内周の単純閉曲線の数（受けのみ）
 
 	pdnum = CatchStringI(&p);		// Trimmed Surfaceの外周の単純閉曲線の数
-	body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->pTO = (CONPS *)GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得
+	trms->pTO = (CONPS *)GetDEPointer(pdnum,body); // 単純閉曲線構造体へのポインタを取得
 
-	for(i=0;i<body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->vTI.size();i++){
+	for(i=0;i<n2;i++){
 		pdnum = CatchStringI(&p);	// Trimmed Surfaceの内周の単純閉曲線のDE部の値を取得
-		body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->vTI[i] = (CONPS *)GetDEPointer(pdnum,body);	// 単純閉曲線構造体へのポインタを取得
+		trms->vTI.push_back( (CONPS *)GetDEPointer(pdnum,body) );	// 単純閉曲線構造体へのポインタを取得
 	}
 
-	body->vTrmS[TypeCount[_TRIMMED_SURFACE]]->pD = pD;		// DE部のシーケンスナンバーを得る
+	trms->pD = pD;		// DE部のシーケンスナンバーを得る
 
-	return KOD_TRUE;
+	return trms;
 }
 
 // Function: GetDirectorySection

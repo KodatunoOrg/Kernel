@@ -279,7 +279,7 @@ private:
 
 	// Function: GetTrmSPara
 	// Type144 トリム面の読み込み
-	int GetTrmSPara(char [],int,DirectoryParam *,BODY*);				
+	TRMS* GetTrmSPara(char [], int, DirectoryParam*, BODY*);
 
 	// Function: CatchStringI
 	// カンマまでの数値を読み込んで返す(int)
